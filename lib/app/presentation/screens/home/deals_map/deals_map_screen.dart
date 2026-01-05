@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:savinggo_app/src/app/domain/models/deal.dart';
-import 'package:savinggo_app/src/app/data/mock/mock_deals.dart';
+import '../../../../domain/models/deal.dart';
+import '../../../../data/mock/mock_deals.dart';
 
 class DealsMapScreen extends StatefulWidget {
   const DealsMapScreen({super.key});

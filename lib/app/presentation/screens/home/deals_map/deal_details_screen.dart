@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:savinggo_app/src/app/domain/models/deal.dart';
+import '../../../../domain/models/deal.dart';
 
 class DealDetailsScreen extends StatelessWidget {
   final Deal deal;
