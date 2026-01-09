@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../domain/models/deal.dart';
 import '../../../../data/mock/mock_deals.dart';
@@ -74,25 +75,35 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
                 itemBuilder: (context, index) {
                   final deal = deals[index];
                   return Card(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                     child: InkWell(
-                      onTap: () {},
+                      onTap: () => context.go('/deals/${deal.id}'),
+                      borderRadius: BorderRadius.circular(12),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 12,
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(deal.title),
-                                const SizedBox(height: 4),
-                                Text(deal.store),
-                              ],
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(deal.title,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w600)),
+                                  const SizedBox(height: 4),
+                                  Text(deal.store,
+                                      style: const TextStyle(
+                                          color: Colors.black54)),
+                                ],
+                              ),
                             ),
-                            Text('\$${deal.price.toStringAsFixed(2)}'),
+                            Text('\$${deal.price.toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600)),
                           ],
                         ),
                       ),
