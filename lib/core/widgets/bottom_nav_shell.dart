@@ -51,19 +51,19 @@ class BottomNavShell extends StatelessWidget {
         onTap: (idx) {
           switch (idx) {
             case 0:
-              context.go('/app/deals');
+              context.go('/deals');
               break;
             case 1:
-              context.go('/app/scanner');
+              context.go('/scanner');
               break;
             case 2:
-              context.go('/app/shopping');
+              context.go('/shopping');
               break;
             case 3:
-              context.go('/app/saved');
+              context.go('/saved');
               break;
             case 4:
-              context.go('/app/profile');
+              context.go('/profile');
               break;
           }
         },

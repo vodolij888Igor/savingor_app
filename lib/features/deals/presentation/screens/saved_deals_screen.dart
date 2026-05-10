@@ -40,6 +40,7 @@ class SavedDealsScreen extends StatelessWidget {
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final Deal deal = saved[index];
+                  final isSaved = store.isSaved(deal.id);
                   return Card(
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
@@ -47,8 +48,25 @@ class SavedDealsScreen extends StatelessWidget {
                       title: Text(deal.title,
                           style: const TextStyle(fontWeight: FontWeight.w600)),
                       subtitle: Text(deal.store),
-                      trailing: Text('\$${deal.price.toStringAsFixed(2)}',
-                          style: const TextStyle(fontWeight: FontWeight.w600)),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('\$${deal.price.toStringAsFixed(2)}',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w600)),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: Icon(isSaved
+                                ? Icons.favorite
+                                : Icons.favorite_border),
+                            color: isSaved
+                                ? Theme.of(context).colorScheme.primary
+                                : null,
+                            onPressed: () => store.toggle(deal.id),
+                            tooltip: isSaved ? t.removeSaved : t.saveDeal,
+                          ),
+                        ],
+                      ),
                       onTap: () => context.go('/deals/${deal.id}'),
                     ),
                   );

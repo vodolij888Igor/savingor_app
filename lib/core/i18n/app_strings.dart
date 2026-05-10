@@ -25,7 +25,7 @@ class AppStrings {
   static AppStrings of(BuildContext context) =>
       AppStrings(AppLocalizations.of(context).strings);
 
-  String get appName => _s['app_name'] ?? 'SavingGo';
+  String get appName => _s['app_name'] ?? 'Savingor';
   String get appSubtitle => _s['app_subtitle'] ?? '';
   String get deals => _s['deals'] ?? 'Deals';
   String get scanner => _s['scanner'] ?? 'Scanner';

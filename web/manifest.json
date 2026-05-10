@@ -1,6 +1,6 @@
 {
-    "name": "savinggo_app",
-    "short_name": "savinggo_app",
+    "name": "Savingor_app",
+    "short_name": "Savingor_app",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

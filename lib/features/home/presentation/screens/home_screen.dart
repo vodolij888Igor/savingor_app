@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:savingor_app/core/i18n/app_strings.dart';
+import 'package:savingor_app/core/theme/savingor_design_system.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -16,12 +17,6 @@ class HomeScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: ElevatedButton(
         onPressed: onTap,
-        style: ElevatedButton.styleFrom(
-          minimumSize: const Size.fromHeight(56),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
         child: Row(
           children: [
             Icon(icon, size: 32),
@@ -35,9 +30,13 @@ class HomeScreen extends StatelessWidget {
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 2),
-                  Text(subtitle,
-                      style:
-                          const TextStyle(fontSize: 13, color: Colors.white70)),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: SavingorColors.darkGreen.withOpacity(0.75),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -59,7 +58,10 @@ class HomeScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [Color(0xFFF7FCFB), Color(0xFFEFFAF8)],
+            colors: [
+              SavingorColors.background,
+              SavingorColors.mint,
+            ],
           ),
         ),
         child: SafeArea(

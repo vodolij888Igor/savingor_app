@@ -1,4 +1,4 @@
-# Savingor (SavingGo) — Product Brief
+# Savingor (Savingor) — Product Brief
 
 Savingor is a lightweight shopper-first mobile app that helps users discover local grocery and retail deals, scan receipts for savings, and manage smarter shopping lists — focusing on fast, useful features that save time and money.
 

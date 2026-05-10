@@ -12,7 +12,9 @@ class AppState extends ChangeNotifier {
 }
 
 class AppStateProvider extends InheritedNotifier<AppState> {
-  const AppStateProvider({super.key, required AppState notifier, required super.child}) : super(notifier: notifier);
+  const AppStateProvider(
+      {super.key, required AppState notifier, required super.child})
+      : super(notifier: notifier);
 
   static AppState of(BuildContext context) {
     final prov = context.dependOnInheritedWidgetOfExactType<AppStateProvider>();

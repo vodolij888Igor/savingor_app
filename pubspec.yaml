@@ -31,7 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   go_router: ^14.0.0
-
+  shared_preferences: ^2.1.1
 
   freezed_annotation: ^2.4.1
   json_annotation: ^4.9.0
@@ -66,6 +66,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/images/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

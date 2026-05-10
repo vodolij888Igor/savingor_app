@@ -1,5 +1,5 @@
 const Map<String, String> ukStrings = {
-  'app_name': 'SavingGo',
+  'app_name': 'Savingor',
   'app_subtitle': 'Локальні пропозиції та розумні заощадження',
   'deals': 'Пропозиції',
   'scanner': 'Сканер квитанцій',

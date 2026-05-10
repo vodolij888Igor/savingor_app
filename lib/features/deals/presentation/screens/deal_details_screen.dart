@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:savingor_app/core/i18n/app_strings.dart';
 
 import 'package:savingor_app/features/deals/domain/models/deal.dart';
 import 'package:savingor_app/features/deals/data/favorites_store.dart';
+import 'package:savingor_app/features/shopping/data/shopping_list_store.dart';
 
 class DealDetailsScreen extends StatelessWidget {
   final Deal deal;
@@ -17,6 +19,16 @@ class DealDetailsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/deals');
+            }
+          },
+        ),
         title: Text(t.dealDetails),
         actions: [
           IconButton(
@@ -54,8 +66,20 @@ class DealDetailsScreen extends StatelessWidget {
               onPressed: () {
                 favorites.toggle(deal.id);
               },
-              icon: Icon(isSaved ? Icons.delete : Icons.favorite_border),
+              icon: Icon(isSaved ? Icons.favorite : Icons.favorite_border),
               label: Text(isSaved ? t.removeSaved : t.saveDeal),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton.icon(
+              onPressed: () {
+                final shopping = ShoppingListProvider.of(context);
+                shopping.addFromDeal(deal);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Added to shopping list')),
+                );
+              },
+              icon: const Icon(Icons.add_shopping_cart),
+              label: const Text('Add to shopping list'),
             ),
           ],
         ),

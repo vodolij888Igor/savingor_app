@@ -1,7 +1,20 @@
 import 'package:flutter/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FavoritesStore extends ChangeNotifier {
+  static const _kPrefsKey = 'favorites_ids';
+
   final Set<String> _ids = <String>{};
+
+  /// Load saved ids from local storage. Call once before showing UI.
+  Future<void> init() async {
+    final prefs = await SharedPreferences.getInstance();
+    final list = prefs.getStringList(_kPrefsKey) ?? <String>[];
+    _ids
+      ..clear()
+      ..addAll(list);
+    notifyListeners();
+  }
 
   bool isSaved(String id) => _ids.contains(id);
 
@@ -11,6 +24,10 @@ class FavoritesStore extends ChangeNotifier {
     } else {
       _ids.add(id);
     }
+    // persist asynchronously (fire-and-forget)
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.setStringList(_kPrefsKey, _ids.toList());
+    });
     notifyListeners();
   }
 

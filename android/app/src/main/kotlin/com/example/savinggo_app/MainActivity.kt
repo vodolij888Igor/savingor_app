@@ -1,4 +1,4 @@
-package com.example.savinggo_app
+package com.example.Savingor_app
 
 import io.flutter.embedding.android.FlutterActivity
 

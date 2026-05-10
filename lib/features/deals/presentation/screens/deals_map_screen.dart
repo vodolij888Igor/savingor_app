@@ -161,8 +161,8 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
                                         fontWeight: FontWeight.w600)),
                                 IconButton(
                                   icon: Icon(isSaved
-                                      ? Icons.bookmark
-                                      : Icons.bookmark_border),
+                                      ? Icons.favorite
+                                      : Icons.favorite_border),
                                   color: isSaved
                                       ? Theme.of(context).colorScheme.primary
                                       : null,

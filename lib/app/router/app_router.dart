@@ -18,7 +18,11 @@ import 'package:savingor_app/core/i18n/app_strings.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/splash',
+  // Android (and other platforms) may supply a non-/ defaultRouteName from
+  // restoration or the engine; that would ignore initialLocation and open /deals.
+  overridePlatformDefaultLocation: true,
   routes: [
+    // onboarding routes
     GoRoute(
       path: '/splash',
       builder: (context, state) => const SplashScreen(),
@@ -35,11 +39,11 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state, child) => BottomNavShell(child: child),
       routes: [
         GoRoute(
-          path: '/app/deals',
+          path: '/deals',
           builder: (context, state) => const DealsMapScreen(),
         ),
         GoRoute(
-          path: '/app/deals/:id',
+          path: '/deals/:id',
           builder: (context, state) {
             final uri = state.uri;
             final id = uri.pathSegments.isNotEmpty ? uri.pathSegments.last : '';
@@ -61,19 +65,19 @@ final GoRouter appRouter = GoRouter(
           },
         ),
         GoRoute(
-          path: '/app/scanner',
+          path: '/scanner',
           builder: (context, state) => const ReceiptScannerScreen(),
         ),
         GoRoute(
-          path: '/app/saved',
+          path: '/saved',
           builder: (context, state) => const SavedDealsScreen(),
         ),
         GoRoute(
-          path: '/app/shopping',
+          path: '/shopping',
           builder: (context, state) => const ShoppingListScreen(),
         ),
         GoRoute(
-          path: '/app/profile',
+          path: '/profile',
           builder: (context, state) => const ProfileScreen(),
         ),
       ],

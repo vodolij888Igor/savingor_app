@@ -1,6 +1,6 @@
 # Savingor — Architecture Overview
 
-This document describes the current small-scale Flutter architecture used in the Savingor (SavingGo) MVP and a simple set of rules for future contributors.
+This document describes the current small-scale Flutter architecture used in the Savingor (Savingor) MVP and a simple set of rules for future contributors.
 
 ## Project layout (relevant folders)
 - `lib/main.dart` — App entry; uses `MaterialApp.router` with `appRouter`.

@@ -1,4 +1,4 @@
-# savinggo_app
+# Savingor_app
 
 A new Flutter project.
 

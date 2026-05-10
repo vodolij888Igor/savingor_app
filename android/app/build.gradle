@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.savinggo_app"
+    namespace = "com.example.Savingor_app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
