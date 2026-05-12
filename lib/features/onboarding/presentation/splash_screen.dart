@@ -18,7 +18,7 @@ import 'package:savingor_app/core/theme/savingor_design_system.dart';
 // Shared greens / CTA / dots use [SavingorColors] + theme-filled buttons where noted.
 // -----------------------------------------------------------------------------
 
-/// Copy colors for slides 3–4 only (indices 2–3); slides 0–1 use approved tokens above.
+/// Copy colors for the final onboarding slide only (index 3); slides 0–2 use approved tokens above.
 abstract final class _OnboardingCopyColors {
   static const Color title = Color(0xFF052E16);
   static const Color subtitle = Color(0xFF14532D);
@@ -51,9 +51,9 @@ class _SplashScreenState extends State<SplashScreen> {
     ),
     _OnboardingPageData(
       imagePath: 'assets/images/onboarding_2.png',
-      title: 'Scan receipts, get cashback',
+      title: 'Scan receipts, save smarter',
       subtitle:
-          'Upload your receipt and unlock exclusive offers and cash rewards.',
+          'See where your money goes and discover better ways to save.',
       buttonLabel: 'Next',
     ),
     _OnboardingPageData(
@@ -112,8 +112,28 @@ class _SplashScreenState extends State<SplashScreen> {
               itemCount: _pages.length,
               onPageChanged: (value) => setState(() => _page = value),
               itemBuilder: (context, index) {
+                final page = _pages[index];
+                // Slide 3: full receipt illustration — contain on matte (no crop vs cover).
+                if (index == 2) {
+                  return ColoredBox(
+                    color: SavingorColors.background,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return Center(
+                          child: Image.asset(
+                            page.imagePath,
+                            fit: BoxFit.contain,
+                            width: constraints.maxWidth,
+                            height: constraints.maxHeight,
+                            alignment: Alignment.center,
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                }
                 final image = Image.asset(
-                  _pages[index].imagePath,
+                  page.imagePath,
                   fit: BoxFit.cover,
                   width: double.infinity,
                   height: double.infinity,
@@ -242,6 +262,184 @@ class _OnboardingCopy extends StatelessWidget {
   /// Current [PageView] index — used to tailor non-brand slides without affecting the hero.
   final int pageIndex;
 
+  static const List<Shadow> _thirdSubtitleShadows = [
+    Shadow(
+      color: Color(0x0A000000),
+      blurRadius: 8,
+      offset: Offset(0, 1),
+    ),
+  ];
+
+  /// Slide 2 (approved) headline stack — frozen; do not alter metrics without sign-off.
+  Widget _approvedSecondSlideCopy(
+    BuildContext context,
+    TextTheme theme, {
+    required double topPadding,
+  }) {
+    final maxCopyW = min(
+      MediaQuery.sizeOf(context).width - 48,
+      340.0,
+    );
+    return Padding(
+      padding: EdgeInsets.only(top: topPadding),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxCopyW),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                data.title,
+                textAlign: TextAlign.center,
+                style: theme.headlineMedium?.copyWith(
+                      color: SavingorColors.darkGreen,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 32,
+                      height: 1.16,
+                      letterSpacing: -0.55,
+                      shadows: titleShadows,
+                    ) ??
+                    TextStyle(
+                      color: SavingorColors.darkGreen,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 32,
+                      height: 1.16,
+                      letterSpacing: -0.55,
+                      shadows: titleShadows,
+                    ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                data.subtitle,
+                textAlign: TextAlign.center,
+                style: theme.bodyLarge?.copyWith(
+                      color: SavingorColors.onboardingSubtitleDeep,
+                      fontSize: 17,
+                      height: 1.56,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.08,
+                      shadows: titleShadows,
+                    ) ??
+                    TextStyle(
+                      color: SavingorColors.onboardingSubtitleDeep,
+                      fontSize: 17,
+                      height: 1.56,
+                      fontWeight: FontWeight.w500,
+                      letterSpacing: 0.08,
+                      shadows: titleShadows,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Slide 3 — receipt copy; typography tuned for `onboarding_2` art (not slide 1/2 approved block).
+  Widget _thirdSlideCopy(BuildContext context, TextTheme theme) {
+    final screenW = MediaQuery.sizeOf(context).width;
+    final maxTitleW = min(screenW - 44, 332.0);
+    final maxSubtitleW = min(screenW - 48, 310.0);
+
+    const titleSize = 35.0;
+    const titleLineHeight = 1.11;
+    const titleLetterSpacing = -0.38;
+    const titleStrut = StrutStyle(
+      fontSize: titleSize,
+      height: titleLineHeight,
+      fontWeight: FontWeight.w800,
+      leadingDistribution: TextLeadingDistribution.even,
+      forceStrutHeight: true,
+    );
+    const titleBehavior = TextHeightBehavior(
+      applyHeightToFirstAscent: false,
+      applyHeightToLastDescent: false,
+      leadingDistribution: TextLeadingDistribution.even,
+    );
+
+    final titleStyle = theme.headlineMedium?.copyWith(
+          color: SavingorColors.darkGreen,
+          fontWeight: FontWeight.w800,
+          fontSize: titleSize,
+          height: titleLineHeight,
+          letterSpacing: titleLetterSpacing,
+          shadows: titleShadows,
+        ) ??
+        TextStyle(
+          color: SavingorColors.darkGreen,
+          fontWeight: FontWeight.w800,
+          fontSize: titleSize,
+          height: titleLineHeight,
+          letterSpacing: titleLetterSpacing,
+          shadows: titleShadows,
+        );
+
+    final subtitleStyle = theme.bodyLarge?.copyWith(
+          color: SavingorColors.onboardingSubtitleDeep,
+          fontSize: 18.5,
+          height: 1.45,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.05,
+          shadows: _thirdSubtitleShadows,
+        ) ??
+        const TextStyle(
+          color: SavingorColors.onboardingSubtitleDeep,
+          fontSize: 18.5,
+          height: 1.45,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.05,
+          shadows: _thirdSubtitleShadows,
+        );
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 68),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxSubtitleW + 24),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(40),
+            child: ColoredBox(
+              color: Colors.white.withOpacity(0.055),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: maxTitleW),
+                      child: Text(
+                        data.title,
+                        textAlign: TextAlign.center,
+                        textHeightBehavior: titleBehavior,
+                        strutStyle: titleStrut,
+                        style: titleStyle,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: maxSubtitleW),
+                      child: Text(
+                        data.subtitle,
+                        textAlign: TextAlign.center,
+                        textHeightBehavior: titleBehavior,
+                        style: subtitleStyle,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context).textTheme;
@@ -261,66 +459,11 @@ class _OnboardingCopy extends StatelessWidget {
 
     // APPROVED (slide 1): Headline + subtitle block — frozen typography & position.
     if (pageIndex == 1) {
-      final maxCopyW = min(
-        MediaQuery.sizeOf(context).width - 48,
-        340.0,
-      );
-      return Padding(
-        padding: const EdgeInsets.only(top: 70),
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: maxCopyW),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  data.title,
-                  textAlign: TextAlign.center,
-                  style: theme.headlineMedium?.copyWith(
-                        color: SavingorColors.darkGreen,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 32,
-                        height: 1.16,
-                        letterSpacing: -0.55,
-                        shadows: titleShadows,
-                      ) ??
-                      TextStyle(
-                        color: SavingorColors.darkGreen,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 32,
-                        height: 1.16,
-                        letterSpacing: -0.55,
-                        shadows: titleShadows,
-                      ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  data.subtitle,
-                  textAlign: TextAlign.center,
-                  style: theme.bodyLarge?.copyWith(
-                        color: SavingorColors.onboardingSubtitleDeep,
-                        fontSize: 17,
-                        height: 1.56,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 0.08,
-                        shadows: titleShadows,
-                      ) ??
-                      TextStyle(
-                        color: SavingorColors.onboardingSubtitleDeep,
-                        fontSize: 17,
-                        height: 1.56,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 0.08,
-                        shadows: titleShadows,
-                      ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
+      return _approvedSecondSlideCopy(context, theme, topPadding: 70);
+    }
+
+    if (pageIndex == 2) {
+      return _thirdSlideCopy(context, theme);
     }
 
     return Column(
