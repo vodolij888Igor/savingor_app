@@ -18,12 +18,6 @@ import 'package:savingor_app/core/theme/savingor_design_system.dart';
 // Shared greens / CTA / dots use [SavingorColors] + theme-filled buttons where noted.
 // -----------------------------------------------------------------------------
 
-/// Copy colors for the final onboarding slide only (index 3); slides 0–2 use approved tokens above.
-abstract final class _OnboardingCopyColors {
-  static const Color title = Color(0xFF052E16);
-  static const Color subtitle = Color(0xFF14532D);
-}
-
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -58,8 +52,9 @@ class _SplashScreenState extends State<SplashScreen> {
     ),
     _OnboardingPageData(
       imagePath: 'assets/images/onboarding_3.png',
-      title: 'All your lists in one place',
-      subtitle: 'Organize shopping, plan meals and never forget anything.',
+      title: 'Plan your shopping smarter',
+      subtitle:
+          'Savingor helps you plan your shopping list and see where each item is better to buy.',
       buttonLabel: 'Get Started',
     ),
   ];
@@ -101,6 +96,21 @@ class _SplashScreenState extends State<SplashScreen> {
     final current = _pages[_page];
     final firstPage = _page == 0;
 
+    final onboardingFooter = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (firstPage) const SizedBox(height: 16),
+        _OnboardingDots(activeIndex: _page, count: _pages.length),
+        SizedBox(height: firstPage ? 24 : 16),
+        // CTA: [SavingorTheme.lightTheme] filled button (approved soft green + dark label).
+        FilledButton(
+          onPressed: _onPrimaryAction,
+          child: Text(current.buttonLabel),
+        ),
+      ],
+    );
+
     return Scaffold(
       backgroundColor: SavingorColors.background,
       body: Stack(
@@ -113,7 +123,7 @@ class _SplashScreenState extends State<SplashScreen> {
               onPageChanged: (value) => setState(() => _page = value),
               itemBuilder: (context, index) {
                 final page = _pages[index];
-                // Slide 3: full receipt illustration — contain on matte (no crop vs cover).
+                // Slide 3 (index 2): receipt illustration — contain on matte (APPROVED; unchanged).
                 if (index == 2) {
                   return ColoredBox(
                     color: SavingorColors.background,
@@ -126,6 +136,28 @@ class _SplashScreenState extends State<SplashScreen> {
                             width: constraints.maxWidth,
                             height: constraints.maxHeight,
                             alignment: Alignment.center,
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                }
+                // Fourth onboarding (index 3): same contain treatment; illustration nudged down only here.
+                if (index == 3) {
+                  return ColoredBox(
+                    color: SavingorColors.background,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return Center(
+                          child: Transform.translate(
+                            offset: const Offset(0, 28),
+                            child: Image.asset(
+                              page.imagePath,
+                              fit: BoxFit.contain,
+                              width: constraints.maxWidth,
+                              height: constraints.maxHeight,
+                              alignment: Alignment.center,
+                            ),
                           ),
                         );
                       },
@@ -159,7 +191,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 22,
                 firstPage ? 72 : 12,
                 22,
-                firstPage ? 26 : 16,
+                firstPage ? 26 : (_page == 3 ? 12 : 16),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -171,14 +203,13 @@ class _SplashScreenState extends State<SplashScreen> {
                     pageIndex: _page,
                   ),
                   const Spacer(),
-                  if (firstPage) const SizedBox(height: 16),
-                  _OnboardingDots(activeIndex: _page, count: _pages.length),
-                  SizedBox(height: firstPage ? 24 : 16),
-                  // CTA: [SavingorTheme.lightTheme] filled button (approved soft green + dark label).
-                  FilledButton(
-                    onPressed: _onPrimaryAction,
-                    child: Text(current.buttonLabel),
-                  ),
+                  if (_page == 3)
+                    Transform.translate(
+                      offset: const Offset(0, -22),
+                      child: onboardingFooter,
+                    )
+                  else
+                    onboardingFooter,
                 ],
               ),
             ),
@@ -338,6 +369,79 @@ class _OnboardingCopy extends StatelessWidget {
     );
   }
 
+  /// Fourth onboarding slide (index 3): smart shopping list — copy over clean top of `onboarding_3`.
+  Widget _fourthSlideCopy(BuildContext context, TextTheme theme) {
+    final maxCopyW = min(
+      MediaQuery.sizeOf(context).width - 48,
+      352.0,
+    );
+    final maxSubtitleW = min(
+      MediaQuery.sizeOf(context).width - 52,
+      326.0,
+    );
+    const titleSize = 33.0;
+    const titleLineHeight = 1.14;
+    return Padding(
+      padding: const EdgeInsets.only(top: 54),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxCopyW),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                data.title,
+                textAlign: TextAlign.center,
+                style: theme.headlineMedium?.copyWith(
+                      color: SavingorColors.darkGreen,
+                      fontWeight: FontWeight.w800,
+                      fontSize: titleSize,
+                      height: titleLineHeight,
+                      letterSpacing: -0.55,
+                      shadows: titleShadows,
+                    ) ??
+                    TextStyle(
+                      color: SavingorColors.darkGreen,
+                      fontWeight: FontWeight.w800,
+                      fontSize: titleSize,
+                      height: titleLineHeight,
+                      letterSpacing: -0.55,
+                      shadows: titleShadows,
+                    ),
+              ),
+              const SizedBox(height: 13),
+              ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxSubtitleW),
+                child: Text(
+                  data.subtitle,
+                  textAlign: TextAlign.center,
+                  style: theme.bodyLarge?.copyWith(
+                        color: SavingorColors.onboardingSubtitleDeep,
+                        fontSize: 18,
+                        height: 1.52,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.04,
+                        shadows: titleShadows,
+                      ) ??
+                      TextStyle(
+                        color: SavingorColors.onboardingSubtitleDeep,
+                        fontSize: 18,
+                        height: 1.52,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.04,
+                        shadows: titleShadows,
+                      ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   /// Slide 3 — receipt copy; typography tuned for `onboarding_2` art (not slide 1/2 approved block).
   Widget _thirdSlideCopy(BuildContext context, TextTheme theme) {
     final screenW = MediaQuery.sizeOf(context).width;
@@ -466,50 +570,11 @@ class _OnboardingCopy extends StatelessWidget {
       return _thirdSlideCopy(context, theme);
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          data.title,
-          textAlign: TextAlign.center,
-          style: theme.titleLarge?.copyWith(
-                color: _OnboardingCopyColors.title,
-                fontWeight: FontWeight.w700,
-                height: 1.22,
-                letterSpacing: -0.35,
-                fontSize: 24,
-                shadows: titleShadows,
-              ) ??
-              TextStyle(
-                color: _OnboardingCopyColors.title,
-                fontWeight: FontWeight.w700,
-                height: 1.22,
-                letterSpacing: -0.35,
-                fontSize: 24,
-                shadows: titleShadows,
-              ),
-        ),
-        const SizedBox(height: 10),
-        Text(
-          data.subtitle,
-          textAlign: TextAlign.center,
-          style: theme.bodyMedium?.copyWith(
-                color: _OnboardingCopyColors.subtitle,
-                height: 1.45,
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                shadows: titleShadows,
-              ) ??
-              TextStyle(
-                color: _OnboardingCopyColors.subtitle,
-                height: 1.45,
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                shadows: titleShadows,
-              ),
-        ),
-      ],
-    );
+    if (pageIndex == 3) {
+      return _fourthSlideCopy(context, theme);
+    }
+
+    return const SizedBox.shrink();
   }
 }
 
