@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app/router/app_router.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/deals/data/favorites_store.dart';
 import 'package:savingor_app/core/i18n/app_strings.dart';
-import 'package:savingor_app/core/i18n/uk.dart';
+import 'package:savingor_app/core/i18n/app_locale_maps.dart';
 import 'package:savingor_app/core/app_state.dart';
 import 'package:savingor_app/features/shopping/data/shopping_list_store.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  final appState = AppState(prefs);
+  appState.hydrateFromDisk();
+
   final favorites = FavoritesStore();
   await favorites.init();
-  final appState = AppState();
   final shopping = ShoppingListStore();
+
+  final GoRouter router = createAppRouter(appState: appState);
 
   runApp(
     AppStateProvider(
@@ -22,13 +29,16 @@ Future<void> main() async {
         notifier: shopping,
         child: FavoritesProvider(
           notifier: favorites,
-          child: Builder(builder: (context) {
-            final state = AppStateProvider.of(context);
-            final strings = (state.language == 'uk' || state.language == null)
-                ? ukStrings
-                : <String, String>{};
-            return AppLocalizations(strings: strings, child: const MyApp());
-          }),
+          child: Builder(
+            builder: (context) {
+              final state = AppStateProvider.of(context);
+              final strings = appStringsMapForLocale(state.language);
+              return AppLocalizations(
+                strings: strings,
+                child: MyApp(router: router),
+              );
+            },
+          ),
         ),
       ),
     ),
@@ -36,7 +46,9 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, required this.router});
+
+  final GoRouter router;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +56,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Savingor',
       theme: SavingorTheme.lightTheme,
-      routerConfig: appRouter,
+      routerConfig: router,
     );
   }
 }

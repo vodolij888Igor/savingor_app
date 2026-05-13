@@ -3,6 +3,8 @@ import 'dart:math' show min;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/app_state.dart';
+import 'package:savingor_app/core/i18n/startup_flow_strings.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 
 // -----------------------------------------------------------------------------
@@ -25,39 +27,41 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
-  final PageController _controller = PageController();
-  int _page = 0;
-
-  static const List<_OnboardingPageData> _pages = [
+List<_OnboardingPageData> _onboardingPagesForLocale(String? langCode) {
+  final code = StartupFlowStrings.normalizeLanguageCode(langCode);
+  String t(String key) => StartupFlowStrings.forLang(code, key);
+  return [
     _OnboardingPageData(
       imagePath: 'assets/images/splash.png',
       title: 'Savingor',
-      subtitle: 'Money Saved, Money Earned.',
-      buttonLabel: 'Get Started',
+      subtitle: t('hero_subtitle'),
+      buttonLabel: t('btn_get_started'),
       isBrandPage: true,
     ),
     _OnboardingPageData(
       imagePath: 'assets/images/onboarding_1.png',
-      title: 'Smart savings every day',
-      subtitle: 'Find the best deals, track prices and save on every shop.',
-      buttonLabel: 'Next',
+      title: t('slide1_title'),
+      subtitle: t('slide1_subtitle'),
+      buttonLabel: t('btn_next'),
     ),
     _OnboardingPageData(
       imagePath: 'assets/images/onboarding_2.png',
-      title: 'Scan receipts, save smarter',
-      subtitle:
-          'See where your money goes and discover better ways to save.',
-      buttonLabel: 'Next',
+      title: t('slide2_title'),
+      subtitle: t('slide2_subtitle'),
+      buttonLabel: t('btn_next'),
     ),
     _OnboardingPageData(
       imagePath: 'assets/images/onboarding_3.png',
-      title: 'Plan your shopping smarter',
-      subtitle:
-          'Savingor helps you plan your shopping list and see where each item is better to buy.',
-      buttonLabel: 'Get Started',
+      title: t('slide3_title'),
+      subtitle: t('slide3_subtitle'),
+      buttonLabel: t('btn_get_started'),
     ),
   ];
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  final PageController _controller = PageController();
+  int _page = 0;
 
   static const String _brandLogoAsset = 'assets/images/logo_Savingor.png';
 
@@ -80,20 +84,23 @@ class _SplashScreenState extends State<SplashScreen> {
     super.dispose();
   }
 
-  void _onPrimaryAction() {
-    if (_page < _pages.length - 1) {
+  void _onPrimaryAction(List<_OnboardingPageData> pages) {
+    if (_page < pages.length - 1) {
       _controller.nextPage(
         duration: const Duration(milliseconds: 260),
         curve: Curves.easeOut,
       );
       return;
     }
-    context.go('/language');
+    AppStateProvider.of(context).setOnboardingFlowCompleted();
+    context.go('/auth');
   }
 
   @override
   Widget build(BuildContext context) {
-    final current = _pages[_page];
+    final pages =
+        _onboardingPagesForLocale(AppStateProvider.of(context).language);
+    final current = pages[_page];
     final firstPage = _page == 0;
 
     final onboardingFooter = Column(
@@ -101,11 +108,11 @@ class _SplashScreenState extends State<SplashScreen> {
       mainAxisSize: MainAxisSize.min,
       children: [
         if (firstPage) const SizedBox(height: 16),
-        _OnboardingDots(activeIndex: _page, count: _pages.length),
+        _OnboardingDots(activeIndex: _page, count: pages.length),
         SizedBox(height: firstPage ? 24 : 16),
         // CTA: [SavingorTheme.lightTheme] filled button (approved soft green + dark label).
         FilledButton(
-          onPressed: _onPrimaryAction,
+          onPressed: () => _onPrimaryAction(pages),
           child: Text(current.buttonLabel),
         ),
       ],
@@ -119,10 +126,10 @@ class _SplashScreenState extends State<SplashScreen> {
           Positioned.fill(
             child: PageView.builder(
               controller: _controller,
-              itemCount: _pages.length,
+              itemCount: pages.length,
               onPageChanged: (value) => setState(() => _page = value),
               itemBuilder: (context, index) {
-                final page = _pages[index];
+                final page = pages[index];
                 // Slide 3 (index 2): receipt illustration — contain on matte (APPROVED; unchanged).
                 if (index == 2) {
                   return ColoredBox(

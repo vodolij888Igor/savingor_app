@@ -1,0 +1,192 @@
+import 'package:savingor_app/core/i18n/startup_flow_strings.dart';
+import 'package:savingor_app/core/i18n/uk.dart';
+
+/// Shell / deals strings for all supported locales (same keys as [ukStrings]).
+Map<String, String> appStringsMapForLocale(String? code) {
+  switch (StartupFlowStrings.normalizeLanguageCode(code)) {
+    case 'uk':
+      return ukStrings;
+    case 'en':
+      return _enApp;
+    case 'ru':
+      return _ruApp;
+    case 'fr':
+      return _frApp;
+    case 'de':
+      return _deApp;
+    case 'es':
+      return _esApp;
+    default:
+      return _enApp;
+  }
+}
+
+const Map<String, String> _enApp = {
+  'app_name': 'Savingor',
+  'app_subtitle': 'Local offers and smart savings',
+  'deals': 'Deals',
+  'scanner': 'Receipt scanner',
+  'shopping': 'Shopping list',
+  'saved': 'Saved',
+  'deals_map': 'Deals map',
+  'receipt_scanner': 'Receipt scanner',
+  'shopping_list': 'Shopping list',
+  'mvp': 'MVP v0.1',
+  'search_hint': 'Search deals or stores...',
+  'filter': 'Filter',
+  'deals_map_subtitle': 'Shows nearby deals',
+  'receipt_scanner_subtitle': 'Scan a receipt',
+  'shopping_list_subtitle': 'Smart list',
+  'deals_count': '{count} deals',
+  'no_deals_found': 'No deals found',
+  'reset_filters': 'Reset filters',
+  'filters_title': 'Filters',
+  'stores': 'Stores',
+  'max_price': 'Max price',
+  'sort': 'Sort',
+  'none': 'None',
+  'price_low_high': 'Price: low to high',
+  'price_high_low': 'Price: high to low',
+  'deal_details': 'Deal details',
+  'deal_not_found': 'Deal not found',
+  'save_deal': 'Save deal',
+  'remove_saved': 'Remove saved',
+  'no_saved_deals': 'No saved deals yet',
+  'saved_hint': 'Saved deals will appear here',
+};
+
+const Map<String, String> _ruApp = {
+  'app_name': 'Savingor',
+  'app_subtitle': 'Локальные предложения и умная экономия',
+  'deals': 'Предложения',
+  'scanner': 'Сканер чеков',
+  'shopping': 'Список покупок',
+  'saved': 'Избранное',
+  'deals_map': 'Карта предложений',
+  'receipt_scanner': 'Сканер чеков',
+  'shopping_list': 'Список покупок',
+  'mvp': 'MVP v0.1',
+  'search_hint': 'Поиск предложений или магазинов...',
+  'filter': 'Фильтр',
+  'deals_map_subtitle': 'Показывает ближайшие предложения',
+  'receipt_scanner_subtitle': 'Сканировать чек',
+  'shopping_list_subtitle': 'Умный список',
+  'deals_count': '{count} предложений',
+  'no_deals_found': 'Предложений не найдено',
+  'reset_filters': 'Сбросить фильтры',
+  'filters_title': 'Фильтры',
+  'stores': 'Магазины',
+  'max_price': 'Макс. цена',
+  'sort': 'Сортировка',
+  'none': 'Нет',
+  'price_low_high': 'Цена: по возрастанию',
+  'price_high_low': 'Цена: по убыванию',
+  'deal_details': 'Детали предложения',
+  'deal_not_found': 'Предложение не найдено',
+  'save_deal': 'Сохранить',
+  'remove_saved': 'Убрать из избранного',
+  'no_saved_deals': 'Пока нет сохранённых предложений',
+  'saved_hint': 'Сохранённые предложения появятся здесь',
+};
+
+const Map<String, String> _frApp = {
+  'app_name': 'Savingor',
+  'app_subtitle': 'Offres locales et économies malines',
+  'deals': 'Offres',
+  'scanner': 'Scanner de tickets',
+  'shopping': 'Liste de courses',
+  'saved': 'Enregistrés',
+  'deals_map': 'Carte des offres',
+  'receipt_scanner': 'Scanner de tickets',
+  'shopping_list': 'Liste de courses',
+  'mvp': 'MVP v0.1',
+  'search_hint': 'Rechercher des offres ou magasins...',
+  'filter': 'Filtre',
+  'deals_map_subtitle': 'Affiche les offres à proximité',
+  'receipt_scanner_subtitle': 'Scanner un ticket',
+  'shopping_list_subtitle': 'Liste intelligente',
+  'deals_count': '{count} offres',
+  'no_deals_found': 'Aucune offre trouvée',
+  'reset_filters': 'Réinitialiser les filtres',
+  'filters_title': 'Filtres',
+  'stores': 'Magasins',
+  'max_price': 'Prix max',
+  'sort': 'Tri',
+  'none': 'Aucun',
+  'price_low_high': 'Prix : croissant',
+  'price_high_low': 'Prix : décroissant',
+  'deal_details': 'Détails de l’offre',
+  'deal_not_found': 'Offre introuvable',
+  'save_deal': 'Enregistrer l’offre',
+  'remove_saved': 'Retirer des enregistrés',
+  'no_saved_deals': 'Pas encore d’offres enregistrées',
+  'saved_hint': 'Les offres enregistrées apparaîtront ici',
+};
+
+const Map<String, String> _deApp = {
+  'app_name': 'Savingor',
+  'app_subtitle': 'Lokale Angebote und smartes Sparen',
+  'deals': 'Angebote',
+  'scanner': 'Belegscanner',
+  'shopping': 'Einkaufsliste',
+  'saved': 'Gespeichert',
+  'deals_map': 'Angebotskarte',
+  'receipt_scanner': 'Belegscanner',
+  'shopping_list': 'Einkaufsliste',
+  'mvp': 'MVP v0.1',
+  'search_hint': 'Angebote oder Geschäfte suchen...',
+  'filter': 'Filter',
+  'deals_map_subtitle': 'Zeigt Angebote in der Nähe',
+  'receipt_scanner_subtitle': 'Beleg scannen',
+  'shopping_list_subtitle': 'Smarte Liste',
+  'deals_count': '{count} Angebote',
+  'no_deals_found': 'Keine Angebote gefunden',
+  'reset_filters': 'Filter zurücksetzen',
+  'filters_title': 'Filter',
+  'stores': 'Geschäfte',
+  'max_price': 'Max. Preis',
+  'sort': 'Sortierung',
+  'none': 'Keine',
+  'price_low_high': 'Preis: aufsteigend',
+  'price_high_low': 'Preis: absteigend',
+  'deal_details': 'Angebotsdetails',
+  'deal_not_found': 'Angebot nicht gefunden',
+  'save_deal': 'Angebot speichern',
+  'remove_saved': 'Aus Gespeichert entfernen',
+  'no_saved_deals': 'Noch keine gespeicherten Angebote',
+  'saved_hint': 'Gespeicherte Angebote erscheinen hier',
+};
+
+const Map<String, String> _esApp = {
+  'app_name': 'Savingor',
+  'app_subtitle': 'Ofertas locales y ahorro inteligente',
+  'deals': 'Ofertas',
+  'scanner': 'Escáner de tickets',
+  'shopping': 'Lista de compras',
+  'saved': 'Guardados',
+  'deals_map': 'Mapa de ofertas',
+  'receipt_scanner': 'Escáner de tickets',
+  'shopping_list': 'Lista de compras',
+  'mvp': 'MVP v0.1',
+  'search_hint': 'Buscar ofertas o tiendas...',
+  'filter': 'Filtro',
+  'deals_map_subtitle': 'Muestra ofertas cercanas',
+  'receipt_scanner_subtitle': 'Escanear ticket',
+  'shopping_list_subtitle': 'Lista inteligente',
+  'deals_count': '{count} ofertas',
+  'no_deals_found': 'No se encontraron ofertas',
+  'reset_filters': 'Restablecer filtros',
+  'filters_title': 'Filtros',
+  'stores': 'Tiendas',
+  'max_price': 'Precio máx.',
+  'sort': 'Orden',
+  'none': 'Ninguno',
+  'price_low_high': 'Precio: menor a mayor',
+  'price_high_low': 'Precio: mayor a menor',
+  'deal_details': 'Detalles de la oferta',
+  'deal_not_found': 'Oferta no encontrada',
+  'save_deal': 'Guardar oferta',
+  'remove_saved': 'Quitar de guardados',
+  'no_saved_deals': 'Aún no hay ofertas guardadas',
+  'saved_hint': 'Las ofertas guardadas aparecerán aquí',
+};

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/app_state.dart';
 import 'package:savingor_app/features/deals/domain/models/deal.dart';
-// Home screen import removed (not used here)
-import 'package:savingor_app/features/onboarding/presentation/screens/splash_screen.dart';
-import 'package:savingor_app/features/onboarding/presentation/screens/language_select_screen.dart';
 import 'package:savingor_app/features/onboarding/presentation/screens/auth_screen.dart';
+import 'package:savingor_app/features/onboarding/presentation/screens/language_select_screen.dart';
+import 'package:savingor_app/features/onboarding/presentation/screens/mini_splash_screen.dart';
+import 'package:savingor_app/features/onboarding/presentation/screens/splash_screen.dart';
 import 'package:savingor_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:savingor_app/features/deals/presentation/screens/deals_map_screen.dart';
 import 'package:savingor_app/features/deals/presentation/screens/deal_details_screen.dart';
@@ -16,76 +17,120 @@ import 'package:savingor_app/core/widgets/bottom_nav_shell.dart';
 import 'package:savingor_app/features/deals/data/mock_deals.dart';
 import 'package:savingor_app/core/i18n/app_strings.dart';
 
-final GoRouter appRouter = GoRouter(
-  initialLocation: '/splash',
-  // Android (and other platforms) may supply a non-/ defaultRouteName from
-  // restoration or the engine; that would ignore initialLocation and open /deals.
-  overridePlatformDefaultLocation: true,
-  routes: [
-    // onboarding routes
-    GoRoute(
-      path: '/splash',
-      builder: (context, state) => const SplashScreen(),
-    ),
-    GoRoute(
-      path: '/language',
-      builder: (context, state) => const LanguageSelectScreen(),
-    ),
-    GoRoute(
-      path: '/auth',
-      builder: (context, state) => const AuthScreen(),
-    ),
-    ShellRoute(
-      builder: (context, state, child) => BottomNavShell(child: child),
-      routes: [
-        GoRoute(
-          path: '/deals',
-          builder: (context, state) => const DealsMapScreen(),
-        ),
-        GoRoute(
-          path: '/deals/:id',
-          builder: (context, state) {
-            final uri = state.uri;
-            final id = uri.pathSegments.isNotEmpty ? uri.pathSegments.last : '';
-            Deal? deal;
-            try {
-              deal = mockDeals.firstWhere((d) => d.id == id);
-            } catch (e) {
-              deal = null;
-            }
+/// Built after [AppState] is hydrated so redirects can read prefs-backed flags.
+GoRouter createAppRouter({required AppState appState}) {
+  // TODO(auth-routing): Add session-aware branches (logged-in → shell, invalid session → /auth)
+  // alongside [AppState] prefs flags. Do not remove language/onboarding gates until spec is aligned.
+  return GoRouter(
+    initialLocation: '/mini-splash',
+    refreshListenable: appState,
+    // Android (and other platforms) may supply a non-/ defaultRouteName from
+    // restoration or the engine; that would ignore initialLocation and open /deals.
+    overridePlatformDefaultLocation: true,
+    redirect: (context, state) {
+      if (!appState.isHydrated) return null;
 
-            if (deal == null) {
-              return Scaffold(
-                appBar: AppBar(title: Text(AppStrings.of(context).dealDetails)),
-                body: Center(child: Text(AppStrings.of(context).dealNotFound)),
-              );
-            }
+      final path = state.uri.path;
+      if (path == '/mini-splash') return null;
+      if (path == '/language') return null;
 
-            return DealDetailsScreen(deal: deal);
-          },
-        ),
-        GoRoute(
-          path: '/scanner',
-          builder: (context, state) => const ReceiptScannerScreen(),
-        ),
-        GoRoute(
-          path: '/saved',
-          builder: (context, state) => const SavedDealsScreen(),
-        ),
-        GoRoute(
-          path: '/shopping',
-          builder: (context, state) => const ShoppingListScreen(),
-        ),
-        GoRoute(
-          path: '/profile',
-          builder: (context, state) => const ProfileScreen(),
-        ),
-      ],
-    ),
-    // fallback to splash
-    GoRoute(
-      path: '/',
-      builder: (context, state) => const SplashScreen(),
-    ),
-  ],
-);
+      final lang = appState.language;
+      final done = appState.onboardingCompleted;
+
+      bool isShell(String p) =>
+          p.startsWith('/deals') ||
+          p.startsWith('/scanner') ||
+          p.startsWith('/saved') ||
+          p.startsWith('/shopping') ||
+          p.startsWith('/profile');
+
+      if (lang == null) {
+        if (path == '/splash' || path == '/auth' || isShell(path)) {
+          return '/language';
+        }
+        if (path == '/' || path.isEmpty) return '/mini-splash';
+        return null;
+      }
+
+      if (path == '/splash' && done) return '/deals';
+      if (isShell(path) && !done) return '/splash';
+      if (path == '/auth' && !done) return '/splash';
+
+      if (path == '/' || path.isEmpty) return '/mini-splash';
+
+      return null;
+    },
+    routes: [
+      GoRoute(
+        path: '/mini-splash',
+        builder: (context, state) => const MiniSplashScreen(),
+      ),
+      GoRoute(
+        path: '/splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: '/language',
+        builder: (context, state) => const LanguageSelectScreen(),
+      ),
+      GoRoute(
+        path: '/auth',
+        builder: (context, state) => const AuthScreen(),
+      ),
+      ShellRoute(
+        builder: (context, state, child) => BottomNavShell(child: child),
+        routes: [
+          GoRoute(
+            path: '/deals',
+            builder: (context, state) => const DealsMapScreen(),
+          ),
+          GoRoute(
+            path: '/deals/:id',
+            builder: (context, state) {
+              final uri = state.uri;
+              final id =
+                  uri.pathSegments.isNotEmpty ? uri.pathSegments.last : '';
+              Deal? deal;
+              try {
+                deal = mockDeals.firstWhere((d) => d.id == id);
+              } catch (e) {
+                deal = null;
+              }
+
+              if (deal == null) {
+                return Scaffold(
+                  appBar:
+                      AppBar(title: Text(AppStrings.of(context).dealDetails)),
+                  body:
+                      Center(child: Text(AppStrings.of(context).dealNotFound)),
+                );
+              }
+
+              return DealDetailsScreen(deal: deal);
+            },
+          ),
+          GoRoute(
+            path: '/scanner',
+            builder: (context, state) => const ReceiptScannerScreen(),
+          ),
+          GoRoute(
+            path: '/saved',
+            builder: (context, state) => const SavedDealsScreen(),
+          ),
+          GoRoute(
+            path: '/shopping',
+            builder: (context, state) => const ShoppingListScreen(),
+          ),
+          GoRoute(
+            path: '/profile',
+            builder: (context, state) => const ProfileScreen(),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/',
+        builder: (context, state) => const MiniSplashScreen(),
+      ),
+    ],
+  );
+}
