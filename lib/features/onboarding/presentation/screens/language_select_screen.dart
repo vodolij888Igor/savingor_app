@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/app_state.dart';
@@ -12,15 +13,57 @@ class LanguageSelectScreen extends StatefulWidget {
   State<LanguageSelectScreen> createState() => _LanguageSelectScreenState();
 }
 
-class _LanguageSelectScreenState extends State<LanguageSelectScreen> {
+class _LanguageSelectScreenState extends State<LanguageSelectScreen>
+    with SingleTickerProviderStateMixin {
+  static const String _backgroundAsset = 'assets/images/language_screen_bg.png';
+
+  /// Inline dropdown expand/collapse timing — same for both directions so the
+  /// SizeTransition (list height) and RotationTransition (arrow) stay in sync.
+  static const Duration _dropdownDuration = Duration(milliseconds: 300);
+  static const Curve _dropdownCurve = Curves.easeOutCubic;
+
+  static const List<Shadow> _copyShadows = <Shadow>[
+    Shadow(
+      color: Color(0xE6FFFFFF),
+      blurRadius: 14,
+      offset: Offset(0, 1),
+    ),
+    Shadow(
+      color: Color(0x22000000),
+      blurRadius: 8,
+      offset: Offset(0, 2),
+    ),
+  ];
+
   /// Selected locale code before Continue.
   late String _selectedCode;
   bool _initialSelectionSynced = false;
+
+  /// Whether the inline dropdown is currently expanded.
+  bool _isDropdownOpen = false;
+
+  late final AnimationController _dropdownController;
+  late final Animation<double> _dropdownAnim;
 
   @override
   void initState() {
     super.initState();
     _selectedCode = 'en';
+    _dropdownController = AnimationController(
+      vsync: this,
+      duration: _dropdownDuration,
+    );
+    _dropdownAnim = CurvedAnimation(
+      parent: _dropdownController,
+      curve: _dropdownCurve,
+      reverseCurve: _dropdownCurve,
+    );
+  }
+
+  @override
+  void dispose() {
+    _dropdownController.dispose();
+    super.dispose();
   }
 
   @override
@@ -67,264 +110,225 @@ class _LanguageSelectScreenState extends State<LanguageSelectScreen> {
     }
   }
 
-  Future<void> _openLanguagePicker() async {
-    final picked = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: false,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: SavingorColors.card,
-                borderRadius: BorderRadius.circular(SavingorRadius.xl),
-                border: Border.all(color: SavingorColors.border),
-                boxShadow: SavingorShadows.medium,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(height: 10),
-                  Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: SavingorColors.border,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: SavingorSpacing.lg,
-                      vertical: SavingorSpacing.sm,
-                    ),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        StartupFlowStrings.tPicker(_pickerUiLang(), 'lang_title'),
-                        style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: SavingorColors.darkGreen,
-                            ),
-                      ),
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: MediaQuery.sizeOf(sheetContext).height * 0.52,
-                    ),
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      itemCount: _choices.length,
-                      separatorBuilder: (_, __) => Divider(
-                        height: 1,
-                        color: SavingorColors.border.withOpacity(0.65),
-                      ),
-                      itemBuilder: (listContext, i) {
-                        final c = _choices[i];
-                        final selected = c.code == _selectedCode;
-                        return Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () => Navigator.of(sheetContext).pop(c.code),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: SavingorSpacing.lg,
-                                vertical: 14,
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          c.primaryLabel,
-                                          style: Theme.of(listContext)
-                                              .textTheme
-                                              .titleSmall
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.w600,
-                                                color: SavingorColors.textPrimary,
-                                              ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          c.secondaryLabel,
-                                          style: Theme.of(listContext)
-                                              .textTheme
-                                              .bodySmall
-                                              ?.copyWith(
-                                                color: SavingorColors.textSecondary,
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  if (selected)
-                                    const Icon(
-                                      Icons.check_circle_rounded,
-                                      color: SavingorColors.primaryGreen,
-                                      size: 22,
-                                    )
-                                  else
-                                    const Icon(
-                                      Icons.circle_outlined,
-                                      color: SavingorColors.border,
-                                      size: 22,
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-    if (picked != null && mounted) {
-      setState(() => _selectedCode = picked);
+  void _toggleDropdown() {
+    setState(() => _isDropdownOpen = !_isDropdownOpen);
+    if (_isDropdownOpen) {
+      _dropdownController.forward();
+    } else {
+      _dropdownController.reverse();
     }
   }
 
-  static const List<_LangChoice> _choices = [
-    _LangChoice('en', 'English', 'English'),
-    _LangChoice('uk', 'Українська', 'Ukrainian'),
-    _LangChoice('ru', 'Русский', 'Russian'),
-    _LangChoice('fr', 'Français', 'French'),
-    _LangChoice('de', 'Deutsch', 'German'),
-    _LangChoice('es', 'Español', 'Spanish'),
+  void _selectLanguage(String code) {
+    setState(() {
+      _selectedCode = code;
+      _isDropdownOpen = false;
+    });
+    _dropdownController.reverse();
+  }
+
+  static const List<_LangChoice> _choices = <_LangChoice>[
+    _LangChoice('en', 'English', 'English', 'assets/flags/gb.svg'),
+    _LangChoice('uk', 'Українська', 'Ukrainian', 'assets/flags/ua.svg'),
+    _LangChoice('ru', 'Русский', 'Russian', 'assets/flags/ru.svg'),
+    _LangChoice('fr', 'Français', 'French', 'assets/flags/fr.svg'),
+    _LangChoice('de', 'Deutsch', 'German', 'assets/flags/de.svg'),
+    _LangChoice('es', 'Español', 'Spanish', 'assets/flags/es.svg'),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final ui = _pickerUiLang();
-    final current = _choiceFor(_selectedCode);
+    final String ui = _pickerUiLang();
+    final _LangChoice current = _choiceFor(_selectedCode);
 
     return Scaffold(
-      backgroundColor: SavingorColors.background,
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(20, 28, 20, 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          StartupFlowStrings.tPicker(ui, 'lang_title'),
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: SavingorColors.textPrimary,
-                              ),
-                        ),
-                        const SizedBox(height: SavingorSpacing.sm),
-                        Text(
-                          StartupFlowStrings.tPicker(ui, 'lang_subtitle'),
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: SavingorColors.textSecondary,
-                                height: 1.45,
-                              ),
-                        ),
-                        const SizedBox(height: SavingorSpacing.section),
-                        Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius:
-                                BorderRadius.circular(SavingorRadius.xl),
-                            onTap: _openLanguagePicker,
-                            child: Ink(
-                              decoration: BoxDecoration(
-                                color: SavingorColors.card,
-                                borderRadius:
-                                    BorderRadius.circular(SavingorRadius.xl),
-                                border: Border.all(
-                                  color: SavingorColors.primaryStroke
-                                      .withOpacity(0.4),
-                                  width: 1,
-                                ),
-                                boxShadow: SavingorShadows.soft,
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: SavingorSpacing.lg,
-                                  vertical: 18,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            current.primaryLabel,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleMedium
-                                                ?.copyWith(
-                                                  fontWeight: FontWeight.w600,
-                                                  color: SavingorColors.textPrimary,
-                                                ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            current.secondaryLabel,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyMedium
-                                                ?.copyWith(
-                                                  color: SavingorColors
-                                                      .textSecondary,
-                                                ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const Icon(
-                                      Icons.keyboard_arrow_down_rounded,
-                                      color: SavingorColors.darkGreen,
-                                      size: 28,
-                                    ),
-                                  ],
-                                ),
-                              ),
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          Positioned.fill(
+            child: Image.asset(
+              _backgroundAsset,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              alignment: Alignment.topCenter,
+              filterQuality: FilterQuality.high,
+            ),
+          ),
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (BuildContext context, BoxConstraints constraints) {
+                final double topInset = constraints.maxHeight * 0.26;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 22),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      SizedBox(height: topInset),
+                      Text(
+                        StartupFlowStrings.tPicker(ui, 'lang_title'),
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: SavingorColors.darkGreen,
+                              letterSpacing: -0.3,
+                              shadows: _copyShadows,
                             ),
+                      ),
+                      const SizedBox(height: SavingorSpacing.sm),
+                      Text(
+                        StartupFlowStrings.tPicker(ui, 'lang_subtitle'),
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: SavingorColors.onboardingSubtitleDeep,
+                              height: 1.45,
+                              fontWeight: FontWeight.w500,
+                              shadows: _copyShadows,
+                            ),
+                      ),
+                      const SizedBox(height: SavingorSpacing.section),
+                      _InlineLanguageDropdown(
+                        current: current,
+                        choices: _choices,
+                        selectedCode: _selectedCode,
+                        animation: _dropdownAnim,
+                        onToggle: _toggleDropdown,
+                        onSelect: _selectLanguage,
+                      ),
+                      const Spacer(),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: FilledButton(
+                          style: SavingorButtonStyles.primaryFilled(),
+                          onPressed: _continue,
+                          child: Text(
+                            StartupFlowStrings.tPicker(ui, 'lang_continue'),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                  child: FilledButton(
-                    style: SavingorButtonStyles.primaryFilled(),
-                    onPressed: _continue,
-                    child: Text(
-                      StartupFlowStrings.tPicker(ui, 'lang_continue'),
-                    ),
-                  ),
-                ),
-              ],
+                );
+              },
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InlineLanguageDropdown extends StatelessWidget {
+  const _InlineLanguageDropdown({
+    required this.current,
+    required this.choices,
+    required this.selectedCode,
+    required this.animation,
+    required this.onToggle,
+    required this.onSelect,
+  });
+
+  final _LangChoice current;
+  final List<_LangChoice> choices;
+  final String selectedCode;
+  final Animation<double> animation;
+  final VoidCallback onToggle;
+  final ValueChanged<String> onSelect;
+
+  static final BorderRadius _radius =
+      BorderRadius.circular(SavingorRadius.xl);
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.96),
+        borderRadius: _radius,
+        boxShadow: SavingorShadows.medium,
+      ),
+      child: ClipRRect(
+        borderRadius: _radius,
+        child: Material(
+          color: Colors.transparent,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              InkWell(
+                onTap: onToggle,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SavingorSpacing.lg,
+                    vertical: 16,
+                  ),
+                  child: Row(
+                    children: <Widget>[
+                      _FlagSlot(asset: current.flagAsset),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              current.primaryLabel,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: SavingorColors.textPrimary,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              current.secondaryLabel,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: SavingorColors.textSecondary,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      RotationTransition(
+                        turns: Tween<double>(begin: 0, end: 0.5)
+                            .animate(animation),
+                        child: const Icon(
+                          Icons.keyboard_arrow_down_rounded,
+                          color: SavingorColors.darkGreen,
+                          size: 28,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizeTransition(
+                sizeFactor: animation,
+                axisAlignment: -1,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Divider(
+                      height: 1,
+                      thickness: 1,
+                      indent: SavingorSpacing.lg,
+                      endIndent: SavingorSpacing.lg,
+                      color: SavingorColors.border.withOpacity(0.55),
+                    ),
+                    for (int i = 0; i < choices.length; i++)
+                      _DropdownRow(
+                        choice: choices[i],
+                        selected: choices[i].code == selectedCode,
+                        showDivider: i < choices.length - 1,
+                        onTap: () => onSelect(choices[i].code),
+                      ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -332,10 +336,116 @@ class _LanguageSelectScreenState extends State<LanguageSelectScreen> {
   }
 }
 
+class _DropdownRow extends StatelessWidget {
+  const _DropdownRow({
+    required this.choice,
+    required this.selected,
+    required this.showDivider,
+    required this.onTap,
+  });
+
+  final _LangChoice choice;
+  final bool selected;
+  final bool showDivider;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        InkWell(
+          onTap: onTap,
+          child: Container(
+            color: selected
+                ? SavingorColors.lightGreen.withOpacity(0.55)
+                : Colors.transparent,
+            padding: const EdgeInsets.symmetric(
+              horizontal: SavingorSpacing.lg,
+              vertical: 12,
+            ),
+            child: Row(
+              children: <Widget>[
+                _FlagSlot(asset: choice.flagAsset),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        choice.primaryLabel,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: SavingorColors.textPrimary,
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        choice.secondaryLabel,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: SavingorColors.textSecondary,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (selected)
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    color: SavingorColors.primaryGreen,
+                    size: 22,
+                  )
+                else
+                  const SizedBox(width: 22, height: 22),
+              ],
+            ),
+          ),
+        ),
+        if (showDivider)
+          Divider(
+            height: 1,
+            thickness: 1,
+            indent: SavingorSpacing.lg,
+            endIndent: SavingorSpacing.lg,
+            color: SavingorColors.border.withOpacity(0.5),
+          ),
+      ],
+    );
+  }
+}
+
+class _FlagSlot extends StatelessWidget {
+  const _FlagSlot({required this.asset});
+
+  final String asset;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 32,
+      height: 32,
+      child: Center(
+        child: SvgPicture.asset(
+          asset,
+          width: 26,
+          height: 26,
+          fit: BoxFit.contain,
+        ),
+      ),
+    );
+  }
+}
+
 class _LangChoice {
-  const _LangChoice(this.code, this.primaryLabel, this.secondaryLabel);
+  const _LangChoice(
+    this.code,
+    this.primaryLabel,
+    this.secondaryLabel,
+    this.flagAsset,
+  );
 
   final String code;
   final String primaryLabel;
   final String secondaryLabel;
+  final String flagAsset;
 }
