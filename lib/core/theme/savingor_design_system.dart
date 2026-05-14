@@ -64,6 +64,35 @@ abstract final class SavingorShadows {
   ];
 }
 
+/// Shared typography for the startup, language, and onboarding flow.
+///
+/// One source of truth so every premium headline + companion subtitle in the
+/// pre-auth surfaces (mini splash, language picker, onboarding PageView) stays
+/// visually aligned. Inherits the app's default font family by design — assign
+/// per-screen accents (shadows, max width, etc.) via [TextStyle.copyWith].
+abstract final class SavingorTextStyles {
+  /// Premium centered title used on the language screen and every onboarding
+  /// slide that displays a textual headline. Heavy weight + slightly open
+  /// tracking gives a strong, branded Savingor presence over any background.
+  static const TextStyle onboardingTitle = TextStyle(
+    color: SavingorColors.darkGreen,
+    fontWeight: FontWeight.w900,
+    fontSize: 31,
+    height: 1.14,
+    letterSpacing: 0.3,
+  );
+
+  /// Companion subtitle paired with [onboardingTitle]. Readable but not heavy
+  /// enough to fight the title — preserves the hierarchy.
+  static const TextStyle onboardingSubtitle = TextStyle(
+    color: SavingorColors.onboardingSubtitleDeep,
+    fontWeight: FontWeight.w600,
+    fontSize: 16.5,
+    height: 1.4,
+    letterSpacing: 0.15,
+  );
+}
+
 /// Primary [FilledButton] / [ElevatedButton] — soft green fill, dark green label, premium radius.
 abstract final class SavingorButtonStyles {
   static ButtonStyle primaryFilled() {

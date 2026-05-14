@@ -308,10 +308,10 @@ class _OnboardingCopy extends StatelessWidget {
     ),
   ];
 
-  /// Slide 2 (approved) headline stack — frozen; do not alter metrics without sign-off.
+  /// Slide 1 headline stack — uses the shared [SavingorTextStyles] so it stays
+  /// visually aligned with the language screen and the rest of the onboarding.
   Widget _approvedSecondSlideCopy(
-    BuildContext context,
-    TextTheme theme, {
+    BuildContext context, {
     required double topPadding,
   }) {
     final maxCopyW = min(
@@ -331,43 +331,17 @@ class _OnboardingCopy extends StatelessWidget {
               Text(
                 data.title,
                 textAlign: TextAlign.center,
-                style: theme.headlineMedium?.copyWith(
-                      color: SavingorColors.darkGreen,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 32,
-                      height: 1.16,
-                      letterSpacing: -0.55,
-                      shadows: titleShadows,
-                    ) ??
-                    TextStyle(
-                      color: SavingorColors.darkGreen,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 32,
-                      height: 1.16,
-                      letterSpacing: -0.55,
-                      shadows: titleShadows,
-                    ),
+                style: SavingorTextStyles.onboardingTitle.copyWith(
+                  shadows: titleShadows,
+                ),
               ),
               const SizedBox(height: 12),
               Text(
                 data.subtitle,
                 textAlign: TextAlign.center,
-                style: theme.bodyLarge?.copyWith(
-                      color: SavingorColors.onboardingSubtitleDeep,
-                      fontSize: 17,
-                      height: 1.56,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0.08,
-                      shadows: titleShadows,
-                    ) ??
-                    TextStyle(
-                      color: SavingorColors.onboardingSubtitleDeep,
-                      fontSize: 17,
-                      height: 1.56,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0.08,
-                      shadows: titleShadows,
-                    ),
+                style: SavingorTextStyles.onboardingSubtitle.copyWith(
+                  shadows: titleShadows,
+                ),
               ),
             ],
           ),
@@ -377,7 +351,7 @@ class _OnboardingCopy extends StatelessWidget {
   }
 
   /// Fourth onboarding slide (index 3): smart shopping list — copy over clean top of `onboarding_3`.
-  Widget _fourthSlideCopy(BuildContext context, TextTheme theme) {
+  Widget _fourthSlideCopy(BuildContext context) {
     final maxCopyW = min(
       MediaQuery.sizeOf(context).width - 48,
       352.0,
@@ -386,8 +360,6 @@ class _OnboardingCopy extends StatelessWidget {
       MediaQuery.sizeOf(context).width - 52,
       326.0,
     );
-    const titleSize = 33.0;
-    const titleLineHeight = 1.14;
     return Padding(
       padding: const EdgeInsets.only(top: 54),
       child: Align(
@@ -401,22 +373,9 @@ class _OnboardingCopy extends StatelessWidget {
               Text(
                 data.title,
                 textAlign: TextAlign.center,
-                style: theme.headlineMedium?.copyWith(
-                      color: SavingorColors.darkGreen,
-                      fontWeight: FontWeight.w800,
-                      fontSize: titleSize,
-                      height: titleLineHeight,
-                      letterSpacing: -0.55,
-                      shadows: titleShadows,
-                    ) ??
-                    TextStyle(
-                      color: SavingorColors.darkGreen,
-                      fontWeight: FontWeight.w800,
-                      fontSize: titleSize,
-                      height: titleLineHeight,
-                      letterSpacing: -0.55,
-                      shadows: titleShadows,
-                    ),
+                style: SavingorTextStyles.onboardingTitle.copyWith(
+                  shadows: titleShadows,
+                ),
               ),
               const SizedBox(height: 13),
               ConstrainedBox(
@@ -424,22 +383,9 @@ class _OnboardingCopy extends StatelessWidget {
                 child: Text(
                   data.subtitle,
                   textAlign: TextAlign.center,
-                  style: theme.bodyLarge?.copyWith(
-                        color: SavingorColors.onboardingSubtitleDeep,
-                        fontSize: 18,
-                        height: 1.52,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.04,
-                        shadows: titleShadows,
-                      ) ??
-                      TextStyle(
-                        color: SavingorColors.onboardingSubtitleDeep,
-                        fontSize: 18,
-                        height: 1.52,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.04,
-                        shadows: titleShadows,
-                      ),
+                  style: SavingorTextStyles.onboardingSubtitle.copyWith(
+                    shadows: titleShadows,
+                  ),
                 ),
               ),
             ],
@@ -449,61 +395,12 @@ class _OnboardingCopy extends StatelessWidget {
     );
   }
 
-  /// Slide 3 — receipt copy; typography tuned for `onboarding_2` art (not slide 1/2 approved block).
-  Widget _thirdSlideCopy(BuildContext context, TextTheme theme) {
+  /// Slide 2 — receipt copy framed by a soft glass veil; typography unified
+  /// via [SavingorTextStyles] to match the language screen + other slides.
+  Widget _thirdSlideCopy(BuildContext context) {
     final screenW = MediaQuery.sizeOf(context).width;
     final maxTitleW = min(screenW - 44, 332.0);
     final maxSubtitleW = min(screenW - 48, 310.0);
-
-    const titleSize = 35.0;
-    const titleLineHeight = 1.11;
-    const titleLetterSpacing = -0.38;
-    const titleStrut = StrutStyle(
-      fontSize: titleSize,
-      height: titleLineHeight,
-      fontWeight: FontWeight.w800,
-      leadingDistribution: TextLeadingDistribution.even,
-      forceStrutHeight: true,
-    );
-    const titleBehavior = TextHeightBehavior(
-      applyHeightToFirstAscent: false,
-      applyHeightToLastDescent: false,
-      leadingDistribution: TextLeadingDistribution.even,
-    );
-
-    final titleStyle = theme.headlineMedium?.copyWith(
-          color: SavingorColors.darkGreen,
-          fontWeight: FontWeight.w800,
-          fontSize: titleSize,
-          height: titleLineHeight,
-          letterSpacing: titleLetterSpacing,
-          shadows: titleShadows,
-        ) ??
-        TextStyle(
-          color: SavingorColors.darkGreen,
-          fontWeight: FontWeight.w800,
-          fontSize: titleSize,
-          height: titleLineHeight,
-          letterSpacing: titleLetterSpacing,
-          shadows: titleShadows,
-        );
-
-    final subtitleStyle = theme.bodyLarge?.copyWith(
-          color: SavingorColors.onboardingSubtitleDeep,
-          fontSize: 18.5,
-          height: 1.45,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.05,
-          shadows: _thirdSubtitleShadows,
-        ) ??
-        const TextStyle(
-          color: SavingorColors.onboardingSubtitleDeep,
-          fontSize: 18.5,
-          height: 1.45,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.05,
-          shadows: _thirdSubtitleShadows,
-        );
 
     return Padding(
       padding: const EdgeInsets.only(top: 68),
@@ -526,19 +423,20 @@ class _OnboardingCopy extends StatelessWidget {
                       child: Text(
                         data.title,
                         textAlign: TextAlign.center,
-                        textHeightBehavior: titleBehavior,
-                        strutStyle: titleStrut,
-                        style: titleStyle,
+                        style: SavingorTextStyles.onboardingTitle.copyWith(
+                          shadows: titleShadows,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 14),
                     ConstrainedBox(
                       constraints: BoxConstraints(maxWidth: maxSubtitleW),
                       child: Text(
                         data.subtitle,
                         textAlign: TextAlign.center,
-                        textHeightBehavior: titleBehavior,
-                        style: subtitleStyle,
+                        style: SavingorTextStyles.onboardingSubtitle.copyWith(
+                          shadows: _thirdSubtitleShadows,
+                        ),
                       ),
                     ),
                   ],
@@ -553,14 +451,12 @@ class _OnboardingCopy extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context).textTheme;
-
-    // APPROVED (slide 0): Brand block — logo, name image, subtitle; frozen layout.
+    // Slide 0: Brand block — logo + wordmark imagery untouched; subtitle uses
+    // the shared [SavingorTextStyles] so it matches the rest of the flow.
     if (data.isBrandPage) {
       return Transform.translate(
         offset: const Offset(13, 24),
         child: _BrandHeadline(
-          theme: theme,
           data: data,
           shadows: titleShadows,
           logoAssetPath: logoAssetPath,
@@ -568,33 +464,32 @@ class _OnboardingCopy extends StatelessWidget {
       );
     }
 
-    // APPROVED (slide 1): Headline + subtitle block — frozen typography & position.
     if (pageIndex == 1) {
-      return _approvedSecondSlideCopy(context, theme, topPadding: 70);
+      return _approvedSecondSlideCopy(context, topPadding: 70);
     }
 
     if (pageIndex == 2) {
-      return _thirdSlideCopy(context, theme);
+      return _thirdSlideCopy(context);
     }
 
     if (pageIndex == 3) {
-      return _fourthSlideCopy(context, theme);
+      return _fourthSlideCopy(context);
     }
 
     return const SizedBox.shrink();
   }
 }
 
-/// Slide 0 hero composition — APPROVED (logo, wordmark, veil, subtitle metrics).
+/// Slide 0 hero composition — logo + wordmark imagery is frozen; the brand
+/// subtitle uses the shared [SavingorTextStyles.onboardingSubtitle] so the
+/// startup/onboarding flow reads as one consistent system.
 class _BrandHeadline extends StatelessWidget {
   const _BrandHeadline({
-    required this.theme,
     required this.data,
     required this.shadows,
     required this.logoAssetPath,
   });
 
-  final TextTheme theme;
   final _OnboardingPageData data;
   final List<Shadow> shadows;
   final String logoAssetPath;
@@ -671,22 +566,9 @@ class _BrandHeadline extends StatelessWidget {
                 child: Text(
                   data.subtitle,
                   textAlign: TextAlign.center,
-                  style: theme.bodyLarge?.copyWith(
-                        color: SavingorColors.onboardingSubtitleDeep,
-                        fontSize: 16,
-                        height: 1.4,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.2,
-                        shadows: shadows,
-                      ) ??
-                      TextStyle(
-                        color: SavingorColors.onboardingSubtitleDeep,
-                        fontSize: 16,
-                        height: 1.4,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.2,
-                        shadows: shadows,
-                      ),
+                  style: SavingorTextStyles.onboardingSubtitle.copyWith(
+                    shadows: shadows,
+                  ),
                 ),
               ),
             ),

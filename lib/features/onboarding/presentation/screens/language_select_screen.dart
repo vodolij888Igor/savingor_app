@@ -83,14 +83,14 @@ class _LanguageSelectScreenState extends State<LanguageSelectScreen>
     }
   }
 
-  String _pickerUiLang() {
-    final sys = WidgetsBinding.instance.platformDispatcher.locale.languageCode
-        .toLowerCase();
-    if (StartupFlowStrings.supportedLanguageCodes.contains(sys)) {
-      return sys;
-    }
-    return 'en';
-  }
+  /// UI language used to render the language screen's own title / subtitle /
+  /// Continue label. Driven by [_selectedCode] so every dropdown tap triggers
+  /// an immediate rebuild of the screen in the chosen language. The initial
+  /// value of [_selectedCode] is seeded in [didChangeDependencies] from the
+  /// saved app-state language (returning users) or the system locale when it
+  /// is one of the supported codes, falling back to `'en'`.
+  String _pickerUiLang() =>
+      StartupFlowStrings.normalizeLanguageCode(_selectedCode);
 
   _LangChoice _choiceFor(String code) {
     return _choices.firstWhere(
@@ -159,7 +159,15 @@ class _LanguageSelectScreenState extends State<LanguageSelectScreen>
           SafeArea(
             child: LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
-                final double topInset = constraints.maxHeight * 0.26;
+                final double safeHeight = constraints.maxHeight;
+                final double topInset = safeHeight * 0.26;
+                // Cap the expanded list so the open dropdown never overflows
+                // and the Continue button stays anchored to the bottom.
+                // Tuned so the Spacer never collapses below ~20 px on common
+                // phone safe areas; the list becomes scrollable if 6 rows
+                // exceed the cap.
+                final double listMaxHeight =
+                    (safeHeight * 0.32).clamp(170.0, 330.0);
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 22),
                   child: Column(
@@ -169,30 +177,25 @@ class _LanguageSelectScreenState extends State<LanguageSelectScreen>
                       Text(
                         StartupFlowStrings.tPicker(ui, 'lang_title'),
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              color: SavingorColors.darkGreen,
-                              letterSpacing: -0.3,
-                              shadows: _copyShadows,
-                            ),
+                        style: SavingorTextStyles.onboardingTitle.copyWith(
+                          shadows: _copyShadows,
+                        ),
                       ),
                       const SizedBox(height: SavingorSpacing.sm),
                       Text(
                         StartupFlowStrings.tPicker(ui, 'lang_subtitle'),
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: SavingorColors.onboardingSubtitleDeep,
-                              height: 1.45,
-                              fontWeight: FontWeight.w500,
-                              shadows: _copyShadows,
-                            ),
+                        style: SavingorTextStyles.onboardingSubtitle.copyWith(
+                          shadows: _copyShadows,
+                        ),
                       ),
-                      const SizedBox(height: SavingorSpacing.section),
+                      const SizedBox(height: SavingorSpacing.xl),
                       _InlineLanguageDropdown(
                         current: current,
                         choices: _choices,
                         selectedCode: _selectedCode,
                         animation: _dropdownAnim,
+                        listMaxHeight: listMaxHeight,
                         onToggle: _toggleDropdown,
                         onSelect: _selectLanguage,
                       ),
@@ -225,6 +228,7 @@ class _InlineLanguageDropdown extends StatelessWidget {
     required this.choices,
     required this.selectedCode,
     required this.animation,
+    required this.listMaxHeight,
     required this.onToggle,
     required this.onSelect,
   });
@@ -233,6 +237,11 @@ class _InlineLanguageDropdown extends StatelessWidget {
   final List<_LangChoice> choices;
   final String selectedCode;
   final Animation<double> animation;
+
+  /// Hard cap for the expanded list area; the list scrolls inside this box
+  /// if six rows do not fit, guaranteeing no bottom overflow.
+  final double listMaxHeight;
+
   final VoidCallback onToggle;
   final ValueChanged<String> onSelect;
 
@@ -259,7 +268,7 @@ class _InlineLanguageDropdown extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: SavingorSpacing.lg,
-                    vertical: 16,
+                    vertical: 14,
                   ),
                   child: Row(
                     children: <Widget>[
@@ -308,24 +317,36 @@ class _InlineLanguageDropdown extends StatelessWidget {
               SizeTransition(
                 sizeFactor: animation,
                 axisAlignment: -1,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Divider(
-                      height: 1,
-                      thickness: 1,
-                      indent: SavingorSpacing.lg,
-                      endIndent: SavingorSpacing.lg,
-                      color: SavingorColors.border.withOpacity(0.55),
-                    ),
-                    for (int i = 0; i < choices.length; i++)
-                      _DropdownRow(
-                        choice: choices[i],
-                        selected: choices[i].code == selectedCode,
-                        showDivider: i < choices.length - 1,
-                        onTap: () => onSelect(choices[i].code),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: listMaxHeight),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Divider(
+                        height: 1,
+                        thickness: 1,
+                        indent: SavingorSpacing.lg,
+                        endIndent: SavingorSpacing.lg,
+                        color: SavingorColors.border.withOpacity(0.55),
                       ),
-                  ],
+                      Flexible(
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          padding: EdgeInsets.zero,
+                          physics: const ClampingScrollPhysics(),
+                          itemCount: choices.length,
+                          itemBuilder: (BuildContext _, int i) {
+                            return _DropdownRow(
+                              choice: choices[i],
+                              selected: choices[i].code == selectedCode,
+                              showDivider: i < choices.length - 1,
+                              onTap: () => onSelect(choices[i].code),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -362,7 +383,7 @@ class _DropdownRow extends StatelessWidget {
                 : Colors.transparent,
             padding: const EdgeInsets.symmetric(
               horizontal: SavingorSpacing.lg,
-              vertical: 12,
+              vertical: 10,
             ),
             child: Row(
               children: <Widget>[
