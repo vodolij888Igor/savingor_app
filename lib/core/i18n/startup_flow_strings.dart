@@ -63,14 +63,17 @@ abstract final class StartupFlowStrings {
         'Savingor helps you plan your shopping list and see where each item is better to buy.',
     'btn_next': 'Next',
     'btn_get_started': 'Get Started',
-    'auth_welcome': 'Welcome back!',
-    'auth_subtitle': 'Continue your savings journey.',
+    'auth_welcome': 'Sign in or create account',
+    'auth_subtitle': 'Save your purchases, lists, and savings.',
     'auth_email': 'Email',
     'auth_password': 'Password',
     'auth_login': 'Log in',
     'auth_google': 'Continue with Google',
     'auth_apple': 'Continue with Apple',
     'auth_guest': 'Continue as Guest',
+    'auth_or': 'or',
+    'auth_no_account': 'Don\u2019t have an account?',
+    'auth_create_account': 'Create account',
   };
 
   static const Map<String, String> _uk = {
@@ -89,14 +92,17 @@ abstract final class StartupFlowStrings {
         'Savingor допомагає скласти список і бачити, де вигідніше купити кожну річ.',
     'btn_next': 'Далі',
     'btn_get_started': 'Почати',
-    'auth_welcome': 'З поверненням!',
-    'auth_subtitle': 'Продовжуйте свій шлях заощаджень.',
+    'auth_welcome': 'Увійдіть або створіть акаунт',
+    'auth_subtitle': 'Збережіть свої покупки, списки та економію.',
     'auth_email': 'Ел. пошта',
     'auth_password': 'Пароль',
     'auth_login': 'Увійти',
     'auth_google': 'Продовжити з Google',
     'auth_apple': 'Продовжити з Apple',
     'auth_guest': 'Продовжити як гість',
+    'auth_or': 'або',
+    'auth_no_account': 'Немає акаунта?',
+    'auth_create_account': 'Створити акаунт',
   };
 
   static const Map<String, String> _ru = {
@@ -115,14 +121,17 @@ abstract final class StartupFlowStrings {
         'Savingor помогает составить список и видеть, где выгоднее купить каждый товар.',
     'btn_next': 'Далее',
     'btn_get_started': 'Начать',
-    'auth_welcome': 'С возвращением!',
-    'auth_subtitle': 'Продолжайте свой путь экономии.',
+    'auth_welcome': 'Войдите или создайте аккаунт',
+    'auth_subtitle': 'Сохраняйте покупки, списки и экономию.',
     'auth_email': 'Эл. почта',
     'auth_password': 'Пароль',
     'auth_login': 'Войти',
     'auth_google': 'Продолжить с Google',
     'auth_apple': 'Продолжить с Apple',
     'auth_guest': 'Продолжить как гость',
+    'auth_or': 'или',
+    'auth_no_account': 'Нет аккаунта?',
+    'auth_create_account': 'Создать аккаунт',
   };
 
   static const Map<String, String> _fr = {
@@ -141,14 +150,17 @@ abstract final class StartupFlowStrings {
         'Savingor vous aide à préparer votre liste et à voir où chaque article est le plus avantageux.',
     'btn_next': 'Suivant',
     'btn_get_started': 'Commencer',
-    'auth_welcome': 'Bon retour !',
-    'auth_subtitle': 'Poursuivez votre parcours d’épargne.',
+    'auth_welcome': 'Connectez-vous ou créez un compte',
+    'auth_subtitle': 'Enregistrez vos achats, listes et économies.',
     'auth_email': 'E-mail',
     'auth_password': 'Mot de passe',
     'auth_login': 'Se connecter',
     'auth_google': 'Continuer avec Google',
     'auth_apple': 'Continuer avec Apple',
     'auth_guest': 'Continuer en invité',
+    'auth_or': 'ou',
+    'auth_no_account': 'Pas encore de compte\u00A0?',
+    'auth_create_account': 'Créer un compte',
   };
 
   static const Map<String, String> _de = {
@@ -167,14 +179,17 @@ abstract final class StartupFlowStrings {
         'Savingor hilft Ihnen bei der Einkaufsliste und zeigt, wo sich jedes Produkt am besten kauft.',
     'btn_next': 'Weiter',
     'btn_get_started': 'Loslegen',
-    'auth_welcome': 'Willkommen zurück!',
-    'auth_subtitle': 'Setzen Sie Ihre Sparreise fort.',
+    'auth_welcome': 'Einloggen oder Konto erstellen',
+    'auth_subtitle': 'Speichern Sie Ihre Einkäufe, Listen und Ersparnisse.',
     'auth_email': 'E-Mail',
     'auth_password': 'Passwort',
     'auth_login': 'Anmelden',
     'auth_google': 'Mit Google fortfahren',
     'auth_apple': 'Mit Apple fortfahren',
     'auth_guest': 'Als Gast fortfahren',
+    'auth_or': 'oder',
+    'auth_no_account': 'Noch kein Konto?',
+    'auth_create_account': 'Konto erstellen',
   };
 
   static const Map<String, String> _es = {
@@ -193,13 +208,16 @@ abstract final class StartupFlowStrings {
         'Savingor te ayuda con la lista y a ver dónde conviene más comprar cada artículo.',
     'btn_next': 'Siguiente',
     'btn_get_started': 'Empezar',
-    'auth_welcome': '¡Bienvenido de nuevo!',
-    'auth_subtitle': 'Sigue tu camino de ahorro.',
+    'auth_welcome': 'Inicia sesión o crea una cuenta',
+    'auth_subtitle': 'Guarda tus compras, listas y ahorros.',
     'auth_email': 'Correo',
     'auth_password': 'Contraseña',
     'auth_login': 'Iniciar sesión',
     'auth_google': 'Continuar con Google',
     'auth_apple': 'Continuar con Apple',
     'auth_guest': 'Continuar como invitado',
+    'auth_or': 'o',
+    'auth_no_account': '¿No tienes cuenta?',
+    'auth_create_account': 'Crear cuenta',
   };
 }
