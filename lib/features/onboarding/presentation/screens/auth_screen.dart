@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/i18n/startup_flow_strings.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/features/auth/data/auth_service.dart';
 
 // TODO(auth-routing): When a real session exists, gate [GoRouter.redirect] so a valid
 // session opens the shell directly and only unauthenticated users see this screen.
@@ -30,6 +31,11 @@ class _AuthScreenState extends State<AuthScreen> {
   final TextEditingController _password = TextEditingController();
   final FocusNode _emailFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
+  final AuthService _authService = AuthService();
+
+  bool _isLoading = false;
+  bool _isCreateMode = false;
+  String? _errorMessage;
 
   @override
   void dispose() {
@@ -57,6 +63,61 @@ class _AuthScreenState extends State<AuthScreen> {
       _emailFocus.requestFocus();
       SystemChannels.textInput.invokeMethod<void>('TextInput.show');
     });
+  }
+
+  void _toggleAuthMode() {
+    setState(() {
+      _isCreateMode = !_isCreateMode;
+      _errorMessage = null;
+    });
+  }
+
+  Future<void> _submitAuth() async {
+    final String email = _email.text.trim();
+    final String password = _password.text;
+
+    if (email.isEmpty) {
+      setState(() => _errorMessage = 'Please enter your email.');
+      return;
+    }
+    if (password.isEmpty) {
+      setState(() => _errorMessage = 'Please enter your password.');
+      return;
+    }
+
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      if (_isCreateMode) {
+        await _authService.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+      } else {
+        await _authService.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+      }
+      if (!mounted) return;
+      context.go('/deals');
+    } on AuthServiceException catch (e) {
+      if (!mounted) return;
+      setState(() => _errorMessage = e.message);
+    } catch (_) {
+      if (!mounted) return;
+      setState(
+        () => _errorMessage = AuthService.messageForCode('unknown'),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   /// Reusable input decoration for the email and password fields — translucent
@@ -246,12 +307,50 @@ class _AuthScreenState extends State<AuthScreen> {
                     icon: Icons.lock_outline_rounded,
                   ),
                 ),
+                if (_errorMessage != null) ...<Widget>[
+                  const SizedBox(height: SavingorSpacing.sm),
+                  Text(
+                    _errorMessage!,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: SavingorColors.darkGreen.withOpacity(0.85),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      height: 1.35,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: SavingorSpacing.sm),
                 FilledButton(
-                  onPressed: () => context.go('/deals'),
-                  child: Text(
-                    StartupFlowStrings.tr(context, 'auth_login'),
-                  ),
+                  onPressed: _isLoading ? null : _submitAuth,
+                  child: _isLoading
+                      ? const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Text('Please wait...'),
+                          ],
+                        )
+                      : Text(
+                          _isCreateMode
+                              ? StartupFlowStrings.tr(
+                                  context,
+                                  'auth_create_account',
+                                )
+                              : StartupFlowStrings.tr(
+                                  context,
+                                  'auth_login',
+                                ),
+                        ),
                 ),
                 const SizedBox(height: SavingorSpacing.sm),
                 const _OrDivider(),
@@ -259,16 +358,46 @@ class _AuthScreenState extends State<AuthScreen> {
                 _OutlinedAuthButton(
                   icon: const _GoogleGlyph(size: 20),
                   label: StartupFlowStrings.tr(context, 'auth_google'),
-                  onPressed: () {},
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Google sign-in will be available soon.',
+                        ),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: SavingorSpacing.sm),
                 _OutlinedAuthButton(
                   icon: const Icon(Icons.apple_rounded, size: 22),
                   label: StartupFlowStrings.tr(context, 'auth_apple'),
-                  onPressed: () {},
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Apple sign-in will be available soon.',
+                        ),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: SavingorSpacing.sm),
-                _CreateAccountRow(onTap: () {}),
+                _CreateAccountRow(
+                  prompt: _isCreateMode
+                      ? 'Already have an account?'
+                      : StartupFlowStrings.tr(
+                          context,
+                          'auth_no_account',
+                        ),
+                  actionLabel: _isCreateMode
+                      ? StartupFlowStrings.tr(context, 'auth_login')
+                      : StartupFlowStrings.tr(
+                          context,
+                          'auth_create_account',
+                        ),
+                  onTap: _toggleAuthMode,
+                ),
               ],
             ),
           ),
@@ -391,12 +520,16 @@ class _GoogleGlyph extends StatelessWidget {
   }
 }
 
-/// "Don't have an account? Create account" — discreet row inside the card,
-/// not at the bottom edge of the screen. Tap target is wired but currently
-/// performs no navigation; hook into a real register route when it exists.
+/// Login ↔ create-account toggle row inside the card.
 class _CreateAccountRow extends StatelessWidget {
-  const _CreateAccountRow({required this.onTap});
+  const _CreateAccountRow({
+    required this.prompt,
+    required this.actionLabel,
+    required this.onTap,
+  });
 
+  final String prompt;
+  final String actionLabel;
   final VoidCallback onTap;
 
   @override
@@ -407,7 +540,7 @@ class _CreateAccountRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Text(
-            StartupFlowStrings.tr(context, 'auth_no_account'),
+            prompt,
             style: const TextStyle(
               color: SavingorColors.textSecondary,
               fontSize: 13.5,
@@ -426,7 +559,7 @@ class _CreateAccountRow extends StatelessWidget {
               visualDensity: VisualDensity.compact,
             ),
             child: Text(
-              StartupFlowStrings.tr(context, 'auth_create_account'),
+              actionLabel,
               style: const TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 13.5,
