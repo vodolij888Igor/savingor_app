@@ -1,11 +1,10 @@
 import 'dart:ui';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/app_state.dart';
 import 'package:savingor_app/core/i18n/startup_flow_strings.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/auth/data/auth_service.dart';
@@ -32,10 +31,6 @@ class _AuthScreenState extends State<AuthScreen> {
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
   final TextEditingController _confirmPassword = TextEditingController();
-  final FocusNode _fullNameFocus = FocusNode();
-  final FocusNode _emailFocus = FocusNode();
-  final FocusNode _passwordFocus = FocusNode();
-  final FocusNode _confirmPasswordFocus = FocusNode();
   final AuthService _authService = AuthService();
 
   bool _isLoading = false;
@@ -44,10 +39,6 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   void dispose() {
-    _fullNameFocus.dispose();
-    _emailFocus.dispose();
-    _passwordFocus.dispose();
-    _confirmPasswordFocus.dispose();
     _fullName.dispose();
     _email.dispose();
     _password.dispose();
@@ -61,17 +52,6 @@ class _AuthScreenState extends State<AuthScreen> {
   // ignore: unused_element
   void _continueAsGuest() {
     context.go('/deals');
-  }
-
-  /// Android emulator / Gboard sometimes attaches only the compact IME strip to
-  /// the first field. After the frame where the TextField takes focus, nudge
-  /// the platform to show the full soft keyboard while keeping focus on email.
-  void _onEmailTapShowKeyboard() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      _emailFocus.requestFocus();
-      SystemChannels.textInput.invokeMethod<void>('TextInput.show');
-    });
   }
 
   void _toggleAuthMode() {
@@ -133,15 +113,13 @@ class _AuthScreenState extends State<AuthScreen> {
 
     try {
       if (_isCreateMode) {
-        final UserCredential credential =
-            await _authService.createUserWithEmailAndPassword(
+        final AppState appState = AppStateProvider.of(context);
+        await _authService.createUserWithEmailAndPassword(
           email: email,
           password: password,
+          fullName: _fullName.text.trim(),
+          selectedLanguage: appState.language ?? 'en',
         );
-        final String fullName = _fullName.text.trim();
-        if (fullName.isNotEmpty) {
-          await credential.user?.updateDisplayName(fullName);
-        }
       } else {
         await _authService.signInWithEmailAndPassword(
           email: email,
@@ -214,14 +192,10 @@ class _AuthScreenState extends State<AuthScreen> {
       return <Widget>[
         TextField(
           controller: _email,
-          focusNode: _emailFocus,
-          keyboardType: TextInputType.text,
+          keyboardType: TextInputType.visiblePassword,
           textInputAction: TextInputAction.next,
-          enabled: true,
-          readOnly: false,
-          onTap: _onEmailTapShowKeyboard,
-          onSubmitted: (_) =>
-              FocusScope.of(context).requestFocus(_passwordFocus),
+          autocorrect: false,
+          onSubmitted: (_) => FocusScope.of(context).nextFocus(),
           decoration: _fieldDecoration(
             hint: emailHint,
             icon: Icons.mail_outline_rounded,
@@ -230,12 +204,9 @@ class _AuthScreenState extends State<AuthScreen> {
         const SizedBox(height: SavingorSpacing.sm),
         TextField(
           controller: _password,
-          focusNode: _passwordFocus,
           obscureText: true,
           keyboardType: TextInputType.visiblePassword,
           textInputAction: TextInputAction.done,
-          enabled: true,
-          readOnly: false,
           onSubmitted: (_) {
             if (!_isLoading) {
               _submitAuth();
@@ -252,14 +223,10 @@ class _AuthScreenState extends State<AuthScreen> {
     return <Widget>[
       TextField(
         controller: _fullName,
-        focusNode: _fullNameFocus,
-        keyboardType: TextInputType.name,
+        keyboardType: TextInputType.visiblePassword,
         textInputAction: TextInputAction.next,
         textCapitalization: TextCapitalization.words,
-        enabled: true,
-        readOnly: false,
-        onSubmitted: (_) =>
-            FocusScope.of(context).requestFocus(_emailFocus),
+        onSubmitted: (_) => FocusScope.of(context).nextFocus(),
         decoration: _fieldDecoration(
           hint: 'Full name',
           icon: Icons.person_outline_rounded,
@@ -268,14 +235,10 @@ class _AuthScreenState extends State<AuthScreen> {
       const SizedBox(height: SavingorSpacing.sm),
       TextField(
         controller: _email,
-        focusNode: _emailFocus,
-        keyboardType: TextInputType.text,
+        keyboardType: TextInputType.visiblePassword,
         textInputAction: TextInputAction.next,
-        enabled: true,
-        readOnly: false,
-        onTap: _onEmailTapShowKeyboard,
-        onSubmitted: (_) =>
-            FocusScope.of(context).requestFocus(_passwordFocus),
+        autocorrect: false,
+        onSubmitted: (_) => FocusScope.of(context).nextFocus(),
         decoration: _fieldDecoration(
           hint: emailHint,
           icon: Icons.mail_outline_rounded,
@@ -284,14 +247,10 @@ class _AuthScreenState extends State<AuthScreen> {
       const SizedBox(height: SavingorSpacing.sm),
       TextField(
         controller: _password,
-        focusNode: _passwordFocus,
         obscureText: true,
         keyboardType: TextInputType.visiblePassword,
         textInputAction: TextInputAction.next,
-        enabled: true,
-        readOnly: false,
-        onSubmitted: (_) => FocusScope.of(context)
-            .requestFocus(_confirmPasswordFocus),
+        onSubmitted: (_) => FocusScope.of(context).nextFocus(),
         decoration: _fieldDecoration(
           hint: passwordHint,
           icon: Icons.lock_outline_rounded,
@@ -300,12 +259,9 @@ class _AuthScreenState extends State<AuthScreen> {
       const SizedBox(height: SavingorSpacing.sm),
       TextField(
         controller: _confirmPassword,
-        focusNode: _confirmPasswordFocus,
         obscureText: true,
         keyboardType: TextInputType.visiblePassword,
         textInputAction: TextInputAction.done,
-        enabled: true,
-        readOnly: false,
         onSubmitted: (_) {
           if (!_isLoading) {
             _submitAuth();
