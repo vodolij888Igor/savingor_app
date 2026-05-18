@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -27,10 +28,14 @@ class _AuthScreenState extends State<AuthScreen> {
   /// edge; mobile renders well below this cap and uses the full width.
   static const double _maxFormWidth = 460;
 
+  final TextEditingController _fullName = TextEditingController();
   final TextEditingController _email = TextEditingController();
   final TextEditingController _password = TextEditingController();
+  final TextEditingController _confirmPassword = TextEditingController();
+  final FocusNode _fullNameFocus = FocusNode();
   final FocusNode _emailFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
+  final FocusNode _confirmPasswordFocus = FocusNode();
   final AuthService _authService = AuthService();
 
   bool _isLoading = false;
@@ -39,10 +44,14 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   void dispose() {
+    _fullNameFocus.dispose();
     _emailFocus.dispose();
     _passwordFocus.dispose();
+    _confirmPasswordFocus.dispose();
+    _fullName.dispose();
     _email.dispose();
     _password.dispose();
+    _confirmPassword.dispose();
     super.dispose();
   }
 
@@ -72,18 +81,49 @@ class _AuthScreenState extends State<AuthScreen> {
     });
   }
 
+  String? _validateLogin() {
+    if (_email.text.trim().isEmpty) {
+      return 'Please enter your email.';
+    }
+    if (_password.text.isEmpty) {
+      return 'Please enter your password.';
+    }
+    return null;
+  }
+
+  String? _validateCreateAccount() {
+    if (_fullName.text.trim().isEmpty) {
+      return 'Please enter your full name.';
+    }
+    if (_email.text.trim().isEmpty) {
+      return 'Please enter your email.';
+    }
+    if (_password.text.isEmpty) {
+      return 'Please enter your password.';
+    }
+    if (_confirmPassword.text.isEmpty) {
+      return 'Please confirm your password.';
+    }
+    if (_password.text.length < 6) {
+      return 'Password must be at least 6 characters.';
+    }
+    if (_password.text != _confirmPassword.text) {
+      return 'Passwords do not match.';
+    }
+    return null;
+  }
+
   Future<void> _submitAuth() async {
+    final String? validationError = _isCreateMode
+        ? _validateCreateAccount()
+        : _validateLogin();
+    if (validationError != null) {
+      setState(() => _errorMessage = validationError);
+      return;
+    }
+
     final String email = _email.text.trim();
     final String password = _password.text;
-
-    if (email.isEmpty) {
-      setState(() => _errorMessage = 'Please enter your email.');
-      return;
-    }
-    if (password.isEmpty) {
-      setState(() => _errorMessage = 'Please enter your password.');
-      return;
-    }
 
     FocusScope.of(context).unfocus();
     setState(() {
@@ -93,10 +133,15 @@ class _AuthScreenState extends State<AuthScreen> {
 
     try {
       if (_isCreateMode) {
-        await _authService.createUserWithEmailAndPassword(
+        final UserCredential credential =
+            await _authService.createUserWithEmailAndPassword(
           email: email,
           password: password,
         );
+        final String fullName = _fullName.text.trim();
+        if (fullName.isNotEmpty) {
+          await credential.user?.updateDisplayName(fullName);
+        }
       } else {
         await _authService.signInWithEmailAndPassword(
           email: email,
@@ -158,6 +203,120 @@ class _AuthScreenState extends State<AuthScreen> {
         color: SavingorColors.textSecondary.withOpacity(0.95),
       ),
     );
+  }
+
+  List<Widget> _buildAuthFields(BuildContext context) {
+    final String emailHint = StartupFlowStrings.tr(context, 'auth_email');
+    final String passwordHint =
+        StartupFlowStrings.tr(context, 'auth_password');
+
+    if (!_isCreateMode) {
+      return <Widget>[
+        TextField(
+          controller: _email,
+          focusNode: _emailFocus,
+          keyboardType: TextInputType.text,
+          textInputAction: TextInputAction.next,
+          enabled: true,
+          readOnly: false,
+          onTap: _onEmailTapShowKeyboard,
+          onSubmitted: (_) =>
+              FocusScope.of(context).requestFocus(_passwordFocus),
+          decoration: _fieldDecoration(
+            hint: emailHint,
+            icon: Icons.mail_outline_rounded,
+          ),
+        ),
+        const SizedBox(height: SavingorSpacing.sm),
+        TextField(
+          controller: _password,
+          focusNode: _passwordFocus,
+          obscureText: true,
+          keyboardType: TextInputType.visiblePassword,
+          textInputAction: TextInputAction.done,
+          enabled: true,
+          readOnly: false,
+          onSubmitted: (_) {
+            if (!_isLoading) {
+              _submitAuth();
+            }
+          },
+          decoration: _fieldDecoration(
+            hint: passwordHint,
+            icon: Icons.lock_outline_rounded,
+          ),
+        ),
+      ];
+    }
+
+    return <Widget>[
+      TextField(
+        controller: _fullName,
+        focusNode: _fullNameFocus,
+        keyboardType: TextInputType.name,
+        textInputAction: TextInputAction.next,
+        textCapitalization: TextCapitalization.words,
+        enabled: true,
+        readOnly: false,
+        onSubmitted: (_) =>
+            FocusScope.of(context).requestFocus(_emailFocus),
+        decoration: _fieldDecoration(
+          hint: 'Full name',
+          icon: Icons.person_outline_rounded,
+        ),
+      ),
+      const SizedBox(height: SavingorSpacing.sm),
+      TextField(
+        controller: _email,
+        focusNode: _emailFocus,
+        keyboardType: TextInputType.text,
+        textInputAction: TextInputAction.next,
+        enabled: true,
+        readOnly: false,
+        onTap: _onEmailTapShowKeyboard,
+        onSubmitted: (_) =>
+            FocusScope.of(context).requestFocus(_passwordFocus),
+        decoration: _fieldDecoration(
+          hint: emailHint,
+          icon: Icons.mail_outline_rounded,
+        ),
+      ),
+      const SizedBox(height: SavingorSpacing.sm),
+      TextField(
+        controller: _password,
+        focusNode: _passwordFocus,
+        obscureText: true,
+        keyboardType: TextInputType.visiblePassword,
+        textInputAction: TextInputAction.next,
+        enabled: true,
+        readOnly: false,
+        onSubmitted: (_) => FocusScope.of(context)
+            .requestFocus(_confirmPasswordFocus),
+        decoration: _fieldDecoration(
+          hint: passwordHint,
+          icon: Icons.lock_outline_rounded,
+        ),
+      ),
+      const SizedBox(height: SavingorSpacing.sm),
+      TextField(
+        controller: _confirmPassword,
+        focusNode: _confirmPasswordFocus,
+        obscureText: true,
+        keyboardType: TextInputType.visiblePassword,
+        textInputAction: TextInputAction.done,
+        enabled: true,
+        readOnly: false,
+        onSubmitted: (_) {
+          if (!_isLoading) {
+            _submitAuth();
+          }
+        },
+        decoration: _fieldDecoration(
+          hint: 'Confirm password',
+          icon: Icons.lock_outline_rounded,
+        ),
+      ),
+    ];
   }
 
   @override
@@ -228,6 +387,13 @@ class _AuthScreenState extends State<AuthScreen> {
   /// social providers + create-account row. Backdrop blur softens whatever
   /// part of the artwork sits behind the card so the inputs stay readable.
   Widget _buildAuthCard(BuildContext context) {
+    final String title = _isCreateMode
+        ? 'Create your Savingor account'
+        : 'Welcome back';
+    final String subtitle = _isCreateMode
+        ? 'Save purchases, track spending, and find better deals.'
+        : 'Log in to continue saving smarter.';
+
     final BorderRadius radius = BorderRadius.circular(28);
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -253,7 +419,7 @@ class _AuthScreenState extends State<AuthScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 Text(
-                  StartupFlowStrings.tr(context, 'auth_welcome'),
+                  title,
                   textAlign: TextAlign.center,
                   style: SavingorTextStyles.onboardingTitle.copyWith(
                     fontSize: 22,
@@ -263,50 +429,14 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
                 const SizedBox(height: SavingorSpacing.xs),
                 Text(
-                  StartupFlowStrings.tr(context, 'auth_subtitle'),
+                  subtitle,
                   textAlign: TextAlign.center,
                   style: SavingorTextStyles.onboardingSubtitle.copyWith(
                     fontSize: 13.5,
                   ),
                 ),
                 const SizedBox(height: SavingorSpacing.sm),
-                TextField(
-                  controller: _email,
-                  focusNode: _emailFocus,
-                  keyboardType: TextInputType.text,
-                  textInputAction: TextInputAction.next,
-                  enabled: true,
-                  readOnly: false,
-                  onTap: _onEmailTapShowKeyboard,
-                  onSubmitted: (_) => FocusScope.of(context)
-                      .requestFocus(_passwordFocus),
-                  decoration: _fieldDecoration(
-                    hint: StartupFlowStrings.tr(
-                      context,
-                      'auth_email',
-                    ),
-                    icon: Icons.mail_outline_rounded,
-                  ),
-                ),
-                const SizedBox(height: SavingorSpacing.sm),
-                TextField(
-                  controller: _password,
-                  focusNode: _passwordFocus,
-                  obscureText: true,
-                  keyboardType: TextInputType.visiblePassword,
-                  textInputAction: TextInputAction.done,
-                  enabled: true,
-                  readOnly: false,
-                  onSubmitted: (_) =>
-                      FocusScope.of(context).unfocus(),
-                  decoration: _fieldDecoration(
-                    hint: StartupFlowStrings.tr(
-                      context,
-                      'auth_password',
-                    ),
-                    icon: Icons.lock_outline_rounded,
-                  ),
-                ),
+                ..._buildAuthFields(context),
                 if (_errorMessage != null) ...<Widget>[
                   const SizedBox(height: SavingorSpacing.sm),
                   Text(
