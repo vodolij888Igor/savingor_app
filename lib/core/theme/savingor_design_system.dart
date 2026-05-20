@@ -133,6 +133,26 @@ abstract final class SavingorButtonStyles {
       ),
     );
   }
+
+  /// Secondary actions on profile/settings surfaces — outlined, calm chrome.
+  static ButtonStyle secondaryOutlined() {
+    return OutlinedButton.styleFrom(
+      foregroundColor: SavingorColors.darkGreen,
+      backgroundColor: SavingorColors.card,
+      elevation: 0,
+      minimumSize: const Size.fromHeight(52),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      side: BorderSide(color: SavingorColors.border.withOpacity(0.9)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(SavingorRadius.xl),
+      ),
+      textStyle: const TextStyle(
+        fontWeight: FontWeight.w600,
+        fontSize: 15,
+        letterSpacing: 0.1,
+      ),
+    );
+  }
 }
 
 abstract final class SavingorTheme {
