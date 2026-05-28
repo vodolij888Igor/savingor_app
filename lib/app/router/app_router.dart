@@ -8,6 +8,7 @@ import 'package:savingor_app/features/onboarding/presentation/screens/language_s
 import 'package:savingor_app/features/onboarding/presentation/screens/mini_splash_screen.dart';
 import 'package:savingor_app/features/onboarding/presentation/screens/splash_screen.dart';
 import 'package:savingor_app/features/profile/presentation/screens/profile_screen.dart';
+import 'package:savingor_app/features/subscription/presentation/screens/subscription_screen.dart';
 import 'package:savingor_app/features/deals/presentation/screens/deals_map_screen.dart';
 import 'package:savingor_app/features/deals/presentation/screens/deal_details_screen.dart';
 import 'package:savingor_app/features/scanner/presentation/screens/receipt_scanner_screen.dart';
@@ -42,7 +43,8 @@ GoRouter createAppRouter({required AppState appState}) {
           p.startsWith('/scanner') ||
           p.startsWith('/saved') ||
           p.startsWith('/shopping') ||
-          p.startsWith('/profile');
+          p.startsWith('/profile') ||
+          p.startsWith('/subscription');
 
       if (lang == null) {
         if (path == '/splash' || path == '/auth' || isShell(path)) {
@@ -76,6 +78,10 @@ GoRouter createAppRouter({required AppState appState}) {
       GoRoute(
         path: '/auth',
         builder: (context, state) => const AuthScreen(),
+      ),
+      GoRoute(
+        path: '/subscription',
+        builder: (context, state) => const SubscriptionScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) => BottomNavShell(child: child),

@@ -19,30 +19,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
   UserProfile? _profile;
   String? _profileError;
 
-  static const Color _pageBackground = Color(0xFFF8FCF7);
-  static const Color _emailMuted = Color(0xFF6B8574);
-  static const double _heroRadius = 24;
+  static const Color _pageBackground = Color(0xFFF3FAF1);
+  static const Color _emailMuted = Color(0xFF5F7A68);
+  static const double _heroRadius = 28;
   static const double _cardRadius = 22;
   static const double _buttonRadius = 18;
 
   static const TextStyle _screenTitleStyle = TextStyle(
     fontSize: 24,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w800,
     color: SavingorColors.darkGreen,
     letterSpacing: 0.2,
     height: 1.15,
   );
 
-  static const TextStyle _sectionTitleStyle = TextStyle(
-    fontSize: 12,
-    fontWeight: FontWeight.w700,
-    color: SavingorColors.darkGreen,
-    letterSpacing: 1.1,
-    height: 1.2,
-  );
-
   static const TextStyle _cardHeadingStyle = TextStyle(
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: FontWeight.w700,
     color: SavingorColors.darkGreen,
     letterSpacing: 0.1,
@@ -90,6 +82,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final AppState appState = AppStateProvider.of(context);
     final String appLanguage = appState.language ?? 'not set';
+    final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
       backgroundColor: _pageBackground,
@@ -102,22 +95,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
         surfaceTintColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 6, 20, 32),
+        padding: EdgeInsets.fromLTRB(20, 6, 20, 28 + bottomInset + 72),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            _buildProfileHeader(),
-            const SizedBox(height: 18),
-            _sectionCard(
-              title: 'ACCOUNT',
+            _buildProfileHero(),
+            const SizedBox(height: SavingorSpacing.lg),
+            _buildSavingsSnapshotRow(appLanguage),
+            const SizedBox(height: SavingorSpacing.lg),
+            _headingCard(
+              title: 'Account',
               child: _buildAccountSection(),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: SavingorSpacing.lg),
             _headingCard(
               title: 'Plan & subscription',
-              child: _buildPlanSection(),
+              child: _buildPlanSection(context),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: SavingorSpacing.lg),
             _headingCard(
               title: 'App settings',
               child: _buildAppSettingsSection(
@@ -126,12 +121,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 appLanguage,
               ),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: SavingorSpacing.lg),
             _headingCard(
               title: 'Savings preferences',
               child: _buildSavingsPreferencesSection(),
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: SavingorSpacing.xl),
             _buildSignOutSection(context, appState),
           ],
         ),
@@ -145,64 +140,118 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileHeader() {
+  ButtonStyle get _primaryButtonStyle => ElevatedButton.styleFrom(
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        backgroundColor: SavingorColors.primaryGreen,
+        foregroundColor: SavingorColors.darkGreen,
+        minimumSize: const Size.fromHeight(52),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(_buttonRadius),
+          side: const BorderSide(
+            color: SavingorColors.primaryStroke,
+            width: 1,
+          ),
+        ),
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.12,
+        ),
+      );
+
+  Widget _primaryButton({
+    required String label,
+    required VoidCallback? onPressed,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: _primaryButtonStyle,
+        onPressed: onPressed,
+        child: Text(label),
+      ),
+    );
+  }
+
+  Widget _buildProfileHero() {
     final String displayName = _profile != null && _profile!.fullName.isNotEmpty
         ? _profile!.fullName
         : 'Your account';
-    final String? subtitle = _profile != null && _profile!.email.isNotEmpty
+    final String? email = _profile != null && _profile!.email.isNotEmpty
         ? _profile!.email
         : null;
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(24, 28, 24, 28),
+      padding: const EdgeInsets.fromLTRB(24, 28, 24, 26),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(_heroRadius),
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: <Color>[
+            Color(0xFFE8F6E4),
+            Color(0xFFF7FCF5),
             Color(0xFFFFFFFF),
-            Color(0xFFF2FAF0),
           ],
+          stops: <double>[0.0, 0.45, 1.0],
         ),
         border: Border.all(
-          color: const Color(0xFFE3EFE0),
+          color: SavingorColors.primaryStroke.withOpacity(0.22),
         ),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: SavingorColors.darkGreen.withOpacity(0.07),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+            color: SavingorColors.darkGreen.withOpacity(0.12),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
       child: Column(
         children: <Widget>[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.75),
+              borderRadius: BorderRadius.circular(SavingorRadius.pill),
+              border: Border.all(
+                color: SavingorColors.primaryStroke.withOpacity(0.3),
+              ),
+            ),
+            child: const Text(
+              'Free plan',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: SavingorColors.darkGreen,
+                letterSpacing: 0.15,
+              ),
+            ),
+          ),
+          const SizedBox(height: SavingorSpacing.lg),
           DecoratedBox(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.white,
-                width: 3,
-              ),
+              border: Border.all(color: Colors.white, width: 3),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: SavingorColors.darkGreen.withOpacity(0.1),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+                  color: SavingorColors.darkGreen.withOpacity(0.14),
+                  blurRadius: 14,
+                  offset: const Offset(0, 5),
                 ),
               ],
             ),
             child: CircleAvatar(
-              radius: 40,
-              backgroundColor: SavingorColors.lightGreen,
+              radius: 42,
+              backgroundColor: SavingorColors.primaryGreen,
               foregroundColor: SavingorColors.darkGreen,
               child: Text(
                 _initialsFor(displayName),
                 style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
                   letterSpacing: 0.3,
                 ),
               ),
@@ -213,17 +262,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
             displayName,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 23,
-              fontWeight: FontWeight.w700,
+              fontSize: 26,
+              fontWeight: FontWeight.w800,
               color: SavingorColors.darkGreen,
-              height: 1.2,
-              letterSpacing: 0.15,
+              height: 1.15,
+              letterSpacing: 0.1,
             ),
           ),
-          if (subtitle != null) ...<Widget>[
+          if (email != null) ...<Widget>[
             const SizedBox(height: 8),
             Text(
-              subtitle,
+              email,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 14,
@@ -233,6 +282,100 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
           ],
+          const SizedBox(height: SavingorSpacing.md),
+          const Text(
+            'Ready to save smarter today',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: SavingorColors.primaryStroke,
+              letterSpacing: 0.2,
+              height: 1.3,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSavingsSnapshotRow(String appLanguage) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: _snapshotChip(
+            icon: Icons.map_outlined,
+            label: 'Region',
+            value: 'Canada',
+          ),
+        ),
+        const SizedBox(width: SavingorSpacing.sm),
+        Expanded(
+          child: _snapshotChip(
+            icon: Icons.translate_rounded,
+            label: 'Language',
+            value: appLanguage,
+          ),
+        ),
+        const SizedBox(width: SavingorSpacing.sm),
+        Expanded(
+          child: _snapshotChip(
+            icon: Icons.brightness_auto_rounded,
+            label: 'Theme',
+            value: 'System',
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _snapshotChip({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SavingorSpacing.sm,
+        vertical: SavingorSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: SavingorColors.primaryStroke.withOpacity(0.18),
+        ),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: SavingorColors.darkGreen.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: <Widget>[
+          Icon(icon, size: 20, color: SavingorColors.darkGreen),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: SavingorColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: SavingorColors.darkGreen,
+              height: 1.2,
+            ),
+          ),
         ],
       ),
     );
@@ -268,10 +411,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_profileError != null) {
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(
-          horizontal: SavingorSpacing.md,
-          vertical: SavingorSpacing.md,
-        ),
+        padding: const EdgeInsets.all(SavingorSpacing.md),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.error.withOpacity(0.06),
           borderRadius: BorderRadius.circular(SavingorRadius.md),
@@ -293,41 +433,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_profile == null) {
       return const Text(
         'No profile found for this account yet.',
-        style: TextStyle(
-          fontSize: 14,
-          color: SavingorColors.textSecondary,
-          height: 1.4,
-        ),
+        style: _bodyMutedStyle,
       );
     }
 
     return Column(
       children: <Widget>[
-        _infoRow('Full name', _displayValue(_profile!.fullName)),
+        _iconInfoRow(
+          icon: Icons.person_outline_rounded,
+          label: 'Full name',
+          value: _displayValue(_profile!.fullName),
+        ),
         _rowDivider(),
-        _infoRow('Email', _displayValue(_profile!.email)),
+        _iconInfoRow(
+          icon: Icons.mail_outline_rounded,
+          label: 'Email',
+          value: _displayValue(_profile!.email),
+        ),
         _rowDivider(),
-        _infoRow(
-          'Selected language',
-          _displayValue(_profile!.selectedLanguage),
+        _iconInfoRow(
+          icon: Icons.translate_rounded,
+          label: 'Selected language',
+          value: _displayValue(_profile!.selectedLanguage),
           isLast: true,
         ),
       ],
     );
   }
 
-  Widget _buildPlanSection() {
+  Widget _buildPlanSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             const Expanded(
               child: Text(
                 'Current plan',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 13,
                   fontWeight: FontWeight.w500,
                   color: SavingorColors.textSecondary,
                 ),
@@ -348,7 +492,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: SavingorColors.darkGreen,
-                  letterSpacing: 0.2,
                 ),
               ),
             ),
@@ -358,55 +501,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const Text(
           'Free',
           style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
+            fontSize: 22,
+            fontWeight: FontWeight.w800,
             color: SavingorColors.darkGreen,
-            height: 1.2,
+            height: 1.15,
           ),
         ),
         const SizedBox(height: SavingorSpacing.md),
         const Text(
-          'Upgrade later for AI savings insights, receipt analytics, '
+          'Upgrade to unlock AI savings insights, receipt analytics, '
           'and smart alerts.',
           style: _bodyMutedStyle,
         ),
         const SizedBox(height: SavingorSpacing.lg),
-        SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              shadowColor: Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              backgroundColor: SavingorColors.primaryGreen,
-              foregroundColor: SavingorColors.darkGreen,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(_buttonRadius),
-                side: const BorderSide(
-                  color: SavingorColors.primaryStroke,
-                  width: 1,
-                ),
-              ),
-              textStyle: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            onPressed: () => _showSnack(
-              'Subscription plans will be available soon.',
-            ),
-            child: const Text('View plans'),
-          ),
+        _primaryButton(
+          label: 'View plans',
+          onPressed: () => context.push('/subscription'),
         ),
-        const SizedBox(height: SavingorSpacing.sm),
+        const SizedBox(height: SavingorSpacing.xs),
         TextButton(
           onPressed: () => _showSnack(
             'Subscription management will be available soon.',
           ),
           style: TextButton.styleFrom(
             foregroundColor: SavingorColors.darkGreen,
-            padding: const EdgeInsets.symmetric(vertical: 8),
             textStyle: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -426,38 +544,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        _infoRow('Language', appLanguage),
+        _iconInfoRow(
+          icon: Icons.language_rounded,
+          label: 'Language',
+          value: appLanguage,
+        ),
         _rowDivider(),
-        _infoRow('Theme', 'System'),
+        _iconInfoRow(
+          icon: Icons.brightness_auto_rounded,
+          label: 'Theme',
+          value: 'System',
+        ),
         _rowDivider(),
-        _infoRow('Notifications', 'Coming soon', valueMuted: true),
+        _iconInfoRow(
+          icon: Icons.notifications_none_rounded,
+          label: 'Notifications',
+          value: 'Coming soon',
+          valueMuted: true,
+          isLast: true,
+        ),
         const SizedBox(height: SavingorSpacing.lg),
-        SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              shadowColor: Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              backgroundColor: SavingorColors.primaryGreen,
-              foregroundColor: SavingorColors.darkGreen,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(_buttonRadius),
-                side: const BorderSide(
-                  color: SavingorColors.primaryStroke,
-                  width: 1,
-                ),
-              ),
-              textStyle: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.15,
-              ),
-            ),
-            onPressed: () => context.go('/language'),
-            child: const Text('Change language'),
-          ),
+        _primaryButton(
+          label: 'Change language',
+          onPressed: () => context.go('/language'),
         ),
       ],
     );
@@ -466,15 +575,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildSavingsPreferencesSection() {
     return Column(
       children: <Widget>[
-        _infoRow('Region', 'Canada'),
+        _iconInfoRow(
+          icon: Icons.map_outlined,
+          label: 'Region',
+          value: 'Canada',
+        ),
         _rowDivider(),
-        _infoRow('Currency', 'CAD'),
+        _iconInfoRow(
+          icon: Icons.attach_money_rounded,
+          label: 'Currency',
+          value: 'CAD',
+        ),
         _rowDivider(),
-        _infoRow('Monthly savings goal', '\$100'),
+        _iconInfoRow(
+          icon: Icons.flag_outlined,
+          label: 'Monthly savings goal',
+          value: '\$100',
+        ),
         _rowDivider(),
-        _infoRow(
-          'Favorite stores',
-          'Walmart, Costco, Superstore',
+        _iconInfoRow(
+          icon: Icons.storefront_outlined,
+          label: 'Favorite stores',
+          value: 'Walmart, Costco, Superstore',
           isLast: true,
         ),
       ],
@@ -482,50 +604,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildSignOutSection(BuildContext context, AppState appState) {
-    return SizedBox(
-      width: double.infinity,
-      height: 50,
-      child: OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          elevation: 0,
-          backgroundColor: Colors.white,
-          foregroundColor: _emailMuted,
-          side: BorderSide(
-            color: SavingorColors.border.withOpacity(0.85),
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(_buttonRadius),
-          ),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.1,
-          ),
-        ),
-        onPressed: () {
-          // TODO(auth): Replace full startup reset with token-only logout when
-          // authentication exists; then route via [createAppRouter.redirect] only.
-          appState.resetStartupFlowToBeginning();
-          context.go('/mini-splash');
-        },
-        child: const Text('Sign out (reset start flow)'),
-      ),
-    );
-  }
-
-  Widget _sectionCard({
-    required String title,
-    required Widget child,
-  }) {
-    return _cardShell(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Text(title, style: _sectionTitleStyle),
-          const SizedBox(height: SavingorSpacing.lg),
-          child,
-        ],
-      ),
+    return _primaryButton(
+      label: 'Sign out (reset start flow)',
+      onPressed: () {
+        // TODO(auth): Replace full startup reset with token-only logout when
+        // authentication exists; then route via [createAppRouter.redirect] only.
+        appState.resetStartupFlowToBeginning();
+        context.go('/mini-splash');
+      },
     );
   }
 
@@ -548,20 +634,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _cardShell({required Widget child}) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(22, 22, 22, 22),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
       decoration: BoxDecoration(
         color: SavingorColors.card,
         borderRadius: BorderRadius.circular(_cardRadius),
         border: Border.all(
-          color: const Color(0xFFE8EEEA),
+          color: SavingorColors.primaryStroke.withOpacity(0.12),
         ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: SavingorColors.darkGreen.withOpacity(0.05),
-            blurRadius: 14,
-            offset: const Offset(0, 5),
-          ),
-        ],
+        boxShadow: SavingorShadows.soft,
       ),
       child: child,
     );
@@ -569,55 +649,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _rowDivider() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Divider(
         height: 1,
         thickness: 1,
-        color: SavingorColors.border.withOpacity(0.55),
+        color: SavingorColors.border.withOpacity(0.5),
       ),
     );
   }
 
-  Widget _infoRow(
-    String label,
-    String value, {
+  Widget _iconInfoRow({
+    required IconData icon,
+    required String label,
+    required String value,
     bool isLast = false,
     bool valueMuted = false,
   }) {
     return Padding(
-      padding: EdgeInsets.only(bottom: isLast ? 0 : 2),
+      padding: EdgeInsets.only(bottom: isLast ? 0 : 4),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Expanded(
-            flex: 2,
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary,
-                height: 1.4,
-                letterSpacing: 0.1,
-              ),
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: SavingorColors.lightGreen,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              size: 18,
+              color: SavingorColors.darkGreen.withOpacity(0.85),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: SavingorSpacing.md),
           Expanded(
-            flex: 3,
-            child: Text(
-              value,
-              textAlign: TextAlign.end,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: valueMuted
-                    ? SavingorColors.textSecondary
-                    : const Color(0xFF1F2937),
-                height: 1.35,
-                fontStyle:
-                    valueMuted ? FontStyle.italic : FontStyle.normal,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: SavingorColors.textSecondary,
+                    height: 1.3,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: valueMuted
+                        ? SavingorColors.textSecondary
+                        : const Color(0xFF1A2E24),
+                    height: 1.35,
+                    fontStyle:
+                        valueMuted ? FontStyle.italic : FontStyle.normal,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
