@@ -12,7 +12,10 @@ import 'package:savingor_app/features/subscription/presentation/screens/subscrip
 import 'package:savingor_app/features/deals/presentation/screens/deals_map_screen.dart';
 import 'package:savingor_app/features/deals/presentation/screens/deal_details_screen.dart';
 import 'package:savingor_app/features/scanner/presentation/screens/receipt_scanner_screen.dart';
-import 'package:savingor_app/features/shopping/presentation/screens/shopping_list_screen.dart';
+import 'package:savingor_app/features/shopping/presentation/screens/shopping_lists_screen.dart';
+import 'package:savingor_app/features/shopping/presentation/screens/shopping_list_detail_screen.dart';
+import 'package:savingor_app/features/shopping/presentation/screens/create_shopping_list_screen.dart';
+import 'package:savingor_app/features/shopping/presentation/screens/add_shopping_list_item_screen.dart';
 import 'package:savingor_app/features/deals/presentation/screens/saved_deals_screen.dart';
 import 'package:savingor_app/features/start_saving/presentation/screens/start_saving_screen.dart';
 import 'package:savingor_app/features/expenses/presentation/screens/add_grocery_expense_screen.dart';
@@ -91,7 +94,8 @@ GoRouter createAppRouter({required AppState appState}) {
       ),
       GoRoute(
         path: '/start-saving/shopping-list',
-        builder: (context, state) => const ShoppingListScreen(),
+        builder: (context, state) =>
+            const ShoppingListsScreen(showBackButton: true),
       ),
       GoRoute(
         path: '/add-grocery-expense',
@@ -100,6 +104,30 @@ GoRouter createAppRouter({required AppState appState}) {
       GoRoute(
         path: '/start-saving',
         builder: (context, state) => const StartSavingScreen(),
+      ),
+      GoRoute(
+        path: '/shopping/create',
+        builder: (context, state) => const CreateShoppingListScreen(),
+      ),
+      GoRoute(
+        path: '/shopping/list/:listId',
+        pageBuilder: (context, state) {
+          final String listId = state.pathParameters['listId'] ?? '';
+          return MaterialPage<void>(
+            key: state.pageKey,
+            child: ShoppingListDetailScreen(listId: listId),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/shopping/list/:listId/add-item',
+        pageBuilder: (context, state) {
+          final String listId = state.pathParameters['listId'] ?? '';
+          return MaterialPage<void>(
+            key: state.pageKey,
+            child: AddShoppingListItemScreen(listId: listId),
+          );
+        },
       ),
       ShellRoute(
         builder: (context, state, child) => BottomNavShell(child: child),
@@ -143,7 +171,7 @@ GoRouter createAppRouter({required AppState appState}) {
           ),
           GoRoute(
             path: '/shopping',
-            builder: (context, state) => const ShoppingListScreen(),
+            builder: (context, state) => const ShoppingListsScreen(),
           ),
           GoRoute(
             path: '/profile',

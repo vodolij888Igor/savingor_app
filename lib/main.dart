@@ -10,6 +10,7 @@ import 'package:savingor_app/core/i18n/app_strings.dart';
 import 'package:savingor_app/core/i18n/app_locale_maps.dart';
 import 'package:savingor_app/core/app_state.dart';
 import 'package:savingor_app/features/shopping/data/shopping_list_store.dart';
+import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
 import 'package:savingor_app/features/expenses/data/expense_store.dart';
 
 Future<void> main() async {
@@ -22,6 +23,7 @@ Future<void> main() async {
   final favorites = FavoritesStore();
   await favorites.init();
   final shopping = ShoppingListStore();
+  final shoppingLists = ShoppingListsStore();
   final expenses = ExpenseStore();
 
   final GoRouter router = createAppRouter(appState: appState);
@@ -31,19 +33,22 @@ Future<void> main() async {
       notifier: appState,
       child: ExpenseProvider(
         notifier: expenses,
-        child: ShoppingListProvider(
-          notifier: shopping,
-          child: FavoritesProvider(
-            notifier: favorites,
-            child: Builder(
-              builder: (context) {
-                final state = AppStateProvider.of(context);
-                final strings = appStringsMapForLocale(state.language);
-                return AppLocalizations(
-                  strings: strings,
-                  child: MyApp(router: router),
-                );
-              },
+        child: ShoppingListsProvider(
+          notifier: shoppingLists,
+          child: ShoppingListProvider(
+            notifier: shopping,
+            child: FavoritesProvider(
+              notifier: favorites,
+              child: Builder(
+                builder: (context) {
+                  final state = AppStateProvider.of(context);
+                  final strings = appStringsMapForLocale(state.language);
+                  return AppLocalizations(
+                    strings: strings,
+                    child: MyApp(router: router),
+                  );
+                },
+              ),
             ),
           ),
         ),
