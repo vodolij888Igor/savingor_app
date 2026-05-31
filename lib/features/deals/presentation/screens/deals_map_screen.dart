@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/features/expenses/data/expenses_store.dart';
+import 'package:savingor_app/features/expenses/domain/models/user_expense.dart';
+import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
 
-/// First-tab Savingor home dashboard (demo data). Routed as [DealsMapScreen].
+/// First-tab Savingor home dashboard. Routed as [DealsMapScreen].
 class DealsMapScreen extends StatelessWidget {
   const DealsMapScreen({super.key});
 
@@ -11,7 +14,64 @@ class DealsMapScreen extends StatelessWidget {
   static const Color _nearBlack = Color(0xFF111827);
   static const Color _airyBorder = Color(0xFFF3F4F3);
   static const double _goalAmount = 100;
-  static const double _goalProgress = 47;
+
+  static String _formatCurrency(double amount) {
+    return '\$${amount.toStringAsFixed(2)}';
+  }
+
+  static _DashboardData _computeDashboardData(
+    ExpensesStore expensesStore,
+    ShoppingListsStore shoppingListsStore,
+  ) {
+    double totalExpenses = 0;
+    for (final UserExpense expense in expensesStore.expenses) {
+      totalExpenses += expense.totalAmount;
+    }
+
+    double estimatedShoppingTotal = 0;
+    for (final list in shoppingListsStore.lists) {
+      if (list.estimatedTotal != null) {
+        estimatedShoppingTotal += list.estimatedTotal!;
+      }
+    }
+
+    UserExpense? latestExpense;
+    if (expensesStore.expenses.isNotEmpty) {
+      final List<UserExpense> sorted = List<UserExpense>.from(
+        expensesStore.expenses,
+      )..sort(
+          (UserExpense a, UserExpense b) =>
+              b.purchaseDate.compareTo(a.purchaseDate),
+        );
+      latestExpense = sorted.first;
+    }
+
+    return _DashboardData(
+      totalExpenses: totalExpenses,
+      expenseCount: expensesStore.expenses.length,
+      shoppingListCount: shoppingListsStore.lists.length,
+      estimatedShoppingTotal: estimatedShoppingTotal,
+      latestExpense: latestExpense,
+    );
+  }
+
+  static String _formatActivityDate(DateTime date) {
+    const List<String> months = <String>[
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
 
   BoxDecoration _airyCardDecoration({double radius = 18}) {
     return BoxDecoration(
@@ -109,36 +169,59 @@ class DealsMapScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double progress = (_goalProgress / _goalAmount).clamp(0, 1);
+    final ExpensesStore expensesStore = ExpensesProvider.of(context);
+    final ShoppingListsStore shoppingListsStore =
+        ShoppingListsProvider.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
-    return Scaffold(
-      backgroundColor: _pageWhite,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(20, 0, 20, 32 + bottomInset + 72),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              _buildHeader(context),
-              const SizedBox(height: 44),
-              _buildSavingsHero(progress),
-              const SizedBox(height: SavingorSpacing.xl),
-              _buildStartSavingButton(context),
-              const SizedBox(height: SavingorSpacing.xl),
-              _buildMetricsRow(),
-              const SizedBox(height: SavingorSpacing.xl),
-              _buildMonthlyGoal(progress),
-              const SizedBox(height: SavingorSpacing.xl),
-              _buildAiCallout(context),
-              const SizedBox(height: SavingorSpacing.xl),
-              _buildTopDeals(context),
-              const SizedBox(height: SavingorSpacing.xl),
-              _buildRecentActivity(),
-            ],
+    return AnimatedBuilder(
+      animation: Listenable.merge(<Listenable>[
+        expensesStore,
+        shoppingListsStore,
+      ]),
+      builder: (BuildContext context, Widget? child) {
+        final _DashboardData data = _computeDashboardData(
+          expensesStore,
+          shoppingListsStore,
+        );
+        final double goalProgress =
+            (data.totalExpenses / _goalAmount).clamp(0.0, 1.0);
+
+        return Scaffold(
+          backgroundColor: _pageWhite,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(20, 0, 20, 32 + bottomInset + 72),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  _buildHeader(context),
+                  const SizedBox(height: 44),
+                  _buildSavingsHero(
+                    data.totalExpenses,
+                    goalProgress,
+                    data.expenseCount,
+                  ),
+                  const SizedBox(height: SavingorSpacing.xl),
+                  _buildStartSavingButton(context),
+                  const SizedBox(height: SavingorSpacing.xl),
+                  _buildMetricsRow(data),
+                  const SizedBox(height: SavingorSpacing.xl),
+                  _buildMonthlyGoal(data.totalExpenses, goalProgress),
+                  const SizedBox(height: SavingorSpacing.md),
+                  _buildViewAnalyticsButton(context),
+                  const SizedBox(height: SavingorSpacing.xl),
+                  _buildAiCallout(context),
+                  const SizedBox(height: SavingorSpacing.xl),
+                  _buildTopDeals(context),
+                  const SizedBox(height: SavingorSpacing.xl),
+                  _buildRecentActivity(data),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -275,7 +358,11 @@ class DealsMapScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSavingsHero(double ringProgress) {
+  Widget _buildSavingsHero(
+    double totalExpenses,
+    double ringProgress,
+    int expenseCount,
+  ) {
     const double ringSize = 220;
 
     return Column(
@@ -309,12 +396,12 @@ class DealsMapScreen extends StatelessWidget {
                     color: Colors.white,
                   ),
                   alignment: Alignment.center,
-                  child: const Column(
+                  child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text(
-                        '\$47.80',
-                        style: TextStyle(
+                        _formatCurrency(totalExpenses),
+                        style: const TextStyle(
                           fontSize: 42,
                           fontWeight: FontWeight.w800,
                           color: _nearBlack,
@@ -322,19 +409,19 @@ class DealsMapScreen extends StatelessWidget {
                           letterSpacing: -1.5,
                         ),
                       ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Estimated savings',
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Total expenses',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: SavingorColors.textSecondary,
                         ),
                       ),
-                      SizedBox(height: 6),
+                      const SizedBox(height: 6),
                       Text(
-                        'Nice work!',
-                        style: TextStyle(
+                        totalExpenses > 0 ? 'Tracked in Savingor' : 'Add your first expense',
+                        style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                           color: SavingorColors.primaryStroke,
@@ -350,15 +437,17 @@ class DealsMapScreen extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: SavingorSpacing.md),
-        const Text(
-          '+ \$8.40 vs last month',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: SavingorColors.primaryStroke,
+        if (expenseCount > 0) ...<Widget>[
+          const SizedBox(height: SavingorSpacing.md),
+          Text(
+            '$expenseCount ${expenseCount == 1 ? 'expense' : 'expenses'} tracked',
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: SavingorColors.primaryStroke,
+            ),
           ),
-        ),
+        ],
       ],
     );
   }
@@ -423,7 +512,7 @@ class DealsMapScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMetricsRow() {
+  Widget _buildMetricsRow(_DashboardData data) {
     return SizedBox(
       height: 126,
       child: Row(
@@ -433,8 +522,8 @@ class DealsMapScreen extends StatelessWidget {
             icon: Icons.trending_up,
             iconSize: 38,
             title: 'This month',
-            value: '\$47.80',
-            suffix: 'saved',
+            value: _formatCurrency(data.totalExpenses),
+            suffix: 'spent',
             iconColor: const Color(0xFFEF4444),
           ),
           const SizedBox(width: 7),
@@ -442,8 +531,8 @@ class DealsMapScreen extends StatelessWidget {
             icon: Icons.receipt_long_outlined,
             iconSize: 33,
             title: 'Receipts',
-            value: '12',
-            suffix: 'scanned',
+            value: '${data.expenseCount}',
+            suffix: 'recorded',
             iconColor: const Color(0xFF5B8FA8),
           ),
           const SizedBox(width: 7),
@@ -451,8 +540,8 @@ class DealsMapScreen extends StatelessWidget {
             icon: Icons.checklist_rounded,
             iconSize: 33,
             title: 'Shopping list',
-            value: '28',
-            suffix: 'items',
+            value: '${data.shoppingListCount}',
+            suffix: 'lists',
             iconColor: const Color(0xFFC4895A),
           ),
           const SizedBox(width: 7),
@@ -460,8 +549,8 @@ class DealsMapScreen extends StatelessWidget {
             icon: Icons.local_offer_outlined,
             iconSize: 33,
             title: 'Active deals',
-            value: '14',
-            suffix: 'today',
+            value: _formatCurrency(data.estimatedShoppingTotal),
+            suffix: 'estimated',
             iconColor: const Color(0xFF8B6BA8),
           ),
         ],
@@ -469,7 +558,9 @@ class DealsMapScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMonthlyGoal(double progress) {
+  Widget _buildMonthlyGoal(double totalExpenses, double progress) {
+    final int progressPercent = (progress * 100).round();
+
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
       decoration: _airyCardDecoration(),
@@ -487,9 +578,9 @@ class DealsMapScreen extends StatelessWidget {
           const SizedBox(height: SavingorSpacing.md),
           Row(
             children: <Widget>[
-              const Text(
-                '\$47 / \$100',
-                style: TextStyle(
+              Text(
+                '${_formatCurrency(totalExpenses)} / ${_formatCurrency(_goalAmount)}',
+                style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
                   color: _nearBlack,
@@ -497,7 +588,7 @@ class DealsMapScreen extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                '${(_goalProgress).round()}%',
+                '$progressPercent%',
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
@@ -519,6 +610,29 @@ class DealsMapScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildViewAnalyticsButton(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: TextButton.icon(
+        onPressed: () => context.push('/analytics'),
+        style: TextButton.styleFrom(
+          foregroundColor: SavingorColors.primaryStroke,
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        icon: const Icon(Icons.insights_outlined, size: 18),
+        label: const Text(
+          'View analytics',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ),
     );
   }
@@ -712,7 +826,9 @@ class DealsMapScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentActivity() {
+  Widget _buildRecentActivity(_DashboardData data) {
+    final UserExpense? latest = data.latestExpense;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
       decoration: _airyCardDecoration(radius: 18),
@@ -732,23 +848,25 @@ class DealsMapScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(width: SavingorSpacing.md),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Receipt added',
-                  style: TextStyle(
+                  latest == null ? 'No recent activity' : 'Expense added',
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: SavingorColors.darkGreen,
                     height: 1.2,
                   ),
                 ),
-                SizedBox(height: 5),
+                const SizedBox(height: 5),
                 Text(
-                  'Walmart • May 27, 2026',
-                  style: TextStyle(
+                  latest == null
+                      ? 'Add an expense to see it here'
+                      : '${latest.storeName} • ${_formatActivityDate(latest.purchaseDate)}',
+                  style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                     color: SavingorColors.textSecondary,
@@ -758,9 +876,11 @@ class DealsMapScreen extends StatelessWidget {
               ],
             ),
           ),
-          const Text(
-            '\$82.40',
-            style: TextStyle(
+          Text(
+            latest == null
+                ? _formatCurrency(0)
+                : _formatCurrency(latest.totalAmount),
+            style: const TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w800,
               color: _nearBlack,
@@ -771,6 +891,22 @@ class DealsMapScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+class _DashboardData {
+  const _DashboardData({
+    required this.totalExpenses,
+    required this.expenseCount,
+    required this.shoppingListCount,
+    required this.estimatedShoppingTotal,
+    required this.latestExpense,
+  });
+
+  final double totalExpenses;
+  final int expenseCount;
+  final int shoppingListCount;
+  final double estimatedShoppingTotal;
+  final UserExpense? latestExpense;
 }
 
 class _DealPreview {

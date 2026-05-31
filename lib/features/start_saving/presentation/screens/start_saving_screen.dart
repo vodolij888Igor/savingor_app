@@ -8,7 +8,7 @@ class StartSavingScreen extends StatelessWidget {
   const StartSavingScreen({super.key});
 
   static const Color _pageWhite = Color(0xFFFFFEFE);
-  static const String _scanReceiptRoute = '/expenses';
+  static const String _scanReceiptRoute = '/scanner';
   static const String _shoppingListRoute = '/start-saving/shopping-list';
   static const String _addGroceryExpenseRoute = '/expenses/create';
 
@@ -53,6 +53,18 @@ class StartSavingScreen extends StatelessWidget {
     } else {
       _snack(context, missingMessage);
     }
+  }
+
+  void _goToScanner(BuildContext context) {
+    final GoRouter router = GoRouter.of(context);
+    if (!_routeExists(router, _scanReceiptRoute)) {
+      _snack(context, 'Receipt scanner is unavailable.');
+      return;
+    }
+    if (router.state.uri.path == _scanReceiptRoute) {
+      return;
+    }
+    context.go(_scanReceiptRoute);
   }
 
   void _returnToDashboard(BuildContext context) {
@@ -185,11 +197,7 @@ class StartSavingScreen extends StatelessWidget {
               title: 'Scan receipt',
               subtitle: 'Upload or scan a receipt to track spending.',
               iconColor: const Color(0xFF5B8FA8),
-              onTap: () => _pushIfRouteExists(
-                context,
-                path: _scanReceiptRoute,
-                missingMessage: 'Expenses screen is unavailable.',
-              ),
+              onTap: () => _goToScanner(context),
             ),
             const SizedBox(height: 12),
             StartSavingActionCard(
