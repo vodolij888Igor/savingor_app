@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
 import 'package:savingor_app/core/i18n/app_strings.dart';
+import 'package:savingor_app/core/theme/savingor_design_system.dart';
 
 class ReceiptScannerScreen extends StatelessWidget {
   const ReceiptScannerScreen({super.key});
@@ -25,6 +28,26 @@ class ReceiptScannerScreen extends StatelessWidget {
               const SizedBox(height: 8),
               const Text('Use this screen to scan receipts and extract offers.',
                   textAlign: TextAlign.center),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => context.push('/expenses'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: SavingorColors.darkGreen,
+                    side: const BorderSide(color: SavingorColors.primaryStroke),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  icon: const Icon(Icons.list_alt_outlined),
+                  label: const Text(
+                    'View expenses',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

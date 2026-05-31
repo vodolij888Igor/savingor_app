@@ -19,6 +19,8 @@ import 'package:savingor_app/features/shopping/presentation/screens/add_shopping
 import 'package:savingor_app/features/deals/presentation/screens/saved_deals_screen.dart';
 import 'package:savingor_app/features/start_saving/presentation/screens/start_saving_screen.dart';
 import 'package:savingor_app/features/expenses/presentation/screens/add_grocery_expense_screen.dart';
+import 'package:savingor_app/features/expenses/presentation/screens/expenses_screen.dart';
+import 'package:savingor_app/features/expenses/presentation/screens/create_expense_screen.dart';
 import 'package:savingor_app/core/widgets/bottom_nav_shell.dart';
 import 'package:savingor_app/features/deals/data/mock_deals.dart';
 import 'package:savingor_app/core/i18n/app_strings.dart';
@@ -48,6 +50,7 @@ GoRouter createAppRouter({required AppState appState}) {
           p.startsWith('/scanner') ||
           p.startsWith('/saved') ||
           p.startsWith('/shopping') ||
+          p.startsWith('/expenses') ||
           p.startsWith('/profile') ||
           p.startsWith('/subscription');
 
@@ -128,6 +131,14 @@ GoRouter createAppRouter({required AppState appState}) {
             child: AddShoppingListItemScreen(listId: listId),
           );
         },
+      ),
+      GoRoute(
+        path: '/expenses/create',
+        builder: (context, state) => const CreateExpenseScreen(),
+      ),
+      GoRoute(
+        path: '/expenses',
+        builder: (context, state) => const ExpensesScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) => BottomNavShell(child: child),

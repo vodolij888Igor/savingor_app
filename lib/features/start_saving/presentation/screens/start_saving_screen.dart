@@ -8,9 +8,9 @@ class StartSavingScreen extends StatelessWidget {
   const StartSavingScreen({super.key});
 
   static const Color _pageWhite = Color(0xFFFFFEFE);
-  static const String _scanReceiptRoute = '/start-saving/scan-receipt';
+  static const String _scanReceiptRoute = '/expenses';
   static const String _shoppingListRoute = '/start-saving/shopping-list';
-  static const String _addGroceryExpenseRoute = '/add-grocery-expense';
+  static const String _addGroceryExpenseRoute = '/expenses/create';
 
   void _snack(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -188,7 +188,7 @@ class StartSavingScreen extends StatelessWidget {
               onTap: () => _pushIfRouteExists(
                 context,
                 path: _scanReceiptRoute,
-                missingMessage: 'Receipt scanner screen is coming next.',
+                missingMessage: 'Expenses screen is unavailable.',
               ),
             ),
             const SizedBox(height: 12),
@@ -200,7 +200,7 @@ class StartSavingScreen extends StatelessWidget {
               onTap: () => _pushIfRouteExists(
                 context,
                 path: _addGroceryExpenseRoute,
-                missingMessage: 'Manual expense entry coming soon.',
+                missingMessage: 'Add expense screen is unavailable.',
               ),
             ),
             const SizedBox(height: 12),
