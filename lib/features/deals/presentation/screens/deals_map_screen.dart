@@ -16,7 +16,19 @@ class DealsMapScreen extends StatelessWidget {
   static const double _goalAmount = 100;
 
   static String _formatCurrency(double amount) {
-    return '\$${amount.toStringAsFixed(2)}';
+    final String fixed = amount.abs().toStringAsFixed(2);
+    final List<String> parts = fixed.split('.');
+    final String intPart = parts[0];
+    final String decPart = parts.length > 1 ? parts[1] : '00';
+    final StringBuffer grouped = StringBuffer();
+    for (int i = 0; i < intPart.length; i++) {
+      if (i > 0 && (intPart.length - i) % 3 == 0) {
+        grouped.write(',');
+      }
+      grouped.write(intPart[i]);
+    }
+    final String sign = amount < 0 ? '-' : '';
+    return '$sign\$$grouped.$decPart';
   }
 
   static _DashboardData _computeDashboardData(
@@ -28,12 +40,7 @@ class DealsMapScreen extends StatelessWidget {
       totalExpenses += expense.totalAmount;
     }
 
-    double estimatedShoppingTotal = 0;
-    for (final list in shoppingListsStore.lists) {
-      if (list.estimatedTotal != null) {
-        estimatedShoppingTotal += list.estimatedTotal!;
-      }
-    }
+    double estimatedShoppingTotal = shoppingListsStore.totalEstimatedListValue;
 
     UserExpense? latestExpense;
     if (expensesStore.expenses.isNotEmpty) {
@@ -49,7 +56,7 @@ class DealsMapScreen extends StatelessWidget {
     return _DashboardData(
       totalExpenses: totalExpenses,
       expenseCount: expensesStore.expenses.length,
-      shoppingListCount: shoppingListsStore.lists.length,
+      shoppingListCount: shoppingListsStore.listCount,
       estimatedShoppingTotal: estimatedShoppingTotal,
       latestExpense: latestExpense,
     );
@@ -106,14 +113,14 @@ class DealsMapScreen extends StatelessWidget {
   }) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 13),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
         decoration: _airyCardDecoration(radius: 14),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Icon(icon, size: iconSize, color: iconColor),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Text(
               title,
               textAlign: TextAlign.center,
@@ -126,19 +133,29 @@ class DealsMapScreen extends StatelessWidget {
                 height: 1.1,
               ),
             ),
-            const SizedBox(height: 5),
-            Text(
-              value,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: _nearBlack,
-                height: 1.05,
-                letterSpacing: -0.3,
+            const SizedBox(height: 4),
+            Flexible(
+              child: Align(
+                alignment: Alignment.center,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.center,
+                  child: Text(
+                    value,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: _nearBlack,
+                      height: 1.05,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 2),
             Text(
               suffix,
               textAlign: TextAlign.center,
@@ -174,52 +191,55 @@ class DealsMapScreen extends StatelessWidget {
         ShoppingListsProvider.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
-    return AnimatedBuilder(
-      animation: Listenable.merge(<Listenable>[
-        expensesStore,
-        shoppingListsStore,
-      ]),
-      builder: (BuildContext context, Widget? child) {
-        final _DashboardData data = _computeDashboardData(
-          expensesStore,
-          shoppingListsStore,
-        );
-        final double goalProgress =
-            (data.totalExpenses / _goalAmount).clamp(0.0, 1.0);
+    return ListenableBuilder(
+      listenable: expensesStore,
+      builder: (BuildContext context, Widget? _) {
+        return ListenableBuilder(
+          listenable: shoppingListsStore,
+          builder: (BuildContext context, Widget? __) {
+            final _DashboardData data = _computeDashboardData(
+              expensesStore,
+              shoppingListsStore,
+            );
+            final double goalProgress =
+                (data.totalExpenses / _goalAmount).clamp(0.0, 1.0);
 
-        return Scaffold(
-          backgroundColor: _pageWhite,
-          body: SafeArea(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(20, 0, 20, 32 + bottomInset + 72),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  _buildHeader(context),
-                  const SizedBox(height: 44),
-                  _buildSavingsHero(
-                    data.totalExpenses,
-                    goalProgress,
-                    data.expenseCount,
+            return Scaffold(
+              backgroundColor: _pageWhite,
+              body: SafeArea(
+                child: SingleChildScrollView(
+                  padding:
+                      EdgeInsets.fromLTRB(20, 0, 20, 32 + bottomInset + 72),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      _buildHeader(context),
+                      const SizedBox(height: 44),
+                      _buildSavingsHero(
+                        data.totalExpenses,
+                        goalProgress,
+                        data.expenseCount,
+                      ),
+                      const SizedBox(height: SavingorSpacing.xl),
+                      _buildStartSavingButton(context),
+                      const SizedBox(height: SavingorSpacing.xl),
+                      _buildMetricsRow(data),
+                      const SizedBox(height: SavingorSpacing.xl),
+                      _buildMonthlyGoal(data.totalExpenses, goalProgress),
+                      const SizedBox(height: SavingorSpacing.md),
+                      _buildViewAnalyticsButton(context),
+                      const SizedBox(height: SavingorSpacing.xl),
+                      _buildAiCallout(context),
+                      const SizedBox(height: SavingorSpacing.xl),
+                      _buildTopDeals(context),
+                      const SizedBox(height: SavingorSpacing.xl),
+                      _buildRecentActivity(data),
+                    ],
                   ),
-                  const SizedBox(height: SavingorSpacing.xl),
-                  _buildStartSavingButton(context),
-                  const SizedBox(height: SavingorSpacing.xl),
-                  _buildMetricsRow(data),
-                  const SizedBox(height: SavingorSpacing.xl),
-                  _buildMonthlyGoal(data.totalExpenses, goalProgress),
-                  const SizedBox(height: SavingorSpacing.md),
-                  _buildViewAnalyticsButton(context),
-                  const SizedBox(height: SavingorSpacing.xl),
-                  _buildAiCallout(context),
-                  const SizedBox(height: SavingorSpacing.xl),
-                  _buildTopDeals(context),
-                  const SizedBox(height: SavingorSpacing.xl),
-                  _buildRecentActivity(data),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
