@@ -15,6 +15,7 @@ class ShoppingListsStore extends ChangeNotifier {
   })  : _service = service ?? ShoppingListsFirestoreService(),
         _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance {
     _authSubscription = _firebaseAuth.authStateChanges().listen(_onAuthChanged);
+    _onAuthChanged(_firebaseAuth.currentUser);
   }
 
   final ShoppingListsFirestoreService _service;
@@ -52,6 +53,20 @@ class ShoppingListsStore extends ChangeNotifier {
     for (final ShoppingListItem item in _items) {
       final double? lineTotal = item.lineTotal;
       if (lineTotal != null) total += lineTotal;
+    }
+    return total;
+  }
+
+  /// Active shopping list count for dashboard and summary views.
+  int get listCount => _lists.length;
+
+  /// Sum of list-level estimated totals (unchecked priced items).
+  double get totalEstimatedListValue {
+    double total = 0;
+    for (final ShoppingList list in _lists) {
+      if (list.estimatedTotal != null) {
+        total += list.estimatedTotal!;
+      }
     }
     return total;
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/core/widgets/app_screen_states.dart';
 import 'package:savingor_app/features/analytics/domain/expense_analytics_calculator.dart';
 import 'package:savingor_app/features/expenses/data/expenses_store.dart';
 import 'package:savingor_app/features/expenses/domain/models/user_expense.dart';
@@ -103,18 +104,14 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     double bottomInset,
   ) {
     if (store.isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(color: SavingorColors.primaryStroke),
-      );
+      return const AppLoadingState();
     }
 
     if (store.loadError != null) {
-      return _EmptyStatePanel(
-        icon: Icons.cloud_off_outlined,
+      return AppErrorState(
         title: 'Could not load analytics',
         message: store.loadError!,
-        actionLabel: 'Retry',
-        onAction: store.retry,
+        onRetry: store.retry,
       );
     }
 
@@ -122,7 +119,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
         ExpenseAnalyticsCalculator.compute(store.expenses);
 
     if (summary.isEmpty) {
-      return _EmptyStatePanel(
+      return AppEmptyState(
         icon: Icons.insights_outlined,
         title: 'No spending data yet',
         message:
@@ -165,7 +162,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
         ),
         automaticallyImplyLeading: false,
       ),
-      body: _EmptyStatePanel(
+      body: AppEmptyState(
         icon: Icons.lock_outline_rounded,
         title: 'Sign in required',
         message: 'View spending analytics with your Savingor account.',
@@ -428,64 +425,6 @@ class _SummaryCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _EmptyStatePanel extends StatelessWidget {
-  const _EmptyStatePanel({
-    required this.icon,
-    required this.title,
-    required this.message,
-    required this.actionLabel,
-    required this.onAction,
-  });
-
-  final IconData icon;
-  final String title;
-  final String message;
-  final String actionLabel;
-  final VoidCallback onAction;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(icon, size: 56, color: SavingorColors.textSecondary),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: SavingorColors.darkGreen,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary,
-                height: 1.45,
-              ),
-            ),
-            const SizedBox(height: 20),
-            FilledButton(
-              onPressed: onAction,
-              style: SavingorButtonStyles.primaryFilled(),
-              child: Text(actionLabel),
-            ),
-          ],
-        ),
       ),
     );
   }

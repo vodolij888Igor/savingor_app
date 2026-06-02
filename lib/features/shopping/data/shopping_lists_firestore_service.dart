@@ -29,16 +29,21 @@ class ShoppingListsFirestoreService {
   }
 
   Stream<List<ShoppingList>> watchLists(String uid) {
-    return _listsCollection(uid)
-        .orderBy('updatedAt', descending: true)
-        .snapshots()
-        .map(
-          (QuerySnapshot<Map<String, dynamic>> snapshot) => snapshot.docs
-              .map(ShoppingList.fromFirestore)
-              .where(
-                (ShoppingList list) => list.status == ShoppingListStatus.active,
-              )
-              .toList(growable: false),
+    return _listsCollection(uid).snapshots().map(
+          (QuerySnapshot<Map<String, dynamic>> snapshot) {
+            final List<ShoppingList> lists = snapshot.docs
+                .map(ShoppingList.fromFirestore)
+                .where(
+                  (ShoppingList list) =>
+                      list.status == ShoppingListStatus.active,
+                )
+                .toList(growable: false)
+              ..sort(
+                (ShoppingList a, ShoppingList b) =>
+                    b.updatedAt.compareTo(a.updatedAt),
+              );
+            return lists;
+          },
         );
   }
 
@@ -87,8 +92,8 @@ class ShoppingListsFirestoreService {
       'status': ShoppingListStatus.active.value,
       'source': ShoppingListSource.manual.value,
       'metadata': <String, dynamic>{},
-      'createdAt': FieldValue.serverTimestamp(),
-      'updatedAt': FieldValue.serverTimestamp(),
+      'createdAt': Timestamp.fromDate(DateTime.now()),
+      'updatedAt': Timestamp.fromDate(DateTime.now()),
     });
 
     for (int index = 0; index < normalizedItems.length; index++) {
@@ -207,8 +212,9 @@ class ShoppingListsFirestoreService {
       <String, dynamic>{
         'itemCount': items.length,
         'checkedCount': checkedCount,
-        'estimatedTotal': estimatedTotal > 0 ? estimatedTotal : FieldValue.delete(),
-        'updatedAt': FieldValue.serverTimestamp(),
+        'estimatedTotal':
+            estimatedTotal > 0 ? estimatedTotal : FieldValue.delete(),
+        'updatedAt': Timestamp.fromDate(DateTime.now()),
       },
       SetOptions(merge: true),
     );

@@ -55,8 +55,8 @@ class ShoppingList {
       'status': status.value,
       'source': source.value,
       'metadata': metadata,
-      'updatedAt': FieldValue.serverTimestamp(),
-      if (isCreate) 'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': Timestamp.fromDate(DateTime.now()),
+      if (isCreate) 'createdAt': Timestamp.fromDate(DateTime.now()),
     };
   }
 

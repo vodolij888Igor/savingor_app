@@ -416,38 +416,59 @@ class DealsMapScreen extends StatelessWidget {
                     color: Colors.white,
                   ),
                   alignment: Alignment.center,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Text(
-                        _formatCurrency(totalExpenses),
-                        style: const TextStyle(
-                          fontSize: 42,
-                          fontWeight: FontWeight.w800,
-                          color: _nearBlack,
-                          height: 1,
-                          letterSpacing: -1.5,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        SizedBox(
+                          width: ringSize - 60,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.center,
+                            child: Text(
+                              _formatCurrency(totalExpenses),
+                              maxLines: 1,
+                              softWrap: false,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 42,
+                                fontWeight: FontWeight.w800,
+                                color: _nearBlack,
+                                height: 1,
+                                letterSpacing: -1.5,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Total expenses',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: SavingorColors.textSecondary,
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Total expenses',
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: SavingorColors.textSecondary,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        totalExpenses > 0 ? 'Tracked in Savingor' : 'Add your first expense',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: SavingorColors.primaryStroke,
+                        const SizedBox(height: 6),
+                        Text(
+                          totalExpenses > 0
+                              ? 'Tracked in Savingor'
+                              : 'Add your first expense',
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: SavingorColors.primaryStroke,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 Positioned(top: 6, right: 2, child: _heroSparkle(size: 5)),

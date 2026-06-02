@@ -5,6 +5,7 @@ import 'package:savingor_app/core/i18n/app_strings.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
 import 'package:savingor_app/features/shopping/domain/models/shopping_list.dart';
+import 'package:savingor_app/features/shopping/presentation/widgets/shopping_list_state_panel.dart';
 
 class ShoppingListsScreen extends StatelessWidget {
   const ShoppingListsScreen({super.key, this.showBackButton = false});
@@ -75,26 +76,22 @@ class ShoppingListsScreen extends StatelessWidget {
     double bottomInset,
   ) {
     if (store.isLoadingLists) {
-      return const Center(
-        child: CircularProgressIndicator(color: SavingorColors.primaryStroke),
-      );
+      return ShoppingListStatePanel.loading();
     }
 
     if (store.listsError != null) {
-      return _StateMessage(
-        icon: Icons.cloud_off_outlined,
-        title: 'Could not load lists',
+      return ShoppingListStatePanel.error(
         message: store.listsError!,
-        actionLabel: 'Retry',
-        onAction: store.retryLists,
+        onRetry: store.retryLists,
       );
     }
 
     if (store.lists.isEmpty) {
-      return _StateMessage(
+      return ShoppingListStatePanel.empty(
         icon: Icons.checklist_rounded,
         title: 'No shopping lists yet',
-        message: 'Create a list to plan groceries, compare deals, and save smarter.',
+        message:
+            'Create a list to plan groceries, compare deals, and save smarter.',
         actionLabel: 'Create List',
         prominentAction: true,
         onAction: () => context.push('/shopping/create'),
@@ -137,7 +134,7 @@ class ShoppingListsScreen extends StatelessWidget {
             : null,
         automaticallyImplyLeading: showBackButton,
       ),
-      body: _StateMessage(
+      body: ShoppingListStatePanel.empty(
         icon: Icons.lock_outline_rounded,
         title: 'Sign in required',
         message: 'Create and sync shopping lists with your Savingor account.',
@@ -207,15 +204,16 @@ class _ShoppingListCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-      clipBehavior: Clip.antiAlias,
+      color: Colors.transparent,
       child: InkWell(
         onTap: onOpen,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
-          child: Row(
-            children: <Widget>[
+        borderRadius: BorderRadius.circular(18),
+        child: Ink(
+          decoration: shoppingListCardDecoration(),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
+            child: Row(
+              children: <Widget>[
               Container(
                 width: 46,
                 height: 46,
@@ -278,75 +276,7 @@ class _ShoppingListCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _StateMessage extends StatelessWidget {
-  const _StateMessage({
-    required this.icon,
-    required this.title,
-    required this.message,
-    required this.actionLabel,
-    required this.onAction,
-    this.prominentAction = false,
-  });
-
-  final IconData icon;
-  final String title;
-  final String message;
-  final String actionLabel;
-  final VoidCallback onAction;
-  final bool prominentAction;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(icon, size: 56, color: SavingorColors.textSecondary),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: SavingorColors.darkGreen,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary,
-                height: 1.45,
-              ),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: prominentAction ? double.infinity : null,
-              child: FilledButton(
-                onPressed: onAction,
-                style: prominentAction
-                    ? SavingorButtonStyles.primaryFilled().copyWith(
-                        minimumSize: const WidgetStatePropertyAll<Size>(
-                          Size.fromHeight(56),
-                        ),
-                      )
-                    : SavingorButtonStyles.primaryFilled(),
-                child: Text(actionLabel),
-              ),
-            ),
-          ],
-        ),
-      ),
+    ),
     );
   }
 }
