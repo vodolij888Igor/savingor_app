@@ -104,7 +104,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     double bottomInset,
   ) {
     if (store.isLoading) {
-      return const AppLoadingState();
+      return const AppLoadingState(message: 'Loading analytics…');
     }
 
     if (store.loadError != null) {
@@ -162,12 +162,9 @@ class SavingsAnalyticsScreen extends StatelessWidget {
         ),
         automaticallyImplyLeading: false,
       ),
-      body: AppEmptyState(
-        icon: Icons.lock_outline_rounded,
-        title: 'Sign in required',
+      body: AppSignInRequiredState(
         message: 'View spending analytics with your Savingor account.',
-        actionLabel: 'Sign in',
-        onAction: () => context.push('/auth'),
+        onSignIn: () => context.push('/auth'),
       ),
     );
   }

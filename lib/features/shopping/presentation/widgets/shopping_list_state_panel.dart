@@ -2,17 +2,24 @@ import 'package:flutter/material.dart';
 
 import 'package:savingor_app/core/widgets/app_screen_states.dart';
 
-/// Shopping-list-specific wrappers around shared app screen states.
+/// Shopping-list wrappers around [AppLoadingState], [AppEmptyState], [AppErrorState].
 class ShoppingListStatePanel {
   ShoppingListStatePanel._();
 
-  static Widget loading() => const AppLoadingState();
+  static Widget loading({String message = 'Loading…'}) {
+    return AppLoadingState(message: message);
+  }
 
   static Widget error({
+    String title = 'Something went wrong',
     required String message,
     required VoidCallback onRetry,
   }) {
-    return AppErrorState(message: message, onRetry: onRetry);
+    return AppErrorState(
+      title: title,
+      message: message,
+      onRetry: onRetry,
+    );
   }
 
   static Widget empty({

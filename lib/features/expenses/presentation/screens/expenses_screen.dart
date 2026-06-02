@@ -78,7 +78,7 @@ class ExpensesScreen extends StatelessWidget {
     double bottomInset,
   ) {
     if (store.isLoading) {
-      return const AppLoadingState();
+      return const AppLoadingState(message: 'Loading expenses…');
     }
 
     if (store.loadError != null) {
@@ -119,12 +119,9 @@ class ExpensesScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: _pageBackground,
       appBar: _buildAppBar(context),
-      body: AppEmptyState(
-        icon: Icons.lock_outline_rounded,
-        title: 'Sign in required',
+      body: AppSignInRequiredState(
         message: 'Save and sync your expenses with your Savingor account.',
-        actionLabel: 'Sign in',
-        onAction: () => context.push('/auth'),
+        onSignIn: () => context.push('/auth'),
       ),
     );
   }

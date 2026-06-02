@@ -22,6 +22,7 @@ import 'package:savingor_app/features/expenses/presentation/screens/add_grocery_
 import 'package:savingor_app/features/expenses/presentation/screens/expenses_screen.dart';
 import 'package:savingor_app/features/expenses/presentation/screens/create_expense_screen.dart';
 import 'package:savingor_app/features/analytics/presentation/screens/savings_analytics_screen.dart';
+import 'package:savingor_app/features/ai_assistant/presentation/screens/ai_savings_assistant_screen.dart';
 import 'package:savingor_app/core/widgets/bottom_nav_shell.dart';
 import 'package:savingor_app/features/deals/data/mock_deals.dart';
 import 'package:savingor_app/core/i18n/app_strings.dart';
@@ -49,10 +50,10 @@ GoRouter createAppRouter({required AppState appState}) {
       bool isShell(String p) =>
           p.startsWith('/deals') ||
           p.startsWith('/scanner') ||
-          p.startsWith('/saved') ||
           p.startsWith('/shopping') ||
           p.startsWith('/expenses') ||
           p.startsWith('/analytics') ||
+          p.startsWith('/ai-assistant') ||
           p.startsWith('/profile') ||
           p.startsWith('/subscription');
 
@@ -143,8 +144,12 @@ GoRouter createAppRouter({required AppState appState}) {
         builder: (context, state) => const ExpensesScreen(),
       ),
       GoRoute(
-        path: '/analytics',
-        builder: (context, state) => const SavingsAnalyticsScreen(),
+        path: '/ai-assistant',
+        builder: (context, state) => const AiSavingsAssistantScreen(),
+      ),
+      GoRoute(
+        path: '/saved',
+        builder: (context, state) => const SavedDealsScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) => BottomNavShell(child: child),
@@ -183,12 +188,12 @@ GoRouter createAppRouter({required AppState appState}) {
             builder: (context, state) => const ReceiptScannerScreen(),
           ),
           GoRoute(
-            path: '/saved',
-            builder: (context, state) => const SavedDealsScreen(),
-          ),
-          GoRoute(
             path: '/shopping',
             builder: (context, state) => const ShoppingListsScreen(),
+          ),
+          GoRoute(
+            path: '/analytics',
+            builder: (context, state) => const SavingsAnalyticsScreen(),
           ),
           GoRoute(
             path: '/profile',

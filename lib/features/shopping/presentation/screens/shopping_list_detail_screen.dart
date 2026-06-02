@@ -175,9 +175,8 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
             ],
           ),
           body: _buildBody(context, store, list, bottomInset),
-          floatingActionButton: list == null
-              ? null
-              : FloatingActionButton.extended(
+          floatingActionButton: _shouldShowAddItemFab(store, list)
+              ? FloatingActionButton.extended(
                   onPressed: () => context.push(
                     '/shopping/list/${widget.listId}/add-item',
                   ),
@@ -188,10 +187,18 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
                     'Add item',
                     style: TextStyle(fontWeight: FontWeight.w700),
                   ),
-                ),
+                )
+              : null,
         );
       },
     );
+  }
+
+  bool _shouldShowAddItemFab(ShoppingListsStore store, ShoppingList? list) {
+    if (list == null) return false;
+    if (store.isLoadingLists || store.isLoadingItems) return false;
+    if (store.itemsError != null || store.listsError != null) return false;
+    return true;
   }
 
   Widget _buildBody(
@@ -200,18 +207,31 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
     ShoppingList? list,
     double bottomInset,
   ) {
+    if (store.listsError != null) {
+      return ShoppingListStatePanel.error(
+        title: 'Could not load lists',
+        message: store.listsError!,
+        onRetry: store.retryLists,
+      );
+    }
+
     if (store.isLoadingLists || store.isLoadingItems) {
-      return ShoppingListStatePanel.loading();
+      return ShoppingListStatePanel.loading(
+        message: store.isLoadingItems
+            ? 'Loading list items…'
+            : 'Loading shopping list…',
+      );
     }
 
     if (store.itemsError != null) {
       return ShoppingListStatePanel.error(
+        title: 'Could not load items',
         message: store.itemsError!,
         onRetry: () => store.watchListItems(widget.listId),
       );
     }
 
-    if (!store.isLoadingLists && list == null) {
+    if (list == null) {
       return ShoppingListStatePanel.empty(
         icon: Icons.checklist_rounded,
         title: 'List not found',
@@ -245,7 +265,7 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
               children: <Widget>[
                 Text(
                   '${store.items.length} items'
-                  '${list != null && list.checkedCount > 0 ? ' · ${list.checkedCount} checked' : ''}',
+                  '${list.checkedCount > 0 ? ' · ${list.checkedCount} checked' : ''}',
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     color: SavingorColors.darkGreen,

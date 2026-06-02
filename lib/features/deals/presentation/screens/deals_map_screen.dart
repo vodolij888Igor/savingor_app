@@ -226,8 +226,6 @@ class DealsMapScreen extends StatelessWidget {
                       _buildMetricsRow(data),
                       const SizedBox(height: SavingorSpacing.xl),
                       _buildMonthlyGoal(data.totalExpenses, goalProgress),
-                      const SizedBox(height: SavingorSpacing.md),
-                      _buildViewAnalyticsButton(context),
                       const SizedBox(height: SavingorSpacing.xl),
                       _buildAiCallout(context),
                       const SizedBox(height: SavingorSpacing.xl),
@@ -655,29 +653,6 @@ class DealsMapScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildViewAnalyticsButton(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: TextButton.icon(
-        onPressed: () => context.push('/analytics'),
-        style: TextButton.styleFrom(
-          foregroundColor: SavingorColors.primaryStroke,
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-          minimumSize: Size.zero,
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        ),
-        icon: const Icon(Icons.insights_outlined, size: 18),
-        label: const Text(
-          'View analytics',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildAiCallout(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 22),
@@ -750,10 +725,7 @@ class DealsMapScreen extends StatelessWidget {
           Material(
             color: Colors.transparent,
             child: InkWell(
-              onTap: () => _snack(
-                context,
-                'AI insights will be available after adding receipts.',
-              ),
+              onTap: () => context.push('/ai-assistant'),
               borderRadius: BorderRadius.circular(8),
               child: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 2),

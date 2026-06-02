@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/i18n/app_strings.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/core/widgets/app_screen_states.dart';
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
 import 'package:savingor_app/features/shopping/domain/models/shopping_list.dart';
 import 'package:savingor_app/features/shopping/presentation/widgets/shopping_list_state_panel.dart';
@@ -76,11 +77,14 @@ class ShoppingListsScreen extends StatelessWidget {
     double bottomInset,
   ) {
     if (store.isLoadingLists) {
-      return ShoppingListStatePanel.loading();
+      return ShoppingListStatePanel.loading(
+        message: 'Loading shopping lists…',
+      );
     }
 
     if (store.listsError != null) {
       return ShoppingListStatePanel.error(
+        title: 'Could not load lists',
         message: store.listsError!,
         onRetry: store.retryLists,
       );
@@ -134,12 +138,9 @@ class ShoppingListsScreen extends StatelessWidget {
             : null,
         automaticallyImplyLeading: showBackButton,
       ),
-      body: ShoppingListStatePanel.empty(
-        icon: Icons.lock_outline_rounded,
-        title: 'Sign in required',
+      body: AppSignInRequiredState(
         message: 'Create and sync shopping lists with your Savingor account.',
-        actionLabel: 'Sign in',
-        onAction: () => context.push('/auth'),
+        onSignIn: () => context.push('/auth'),
       ),
     );
   }

@@ -28,6 +28,10 @@ class AppStrings {
   String get appName => _s['app_name'] ?? 'Savingor';
   String get appSubtitle => _s['app_subtitle'] ?? '';
   String get deals => _s['deals'] ?? 'Deals';
+  String get home => _s['home'] ?? 'Home';
+  String get receipts => _s['receipts'] ?? 'Receipts';
+  String get analytics => _s['analytics'] ?? 'Analytics';
+  String get profile => _s['profile'] ?? 'Profile';
   String get scanner => _s['scanner'] ?? 'Scanner';
   String get shopping => _s['shopping'] ?? 'Shopping';
   String get saved => _s['saved'] ?? 'Saved';
