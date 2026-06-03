@@ -1,64 +1,170 @@
-import 'package:savingor_app/features/analytics/domain/expense_analytics_calculator.dart';
-import 'package:savingor_app/features/expenses/data/expenses_store.dart';
-import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
+/// Compact store spending row for AI context.
+class AiStoreSpendingEntry {
+  const AiStoreSpendingEntry({
+    required this.storeName,
+    required this.totalAmount,
+    required this.recordCount,
+  });
 
-/// Snapshot of user financial data passed into [AiSavingsAssistantService].
-///
-/// Built from existing Firestore-backed stores — no secrets or API keys.
+  final String storeName;
+  final double totalAmount;
+  final int recordCount;
+}
+
+/// Compact recent receipt row for AI context.
+class AiRecentReceiptEntry {
+  const AiRecentReceiptEntry({
+    required this.storeName,
+    required this.dateIso,
+    required this.total,
+    required this.category,
+  });
+
+  final String storeName;
+  final String dateIso;
+  final double total;
+  final String category;
+}
+
+/// Shopping list summary for AI context.
+class AiShoppingListSummary {
+  const AiShoppingListSummary({
+    required this.title,
+    required this.itemCount,
+    required this.checkedCount,
+    this.estimatedTotal,
+  });
+
+  final String title;
+  final int itemCount;
+  final int checkedCount;
+  final double? estimatedTotal;
+}
+
+/// Active shopping list item for AI context.
+class AiShoppingItemSummary {
+  const AiShoppingItemSummary({
+    required this.name,
+    required this.quantity,
+    required this.isChecked,
+    this.unitPrice,
+    this.category,
+  });
+
+  final String name;
+  final int quantity;
+  final bool isChecked;
+  final double? unitPrice;
+  final String? category;
+}
+
+/// Snapshot of user financial and shopping data for the AI assistant.
 class AiSavingsContext {
   const AiSavingsContext({
     required this.isAuthenticated,
-    required this.totalExpenses,
-    required this.expenseCount,
+    required this.totalSpending,
     required this.totalThisMonth,
+    required this.manualExpenseCount,
+    required this.receiptCount,
     required this.shoppingListCount,
     required this.totalEstimatedShoppingValue,
-    this.topSpendingStoreName,
-    this.topSpendingStoreAmount,
+    required this.activeListEstimate,
+    required this.topStores,
+    required this.recentReceipts,
+    required this.shoppingLists,
+    required this.activeShoppingItems,
   });
 
   final bool isAuthenticated;
-  final double totalExpenses;
-  final int expenseCount;
+  final double totalSpending;
   final double totalThisMonth;
+  final int manualExpenseCount;
+  final int receiptCount;
   final int shoppingListCount;
   final double totalEstimatedShoppingValue;
-  final String? topSpendingStoreName;
-  final double? topSpendingStoreAmount;
+  final double activeListEstimate;
+  final List<AiStoreSpendingEntry> topStores;
+  final List<AiRecentReceiptEntry> recentReceipts;
+  final List<AiShoppingListSummary> shoppingLists;
+  final List<AiShoppingItemSummary> activeShoppingItems;
 
-  bool get hasExpenses => expenseCount > 0;
+  /// Legacy alias used by local insight rules.
+  double get totalExpenses => totalSpending;
+
+  /// Legacy alias.
+  int get expenseCount => manualExpenseCount + receiptCount;
+
+  bool get hasManualExpenses => manualExpenseCount > 0;
+
+  bool get hasReceipts => receiptCount > 0;
+
+  bool get hasExpenses => hasManualExpenses || hasReceipts;
 
   bool get hasShoppingLists => shoppingListCount > 0;
 
-  /// Builds context from live app stores (expenses + shopping lists).
-  static AiSavingsContext fromStores({
-    required ExpensesStore expensesStore,
-    required ShoppingListsStore shoppingListsStore,
-  }) {
-    final ExpenseAnalyticsSummary analytics =
-        ExpenseAnalyticsCalculator.compute(expensesStore.expenses);
+  bool get hasData => hasExpenses || hasShoppingLists;
 
-    double totalExpenses = 0;
-    for (final expense in expensesStore.expenses) {
-      totalExpenses += expense.totalAmount;
-    }
+  String? get topSpendingStoreName =>
+      topStores.isEmpty ? null : topStores.first.storeName;
 
-    final String? topStoreName = analytics.spendingByStore.isEmpty
-        ? null
-        : analytics.spendingByStore.first.storeName;
-    final double? topStoreAmount = analytics.spendingByStore.isEmpty
-        ? null
-        : analytics.spendingByStore.first.totalAmount;
+  double? get topSpendingStoreAmount =>
+      topStores.isEmpty ? null : topStores.first.totalAmount;
 
-    return AiSavingsContext(
-      isAuthenticated: expensesStore.isAuthenticated,
-      totalExpenses: totalExpenses,
-      expenseCount: expensesStore.expenses.length,
-      totalThisMonth: analytics.totalThisMonth,
-      shoppingListCount: shoppingListsStore.listCount,
-      totalEstimatedShoppingValue: shoppingListsStore.totalEstimatedListValue,
-      topSpendingStoreName: topStoreName,
-      topSpendingStoreAmount: topStoreAmount,
-    );
+  /// Compact JSON-friendly map for LLM prompts (no raw OCR dumps).
+  Map<String, dynamic> toPromptMap() {
+    return <String, dynamic>{
+      'totalSpending': _round(totalSpending),
+      'totalThisMonth': _round(totalThisMonth),
+      'manualExpenseCount': manualExpenseCount,
+      'receiptCount': receiptCount,
+      'shoppingListCount': shoppingListCount,
+      'totalEstimatedShoppingValue': _round(totalEstimatedShoppingValue),
+      'activeListEstimate': _round(activeListEstimate),
+      'topStores': topStores
+          .map(
+            (AiStoreSpendingEntry entry) => <String, dynamic>{
+              'storeName': entry.storeName,
+              'totalAmount': _round(entry.totalAmount),
+              'recordCount': entry.recordCount,
+            },
+          )
+          .toList(),
+      'recentReceipts': recentReceipts
+          .map(
+            (AiRecentReceiptEntry entry) => <String, dynamic>{
+              'storeName': entry.storeName,
+              'date': entry.dateIso,
+              'total': _round(entry.total),
+              'category': entry.category,
+            },
+          )
+          .toList(),
+      'shoppingLists': shoppingLists
+          .map(
+            (AiShoppingListSummary list) => <String, dynamic>{
+              'title': list.title,
+              'itemCount': list.itemCount,
+              'checkedCount': list.checkedCount,
+              if (list.estimatedTotal != null)
+                'estimatedTotal': _round(list.estimatedTotal!),
+            },
+          )
+          .toList(),
+      'activeShoppingItems': activeShoppingItems
+          .map(
+            (AiShoppingItemSummary item) => <String, dynamic>{
+              'name': item.name,
+              'quantity': item.quantity,
+              'isChecked': item.isChecked,
+              if (item.unitPrice != null)
+                'unitPrice': _round(item.unitPrice!),
+              if (item.category != null) 'category': item.category,
+            },
+          )
+          .toList(),
+    };
   }
+
+  static double _round(double value) =>
+      double.parse(value.toStringAsFixed(2));
 }

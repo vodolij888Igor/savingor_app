@@ -70,6 +70,21 @@ class DealsMapScreen extends StatelessWidget {
       latestReceipt = sorted.first;
     }
 
+    final double weeklySpending = _sumSpendingSince(
+      expensesStore: expensesStore,
+      receiptStore: receiptStore,
+      since: DateTime.now().subtract(const Duration(days: 7)),
+    );
+    final double activeListEstimate = shoppingListsStore.activeListEstimate;
+    final bool hasInsightData = expensesStore.expenses.isNotEmpty ||
+        receiptStore.receipts.isNotEmpty ||
+        shoppingListsStore.listCount > 0;
+    final double potentialSavingsEstimate = _estimatePotentialSavings(
+      weeklySpending: weeklySpending,
+      estimatedShoppingTotal: estimatedShoppingTotal,
+      activeListEstimate: activeListEstimate,
+    );
+
     return _DashboardData(
       totalExpenses: totalExpenses,
       expenseCount: expensesStore.expenses.length,
@@ -77,9 +92,45 @@ class DealsMapScreen extends StatelessWidget {
       receiptsTotal: receiptsTotal,
       shoppingListCount: shoppingListsStore.listCount,
       estimatedShoppingTotal: estimatedShoppingTotal,
+      weeklySpending: weeklySpending,
+      potentialSavingsEstimate: potentialSavingsEstimate,
+      hasInsightData: hasInsightData,
       latestExpense: latestExpense,
       latestReceipt: latestReceipt,
     );
+  }
+
+  static double _sumSpendingSince({
+    required ExpensesStore expensesStore,
+    required ReceiptStore receiptStore,
+    required DateTime since,
+  }) {
+    double total = 0;
+    for (final UserExpense expense in expensesStore.expenses) {
+      if (!expense.purchaseDate.isBefore(since)) {
+        total += expense.totalAmount;
+      }
+    }
+    for (final Receipt receipt in receiptStore.receipts) {
+      if (!receipt.date.isBefore(since)) {
+        total += receipt.total;
+      }
+    }
+    return total;
+  }
+
+  /// Conservative estimate from saved spending and list totals — not live store prices.
+  static double _estimatePotentialSavings({
+    required double weeklySpending,
+    required double estimatedShoppingTotal,
+    required double activeListEstimate,
+  }) {
+    final double fromRecentSpending = weeklySpending * 0.05;
+    final double listBasis = estimatedShoppingTotal > 0
+        ? estimatedShoppingTotal
+        : activeListEstimate;
+    final double fromLists = listBasis * 0.08;
+    return fromRecentSpending > fromLists ? fromRecentSpending : fromLists;
   }
 
   static String _formatActivityDate(DateTime date) {
@@ -251,12 +302,12 @@ class DealsMapScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: SavingorSpacing.xl),
                           _buildStartSavingButton(context),
+                          const SizedBox(height: SavingorSpacing.md),
+                          _buildAiPremiumCta(context, data),
                           const SizedBox(height: SavingorSpacing.xl),
                           _buildMetricsRow(data),
                           const SizedBox(height: SavingorSpacing.xl),
                           _buildMonthlyGoal(data.totalExpenses, goalProgress),
-                          const SizedBox(height: SavingorSpacing.xl),
-                          _buildAiCallout(context),
                           const SizedBox(height: SavingorSpacing.xl),
                           _buildTopDeals(context),
                           const SizedBox(height: SavingorSpacing.xl),
@@ -684,107 +735,135 @@ class DealsMapScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAiCallout(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 22),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            SavingorColors.lightGreen.withOpacity(0.72),
-            const Color(0xFFEAF6E8),
-            Colors.white.withOpacity(0.85),
-          ],
-          stops: const <double>[0.0, 0.55, 1.0],
-        ),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: _airyBorder.withOpacity(0.45), width: 0.5),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: SavingorColors.primaryStroke.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          const Text(
-            '✨ AI Savings Assistant',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: SavingorColors.darkGreen,
-              height: 1.2,
-              letterSpacing: -0.1,
+  Widget _buildAiPremiumCta(BuildContext context, _DashboardData data) {
+    final String savingsLine = data.hasInsightData
+        ? 'Potential savings: ${_formatCurrency(data.potentialSavingsEstimate)}'
+        : 'Add receipts and lists to unlock insights';
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => context.push('/ai-assistant'),
+        borderRadius: BorderRadius.circular(20),
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: <Color>[
+                SavingorColors.lightGreen.withOpacity(0.85),
+                const Color(0xFFE2F4DE),
+                Colors.white.withOpacity(0.92),
+              ],
+              stops: const <double>[0.0, 0.5, 1.0],
             ),
-          ),
-          const SizedBox(height: 18),
-          const Text(
-            '+\$12.40',
-            style: TextStyle(
-              fontSize: 40,
-              fontWeight: FontWeight.w800,
-              color: _nearBlack,
-              height: 1.0,
-              letterSpacing: -1.2,
+            border: Border.all(
+              color: SavingorColors.primaryStroke.withOpacity(0.28),
+              width: 1.2,
             ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Potential savings this week',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: SavingorColors.textSecondary.withOpacity(0.92),
-              height: 1.25,
-            ),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            'Switch 3 products to better deals.',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: SavingorColors.darkGreen.withOpacity(0.82),
-              height: 1.35,
-            ),
-          ),
-          const SizedBox(height: 18),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => context.push('/ai-assistant'),
-              borderRadius: BorderRadius.circular(8),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(vertical: 2),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      'View insight',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: SavingorColors.primaryStroke,
-                        height: 1.2,
-                      ),
-                    ),
-                    SizedBox(width: 4),
-                    Icon(
-                      Icons.arrow_forward_rounded,
-                      size: 16,
-                      color: SavingorColors.primaryStroke,
-                    ),
-                  ],
-                ),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: SavingorColors.primaryStroke.withOpacity(0.18),
+                blurRadius: 18,
+                offset: const Offset(0, 6),
               ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: <Widget>[
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.88),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: SavingorColors.primaryStroke.withOpacity(0.15),
+                    ),
+                    boxShadow: <BoxShadow>[
+                      BoxShadow(
+                        color: SavingorColors.primaryStroke.withOpacity(0.12),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 24,
+                    color: SavingorColors.primaryStroke,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const Text(
+                        'AI Savings Assistant',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: SavingorColors.darkGreen,
+                          height: 1.15,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Get smart tips from your receipts and shopping lists',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: SavingorColors.darkGreen.withOpacity(0.72),
+                          height: 1.3,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        savingsLine,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: SavingorColors.textSecondary.withOpacity(0.95),
+                          height: 1.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.75),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 18,
+                    color: SavingorColors.primaryStroke,
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -945,6 +1024,9 @@ class _DashboardData {
     required this.receiptsTotal,
     required this.shoppingListCount,
     required this.estimatedShoppingTotal,
+    required this.weeklySpending,
+    required this.potentialSavingsEstimate,
+    required this.hasInsightData,
     required this.latestExpense,
     required this.latestReceipt,
   });
@@ -955,6 +1037,9 @@ class _DashboardData {
   final double receiptsTotal;
   final int shoppingListCount;
   final double estimatedShoppingTotal;
+  final double weeklySpending;
+  final double potentialSavingsEstimate;
+  final bool hasInsightData;
   final UserExpense? latestExpense;
   final Receipt? latestReceipt;
 }

@@ -1,12 +1,23 @@
+import 'package:savingor_app/features/ai_assistant/domain/ai_assistant_exception.dart';
 import 'package:savingor_app/features/ai_assistant/domain/ai_savings_assistant_service.dart';
 import 'package:savingor_app/features/ai_assistant/domain/ai_savings_context.dart';
+import 'package:savingor_app/features/ai_assistant/domain/models/ai_assistant_request.dart';
+import 'package:savingor_app/features/ai_assistant/domain/models/ai_assistant_response.dart';
 import 'package:savingor_app/features/ai_assistant/domain/models/savings_insight.dart';
 
 /// Rule-based insights from local Firestore-backed user data.
 ///
-/// Replace with a remote implementation when the secure backend is ready.
+/// Used when no remote AI key is configured. Does not call external APIs.
 class LocalAiSavingsAssistantService implements AiSavingsAssistantService {
   const LocalAiSavingsAssistantService();
+
+  @override
+  bool get isConfigured => false;
+
+  @override
+  Future<AiAssistantResponse> ask(AiAssistantRequest request) async {
+    throw AiAssistantException.missingApiKey;
+  }
 
   @override
   Future<List<SavingsInsight>> generateInsights(
@@ -25,13 +36,13 @@ class LocalAiSavingsAssistantService implements AiSavingsAssistantService {
       ];
     }
 
-    if (!context.hasExpenses && !context.hasShoppingLists) {
+    if (!context.hasData) {
       return <SavingsInsight>[
         const SavingsInsight(
           id: 'get-started',
           title: 'Start tracking to save smarter',
           message:
-              'Add your first grocery expense or create a shopping list. '
+              'Scan a receipt, add an expense, or create a shopping list. '
               'Savingor will surface spending patterns and savings ideas here.',
           type: InsightType.onboarding,
           severity: InsightSeverity.info,
@@ -47,27 +58,16 @@ class LocalAiSavingsAssistantService implements AiSavingsAssistantService {
           id: 'spending-overview',
           title: 'Your spending snapshot',
           message:
-              'You have recorded ${context.expenseCount} '
-              '${context.expenseCount == 1 ? 'expense' : 'expenses'} '
+              'Based on your saved receipts and expenses: '
+              '${context.receiptCount} '
+              '${context.receiptCount == 1 ? 'receipt' : 'receipts'} '
+              'and ${context.manualExpenseCount} manual '
+              '${context.manualExpenseCount == 1 ? 'entry' : 'entries'}, '
               'totaling ${_formatCurrency(context.totalExpenses)}. '
               'This month: ${_formatCurrency(context.totalThisMonth)}.',
           type: InsightType.spending,
           severity: InsightSeverity.info,
           highlightValue: _formatCurrency(context.totalExpenses),
-        ),
-      );
-
-      insights.add(
-        SavingsInsight(
-          id: 'receipts-tracked',
-          title: 'Receipts on file',
-          message:
-              '${context.expenseCount} recorded '
-              '${context.expenseCount == 1 ? 'purchase' : 'purchases'} '
-              'help Savingor learn where you shop most often.',
-          type: InsightType.receipt,
-          severity: InsightSeverity.positive,
-          highlightValue: '${context.expenseCount}',
         ),
       );
 
@@ -78,9 +78,10 @@ class LocalAiSavingsAssistantService implements AiSavingsAssistantService {
             id: 'top-store',
             title: 'Highest spending store',
             message:
-                '${context.topSpendingStoreName} is your top store at '
+                'Based on your saved receipts, ${context.topSpendingStoreName} '
+                'is your top store at '
                 '${_formatCurrency(context.topSpendingStoreAmount!)}. '
-                'Compare deals before your next trip to cut grocery costs.',
+                'Compare prices before your next trip to cut grocery costs.',
             type: InsightType.spending,
             severity: InsightSeverity.warning,
             highlightValue: context.topSpendingStoreName,
@@ -99,7 +100,8 @@ class LocalAiSavingsAssistantService implements AiSavingsAssistantService {
           id: 'shopping-lists',
           title: 'Shopping lists active',
           message:
-              'You have ${context.shoppingListCount} '
+              'Based on your current shopping lists, you have '
+              '${context.shoppingListCount} '
               '${context.shoppingListCount == 1 ? 'list' : 'lists'} '
               'to plan purchases.$estimateNote Check items before checkout.',
           type: InsightType.shopping,
@@ -115,7 +117,7 @@ class LocalAiSavingsAssistantService implements AiSavingsAssistantService {
           id: 'savings-tip',
           title: 'Savings opportunity',
           message:
-              'Review local deals and compare unit prices on your top items. '
+              'Review your recent spending and compare unit prices on top items. '
               'Small switches each week can add up to meaningful savings.',
           type: InsightType.savings,
           severity: InsightSeverity.positive,
