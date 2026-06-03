@@ -3,9 +3,11 @@ import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/deals/data/local_nearby_store_repository.dart';
+import 'package:savingor_app/features/deals/data/user_location_service.dart';
 import 'package:savingor_app/features/deals/domain/models/nearby_store.dart';
+import 'package:savingor_app/features/deals/domain/models/user_location_coords.dart';
+import 'package:savingor_app/features/deals/presentation/widgets/nearby_location_section.dart';
 import 'package:savingor_app/features/deals/presentation/widgets/nearby_map_placeholder_card.dart';
-import 'package:savingor_app/features/deals/presentation/widgets/nearby_radius_selector.dart';
 import 'package:savingor_app/features/deals/presentation/widgets/nearby_store_card.dart';
 
 /// Nearby stores map foundation — mock data until Google Maps / Places.
@@ -13,9 +15,11 @@ class DealsMapScreen extends StatefulWidget {
   const DealsMapScreen({
     super.key,
     this.repository = const LocalNearbyStoreRepository(),
+    this.locationService = const UserLocationService(),
   });
 
   final NearbyStoreRepository repository;
+  final UserLocationService locationService;
 
   static const List<double> radiusOptionsKm = <double>[5, 10, 20, 30];
 
@@ -27,6 +31,33 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
   static const Color _pageWhite = Color(0xFFFFFEFE);
 
   double _selectedRadiusKm = 10;
+  UserLocationAccessStatus _locationStatus = UserLocationAccessStatus.idle;
+  UserLocationCoords? _coords;
+  String? _locationMessage;
+  UserLocationDebugInfo? _locationDebug;
+  bool _isLoadingLocation = false;
+
+  Future<void> _requestLocation() async {
+    if (_isLoadingLocation) return;
+
+    setState(() {
+      _isLoadingLocation = true;
+      _locationMessage = null;
+      _locationDebug = null;
+    });
+
+    final UserLocationResult result =
+        await widget.locationService.requestCurrentLocation();
+
+    if (!mounted) return;
+    setState(() {
+      _isLoadingLocation = false;
+      _locationStatus = result.status;
+      _coords = result.coords;
+      _locationMessage = result.message;
+      _locationDebug = result.debug;
+    });
+  }
 
   void _showDirectionsSnack() {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -79,7 +110,20 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
               ),
             ),
             const SizedBox(height: SavingorSpacing.lg),
-            _buildLocationSection(),
+            NearbyLocationSection(
+              locationStatus: _locationStatus,
+              coords: _coords,
+              locationMessage: _locationMessage,
+              isLoadingLocation: _isLoadingLocation,
+              locationDebug: _locationDebug,
+              selectedRadiusKm: _selectedRadiusKm,
+              radiusOptionsKm: DealsMapScreen.radiusOptionsKm,
+              onUseMyLocation: _requestLocation,
+              onRetryLocation: _requestLocation,
+              onRadiusSelected: (double radiusKm) {
+                setState(() => _selectedRadiusKm = radiusKm);
+              },
+            ),
             const SizedBox(height: SavingorSpacing.lg),
             const NearbyMapPlaceholderCard(),
             const SizedBox(height: SavingorSpacing.lg),
@@ -105,6 +149,16 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 6),
+            Text(
+              'Sample nearby stores. Real Google Places integration is coming next.',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: SavingorColors.textSecondary.withOpacity(0.9),
+                height: 1.35,
+              ),
+            ),
             const SizedBox(height: SavingorSpacing.md),
             if (stores.isEmpty)
               _buildEmptyRadiusState()
@@ -120,82 +174,6 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
               ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildLocationSection() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF3F4F3)),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Row(
-            children: <Widget>[
-              Icon(
-                Icons.my_location_rounded,
-                size: 20,
-                color: SavingorColors.primaryStroke.withOpacity(0.85),
-              ),
-              const SizedBox(width: 8),
-              const Expanded(
-                child: Text(
-                  'Search radius',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: SavingorColors.darkGreen,
-                  ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: SavingorColors.lightGreen.withOpacity(0.35),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  'Sample area',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: SavingorColors.darkGreen.withOpacity(0.8),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Location services will be enabled in a future update.',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: SavingorColors.textSecondary.withOpacity(0.9),
-              height: 1.3,
-            ),
-          ),
-          const SizedBox(height: 12),
-          NearbyRadiusSelector(
-            selectedRadiusKm: _selectedRadiusKm,
-            radiusOptionsKm: DealsMapScreen.radiusOptionsKm,
-            onRadiusSelected: (double radiusKm) {
-              setState(() => _selectedRadiusKm = radiusKm);
-            },
-          ),
-        ],
       ),
     );
   }
