@@ -1,42 +1,81 @@
 import 'package:savingor_app/features/expenses/domain/models/user_expense.dart';
+import 'package:savingor_app/features/scanner/domain/models/receipt.dart';
 
-/// Aggregated expense analytics derived from Firestore-backed [UserExpense] data.
+/// Aggregated spending analytics from manual expenses and scanned receipts.
 class ExpenseAnalyticsSummary {
   const ExpenseAnalyticsSummary({
     required this.totalThisMonth,
     required this.totalThisYear,
-    required this.expenseCount,
-    required this.averageExpense,
+    required this.totalAll,
+    required this.manualExpenseCount,
+    required this.receiptCount,
+    required this.totalRecordCount,
+    required this.averageRecordAmount,
+    required this.averageReceiptAmount,
+    required this.highestReceiptAmount,
+    required this.topStoreName,
     required this.spendingByStore,
-    required this.recentExpenses,
+    required this.recentActivity,
   });
 
   final double totalThisMonth;
   final double totalThisYear;
-  final int expenseCount;
-  final double averageExpense;
+  final double totalAll;
+  final int manualExpenseCount;
+  final int receiptCount;
+  final int totalRecordCount;
+  final double averageRecordAmount;
+  final double averageReceiptAmount;
+  final double highestReceiptAmount;
+  final String? topStoreName;
   final List<StoreSpendingEntry> spendingByStore;
-  final List<UserExpense> recentExpenses;
+  final List<AnalyticsActivityEntry> recentActivity;
 
-  bool get isEmpty => expenseCount == 0;
+  /// Manual expense count (legacy alias).
+  int get expenseCount => manualExpenseCount;
+
+  /// Average across all records (legacy alias).
+  double get averageExpense => averageRecordAmount;
+
+  bool get isEmpty => totalRecordCount == 0;
 }
 
 class StoreSpendingEntry {
   const StoreSpendingEntry({
     required this.storeName,
     required this.totalAmount,
-    required this.expenseCount,
+    required this.recordCount,
   });
 
   final String storeName;
   final double totalAmount;
-  final int expenseCount;
+  final int recordCount;
+
+  /// Legacy alias.
+  int get expenseCount => recordCount;
+}
+
+class AnalyticsActivityEntry {
+  const AnalyticsActivityEntry({
+    required this.title,
+    required this.subtitle,
+    required this.date,
+    required this.amount,
+    required this.typeLabel,
+  });
+
+  final String title;
+  final String subtitle;
+  final DateTime date;
+  final double amount;
+  final String typeLabel;
 }
 
 /// Pure calculator — no Firestore or UI dependencies.
 abstract final class ExpenseAnalyticsCalculator {
   static ExpenseAnalyticsSummary compute(
     List<UserExpense> expenses, {
+    List<Receipt> receipts = const <Receipt>[],
     DateTime? referenceDate,
   }) {
     final DateTime now = referenceDate ?? DateTime.now();
@@ -46,27 +85,72 @@ abstract final class ExpenseAnalyticsCalculator {
     double totalThisMonth = 0;
     double totalThisYear = 0;
     double totalAll = 0;
+    double receiptsTotal = 0;
+    double highestReceiptAmount = 0;
     final Map<String, _StoreAccumulator> storeTotals =
         <String, _StoreAccumulator>{};
+    final List<AnalyticsActivityEntry> activity = <AnalyticsActivityEntry>[];
 
-    for (final UserExpense expense in expenses) {
-      totalAll += expense.totalAmount;
+    void addAmount({
+      required String storeName,
+      required DateTime date,
+      required double amount,
+      required String subtitle,
+      required String typeLabel,
+    }) {
+      totalAll += amount;
 
-      if (expense.purchaseDate.year == currentYear) {
-        totalThisYear += expense.totalAmount;
-        if (expense.purchaseDate.month == currentMonth) {
-          totalThisMonth += expense.totalAmount;
+      if (date.year == currentYear) {
+        totalThisYear += amount;
+        if (date.month == currentMonth) {
+          totalThisMonth += amount;
         }
       }
 
-      final String storeKey = expense.storeName.trim().isEmpty
-          ? 'Unknown store'
-          : expense.storeName.trim();
+      final String storeKey =
+          storeName.trim().isEmpty ? 'Unknown store' : storeName.trim();
       final _StoreAccumulator current =
           storeTotals[storeKey] ?? _StoreAccumulator(storeName: storeKey);
       storeTotals[storeKey] = current
-        ..totalAmount += expense.totalAmount
-        ..expenseCount += 1;
+        ..totalAmount += amount
+        ..recordCount += 1;
+
+      activity.add(
+        AnalyticsActivityEntry(
+          title: storeKey,
+          subtitle: subtitle,
+          date: date,
+          amount: amount,
+          typeLabel: typeLabel,
+        ),
+      );
+    }
+
+    for (final UserExpense expense in expenses) {
+      addAmount(
+        storeName: expense.storeName,
+        date: expense.purchaseDate,
+        amount: expense.totalAmount,
+        subtitle: 'Manual expense',
+        typeLabel: 'expense',
+      );
+    }
+
+    for (final Receipt receipt in receipts) {
+      receiptsTotal += receipt.total;
+      if (receipt.total > highestReceiptAmount) {
+        highestReceiptAmount = receipt.total;
+      }
+
+      addAmount(
+        storeName: receipt.storeName,
+        date: receipt.date,
+        amount: receipt.total,
+        subtitle: receipt.category.trim().isEmpty
+            ? 'Receipt'
+            : receipt.category.trim(),
+        typeLabel: 'receipt',
+      );
     }
 
     final List<StoreSpendingEntry> byStore = storeTotals.values
@@ -74,7 +158,7 @@ abstract final class ExpenseAnalyticsCalculator {
           (_StoreAccumulator entry) => StoreSpendingEntry(
             storeName: entry.storeName,
             totalAmount: entry.totalAmount,
-            expenseCount: entry.expenseCount,
+            recordCount: entry.recordCount,
           ),
         )
         .toList(growable: false)
@@ -83,20 +167,30 @@ abstract final class ExpenseAnalyticsCalculator {
             b.totalAmount.compareTo(a.totalAmount),
       );
 
-    final List<UserExpense> recent = List<UserExpense>.from(expenses)
-      ..sort(
-        (UserExpense a, UserExpense b) =>
-            b.purchaseDate.compareTo(a.purchaseDate),
-      );
+    activity.sort(
+      (AnalyticsActivityEntry a, AnalyticsActivityEntry b) =>
+          b.date.compareTo(a.date),
+    );
 
-    final int count = expenses.length;
+    final int manualExpenseCount = expenses.length;
+    final int receiptCount = receipts.length;
+    final int totalRecordCount = manualExpenseCount + receiptCount;
+
     return ExpenseAnalyticsSummary(
       totalThisMonth: totalThisMonth,
       totalThisYear: totalThisYear,
-      expenseCount: count,
-      averageExpense: count == 0 ? 0 : totalAll / count,
+      totalAll: totalAll,
+      manualExpenseCount: manualExpenseCount,
+      receiptCount: receiptCount,
+      totalRecordCount: totalRecordCount,
+      averageRecordAmount:
+          totalRecordCount == 0 ? 0 : totalAll / totalRecordCount,
+      averageReceiptAmount:
+          receiptCount == 0 ? 0 : receiptsTotal / receiptCount,
+      highestReceiptAmount: highestReceiptAmount,
+      topStoreName: byStore.isEmpty ? null : byStore.first.storeName,
       spendingByStore: byStore,
-      recentExpenses: recent.take(5).toList(growable: false),
+      recentActivity: activity.take(5).toList(growable: false),
     );
   }
 }
@@ -106,5 +200,5 @@ class _StoreAccumulator {
 
   final String storeName;
   double totalAmount = 0;
-  int expenseCount = 0;
+  int recordCount = 0;
 }

@@ -5,7 +5,7 @@ import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/app_screen_states.dart';
 import 'package:savingor_app/features/analytics/domain/expense_analytics_calculator.dart';
 import 'package:savingor_app/features/expenses/data/expenses_store.dart';
-import 'package:savingor_app/features/expenses/domain/models/user_expense.dart';
+import 'package:savingor_app/features/scanner/data/receipt_store.dart';
 
 class SavingsAnalyticsScreen extends StatelessWidget {
   const SavingsAnalyticsScreen({super.key});
@@ -61,38 +61,49 @@ class SavingsAnalyticsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ExpensesStore store = ExpensesProvider.of(context);
+    final ExpensesStore expensesStore = ExpensesProvider.of(context);
+    final ReceiptStore receiptStore = ReceiptProvider.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return AnimatedBuilder(
-      animation: store,
-      builder: (BuildContext context, Widget? child) {
-        if (!store.isAuthenticated) {
-          return _buildSignInRequired(context);
-        }
+      animation: expensesStore,
+      builder: (BuildContext context, Widget? _) {
+        return AnimatedBuilder(
+          animation: receiptStore,
+          builder: (BuildContext context, Widget? __) {
+            if (!expensesStore.isAuthenticated && !receiptStore.isAuthenticated) {
+              return _buildSignInRequired(context);
+            }
 
-        return Scaffold(
-          backgroundColor: _pageBackground,
-          appBar: AppBar(
-            title: const Text(
-              'Savings analytics',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: SavingorColors.darkGreen,
+            return Scaffold(
+              backgroundColor: _pageBackground,
+              appBar: AppBar(
+                title: const Text(
+                  'Savings analytics',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: SavingorColors.darkGreen,
+                  ),
+                ),
+                elevation: 0,
+                scrolledUnderElevation: 0,
+                backgroundColor: _pageBackground,
+                surfaceTintColor: Colors.transparent,
+                leading: BackButton(
+                  color: SavingorColors.darkGreen,
+                  onPressed: () => _goBack(context),
+                ),
+                automaticallyImplyLeading: false,
               ),
-            ),
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            backgroundColor: _pageBackground,
-            surfaceTintColor: Colors.transparent,
-            leading: BackButton(
-              color: SavingorColors.darkGreen,
-              onPressed: () => _goBack(context),
-            ),
-            automaticallyImplyLeading: false,
-          ),
-          body: _buildBody(context, store, bottomInset),
+              body: _buildBody(
+                context,
+                expensesStore,
+                receiptStore,
+                bottomInset,
+              ),
+            );
+          },
         );
       },
     );
@@ -100,32 +111,44 @@ class SavingsAnalyticsScreen extends StatelessWidget {
 
   Widget _buildBody(
     BuildContext context,
-    ExpensesStore store,
+    ExpensesStore expensesStore,
+    ReceiptStore receiptStore,
     double bottomInset,
   ) {
-    if (store.isLoading) {
+    if (expensesStore.isLoading || receiptStore.isLoading) {
       return const AppLoadingState(message: 'Loading analytics…');
     }
 
-    if (store.loadError != null) {
+    if (expensesStore.loadError != null) {
       return AppErrorState(
         title: 'Could not load analytics',
-        message: store.loadError!,
-        onRetry: store.retry,
+        message: expensesStore.loadError!,
+        onRetry: expensesStore.retry,
       );
     }
 
-    final ExpenseAnalyticsSummary summary =
-        ExpenseAnalyticsCalculator.compute(store.expenses);
+    if (receiptStore.loadError != null) {
+      return AppErrorState(
+        title: 'Could not load analytics',
+        message: receiptStore.loadError!,
+        onRetry: receiptStore.retry,
+      );
+    }
+
+    final ExpenseAnalyticsSummary summary = ExpenseAnalyticsCalculator.compute(
+      expensesStore.expenses,
+      receipts: receiptStore.receipts,
+    );
 
     if (summary.isEmpty) {
       return AppEmptyState(
         icon: Icons.insights_outlined,
         title: 'No spending data yet',
         message:
-            'Add grocery expenses to see monthly totals, store breakdowns, and trends.',
-        actionLabel: 'Add expense',
-        onAction: () => context.push('/expenses/create'),
+            'Add a receipt or expense to see spending totals, store breakdowns, and trends.',
+        actionLabel: 'Add receipt',
+        prominentAction: true,
+        onAction: () => context.push('/scanner/create'),
       );
     }
 
@@ -136,7 +159,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
         const SizedBox(height: SavingorSpacing.xl),
         _buildSpendingByStore(summary),
         const SizedBox(height: SavingorSpacing.xl),
-        _buildRecentExpenses(summary),
+        _buildRecentActivity(summary),
       ],
     );
   }
@@ -206,16 +229,16 @@ class SavingsAnalyticsScreen extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: _SummaryCard(
-                label: 'Total expenses',
-                value: '${summary.expenseCount}',
+                label: 'Receipts',
+                value: '${summary.receiptCount}',
                 icon: Icons.receipt_long_outlined,
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: _SummaryCard(
-                label: 'Average expense',
-                value: _formatCurrency(summary.averageExpense),
+                label: 'Average receipt',
+                value: _formatCurrency(summary.averageReceiptAmount),
                 icon: Icons.payments_outlined,
               ),
             ),
@@ -275,7 +298,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${entry.expenseCount} ${entry.expenseCount == 1 ? 'expense' : 'expenses'}',
+                    '${entry.recordCount} ${entry.recordCount == 1 ? 'record' : 'records'}',
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -305,7 +328,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentExpenses(ExpenseAnalyticsSummary summary) {
+  Widget _buildRecentActivity(ExpenseAnalyticsSummary summary) {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: _cardDecoration(),
@@ -313,7 +336,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           const Text(
-            'Recent expenses',
+            'Recent activity',
             style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w700,
@@ -321,8 +344,8 @@ class SavingsAnalyticsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: SavingorSpacing.md),
-          ...summary.recentExpenses.map(
-            (UserExpense expense) => Padding(
+          ...summary.recentActivity.map(
+            (AnalyticsActivityEntry entry) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Row(
                 children: <Widget>[
@@ -333,8 +356,10 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                       color: SavingorColors.lightGreen,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(
-                      Icons.storefront_outlined,
+                    child: Icon(
+                      entry.typeLabel == 'receipt'
+                          ? Icons.receipt_long_outlined
+                          : Icons.storefront_outlined,
                       color: SavingorColors.primaryStroke,
                       size: 20,
                     ),
@@ -345,7 +370,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          expense.storeName,
+                          entry.title,
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
@@ -354,18 +379,29 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          _formatDate(expense.purchaseDate),
+                          '${_formatDate(entry.date)} · ${entry.typeLabel}',
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: SavingorColors.textSecondary,
                           ),
                         ),
+                        if (entry.subtitle.isNotEmpty) ...<Widget>[
+                          const SizedBox(height: 2),
+                          Text(
+                            entry.subtitle,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: SavingorColors.textSecondary,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
                   Text(
-                    _formatCurrency(expense.totalAmount),
+                    _formatCurrency(entry.amount),
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
