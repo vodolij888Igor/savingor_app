@@ -2,1155 +2,220 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
-import 'package:savingor_app/features/expenses/data/expenses_store.dart';
-import 'package:savingor_app/features/expenses/domain/models/user_expense.dart';
-import 'package:savingor_app/features/scanner/data/receipt_store.dart';
-import 'package:savingor_app/features/scanner/domain/models/receipt.dart';
-import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
+import 'package:savingor_app/features/deals/data/local_nearby_store_repository.dart';
+import 'package:savingor_app/features/deals/domain/models/nearby_store.dart';
+import 'package:savingor_app/features/deals/presentation/widgets/nearby_map_placeholder_card.dart';
+import 'package:savingor_app/features/deals/presentation/widgets/nearby_radius_selector.dart';
+import 'package:savingor_app/features/deals/presentation/widgets/nearby_store_card.dart';
 
-/// First-tab Savingor home dashboard. Routed as [DealsMapScreen].
-class DealsMapScreen extends StatelessWidget {
-  const DealsMapScreen({super.key});
+/// Nearby stores map foundation — mock data until Google Maps / Places.
+class DealsMapScreen extends StatefulWidget {
+  const DealsMapScreen({
+    super.key,
+    this.repository = const LocalNearbyStoreRepository(),
+  });
 
+  final NearbyStoreRepository repository;
+
+  static const List<double> radiusOptionsKm = <double>[5, 10, 20, 30];
+
+  @override
+  State<DealsMapScreen> createState() => _DealsMapScreenState();
+}
+
+class _DealsMapScreenState extends State<DealsMapScreen> {
   static const Color _pageWhite = Color(0xFFFFFEFE);
-  static const Color _nearBlack = Color(0xFF111827);
-  static const Color _airyBorder = Color(0xFFF3F4F3);
-  static const double _goalAmount = 100;
 
-  static String _formatCurrency(double amount) {
-    final String fixed = amount.abs().toStringAsFixed(2);
-    final List<String> parts = fixed.split('.');
-    final String intPart = parts[0];
-    final String decPart = parts.length > 1 ? parts[1] : '00';
-    final StringBuffer grouped = StringBuffer();
-    for (int i = 0; i < intPart.length; i++) {
-      if (i > 0 && (intPart.length - i) % 3 == 0) {
-        grouped.write(',');
-      }
-      grouped.write(intPart[i]);
-    }
-    final String sign = amount < 0 ? '-' : '';
-    return '$sign\$$grouped.$decPart';
-  }
+  double _selectedRadiusKm = 10;
 
-  static _DashboardData _computeDashboardData(
-    ExpensesStore expensesStore,
-    ShoppingListsStore shoppingListsStore,
-    ReceiptStore receiptStore,
-  ) {
-    double expensesTotal = 0;
-    for (final UserExpense expense in expensesStore.expenses) {
-      expensesTotal += expense.totalAmount;
-    }
-
-    double receiptsTotal = 0;
-    for (final Receipt receipt in receiptStore.receipts) {
-      receiptsTotal += receipt.total;
-    }
-
-    final double totalExpenses = expensesTotal + receiptsTotal;
-
-    double estimatedShoppingTotal = shoppingListsStore.totalEstimatedListValue;
-
-    UserExpense? latestExpense;
-    if (expensesStore.expenses.isNotEmpty) {
-      final List<UserExpense> sorted = List<UserExpense>.from(
-        expensesStore.expenses,
-      )..sort(
-          (UserExpense a, UserExpense b) =>
-              b.purchaseDate.compareTo(a.purchaseDate),
-        );
-      latestExpense = sorted.first;
-    }
-
-    Receipt? latestReceipt;
-    if (receiptStore.receipts.isNotEmpty) {
-      final List<Receipt> sorted = List<Receipt>.from(receiptStore.receipts)
-        ..sort((Receipt a, Receipt b) => b.date.compareTo(a.date));
-      latestReceipt = sorted.first;
-    }
-
-    final double weeklySpending = _sumSpendingSince(
-      expensesStore: expensesStore,
-      receiptStore: receiptStore,
-      since: DateTime.now().subtract(const Duration(days: 7)),
-    );
-    final double activeListEstimate = shoppingListsStore.activeListEstimate;
-    final bool hasInsightData = expensesStore.expenses.isNotEmpty ||
-        receiptStore.receipts.isNotEmpty ||
-        shoppingListsStore.listCount > 0;
-    final double potentialSavingsEstimate = _estimatePotentialSavings(
-      weeklySpending: weeklySpending,
-      estimatedShoppingTotal: estimatedShoppingTotal,
-      activeListEstimate: activeListEstimate,
-    );
-
-    return _DashboardData(
-      totalExpenses: totalExpenses,
-      expenseCount: expensesStore.expenses.length,
-      receiptCount: receiptStore.receipts.length,
-      receiptsTotal: receiptsTotal,
-      shoppingListCount: shoppingListsStore.listCount,
-      estimatedShoppingTotal: estimatedShoppingTotal,
-      weeklySpending: weeklySpending,
-      potentialSavingsEstimate: potentialSavingsEstimate,
-      hasInsightData: hasInsightData,
-      latestExpense: latestExpense,
-      latestReceipt: latestReceipt,
-    );
-  }
-
-  static double _sumSpendingSince({
-    required ExpensesStore expensesStore,
-    required ReceiptStore receiptStore,
-    required DateTime since,
-  }) {
-    double total = 0;
-    for (final UserExpense expense in expensesStore.expenses) {
-      if (!expense.purchaseDate.isBefore(since)) {
-        total += expense.totalAmount;
-      }
-    }
-    for (final Receipt receipt in receiptStore.receipts) {
-      if (!receipt.date.isBefore(since)) {
-        total += receipt.total;
-      }
-    }
-    return total;
-  }
-
-  /// Conservative estimate from saved spending and list totals — not live store prices.
-  static double _estimatePotentialSavings({
-    required double weeklySpending,
-    required double estimatedShoppingTotal,
-    required double activeListEstimate,
-  }) {
-    final double fromRecentSpending = weeklySpending * 0.05;
-    final double listBasis = estimatedShoppingTotal > 0
-        ? estimatedShoppingTotal
-        : activeListEstimate;
-    final double fromLists = listBasis * 0.08;
-    return fromRecentSpending > fromLists ? fromRecentSpending : fromLists;
-  }
-
-  static String _formatActivityDate(DateTime date) {
-    const List<String> months = <String>[
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${months[date.month - 1]} ${date.day}, ${date.year}';
-  }
-
-  BoxDecoration _airyCardDecoration({double radius = 18}) {
-    return BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: _airyBorder.withOpacity(0.6), width: 0.5),
-      boxShadow: <BoxShadow>[
-        BoxShadow(
-          color: Colors.black.withOpacity(0.04),
-          blurRadius: 12,
-          offset: const Offset(0, 2),
-        ),
-      ],
-    );
-  }
-
-  Widget _heroSparkle({double size = 4}) {
-    return Icon(
-      Icons.circle,
-      size: size,
-      color: SavingorColors.primaryStroke.withOpacity(0.28),
-    );
-  }
-
-  Widget _metricCard({
-    required IconData icon,
-    required String title,
-    required String value,
-    required String suffix,
-    required Color iconColor,
-    double iconSize = 33,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
-        decoration: _airyCardDecoration(radius: 14),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Icon(icon, size: iconSize, color: iconColor),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary.withOpacity(0.78),
-                height: 1.1,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Flexible(
-              child: Align(
-                alignment: Alignment.center,
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.center,
-                  child: Text(
-                    value,
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: _nearBlack,
-                      height: 1.05,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              suffix,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary.withOpacity(0.72),
-                height: 1.1,
-              ),
-            ),
-          ],
-        ),
+  void _showDirectionsSnack() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Directions will open Google Maps in the next step.'),
       ),
     );
-  }
-
-  void _snack(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
-
-  void _onStartSaving(BuildContext context) {
-    context.push('/start-saving');
   }
 
   @override
   Widget build(BuildContext context) {
-    final ExpensesStore expensesStore = ExpensesProvider.of(context);
-    final ShoppingListsStore shoppingListsStore =
-        ShoppingListsProvider.of(context);
-    final ReceiptStore receiptStore = ReceiptProvider.of(context);
+    final List<NearbyStore> stores =
+        widget.repository.getStoresWithinRadius(_selectedRadiusKm);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
-    return ListenableBuilder(
-      listenable: expensesStore,
-      builder: (BuildContext context, Widget? _) {
-        return ListenableBuilder(
-          listenable: shoppingListsStore,
-          builder: (BuildContext context, Widget? __) {
-            return ListenableBuilder(
-              listenable: receiptStore,
-              builder: (BuildContext context, Widget? ___) {
-                final _DashboardData data = _computeDashboardData(
-                  expensesStore,
-                  shoppingListsStore,
-                  receiptStore,
-                );
-                final double goalProgress =
-                    (data.totalExpenses / _goalAmount).clamp(0.0, 1.0);
-
-                return Scaffold(
-                  backgroundColor: _pageWhite,
-                  body: SafeArea(
-                    child: SingleChildScrollView(
-                      padding: EdgeInsets.fromLTRB(
-                        20,
-                        0,
-                        20,
-                        32 + bottomInset + 72,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          _buildHeader(context),
-                          const SizedBox(height: 44),
-                          _buildSavingsHero(
-                            data.totalExpenses,
-                            goalProgress,
-                            data.expenseCount,
-                          ),
-                          const SizedBox(height: SavingorSpacing.xl),
-                          _buildStartSavingButton(context),
-                          const SizedBox(height: SavingorSpacing.md),
-                          _buildAiPremiumCta(context, data),
-                          const SizedBox(height: SavingorSpacing.xl),
-                          _buildMetricsRow(data),
-                          const SizedBox(height: SavingorSpacing.xl),
-                          _buildMonthlyGoal(data.totalExpenses, goalProgress),
-                          const SizedBox(height: SavingorSpacing.xl),
-                          _buildTopDeals(context),
-                          const SizedBox(height: SavingorSpacing.xl),
-                          _buildRecentActivity(data),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const SizedBox(height: 14),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(SavingorRadius.pill),
-                border: Border.all(color: _airyBorder.withOpacity(0.5), width: 0.5),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text(
-                    '🇨🇦',
-                    style: TextStyle(fontSize: 14, height: 1.1),
-                  ),
-                  SizedBox(width: 6),
-                  Text(
-                    'Canada • CAD',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: SavingorColors.darkGreen,
-                      height: 1.1,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Spacer(),
-            IconButton(
-              onPressed: () => _snack(context, 'Notifications coming soon.'),
-              icon: const Icon(Icons.notifications_none_rounded),
-              color: SavingorColors.darkGreen,
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.white,
-                padding: const EdgeInsets.all(8),
-                side: BorderSide(color: _airyBorder.withOpacity(0.5), width: 0.5),
-              ),
-            ),
-            const SizedBox(width: 4),
-            _buildStreakBadge(context),
-          ],
-        ),
-        const SizedBox(height: 6),
-        const Text(
-          'Welcome back, Igor! 👋',
+    return Scaffold(
+      backgroundColor: _pageWhite,
+      appBar: AppBar(
+        title: const Text(
+          'Nearby stores',
           style: TextStyle(
-            fontSize: 28,
+            fontSize: 20,
             fontWeight: FontWeight.w800,
             color: SavingorColors.darkGreen,
-            height: 1.1,
-            letterSpacing: -0.4,
           ),
         ),
-        const SizedBox(height: 6),
-        Text(
-          'Ready to save smarter today?',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: SavingorColors.textSecondary.withOpacity(0.95),
-            height: 1.35,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStreakBadge(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _snack(context, 'Streak details coming soon.'),
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(10, 7, 4, 7),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: _airyBorder.withOpacity(0.5), width: 0.5),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    '🔥 12',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: _nearBlack,
-                      height: 1.1,
-                    ),
-                  ),
-                  Text(
-                    'Day streak',
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w500,
-                      color: SavingorColors.textSecondary,
-                      height: 1.1,
-                    ),
-                  ),
-                ],
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 16,
-                color: SavingorColors.textSecondary.withOpacity(0.65),
-              ),
-            ],
-          ),
-        ),
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: _pageWhite,
+        surfaceTintColor: Colors.transparent,
+        leading: context.canPop()
+            ? BackButton(
+                color: SavingorColors.darkGreen,
+                onPressed: () => context.pop(),
+              )
+            : null,
       ),
-    );
-  }
-
-  Widget _buildSavingsHero(
-    double totalExpenses,
-    double ringProgress,
-    int expenseCount,
-  ) {
-    const double ringSize = 220;
-
-    return Column(
-      children: <Widget>[
-        Center(
-          child: SizedBox(
-            width: ringSize,
-            height: ringSize,
-            child: Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.center,
-              children: <Widget>[
-                SizedBox(
-                  width: ringSize,
-                  height: ringSize,
-                  child: CircularProgressIndicator(
-                    value: ringProgress,
-                    strokeWidth: 10,
-                    strokeCap: StrokeCap.round,
-                    backgroundColor: const Color(0xFFF3F5F4),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      SavingorColors.primaryGreen,
-                    ),
-                  ),
-                ),
-                Container(
-                  width: ringSize - 40,
-                  height: ringSize - 40,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                  ),
-                  alignment: Alignment.center,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        SizedBox(
-                          width: ringSize - 60,
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.center,
-                            child: Text(
-                              _formatCurrency(totalExpenses),
-                              maxLines: 1,
-                              softWrap: false,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 42,
-                                fontWeight: FontWeight.w800,
-                                color: _nearBlack,
-                                height: 1,
-                                letterSpacing: -1.5,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Total expenses',
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: SavingorColors.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          totalExpenses > 0
-                              ? 'Tracked in Savingor'
-                              : 'Add your first expense',
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: SavingorColors.primaryStroke,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Positioned(top: 6, right: 2, child: _heroSparkle(size: 5)),
-                Positioned(top: 36, left: -2, child: _heroSparkle(size: 3.5)),
-                Positioned(bottom: 22, right: -4, child: _heroSparkle(size: 4)),
-              ],
-            ),
-          ),
-        ),
-        if (expenseCount > 0) ...<Widget>[
-          const SizedBox(height: SavingorSpacing.md),
-          Text(
-            '$expenseCount ${expenseCount == 1 ? 'expense' : 'expenses'} tracked',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: SavingorColors.primaryStroke,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildStartSavingButton(BuildContext context) {
-    return Material(
-      borderRadius: BorderRadius.circular(28),
-      elevation: 0,
-      child: InkWell(
-        onTap: () => _onStartSaving(context),
-        borderRadius: BorderRadius.circular(28),
-        child: Ink(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(28),
-            gradient: const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: <Color>[
-                Color(0xFF9AD88F),
-                Color(0xFF7BC96F),
-                SavingorColors.primaryGreen,
-              ],
-              stops: <double>[0.0, 0.45, 1.0],
-            ),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: SavingorColors.primaryStroke.withOpacity(0.28),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + bottomInset),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(
+              'Find grocery stores near you and compare savings opportunities.',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: SavingorColors.textSecondary.withOpacity(0.95),
+                height: 1.4,
               ),
-            ],
-          ),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 23),
-            child: Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    '✨ START SAVING',
+            ),
+            const SizedBox(height: SavingorSpacing.lg),
+            _buildLocationSection(),
+            const SizedBox(height: SavingorSpacing.lg),
+            const NearbyMapPlaceholderCard(),
+            const SizedBox(height: SavingorSpacing.lg),
+            Row(
+              children: <Widget>[
+                const Expanded(
+                  child: Text(
+                    'Stores nearby',
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: 17,
                       fontWeight: FontWeight.w800,
                       color: SavingorColors.darkGreen,
-                      height: 1.0,
-                      letterSpacing: 0.4,
                     ),
                   ),
-                  SizedBox(width: 16),
-                  Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 20,
-                    color: SavingorColors.darkGreen,
+                ),
+                Text(
+                  '${stores.length} found',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: SavingorColors.textSecondary.withOpacity(0.9),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
+            const SizedBox(height: SavingorSpacing.md),
+            if (stores.isEmpty)
+              _buildEmptyRadiusState()
+            else
+              ...stores.map(
+                (NearbyStore store) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: NearbyStoreCard(
+                    store: store,
+                    onDirections: _showDirectionsSnack,
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildMetricsRow(_DashboardData data) {
-    return SizedBox(
-      height: 126,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          _metricCard(
-            icon: Icons.trending_up,
-            iconSize: 38,
-            title: 'This month',
-            value: _formatCurrency(data.totalExpenses),
-            suffix: 'spent',
-            iconColor: const Color(0xFFEF4444),
-          ),
-          const SizedBox(width: 7),
-          _metricCard(
-            icon: Icons.receipt_long_outlined,
-            iconSize: 33,
-            title: 'Receipts',
-            value: '${data.receiptCount}',
-            suffix: 'recorded',
-            iconColor: const Color(0xFF5B8FA8),
-          ),
-          const SizedBox(width: 7),
-          _metricCard(
-            icon: Icons.checklist_rounded,
-            iconSize: 33,
-            title: 'Shopping list',
-            value: '${data.shoppingListCount}',
-            suffix: 'lists',
-            iconColor: const Color(0xFFC4895A),
-          ),
-          const SizedBox(width: 7),
-          _metricCard(
-            icon: Icons.local_offer_outlined,
-            iconSize: 33,
-            title: 'Active deals',
-            value: _formatCurrency(data.estimatedShoppingTotal),
-            suffix: 'estimated',
-            iconColor: const Color(0xFF8B6BA8),
+  Widget _buildLocationSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFF3F4F3)),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildMonthlyGoal(double totalExpenses, double progress) {
-    final int progressPercent = (progress * 100).round();
-
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-      decoration: _airyCardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text(
-            'Monthly goal',
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              color: SavingorColors.darkGreen,
-            ),
-          ),
-          const SizedBox(height: SavingorSpacing.md),
           Row(
             children: <Widget>[
-              Text(
-                '${_formatCurrency(totalExpenses)} / ${_formatCurrency(_goalAmount)}',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: _nearBlack,
-                ),
+              Icon(
+                Icons.my_location_rounded,
+                size: 20,
+                color: SavingorColors.primaryStroke.withOpacity(0.85),
               ),
-              const Spacer(),
-              Text(
-                '$progressPercent%',
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: SavingorColors.primaryStroke,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: SavingorSpacing.md),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 8,
-              backgroundColor: const Color(0xFFF0F2F1),
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                SavingorColors.primaryGreen,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAiPremiumCta(BuildContext context, _DashboardData data) {
-    final String savingsLine = data.hasInsightData
-        ? 'Potential savings: ${_formatCurrency(data.potentialSavingsEstimate)}'
-        : 'Add receipts and lists to unlock insights';
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => context.push('/ai-assistant'),
-        borderRadius: BorderRadius.circular(20),
-        child: Ink(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: <Color>[
-                SavingorColors.lightGreen.withOpacity(0.85),
-                const Color(0xFFE2F4DE),
-                Colors.white.withOpacity(0.92),
-              ],
-              stops: const <double>[0.0, 0.5, 1.0],
-            ),
-            border: Border.all(
-              color: SavingorColors.primaryStroke.withOpacity(0.28),
-              width: 1.2,
-            ),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: SavingorColors.primaryStroke.withOpacity(0.18),
-                blurRadius: 18,
-                offset: const Offset(0, 6),
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              children: <Widget>[
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.88),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: SavingorColors.primaryStroke.withOpacity(0.15),
-                    ),
-                    boxShadow: <BoxShadow>[
-                      BoxShadow(
-                        color: SavingorColors.primaryStroke.withOpacity(0.12),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.auto_awesome_rounded,
-                    size: 24,
-                    color: SavingorColors.primaryStroke,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const Text(
-                        'AI Savings Assistant',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: SavingorColors.darkGreen,
-                          height: 1.15,
-                          letterSpacing: -0.2,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Get smart tips from your receipts and shopping lists',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: SavingorColors.darkGreen.withOpacity(0.72),
-                          height: 1.3,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        savingsLine,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: SavingorColors.textSecondary.withOpacity(0.95),
-                          height: 1.2,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.75),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 18,
-                    color: SavingorColors.primaryStroke,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTopDeals(BuildContext context) {
-    const List<_DealPreview> deals = <_DealPreview>[
-      _DealPreview(
-        emoji: '🍌',
-        title: 'Bananas 1 lb',
-        store: 'Walmart',
-        price: '\$0.68',
-        save: 'Save \$0.31',
-      ),
-      _DealPreview(
-        emoji: '🍗',
-        title: 'Chicken Breast',
-        store: 'Costco',
-        price: '\$3.79',
-        save: 'Save \$2.20',
-      ),
-      _DealPreview(
-        emoji: '🥛',
-        title: 'Milk 2L',
-        store: 'No Frills',
-        price: '\$1.89',
-        save: 'Save \$0.90',
-      ),
-      _DealPreview(
-        emoji: '🍞',
-        title: 'Whole Wheat Bread',
-        store: 'Metro',
-        price: '\$2.49',
-        save: 'Save \$0.80',
-      ),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Row(
-          children: <Widget>[
-            const Expanded(
-              child: Text(
-                'Top deals for you',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: SavingorColors.darkGreen,
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () => _snack(context, 'All deals coming soon.'),
-              style: TextButton.styleFrom(
-                foregroundColor: SavingorColors.primaryStroke,
-                padding: EdgeInsets.zero,
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: const Text(
-                'See all',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: SavingorSpacing.sm),
-        SizedBox(
-          height: 210,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: deals.length,
-            separatorBuilder: (_, __) => const SizedBox(width: SavingorSpacing.sm),
-            itemBuilder: (BuildContext context, int index) {
-              return _DealTile(deal: deals[index]);
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildRecentActivity(_DashboardData data) {
-    final UserExpense? latest = data.latestExpense;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-      decoration: _airyCardDecoration(radius: 18),
-      child: Row(
-        children: <Widget>[
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: SavingorColors.lightGreen.withOpacity(0.55),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(
-              Icons.receipt_long_rounded,
-              color: SavingorColors.primaryStroke.withOpacity(0.9),
-              size: 22,
-            ),
-          ),
-          const SizedBox(width: SavingorSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  latest == null ? 'No recent activity' : 'Expense added',
-                  style: const TextStyle(
-                    fontSize: 16,
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'Search radius',
+                  style: TextStyle(
+                    fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: SavingorColors.darkGreen,
-                    height: 1.2,
                   ),
                 ),
-                const SizedBox(height: 5),
-                Text(
-                  latest == null
-                      ? 'Add an expense to see it here'
-                      : '${latest.storeName} • ${_formatActivityDate(latest.purchaseDate)}',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                    color: SavingorColors.textSecondary,
-                    height: 1.3,
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: SavingorColors.lightGreen.withOpacity(0.35),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'Sample area',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: SavingorColors.darkGreen.withOpacity(0.8),
                   ),
                 ),
-              ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Location services will be enabled in a future update.',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: SavingorColors.textSecondary.withOpacity(0.9),
+              height: 1.3,
             ),
           ),
-          Text(
-            latest == null
-                ? _formatCurrency(0)
-                : _formatCurrency(latest.totalAmount),
-            style: const TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w800,
-              color: _nearBlack,
-              letterSpacing: -0.2,
-            ),
+          const SizedBox(height: 12),
+          NearbyRadiusSelector(
+            selectedRadiusKm: _selectedRadiusKm,
+            radiusOptionsKm: DealsMapScreen.radiusOptionsKm,
+            onRadiusSelected: (double radiusKm) {
+              setState(() => _selectedRadiusKm = radiusKm);
+            },
           ),
         ],
       ),
     );
   }
-}
 
-class _DashboardData {
-  const _DashboardData({
-    required this.totalExpenses,
-    required this.expenseCount,
-    required this.receiptCount,
-    required this.receiptsTotal,
-    required this.shoppingListCount,
-    required this.estimatedShoppingTotal,
-    required this.weeklySpending,
-    required this.potentialSavingsEstimate,
-    required this.hasInsightData,
-    required this.latestExpense,
-    required this.latestReceipt,
-  });
-
-  final double totalExpenses;
-  final int expenseCount;
-  final int receiptCount;
-  final double receiptsTotal;
-  final int shoppingListCount;
-  final double estimatedShoppingTotal;
-  final double weeklySpending;
-  final double potentialSavingsEstimate;
-  final bool hasInsightData;
-  final UserExpense? latestExpense;
-  final Receipt? latestReceipt;
-}
-
-class _DealPreview {
-  const _DealPreview({
-    required this.emoji,
-    required this.title,
-    required this.store,
-    required this.price,
-    required this.save,
-  });
-
-  final String emoji;
-  final String title;
-  final String store;
-  final String price;
-  final String save;
-}
-
-class _DealTile extends StatelessWidget {
-  const _DealTile({required this.deal});
-
-  static const double _tileHeight = 210;
-
-  final _DealPreview deal;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 160,
-      height: _tileHeight,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: DealsMapScreen._airyBorder.withOpacity(0.6),
-            width: 0.5,
-          ),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Center(
-              child: Text(
-                deal.emoji,
-                style: const TextStyle(fontSize: 44, height: 1.05),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              deal.title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: DealsMapScreen._nearBlack,
-                height: 1.2,
-              ),
-            ),
-            const SizedBox(height: 3),
-            Text(
-              deal.store,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary,
-              ),
-            ),
-            const Spacer(),
-            Text(
-              deal.price,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-                color: DealsMapScreen._nearBlack,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: SavingorColors.primaryGreen.withOpacity(0.75),
-                borderRadius: BorderRadius.circular(SavingorRadius.pill),
-              ),
-              child: Text(
-                deal.save,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  color: DealsMapScreen._nearBlack,
-                ),
-              ),
-            ),
-          ],
+  Widget _buildEmptyRadiusState() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: SavingorColors.lightGreen.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        'No sample stores within ${_selectedRadiusKm.round()} km. '
+        'Try a larger radius.',
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          color: SavingorColors.darkGreen.withOpacity(0.85),
+          height: 1.4,
         ),
       ),
     );

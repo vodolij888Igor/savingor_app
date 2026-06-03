@@ -10,6 +10,7 @@ import 'package:savingor_app/features/onboarding/presentation/screens/splash_scr
 import 'package:savingor_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:savingor_app/features/subscription/presentation/screens/subscription_screen.dart';
 import 'package:savingor_app/features/deals/presentation/screens/deals_map_screen.dart';
+import 'package:savingor_app/features/home/presentation/screens/home_dashboard_screen.dart';
 import 'package:savingor_app/features/deals/presentation/screens/deal_details_screen.dart';
 import 'package:savingor_app/features/scanner/presentation/screens/receipt_scanner_screen.dart';
 import 'package:savingor_app/features/scanner/presentation/screens/create_receipt_screen.dart';
@@ -190,6 +191,10 @@ GoRouter createAppRouter({required AppState appState}) {
         builder: (context, state) => const AiSavingsAssistantScreen(),
       ),
       GoRoute(
+        path: '/nearby-stores',
+        builder: (context, state) => const DealsMapScreen(),
+      ),
+      GoRoute(
         path: '/saved',
         builder: (context, state) => const SavedDealsScreen(),
       ),
@@ -198,7 +203,7 @@ GoRouter createAppRouter({required AppState appState}) {
         routes: [
           GoRoute(
             path: '/deals',
-            builder: (context, state) => const DealsMapScreen(),
+            builder: (context, state) => const HomeDashboardScreen(),
           ),
           GoRoute(
             path: '/deals/:id',
