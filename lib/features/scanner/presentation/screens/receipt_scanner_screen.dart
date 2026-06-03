@@ -368,6 +368,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
         final Receipt receipt = store.receipts[index - 1];
         return _ReceiptCard(
           receipt: receipt,
+          onTap: () => context.push('/scanner/${receipt.id}'),
           onDelete: () => _confirmDelete(context, store, receipt),
         );
       },
@@ -485,10 +486,12 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
 class _ReceiptCard extends StatelessWidget {
   const _ReceiptCard({
     required this.receipt,
+    required this.onTap,
     required this.onDelete,
   });
 
   final Receipt receipt;
+  final VoidCallback onTap;
   final VoidCallback onDelete;
 
   @override
@@ -497,71 +500,75 @@ class _ReceiptCard extends StatelessWidget {
       color: Colors.white,
       borderRadius: BorderRadius.circular(18),
       clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
-        child: Row(
-          children: <Widget>[
-            Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                color: SavingorColors.lightGreen,
-                borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: SavingorColors.lightGreen,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.receipt_long_outlined,
+                  color: SavingorColors.primaryStroke,
+                ),
               ),
-              child: const Icon(
-                Icons.receipt_long_outlined,
-                color: SavingorColors.primaryStroke,
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      receipt.storeName,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: SavingorColors.darkGreen,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatDate(receipt.date),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: SavingorColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      receipt.category,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: SavingorColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '\$${receipt.total.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: SavingorColors.darkGreen,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    receipt.storeName,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: SavingorColors.darkGreen,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _formatDate(receipt.date),
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: SavingorColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    receipt.category,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: SavingorColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '\$${receipt.total.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: SavingorColors.darkGreen,
-                    ),
-                  ),
-                ],
+              IconButton(
+                icon: const Icon(Icons.delete_outline_rounded),
+                color: SavingorColors.textSecondary,
+                onPressed: onDelete,
               ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline_rounded),
-              color: SavingorColors.textSecondary,
-              onPressed: onDelete,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

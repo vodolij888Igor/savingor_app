@@ -132,6 +132,57 @@ class ReceiptStore extends ChangeNotifier {
     }
   }
 
+  Receipt? _findReceiptById(String receiptId) {
+    for (final Receipt receipt in _receipts) {
+      if (receipt.id == receiptId) return receipt;
+    }
+    return null;
+  }
+
+  Future<bool> updateReceipt({
+    required String receiptId,
+    required String storeName,
+    required DateTime date,
+    required String category,
+    required double total,
+    String? notes,
+  }) async {
+    if (_uid == null) {
+      _mutationError = 'Sign in to update receipts.';
+      notifyListeners();
+      return false;
+    }
+
+    final Receipt? existing = _findReceiptById(receiptId);
+    if (existing == null) {
+      _mutationError = 'Receipt not found.';
+      notifyListeners();
+      return false;
+    }
+
+    try {
+      _mutationError = null;
+      final String? trimmedNotes =
+          notes?.trim().isEmpty ?? true ? null : notes?.trim();
+      final Receipt updated = existing.copyWith(
+        storeName: storeName.trim(),
+        date: date,
+        category: category.trim(),
+        total: total,
+        notes: trimmedNotes,
+        clearNotes: trimmedNotes == null,
+        updatedAt: DateTime.now(),
+      );
+      await _service.updateReceipt(updated);
+      notifyListeners();
+      return true;
+    } catch (_) {
+      _mutationError = 'Could not update the receipt. Please try again.';
+      notifyListeners();
+      return false;
+    }
+  }
+
   @override
   void dispose() {
     _authSubscription?.cancel();

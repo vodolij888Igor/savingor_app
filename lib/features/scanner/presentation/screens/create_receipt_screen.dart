@@ -7,18 +7,22 @@ import 'package:savingor_app/features/scanner/data/receipt_store.dart';
 class CreateReceiptScreen extends StatefulWidget {
   const CreateReceiptScreen({
     super.key,
+    this.receiptId,
     this.initialStoreName,
     this.initialDate,
     this.initialTotal,
     this.initialCategory,
     this.initialNotes,
+    this.isEditing = false,
   });
 
+  final String? receiptId;
   final String? initialStoreName;
   final DateTime? initialDate;
   final double? initialTotal;
   final String? initialCategory;
   final String? initialNotes;
+  final bool isEditing;
 
   static const Color _pageBackground = Colors.white;
 
@@ -115,15 +119,52 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
 
     setState(() => _isSaving = true);
     final ReceiptStore store = ReceiptProvider.of(context);
+    final String? notes = _notesController.text.trim().isEmpty
+        ? null
+        : _notesController.text.trim();
+
+    if (widget.isEditing) {
+      final String? receiptId = widget.receiptId;
+      if (receiptId == null || receiptId.isEmpty) {
+        setState(() => _isSaving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Receipt not found.')),
+        );
+        return;
+      }
+
+      final bool updated = await store.updateReceipt(
+        receiptId: receiptId,
+        storeName: _storeController.text.trim(),
+        date: _selectedDate,
+        category: _categoryController.text.trim(),
+        total: totalAmount,
+        notes: notes,
+      );
+
+      if (!mounted) return;
+      setState(() => _isSaving = false);
+
+      if (updated) {
+        context.pop();
+        return;
+      }
+
+      final String? error = store.mutationError;
+      if (error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error)),
+        );
+      }
+      return;
+    }
 
     final String? receiptId = await store.createReceipt(
       storeName: _storeController.text.trim(),
       date: _selectedDate,
       category: _categoryController.text.trim(),
       total: totalAmount,
-      notes: _notesController.text.trim().isEmpty
-          ? null
-          : _notesController.text.trim(),
+      notes: notes,
     );
 
     if (!mounted) return;
@@ -146,13 +187,17 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
   Widget build(BuildContext context) {
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
     final double keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final String appBarTitle =
+        widget.isEditing ? 'Edit receipt' : 'Add receipt';
+    final String saveLabel =
+        widget.isEditing ? 'Update receipt' : 'Save receipt';
 
     return Scaffold(
       backgroundColor: CreateReceiptScreen._pageBackground,
       appBar: AppBar(
-        title: const Text(
-          'Add receipt',
-          style: TextStyle(
+        title: Text(
+          appBarTitle,
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w800,
             color: SavingorColors.darkGreen,
@@ -238,7 +283,6 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Total Amount',
                   border: OutlineInputBorder(),
-                  prefixText: '\$ ',
                 ),
                 validator: (String? value) {
                   if (value == null || value.trim().isEmpty) {
@@ -272,7 +316,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
                         height: 22,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Save receipt'),
+                    : Text(saveLabel),
               ),
             ],
           ),

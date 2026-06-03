@@ -33,6 +33,11 @@ class ReceiptFirestoreService {
     await _receiptsCollection.doc(receiptId).delete();
   }
 
+  Future<void> updateReceipt(Receipt receipt) async {
+    final Receipt updated = receipt.copyWith(updatedAt: DateTime.now());
+    await _receiptsCollection.doc(updated.id).set(updated.toMap());
+  }
+
   Future<Receipt?> getReceiptById(String receiptId) async {
     final DocumentSnapshot<Map<String, dynamic>> snapshot =
         await _receiptsCollection.doc(receiptId).get();

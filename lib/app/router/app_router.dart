@@ -13,6 +13,7 @@ import 'package:savingor_app/features/deals/presentation/screens/deals_map_scree
 import 'package:savingor_app/features/deals/presentation/screens/deal_details_screen.dart';
 import 'package:savingor_app/features/scanner/presentation/screens/receipt_scanner_screen.dart';
 import 'package:savingor_app/features/scanner/presentation/screens/create_receipt_screen.dart';
+import 'package:savingor_app/features/scanner/presentation/screens/receipt_detail_screen.dart';
 import 'package:savingor_app/features/shopping/presentation/screens/shopping_lists_screen.dart';
 import 'package:savingor_app/features/shopping/presentation/screens/shopping_list_detail_screen.dart';
 import 'package:savingor_app/features/shopping/presentation/screens/create_shopping_list_screen.dart';
@@ -160,15 +161,24 @@ GoRouter createAppRouter({required AppState appState}) {
             }
 
             return CreateReceiptScreen(
+              receiptId: extra['receiptId'] as String?,
               initialStoreName: extra['initialStoreName'] as String?,
               initialDate: initialDate,
               initialTotal: initialTotal,
               initialCategory: extra['initialCategory'] as String?,
               initialNotes: extra['initialNotes'] as String?,
+              isEditing: extra['isEditing'] == true,
             );
           }
 
           return const CreateReceiptScreen();
+        },
+      ),
+      GoRoute(
+        path: '/scanner/:receiptId',
+        builder: (context, state) {
+          final String receiptId = state.pathParameters['receiptId'] ?? '';
+          return ReceiptDetailScreen(receiptId: receiptId);
         },
       ),
       GoRoute(
