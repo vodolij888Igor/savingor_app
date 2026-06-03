@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/expenses/data/expenses_store.dart';
 import 'package:savingor_app/features/expenses/domain/models/user_expense.dart';
+import 'package:savingor_app/features/scanner/data/receipt_store.dart';
+import 'package:savingor_app/features/scanner/domain/models/receipt.dart';
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
 
 /// First-tab Savingor home dashboard. Routed as [DealsMapScreen].
@@ -34,11 +36,19 @@ class DealsMapScreen extends StatelessWidget {
   static _DashboardData _computeDashboardData(
     ExpensesStore expensesStore,
     ShoppingListsStore shoppingListsStore,
+    ReceiptStore receiptStore,
   ) {
-    double totalExpenses = 0;
+    double expensesTotal = 0;
     for (final UserExpense expense in expensesStore.expenses) {
-      totalExpenses += expense.totalAmount;
+      expensesTotal += expense.totalAmount;
     }
+
+    double receiptsTotal = 0;
+    for (final Receipt receipt in receiptStore.receipts) {
+      receiptsTotal += receipt.total;
+    }
+
+    final double totalExpenses = expensesTotal + receiptsTotal;
 
     double estimatedShoppingTotal = shoppingListsStore.totalEstimatedListValue;
 
@@ -53,12 +63,22 @@ class DealsMapScreen extends StatelessWidget {
       latestExpense = sorted.first;
     }
 
+    Receipt? latestReceipt;
+    if (receiptStore.receipts.isNotEmpty) {
+      final List<Receipt> sorted = List<Receipt>.from(receiptStore.receipts)
+        ..sort((Receipt a, Receipt b) => b.date.compareTo(a.date));
+      latestReceipt = sorted.first;
+    }
+
     return _DashboardData(
       totalExpenses: totalExpenses,
       expenseCount: expensesStore.expenses.length,
+      receiptCount: receiptStore.receipts.length,
+      receiptsTotal: receiptsTotal,
       shoppingListCount: shoppingListsStore.listCount,
       estimatedShoppingTotal: estimatedShoppingTotal,
       latestExpense: latestExpense,
+      latestReceipt: latestReceipt,
     );
   }
 
@@ -189,6 +209,7 @@ class DealsMapScreen extends StatelessWidget {
     final ExpensesStore expensesStore = ExpensesProvider.of(context);
     final ShoppingListsStore shoppingListsStore =
         ShoppingListsProvider.of(context);
+    final ReceiptStore receiptStore = ReceiptProvider.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return ListenableBuilder(
@@ -197,45 +218,55 @@ class DealsMapScreen extends StatelessWidget {
         return ListenableBuilder(
           listenable: shoppingListsStore,
           builder: (BuildContext context, Widget? __) {
-            final _DashboardData data = _computeDashboardData(
-              expensesStore,
-              shoppingListsStore,
-            );
-            final double goalProgress =
-                (data.totalExpenses / _goalAmount).clamp(0.0, 1.0);
+            return ListenableBuilder(
+              listenable: receiptStore,
+              builder: (BuildContext context, Widget? ___) {
+                final _DashboardData data = _computeDashboardData(
+                  expensesStore,
+                  shoppingListsStore,
+                  receiptStore,
+                );
+                final double goalProgress =
+                    (data.totalExpenses / _goalAmount).clamp(0.0, 1.0);
 
-            return Scaffold(
-              backgroundColor: _pageWhite,
-              body: SafeArea(
-                child: SingleChildScrollView(
-                  padding:
-                      EdgeInsets.fromLTRB(20, 0, 20, 32 + bottomInset + 72),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: <Widget>[
-                      _buildHeader(context),
-                      const SizedBox(height: 44),
-                      _buildSavingsHero(
-                        data.totalExpenses,
-                        goalProgress,
-                        data.expenseCount,
+                return Scaffold(
+                  backgroundColor: _pageWhite,
+                  body: SafeArea(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.fromLTRB(
+                        20,
+                        0,
+                        20,
+                        32 + bottomInset + 72,
                       ),
-                      const SizedBox(height: SavingorSpacing.xl),
-                      _buildStartSavingButton(context),
-                      const SizedBox(height: SavingorSpacing.xl),
-                      _buildMetricsRow(data),
-                      const SizedBox(height: SavingorSpacing.xl),
-                      _buildMonthlyGoal(data.totalExpenses, goalProgress),
-                      const SizedBox(height: SavingorSpacing.xl),
-                      _buildAiCallout(context),
-                      const SizedBox(height: SavingorSpacing.xl),
-                      _buildTopDeals(context),
-                      const SizedBox(height: SavingorSpacing.xl),
-                      _buildRecentActivity(data),
-                    ],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          _buildHeader(context),
+                          const SizedBox(height: 44),
+                          _buildSavingsHero(
+                            data.totalExpenses,
+                            goalProgress,
+                            data.expenseCount,
+                          ),
+                          const SizedBox(height: SavingorSpacing.xl),
+                          _buildStartSavingButton(context),
+                          const SizedBox(height: SavingorSpacing.xl),
+                          _buildMetricsRow(data),
+                          const SizedBox(height: SavingorSpacing.xl),
+                          _buildMonthlyGoal(data.totalExpenses, goalProgress),
+                          const SizedBox(height: SavingorSpacing.xl),
+                          _buildAiCallout(context),
+                          const SizedBox(height: SavingorSpacing.xl),
+                          _buildTopDeals(context),
+                          const SizedBox(height: SavingorSpacing.xl),
+                          _buildRecentActivity(data),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             );
           },
         );
@@ -570,7 +601,7 @@ class DealsMapScreen extends StatelessWidget {
             icon: Icons.receipt_long_outlined,
             iconSize: 33,
             title: 'Receipts',
-            value: '${data.expenseCount}',
+            value: '${data.receiptCount}',
             suffix: 'recorded',
             iconColor: const Color(0xFF5B8FA8),
           ),
@@ -910,16 +941,22 @@ class _DashboardData {
   const _DashboardData({
     required this.totalExpenses,
     required this.expenseCount,
+    required this.receiptCount,
+    required this.receiptsTotal,
     required this.shoppingListCount,
     required this.estimatedShoppingTotal,
     required this.latestExpense,
+    required this.latestReceipt,
   });
 
   final double totalExpenses;
   final int expenseCount;
+  final int receiptCount;
+  final double receiptsTotal;
   final int shoppingListCount;
   final double estimatedShoppingTotal;
   final UserExpense? latestExpense;
+  final Receipt? latestReceipt;
 }
 
 class _DealPreview {

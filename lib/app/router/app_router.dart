@@ -12,6 +12,7 @@ import 'package:savingor_app/features/subscription/presentation/screens/subscrip
 import 'package:savingor_app/features/deals/presentation/screens/deals_map_screen.dart';
 import 'package:savingor_app/features/deals/presentation/screens/deal_details_screen.dart';
 import 'package:savingor_app/features/scanner/presentation/screens/receipt_scanner_screen.dart';
+import 'package:savingor_app/features/scanner/presentation/screens/create_receipt_screen.dart';
 import 'package:savingor_app/features/shopping/presentation/screens/shopping_lists_screen.dart';
 import 'package:savingor_app/features/shopping/presentation/screens/shopping_list_detail_screen.dart';
 import 'package:savingor_app/features/shopping/presentation/screens/create_shopping_list_screen.dart';
@@ -138,6 +139,37 @@ GoRouter createAppRouter({required AppState appState}) {
       GoRoute(
         path: '/expenses/create',
         builder: (context, state) => const CreateExpenseScreen(),
+      ),
+      GoRoute(
+        path: '/scanner/create',
+        builder: (context, state) {
+          final Object? extra = state.extra;
+          if (extra is Map<String, dynamic>) {
+            final Object? dateValue = extra['initialDate'];
+            DateTime? initialDate;
+            if (dateValue is DateTime) {
+              initialDate = dateValue;
+            }
+
+            final Object? totalValue = extra['initialTotal'];
+            double? initialTotal;
+            if (totalValue is double) {
+              initialTotal = totalValue;
+            } else if (totalValue is num) {
+              initialTotal = totalValue.toDouble();
+            }
+
+            return CreateReceiptScreen(
+              initialStoreName: extra['initialStoreName'] as String?,
+              initialDate: initialDate,
+              initialTotal: initialTotal,
+              initialCategory: extra['initialCategory'] as String?,
+              initialNotes: extra['initialNotes'] as String?,
+            );
+          }
+
+          return const CreateReceiptScreen();
+        },
       ),
       GoRoute(
         path: '/expenses',
