@@ -1,3 +1,5 @@
+import 'package:savingor_app/features/deals/domain/models/nearby_store_data_source.dart';
+
 /// Grocery store category for nearby store listings.
 enum NearbyStoreCategory {
   grocery('Grocery'),
@@ -9,7 +11,7 @@ enum NearbyStoreCategory {
   final String label;
 }
 
-/// Nearby grocery store — replace with Places API results later.
+/// Nearby grocery store from mock data or Google Places.
 class NearbyStore {
   const NearbyStore({
     required this.id,
@@ -20,6 +22,7 @@ class NearbyStore {
     this.longitude,
     this.address,
     this.statusText = 'Nearby store',
+    this.dataSource = NearbyStoreDataSource.mock,
   });
 
   final String id;
@@ -30,8 +33,11 @@ class NearbyStore {
   final double? longitude;
   final String? address;
   final String statusText;
+  final NearbyStoreDataSource dataSource;
 
   bool get hasCoordinates => latitude != null && longitude != null;
+
+  bool get isRealData => dataSource == NearbyStoreDataSource.places;
 
   String get distanceLabel {
     if (distanceKm < 1) {

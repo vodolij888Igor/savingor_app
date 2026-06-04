@@ -192,7 +192,7 @@ GoRouter createAppRouter({required AppState appState}) {
       ),
       GoRoute(
         path: '/nearby-stores',
-        builder: (context, state) => const DealsMapScreen(),
+        builder: (context, state) => DealsMapScreen(),
       ),
       GoRoute(
         path: '/saved',

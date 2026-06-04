@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
-import 'package:savingor_app/features/deals/data/local_nearby_store_repository.dart';
 import 'package:savingor_app/features/deals/data/map_directions_launcher.dart';
+import 'package:savingor_app/features/deals/data/nearby_stores_repository.dart';
 import 'package:savingor_app/features/deals/data/user_location_service.dart';
 import 'package:savingor_app/features/deals/domain/models/manual_location_selection.dart';
 import 'package:savingor_app/features/deals/domain/models/nearby_store.dart';
+import 'package:savingor_app/features/deals/domain/models/nearby_store_data_source.dart';
 import 'package:savingor_app/features/deals/domain/models/user_location_coords.dart';
 import 'package:savingor_app/features/deals/presentation/widgets/manual_location_sheet.dart';
 import 'package:savingor_app/features/deals/presentation/widgets/nearby_location_section.dart';
@@ -15,14 +16,14 @@ import 'package:savingor_app/features/deals/presentation/widgets/nearby_store_ca
 
 /// Nearby stores map foundation — mock data until Google Maps / Places.
 class DealsMapScreen extends StatefulWidget {
-  const DealsMapScreen({
+  DealsMapScreen({
     super.key,
-    this.repository = const LocalNearbyStoreRepository(),
+    NearbyStoresRepository? repository,
     this.locationService = const UserLocationService(),
     this.directionsLauncher = const MapDirectionsLauncher(),
-  });
+  }) : repository = repository ?? NearbyStoresRepository();
 
-  final NearbyStoreRepository repository;
+  final NearbyStoresRepository repository;
   final UserLocationService locationService;
   final MapDirectionsLauncher directionsLauncher;
 
@@ -42,6 +43,17 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
   UserLocationDebugInfo? _locationDebug;
   bool _isLoadingLocation = false;
 
+  List<NearbyStore> _stores = <NearbyStore>[];
+  bool _isLoadingStores = true;
+  NearbyStoreDataSource _storeDataSource = NearbyStoreDataSource.mock;
+  bool _usedPlacesFallback = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStores();
+  }
+
   UserLocationCoords? get _displayCoords {
     if (_activeLocation != null &&
         (_activeLocation!.latitude != 0 || _activeLocation!.longitude != 0)) {
@@ -55,6 +67,25 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
       return _activeLocation!.displayName;
     }
     return null;
+  }
+
+  Future<void> _loadStores() async {
+    setState(() => _isLoadingStores = true);
+
+    final NearbyStoresLoadResult result = await widget.repository.loadStores(
+      radiusKm: _selectedRadiusKm,
+      regionId: _activeLocation?.regionId,
+      originLatitude: _displayCoords?.latitude,
+      originLongitude: _displayCoords?.longitude,
+    );
+
+    if (!mounted) return;
+    setState(() {
+      _stores = result.stores;
+      _storeDataSource = result.dataSource;
+      _usedPlacesFallback = result.usedPlacesFallback;
+      _isLoadingStores = false;
+    });
   }
 
   Future<void> _requestLocation() async {
@@ -90,6 +121,8 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
       _locationMessage = result.message;
       _locationDebug = result.debug;
     });
+
+    await _loadStores();
   }
 
   Future<void> _enterCityManually() async {
@@ -119,6 +152,8 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
       _locationMessage = null;
       _locationDebug = null;
     });
+
+    await _loadStores();
   }
 
   Future<void> _openDirections(NearbyStore store) async {
@@ -137,12 +172,18 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
     }
   }
 
+  String _storesFootnote() {
+    if (_storeDataSource == NearbyStoreDataSource.places) {
+      return 'Stores are based on your selected location and search radius.';
+    }
+    if (_usedPlacesFallback) {
+      return 'Showing sample stores because live store search is unavailable.';
+    }
+    return 'Sample nearby stores. Real Google Places integration is coming next.';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final List<NearbyStore> stores = widget.repository.getStoresWithinRadius(
-      _selectedRadiusKm,
-      regionId: _activeLocation?.regionId,
-    );
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
@@ -196,6 +237,7 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
               onEnterCityManually: _enterCityManually,
               onRadiusSelected: (double radiusKm) {
                 setState(() => _selectedRadiusKm = radiusKm);
+                _loadStores();
               },
             ),
             const SizedBox(height: SavingorSpacing.lg),
@@ -214,7 +256,7 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
                   ),
                 ),
                 Text(
-                  '${stores.length} found',
+                  _isLoadingStores ? '…' : '${_stores.length} found',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -225,7 +267,7 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Sample nearby stores. Real Google Places integration is coming next.',
+              _storesFootnote(),
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
@@ -234,10 +276,19 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
               ),
             ),
             const SizedBox(height: SavingorSpacing.md),
-            if (stores.isEmpty)
+            if (_isLoadingStores)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: SavingorColors.primaryStroke,
+                  ),
+                ),
+              )
+            else if (_stores.isEmpty)
               _buildEmptyRadiusState()
             else
-              ...stores.map(
+              ..._stores.map(
                 (NearbyStore store) => Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: NearbyStoreCard(
@@ -260,8 +311,7 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Text(
-        'No sample stores within ${_selectedRadiusKm.round()} km. '
-        'Try a larger radius.',
+        'No stores within ${_selectedRadiusKm.round()} km. Try a larger radius.',
         textAlign: TextAlign.center,
         style: TextStyle(
           fontSize: 13,
