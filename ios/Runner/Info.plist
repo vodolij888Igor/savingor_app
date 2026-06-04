@@ -47,5 +47,11 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Savingor uses your location to find nearby grocery stores.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>comgooglemaps</string>
+		<string>googlemaps</string>
+		<string>maps</string>
+	</array>
 </dict>
 </plist>

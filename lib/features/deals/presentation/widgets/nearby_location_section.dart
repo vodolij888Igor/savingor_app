@@ -14,10 +14,12 @@ class NearbyLocationSection extends StatelessWidget {
     required this.locationMessage,
     required this.isLoadingLocation,
     this.locationDebug,
+    this.manualLocationLabel,
     required this.selectedRadiusKm,
     required this.radiusOptionsKm,
     required this.onUseMyLocation,
     required this.onRetryLocation,
+    required this.onEnterCityManually,
     required this.onRadiusSelected,
   });
 
@@ -26,11 +28,16 @@ class NearbyLocationSection extends StatelessWidget {
   final String? locationMessage;
   final bool isLoadingLocation;
   final UserLocationDebugInfo? locationDebug;
+  final String? manualLocationLabel;
   final double selectedRadiusKm;
   final List<double> radiusOptionsKm;
   final VoidCallback onUseMyLocation;
   final VoidCallback onRetryLocation;
+  final VoidCallback onEnterCityManually;
   final ValueChanged<double> onRadiusSelected;
+
+  bool get _isManualSelected =>
+      manualLocationLabel != null && manualLocationLabel!.isNotEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +85,9 @@ class NearbyLocationSection extends StatelessWidget {
   }
 
   Widget _buildLocationHeader() {
+    final bool isActive = _isManualSelected ||
+        locationStatus == UserLocationAccessStatus.granted;
+
     return Row(
       children: <Widget>[
         Icon(
@@ -96,7 +106,7 @@ class NearbyLocationSection extends StatelessWidget {
             ),
           ),
         ),
-        if (locationStatus == UserLocationAccessStatus.granted)
+        if (isActive)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
@@ -118,25 +128,68 @@ class NearbyLocationSection extends StatelessWidget {
 
   Widget _buildLocationBody(BuildContext context) {
     if (isLoadingLocation) {
-      return Row(
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          SizedBox(
-            width: 18,
-            height: 18,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: SavingorColors.primaryStroke.withOpacity(0.85),
+          Row(
+            children: <Widget>[
+              SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: SavingorColors.primaryStroke.withOpacity(0.85),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'Checking location...',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: SavingorColors.textSecondary.withOpacity(0.95),
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+    }
+
+    if (_isManualSelected) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          const Text(
+            'Location selected',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: SavingorColors.primaryStroke,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(height: 4),
           Text(
-            'Checking location...',
+            manualLocationLabel!,
             style: TextStyle(
               fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: SavingorColors.textSecondary.withOpacity(0.95),
+              fontWeight: FontWeight.w600,
+              color: SavingorColors.darkGreen.withOpacity(0.85),
             ),
           ),
+          if (coords != null) ...<Widget>[
+            const SizedBox(height: 4),
+            Text(
+              'Lat: ${coords!.latitudeLabel}, Lng: ${coords!.longitudeLabel}',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: SavingorColors.textSecondary.withOpacity(0.9),
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          _buildLocationActions(showUseMyLocation: true),
         ],
       );
     }
@@ -173,6 +226,8 @@ class NearbyLocationSection extends StatelessWidget {
               ),
             ),
           ],
+          const SizedBox(height: 12),
+          _buildLocationActions(showUseMyLocation: true),
         ],
       );
     }
@@ -196,28 +251,8 @@ class NearbyLocationSection extends StatelessWidget {
             const SizedBox(height: 8),
             _buildDebugInfo(locationDebug!),
           ],
-          const SizedBox(height: 10),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: OutlinedButton(
-              onPressed: onRetryLocation,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: SavingorColors.primaryStroke,
-                side: BorderSide(
-                  color: SavingorColors.primaryStroke.withOpacity(0.35),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                textStyle: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              child: const Text('Retry'),
-            ),
-          ),
+          const SizedBox(height: 12),
+          _buildLocationActions(showUseMyLocation: true, primaryLabel: 'Retry'),
         ],
       );
     }
@@ -234,13 +269,31 @@ class NearbyLocationSection extends StatelessWidget {
             height: 1.35,
           ),
         ),
-        const SizedBox(height: 10),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: FilledButton.icon(
-            onPressed: onUseMyLocation,
-            icon: const Icon(Icons.location_searching_rounded, size: 18),
-            label: const Text('Use my location'),
+        const SizedBox(height: 12),
+        _buildLocationActions(showUseMyLocation: true),
+      ],
+    );
+  }
+
+  Widget _buildLocationActions({
+    required bool showUseMyLocation,
+    String primaryLabel = 'Use my location',
+  }) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: <Widget>[
+        if (showUseMyLocation)
+          FilledButton.icon(
+            onPressed: primaryLabel == 'Retry' ? onRetryLocation : onUseMyLocation,
+            icon: Icon(
+              primaryLabel == 'Retry'
+                  ? Icons.refresh_rounded
+                  : Icons.location_searching_rounded,
+              size: 18,
+            ),
+            label: Text(primaryLabel),
             style: FilledButton.styleFrom(
               backgroundColor: SavingorColors.primaryStroke,
               foregroundColor: Colors.white,
@@ -254,6 +307,23 @@ class NearbyLocationSection extends StatelessWidget {
               ),
             ),
           ),
+        OutlinedButton(
+          onPressed: onEnterCityManually,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: SavingorColors.primaryStroke,
+            side: BorderSide(
+              color: SavingorColors.primaryStroke.withOpacity(0.35),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            textStyle: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          child: const Text('Enter city manually'),
         ),
       ],
     );

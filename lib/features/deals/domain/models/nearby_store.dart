@@ -16,6 +16,9 @@ class NearbyStore {
     required this.name,
     required this.category,
     required this.distanceKm,
+    this.latitude,
+    this.longitude,
+    this.address,
     this.statusText = 'Nearby store',
   });
 
@@ -23,7 +26,12 @@ class NearbyStore {
   final String name;
   final NearbyStoreCategory category;
   final double distanceKm;
+  final double? latitude;
+  final double? longitude;
+  final String? address;
   final String statusText;
+
+  bool get hasCoordinates => latitude != null && longitude != null;
 
   String get distanceLabel {
     if (distanceKm < 1) {

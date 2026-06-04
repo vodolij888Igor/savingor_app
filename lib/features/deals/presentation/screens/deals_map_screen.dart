@@ -3,9 +3,12 @@ import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/deals/data/local_nearby_store_repository.dart';
+import 'package:savingor_app/features/deals/data/map_directions_launcher.dart';
 import 'package:savingor_app/features/deals/data/user_location_service.dart';
+import 'package:savingor_app/features/deals/domain/models/manual_location_selection.dart';
 import 'package:savingor_app/features/deals/domain/models/nearby_store.dart';
 import 'package:savingor_app/features/deals/domain/models/user_location_coords.dart';
+import 'package:savingor_app/features/deals/presentation/widgets/manual_location_sheet.dart';
 import 'package:savingor_app/features/deals/presentation/widgets/nearby_location_section.dart';
 import 'package:savingor_app/features/deals/presentation/widgets/nearby_map_placeholder_card.dart';
 import 'package:savingor_app/features/deals/presentation/widgets/nearby_store_card.dart';
@@ -16,10 +19,12 @@ class DealsMapScreen extends StatefulWidget {
     super.key,
     this.repository = const LocalNearbyStoreRepository(),
     this.locationService = const UserLocationService(),
+    this.directionsLauncher = const MapDirectionsLauncher(),
   });
 
   final NearbyStoreRepository repository;
   final UserLocationService locationService;
+  final MapDirectionsLauncher directionsLauncher;
 
   static const List<double> radiusOptionsKm = <double>[5, 10, 20, 30];
 
@@ -31,11 +36,26 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
   static const Color _pageWhite = Color(0xFFFFFEFE);
 
   double _selectedRadiusKm = 10;
+  NearbyActiveLocation? _activeLocation;
   UserLocationAccessStatus _locationStatus = UserLocationAccessStatus.idle;
-  UserLocationCoords? _coords;
   String? _locationMessage;
   UserLocationDebugInfo? _locationDebug;
   bool _isLoadingLocation = false;
+
+  UserLocationCoords? get _displayCoords {
+    if (_activeLocation != null &&
+        (_activeLocation!.latitude != 0 || _activeLocation!.longitude != 0)) {
+      return _activeLocation!.coords;
+    }
+    return null;
+  }
+
+  String? get _manualLocationLabel {
+    if (_activeLocation?.source == NearbyLocationSource.manual) {
+      return _activeLocation!.displayName;
+    }
+    return null;
+  }
 
   Future<void> _requestLocation() async {
     if (_isLoadingLocation) return;
@@ -50,27 +70,79 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
         await widget.locationService.requestCurrentLocation();
 
     if (!mounted) return;
+
+    NearbyActiveLocation? nextActive;
+    if (result.status == UserLocationAccessStatus.granted &&
+        result.coords != null) {
+      nextActive = NearbyActiveLocation(
+        displayName: 'Current location',
+        latitude: result.coords!.latitude,
+        longitude: result.coords!.longitude,
+        source: NearbyLocationSource.gps,
+        regionId: null,
+      );
+    }
+
     setState(() {
       _isLoadingLocation = false;
       _locationStatus = result.status;
-      _coords = result.coords;
+      _activeLocation = nextActive;
       _locationMessage = result.message;
       _locationDebug = result.debug;
     });
   }
 
-  void _showDirectionsSnack() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Directions will open Google Maps in the next step.'),
-      ),
+  Future<void> _enterCityManually() async {
+    final String? input = await ManualLocationSheet.show(context);
+    if (input == null || !mounted) return;
+
+    final String trimmed = input.trim();
+    if (trimmed.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a city or area.')),
+      );
+      return;
+    }
+
+    final ManualLocationSelection? selection =
+        ManualLocationResolver.resolve(trimmed);
+    if (selection == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a city or area.')),
+      );
+      return;
+    }
+
+    setState(() {
+      _activeLocation = selection.toActiveLocation();
+      _locationStatus = UserLocationAccessStatus.idle;
+      _locationMessage = null;
+      _locationDebug = null;
+    });
+  }
+
+  Future<void> _openDirections(NearbyStore store) async {
+    final UserLocationCoords? origin = _displayCoords;
+
+    final bool opened = await widget.directionsLauncher.openDirections(
+      store,
+      origin: origin,
     );
+
+    if (!mounted) return;
+    if (!opened) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open directions.')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<NearbyStore> stores =
-        widget.repository.getStoresWithinRadius(_selectedRadiusKm);
+    final List<NearbyStore> stores = widget.repository.getStoresWithinRadius(
+      _selectedRadiusKm,
+      regionId: _activeLocation?.regionId,
+    );
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
@@ -112,14 +184,16 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
             const SizedBox(height: SavingorSpacing.lg),
             NearbyLocationSection(
               locationStatus: _locationStatus,
-              coords: _coords,
+              coords: _displayCoords,
               locationMessage: _locationMessage,
               isLoadingLocation: _isLoadingLocation,
               locationDebug: _locationDebug,
+              manualLocationLabel: _manualLocationLabel,
               selectedRadiusKm: _selectedRadiusKm,
               radiusOptionsKm: DealsMapScreen.radiusOptionsKm,
               onUseMyLocation: _requestLocation,
               onRetryLocation: _requestLocation,
+              onEnterCityManually: _enterCityManually,
               onRadiusSelected: (double radiusKm) {
                 setState(() => _selectedRadiusKm = radiusKm);
               },
@@ -168,7 +242,7 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: NearbyStoreCard(
                     store: store,
-                    onDirections: _showDirectionsSnack,
+                    onDirections: () => _openDirections(store),
                   ),
                 ),
               ),
