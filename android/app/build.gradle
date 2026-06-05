@@ -6,6 +6,22 @@ plugins {
     id "com.google.gms.google-services"
 }
 
+def dartDefines = [:]
+if (project.hasProperty('dart-defines')) {
+    dartDefines = dartDefines + project.property('dart-defines')
+        .split(',')
+        .collectEntries { entry ->
+            def decoded = new String(entry.decodeBase64(), 'UTF-8')
+            def separatorIndex = decoded.indexOf('=')
+            if (separatorIndex >= 0) {
+                [(decoded.substring(0, separatorIndex)): decoded.substring(separatorIndex + 1)]
+            } else {
+                [:]
+            }
+        }
+}
+def googleMapsApiKey = dartDefines.GOOGLE_PLACES_API_KEY ?: ""
+
 android {
     namespace = "com.example.Savingor_app"
     compileSdk = flutter.compileSdkVersion
@@ -29,6 +45,9 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders += [
+            GOOGLE_MAPS_API_KEY: googleMapsApiKey,
+        ]
     }
 
     buildTypes {

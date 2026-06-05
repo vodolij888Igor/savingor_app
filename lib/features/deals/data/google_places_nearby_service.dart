@@ -55,7 +55,7 @@ class GooglePlacesNearbyService {
         },
         body: jsonEncode(<String, dynamic>{
           'includedTypes': <String>['supermarket', 'grocery_store'],
-          'maxResultCount': 10,
+          'maxResultCount': 20,
           'locationRestriction': <String, dynamic>{
             'circle': <String, dynamic>{
               'center': <String, dynamic>{
@@ -89,13 +89,14 @@ class GooglePlacesNearbyService {
       }
 
       final List<NearbyStore> stores = <NearbyStore>[];
+      final Set<String> seenPlaceIds = <String>{};
       for (final dynamic rawPlace in places) {
         final NearbyStore? store = _mapPlace(
           rawPlace as Map<String, dynamic>,
           originLat: latitude,
           originLng: longitude,
         );
-        if (store != null) {
+        if (store != null && seenPlaceIds.add(store.id)) {
           stores.add(store);
         }
       }

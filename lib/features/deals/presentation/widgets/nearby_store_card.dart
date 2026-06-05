@@ -75,6 +75,20 @@ class NearbyStoreCard extends StatelessWidget {
                         color: SavingorColors.textSecondary.withOpacity(0.9),
                       ),
                     ),
+                    if (store.hasAddress) ...<Widget>[
+                      const SizedBox(height: 4),
+                      Text(
+                        store.displayAddress!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: SavingorColors.darkGreen.withOpacity(0.72),
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

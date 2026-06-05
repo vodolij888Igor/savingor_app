@@ -39,6 +39,17 @@ class NearbyStore {
 
   bool get isRealData => dataSource == NearbyStoreDataSource.places;
 
+  bool get hasAddress => address != null && address!.trim().isNotEmpty;
+
+  String? get displayAddress => hasAddress ? address!.trim() : null;
+
+  String get mapInfoWindowSnippet {
+    if (hasAddress) {
+      return '$distanceLabel · $address';
+    }
+    return '$distanceLabel · ${category.label}';
+  }
+
   String get distanceLabel {
     if (distanceKm < 1) {
       return '${(distanceKm * 1000).round()} m';

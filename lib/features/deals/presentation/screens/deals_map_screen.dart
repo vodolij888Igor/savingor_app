@@ -11,8 +11,9 @@ import 'package:savingor_app/features/deals/domain/models/nearby_store_data_sour
 import 'package:savingor_app/features/deals/domain/models/user_location_coords.dart';
 import 'package:savingor_app/features/deals/presentation/widgets/manual_location_sheet.dart';
 import 'package:savingor_app/features/deals/presentation/widgets/nearby_location_section.dart';
-import 'package:savingor_app/features/deals/presentation/widgets/nearby_map_placeholder_card.dart';
+import 'package:savingor_app/features/deals/presentation/widgets/nearby_stores_map_card.dart';
 import 'package:savingor_app/features/deals/presentation/widgets/nearby_store_card.dart';
+import 'package:savingor_app/features/deals/presentation/widgets/selected_store_bottom_sheet.dart';
 
 /// Nearby stores map foundation — mock data until Google Maps / Places.
 class DealsMapScreen extends StatefulWidget {
@@ -172,6 +173,17 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
     }
   }
 
+  Future<void> _onStoreMarkerTap(NearbyStore store) async {
+    await SelectedStoreBottomSheet.show(
+      context,
+      store: store,
+      onDirections: () {
+        Navigator.of(context).pop();
+        _openDirections(store);
+      },
+    );
+  }
+
   String _storesFootnote() {
     if (_storeDataSource == NearbyStoreDataSource.places) {
       return 'Stores are based on your selected location and search radius.';
@@ -241,7 +253,14 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
               },
             ),
             const SizedBox(height: SavingorSpacing.lg),
-            const NearbyMapPlaceholderCard(),
+            NearbyStoresMapCard(
+              userLatitude: _displayCoords?.latitude,
+              userLongitude: _displayCoords?.longitude,
+              userLocationLabel: _activeLocation?.displayName,
+              radiusKm: _selectedRadiusKm,
+              stores: _stores,
+              onStoreMarkerTap: _onStoreMarkerTap,
+            ),
             const SizedBox(height: SavingorSpacing.lg),
             Row(
               children: <Widget>[
