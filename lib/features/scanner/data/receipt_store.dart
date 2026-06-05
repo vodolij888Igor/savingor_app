@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 
-import 'package:savingor_app/features/scanner/data/receipt_firestore_service.dart';
-import 'package:savingor_app/features/scanner/domain/models/receipt.dart';
+import 'package:savingor_app/features/receipts/data/receipt_firestore_service.dart';
+import 'package:savingor_app/features/receipts/domain/models/receipt.dart';
+import 'package:savingor_app/features/receipts/domain/models/receipt_item.dart';
+import 'package:savingor_app/features/receipts/domain/models/receipt_source.dart';
 
 /// App-level state for Firestore-backed grocery receipts.
 class ReceiptStore extends ChangeNotifier {
@@ -80,12 +82,28 @@ class ReceiptStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  Receipt? receiptById(String receiptId) {
+    for (final Receipt receipt in _receipts) {
+      if (receipt.id == receiptId) {
+        return receipt;
+      }
+    }
+    return null;
+  }
+
   Future<String?> createReceipt({
     required String storeName,
-    required DateTime date,
-    required String category,
+    required DateTime purchaseDate,
     required double total,
+    ReceiptSource source = ReceiptSource.manual,
+    String? storeAddress,
+    String? placeId,
+    String? storeId,
+    double? subtotal,
+    double? tax,
     String? notes,
+    String? categorySummary,
+    List<ReceiptItem> items = const <ReceiptItem>[],
   }) async {
     if (_uid == null) {
       _mutationError = 'Sign in to save receipts.';
@@ -100,14 +118,22 @@ class ReceiptStore extends ChangeNotifier {
         id: '',
         userId: _uid!,
         storeName: storeName.trim(),
-        date: date,
-        category: category.trim(),
-        total: total,
-        notes: notes?.trim().isEmpty ?? true ? null : notes?.trim(),
+        storeAddress: _trimOrNull(storeAddress),
+        placeId: _trimOrNull(placeId),
+        storeId: _trimOrNull(storeId),
+        purchaseDate: purchaseDate,
         createdAt: now,
         updatedAt: now,
+        subtotal: subtotal,
+        tax: tax,
+        total: total,
+        source: source,
+        notes: _trimOrNull(notes),
+        categorySummary: _trimOrNull(categorySummary) ?? 'Grocery',
+        items: items,
       );
-      final String receiptId = await _service.createReceipt(receipt);
+      final String receiptId =
+          await _service.createReceipt(_uid!, receipt);
       notifyListeners();
       return receiptId;
     } catch (_) {
@@ -122,7 +148,7 @@ class ReceiptStore extends ChangeNotifier {
 
     try {
       _mutationError = null;
-      await _service.deleteReceipt(receiptId);
+      await _service.deleteReceipt(_uid!, receiptId);
       notifyListeners();
       return true;
     } catch (_) {
@@ -132,20 +158,20 @@ class ReceiptStore extends ChangeNotifier {
     }
   }
 
-  Receipt? _findReceiptById(String receiptId) {
-    for (final Receipt receipt in _receipts) {
-      if (receipt.id == receiptId) return receipt;
-    }
-    return null;
-  }
-
   Future<bool> updateReceipt({
     required String receiptId,
     required String storeName,
-    required DateTime date,
-    required String category,
+    required DateTime purchaseDate,
     required double total,
+    ReceiptSource? source,
+    String? storeAddress,
+    String? placeId,
+    String? storeId,
+    double? subtotal,
+    double? tax,
     String? notes,
+    String? categorySummary,
+    List<ReceiptItem>? items,
   }) async {
     if (_uid == null) {
       _mutationError = 'Sign in to update receipts.';
@@ -153,7 +179,7 @@ class ReceiptStore extends ChangeNotifier {
       return false;
     }
 
-    final Receipt? existing = _findReceiptById(receiptId);
+    final Receipt? existing = receiptById(receiptId);
     if (existing == null) {
       _mutationError = 'Receipt not found.';
       notifyListeners();
@@ -162,18 +188,23 @@ class ReceiptStore extends ChangeNotifier {
 
     try {
       _mutationError = null;
-      final String? trimmedNotes =
-          notes?.trim().isEmpty ?? true ? null : notes?.trim();
       final Receipt updated = existing.copyWith(
         storeName: storeName.trim(),
-        date: date,
-        category: category.trim(),
+        purchaseDate: purchaseDate,
         total: total,
-        notes: trimmedNotes,
-        clearNotes: trimmedNotes == null,
+        source: source,
+        storeAddress: _trimOrNull(storeAddress),
+        placeId: _trimOrNull(placeId),
+        storeId: _trimOrNull(storeId),
+        subtotal: subtotal,
+        tax: tax,
+        notes: _trimOrNull(notes),
+        clearNotes: _trimOrNull(notes) == null,
+        categorySummary: _trimOrNull(categorySummary) ?? existing.categorySummary,
+        items: items,
         updatedAt: DateTime.now(),
       );
-      await _service.updateReceipt(updated);
+      await _service.updateReceipt(_uid!, updated);
       notifyListeners();
       return true;
     } catch (_) {
@@ -181,6 +212,12 @@ class ReceiptStore extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  String? _trimOrNull(String? value) {
+    if (value == null) return null;
+    final String trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
   }
 
   @override

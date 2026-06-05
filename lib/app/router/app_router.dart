@@ -15,6 +15,7 @@ import 'package:savingor_app/features/deals/presentation/screens/deal_details_sc
 import 'package:savingor_app/features/scanner/presentation/screens/receipt_scanner_screen.dart';
 import 'package:savingor_app/features/scanner/presentation/screens/create_receipt_screen.dart';
 import 'package:savingor_app/features/scanner/presentation/screens/receipt_detail_screen.dart';
+import 'package:savingor_app/features/receipts/domain/models/receipt_source.dart';
 import 'package:savingor_app/features/shopping/presentation/screens/shopping_lists_screen.dart';
 import 'package:savingor_app/features/shopping/presentation/screens/shopping_list_detail_screen.dart';
 import 'package:savingor_app/features/shopping/presentation/screens/create_shopping_list_screen.dart';
@@ -23,7 +24,6 @@ import 'package:savingor_app/features/deals/presentation/screens/saved_deals_scr
 import 'package:savingor_app/features/start_saving/presentation/screens/start_saving_screen.dart';
 import 'package:savingor_app/features/expenses/presentation/screens/add_grocery_expense_screen.dart';
 import 'package:savingor_app/features/expenses/presentation/screens/expenses_screen.dart';
-import 'package:savingor_app/features/expenses/presentation/screens/create_expense_screen.dart';
 import 'package:savingor_app/features/analytics/presentation/screens/savings_analytics_screen.dart';
 import 'package:savingor_app/features/ai_assistant/presentation/screens/ai_savings_assistant_screen.dart';
 import 'package:savingor_app/core/widgets/bottom_nav_shell.dart';
@@ -140,7 +140,7 @@ GoRouter createAppRouter({required AppState appState}) {
       ),
       GoRoute(
         path: '/expenses/create',
-        builder: (context, state) => const CreateExpenseScreen(),
+        redirect: (context, state) => '/scanner/create',
       ),
       GoRoute(
         path: '/scanner/create',
@@ -161,6 +161,16 @@ GoRouter createAppRouter({required AppState appState}) {
               initialTotal = totalValue.toDouble();
             }
 
+            final List<String> initialItemNames =
+                (extra['initialItemNames'] as List<dynamic>?)
+                        ?.map((dynamic item) => item.toString())
+                        .toList(growable: false) ??
+                    const <String>[];
+
+            final ReceiptSource initialSource = _parseReceiptSource(
+              extra['initialSource'] as String?,
+            );
+
             return CreateReceiptScreen(
               receiptId: extra['receiptId'] as String?,
               initialStoreName: extra['initialStoreName'] as String?,
@@ -168,6 +178,9 @@ GoRouter createAppRouter({required AppState appState}) {
               initialTotal: initialTotal,
               initialCategory: extra['initialCategory'] as String?,
               initialNotes: extra['initialNotes'] as String?,
+              initialStoreAddress: extra['initialStoreAddress'] as String?,
+              initialItemNames: initialItemNames,
+              initialSource: initialSource,
               isEditing: extra['isEditing'] == true,
             );
           }
@@ -254,4 +267,8 @@ GoRouter createAppRouter({required AppState appState}) {
       ),
     ],
   );
+}
+
+ReceiptSource _parseReceiptSource(String? value) {
+  return ReceiptSource.fromValue(value);
 }

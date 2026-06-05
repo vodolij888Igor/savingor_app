@@ -142,13 +142,15 @@ abstract final class ExpenseAnalyticsCalculator {
         highestReceiptAmount = receipt.total;
       }
 
+      final String subtitle = receipt.hasItems
+          ? '${receipt.source.label} · ${receipt.itemCount} items'
+          : receipt.source.label;
+
       addAmount(
         storeName: receipt.storeName,
-        date: receipt.date,
+        date: receipt.purchaseDate,
         amount: receipt.total,
-        subtitle: receipt.category.trim().isEmpty
-            ? 'Receipt'
-            : receipt.category.trim(),
+        subtitle: subtitle,
         typeLabel: 'receipt',
       );
     }

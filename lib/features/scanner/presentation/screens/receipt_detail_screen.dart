@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/features/receipts/domain/models/receipt.dart';
+import 'package:savingor_app/features/receipts/domain/models/receipt_item.dart';
+import 'package:savingor_app/features/receipts/presentation/widgets/receipt_source_badge.dart';
 import 'package:savingor_app/features/scanner/data/receipt_store.dart';
-import 'package:savingor_app/features/scanner/domain/models/receipt.dart';
 
 class ReceiptDetailScreen extends StatelessWidget {
   const ReceiptDetailScreen({super.key, required this.receiptId});
@@ -18,13 +20,6 @@ class ReceiptDetailScreen extends StatelessWidget {
     fontWeight: FontWeight.w800,
     color: SavingorColors.darkGreen,
   );
-
-  Receipt? _findReceipt(ReceiptStore store) {
-    for (final Receipt receipt in store.receipts) {
-      if (receipt.id == receiptId) return receipt;
-    }
-    return null;
-  }
 
   static String _formatDate(DateTime date) {
     final String month = date.month.toString().padLeft(2, '0');
@@ -55,7 +50,7 @@ class ReceiptDetailScreen extends StatelessWidget {
     return AnimatedBuilder(
       animation: store,
       builder: (BuildContext context, Widget? _) {
-        final Receipt? receipt = _findReceipt(store);
+        final Receipt? receipt = store.receiptById(receiptId);
 
         return Scaffold(
           backgroundColor: _pageBackground,
@@ -97,9 +92,7 @@ class ReceiptDetailScreen extends StatelessWidget {
     Receipt receipt,
     double bottomInset,
   ) {
-    final String formattedDate = _formatDate(receipt.date);
-    final String formattedTotal =
-        '\$${receipt.total.toStringAsFixed(2)}';
+    final String formattedDate = _formatDate(receipt.purchaseDate);
     final bool hasNotes =
         receipt.notes != null && receipt.notes!.trim().isNotEmpty;
 
@@ -112,15 +105,48 @@ class ReceiptDetailScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(
-                receipt.storeName,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: SavingorColors.darkGreen,
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Expanded(
+                    child: Text(
+                      receipt.storeName,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: SavingorColors.darkGreen,
+                      ),
+                    ),
+                  ),
+                  ReceiptSourceBadge(source: receipt.source),
+                ],
               ),
-              const SizedBox(height: 8),
+              if (receipt.hasAddress) ...<Widget>[
+                const SizedBox(height: 10),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 18,
+                      color: SavingorColors.primaryStroke.withOpacity(0.85),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        receipt.displayAddress!,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: SavingorColors.darkGreen.withOpacity(0.8),
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 10),
               Text(
                 formattedDate,
                 style: const TextStyle(
@@ -140,7 +166,7 @@ class ReceiptDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                formattedTotal,
+                receipt.formattedTotal,
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
@@ -148,62 +174,110 @@ class ReceiptDetailScreen extends StatelessWidget {
                   letterSpacing: -0.5,
                 ),
               ),
+              if (receipt.subtotal != null || receipt.tax != null) ...<Widget>[
+                const SizedBox(height: 8),
+                if (receipt.subtotal != null)
+                  Text(
+                    'Subtotal: \$${receipt.subtotal!.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: SavingorColors.textSecondary.withOpacity(0.95),
+                    ),
+                  ),
+                if (receipt.tax != null)
+                  Text(
+                    'Tax: \$${receipt.tax!.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: SavingorColors.textSecondary.withOpacity(0.95),
+                    ),
+                  ),
+              ],
             ],
           ),
         ),
         const SizedBox(height: SavingorSpacing.lg),
-        const Text(
-          'Details',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: SavingorColors.darkGreen,
-          ),
+        Row(
+          children: <Widget>[
+            const Expanded(
+              child: Text(
+                'Items',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: SavingorColors.darkGreen,
+                ),
+              ),
+            ),
+            Text(
+              receipt.hasItems ? '${receipt.itemCount} items' : 'No items saved',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: SavingorColors.textSecondary.withOpacity(0.9),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: SavingorSpacing.sm),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          decoration: _cardDecoration(),
-          child: Column(
-            children: <Widget>[
-              _detailRow('Store', receipt.storeName),
-              _detailDivider(),
-              _detailRow('Date', formattedDate),
-              _detailDivider(),
-              _detailRow('Category', receipt.category),
-              _detailDivider(),
-              _detailRow('Total', formattedTotal),
-            ],
-          ),
-        ),
-        const SizedBox(height: SavingorSpacing.lg),
-        const Text(
-          'Notes / OCR text',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: SavingorColors.darkGreen,
-          ),
-        ),
-        const SizedBox(height: SavingorSpacing.sm),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: _cardDecoration(),
-          child: Text(
-            hasNotes
-                ? receipt.notes!
-                : 'No notes saved for this receipt.',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: hasNotes
-                  ? SavingorColors.darkGreen
-                  : SavingorColors.textSecondary,
-              height: 1.45,
+        if (receipt.hasItems)
+          Container(
+            decoration: _cardDecoration(),
+            child: Column(
+              children: List<Widget>.generate(receipt.items.length, (int index) {
+                final ReceiptItem item = receipt.items[index];
+                return Column(
+                  children: <Widget>[
+                    if (index > 0) _detailDivider(),
+                    _itemRow(item),
+                  ],
+                );
+              }),
+            ),
+          )
+        else
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: _cardDecoration(),
+            child: Text(
+              'No line items were saved for this receipt yet.',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: SavingorColors.textSecondary.withOpacity(0.95),
+                height: 1.4,
+              ),
             ),
           ),
-        ),
+        if (hasNotes) ...<Widget>[
+          const SizedBox(height: SavingorSpacing.lg),
+          Text(
+            receipt.notesSectionTitle,
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              color: SavingorColors.darkGreen,
+            ),
+          ),
+          const SizedBox(height: SavingorSpacing.sm),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: _cardDecoration(),
+            child: Text(
+              receipt.notes!,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: SavingorColors.darkGreen,
+                height: 1.45,
+              ),
+            ),
+          ),
+        ],
         const SizedBox(height: SavingorSpacing.lg),
         OutlinedButton.icon(
           onPressed: () {
@@ -211,11 +285,6 @@ class ReceiptDetailScreen extends StatelessWidget {
               '/scanner/create',
               extra: <String, dynamic>{
                 'receiptId': receipt.id,
-                'initialStoreName': receipt.storeName,
-                'initialDate': receipt.date,
-                'initialTotal': receipt.total,
-                'initialCategory': receipt.category,
-                'initialNotes': receipt.notes,
                 'isEditing': true,
               },
             );
@@ -255,31 +324,43 @@ class ReceiptDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _detailRow(String label, String value) {
+  Widget _itemRow(ReceiptItem item) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          SizedBox(
-            width: 88,
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: SavingorColors.textSecondary,
-              ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  item.name,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: SavingorColors.darkGreen,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Qty ${item.displayQuantity}'
+                      '${item.category != null ? ' · ${item.category}' : ''}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: SavingorColors.textSecondary.withOpacity(0.95),
+                  ),
+                ),
+              ],
             ),
           ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: SavingorColors.darkGreen,
-              ),
+          Text(
+            item.formattedTotalPrice,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: SavingorColors.primaryStroke,
             ),
           ),
         ],
@@ -299,16 +380,13 @@ class ReceiptDetailScreen extends StatelessWidget {
     ReceiptStore store,
     Receipt receipt,
   ) async {
-    final String formattedTotal =
-        '\$${receipt.total.toStringAsFixed(2)}';
-
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text('Delete receipt?'),
           content: Text(
-            '${receipt.storeName} ($formattedTotal) will be permanently removed.',
+            '${receipt.storeName} (${receipt.formattedTotal}) will be permanently removed.',
           ),
           actions: <Widget>[
             TextButton(

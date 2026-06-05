@@ -7,7 +7,9 @@ import 'package:savingor_app/core/widgets/app_screen_states.dart';
 import 'package:savingor_app/features/scanner/data/receipt_ocr_parser.dart';
 import 'package:savingor_app/features/scanner/data/receipt_ocr_service.dart';
 import 'package:savingor_app/features/scanner/data/receipt_store.dart';
-import 'package:savingor_app/features/scanner/domain/models/receipt.dart';
+import 'package:savingor_app/features/receipts/domain/models/receipt.dart';
+import 'package:savingor_app/features/receipts/domain/models/receipt_source.dart';
+import 'package:savingor_app/features/receipts/presentation/widgets/receipt_source_badge.dart';
 
 class ReceiptScannerScreen extends StatefulWidget {
   const ReceiptScannerScreen({super.key});
@@ -104,7 +106,12 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
       if (!mounted) return;
       setState(() => _isScanning = false);
 
-      await _showOcrPreviewDialog(text);
+      await _showOcrPreviewDialog(
+        text,
+        source == ImageSource.camera
+            ? ReceiptSource.scanned
+            : ReceiptSource.gallery,
+      );
     } catch (_) {
       if (!mounted) return;
       setState(() => _isScanning = false);
@@ -116,7 +123,10 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
     }
   }
 
-  Future<void> _showOcrPreviewDialog(String text) async {
+  Future<void> _showOcrPreviewDialog(
+    String text,
+    ReceiptSource receiptSource,
+  ) async {
     if (text.trim().isEmpty) {
       await showDialog<void>(
         context: context,
@@ -234,8 +244,10 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
                     'initialStoreName': parsed.storeName,
                     'initialDate': parsed.date,
                     'initialTotal': parsed.total,
-                    'initialCategory': 'grocery',
+                    'initialCategory': 'Grocery',
                     'initialNotes': parsed.rawText,
+                    'initialItemNames': parsed.items,
+                    'initialSource': receiptSource.value,
                   },
                 );
               },
@@ -543,21 +555,32 @@ class _ReceiptCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      receipt.category,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: SavingorColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '\$${receipt.total.toStringAsFixed(2)}',
+                      receipt.formattedTotal,
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: SavingorColors.darkGreen,
                       ),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: <Widget>[
+                        ReceiptSourceBadge(
+                          source: receipt.source,
+                          compact: true,
+                        ),
+                        if (receipt.hasItems) ...<Widget>[
+                          const SizedBox(width: 8),
+                          Text(
+                            '${receipt.itemCount} items',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: SavingorColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ],
                 ),
