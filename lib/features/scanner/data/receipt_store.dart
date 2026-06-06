@@ -7,18 +7,22 @@ import 'package:savingor_app/features/receipts/data/receipt_firestore_service.da
 import 'package:savingor_app/features/receipts/domain/models/receipt.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt_item.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt_source.dart';
+import 'package:savingor_app/features/price_memory/data/price_memory_repository.dart';
 
 /// App-level state for Firestore-backed grocery receipts.
 class ReceiptStore extends ChangeNotifier {
   ReceiptStore({
     ReceiptFirestoreService? service,
+    PriceMemoryRepository? priceMemoryRepository,
     FirebaseAuth? firebaseAuth,
   })  : _service = service ?? ReceiptFirestoreService(),
+        _priceMemory = priceMemoryRepository ?? PriceMemoryRepository(),
         _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance {
     _authSubscription = _firebaseAuth.authStateChanges().listen(_onAuthChanged);
   }
 
   final ReceiptFirestoreService _service;
+  final PriceMemoryRepository _priceMemory;
   final FirebaseAuth _firebaseAuth;
 
   StreamSubscription<User?>? _authSubscription;
@@ -134,6 +138,8 @@ class ReceiptStore extends ChangeNotifier {
       );
       final String receiptId =
           await _service.createReceipt(_uid!, receipt);
+      final Receipt savedReceipt = receipt.copyWith(id: receiptId);
+      await _syncPriceMemory(savedReceipt);
       notifyListeners();
       return receiptId;
     } catch (_) {
@@ -149,6 +155,16 @@ class ReceiptStore extends ChangeNotifier {
     try {
       _mutationError = null;
       await _service.deleteReceipt(_uid!, receiptId);
+      try {
+        await _priceMemory.deleteForReceipt(
+          userId: _uid!,
+          receiptId: receiptId,
+        );
+      } catch (error) {
+        debugPrint(
+          'PriceMemory: cleanup failed for receiptId=$receiptId: $error',
+        );
+      }
       notifyListeners();
       return true;
     } catch (_) {
@@ -205,6 +221,7 @@ class ReceiptStore extends ChangeNotifier {
         updatedAt: DateTime.now(),
       );
       await _service.updateReceipt(_uid!, updated);
+      await _syncPriceMemory(updated);
       notifyListeners();
       return true;
     } catch (_) {
@@ -218,6 +235,16 @@ class ReceiptStore extends ChangeNotifier {
     if (value == null) return null;
     final String trimmed = value.trim();
     return trimmed.isEmpty ? null : trimmed;
+  }
+
+  Future<void> _syncPriceMemory(Receipt receipt) async {
+    try {
+      await _priceMemory.syncFromReceipt(receipt);
+    } catch (error) {
+      debugPrint(
+        'PriceMemory: sync failed for receiptId=${receipt.id}: $error',
+      );
+    }
   }
 
   @override
