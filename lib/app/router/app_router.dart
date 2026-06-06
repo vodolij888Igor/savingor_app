@@ -27,6 +27,8 @@ import 'package:savingor_app/features/expenses/presentation/screens/expenses_scr
 import 'package:savingor_app/features/analytics/presentation/screens/savings_analytics_screen.dart';
 import 'package:savingor_app/features/price_memory/presentation/screens/product_price_insights_screen.dart';
 import 'package:savingor_app/features/price_memory/presentation/screens/product_price_detail_screen.dart';
+import 'package:savingor_app/features/price_memory/presentation/screens/savings_opportunities_screen.dart';
+import 'package:savingor_app/features/price_memory/domain/models/savings_opportunity.dart';
 import 'package:savingor_app/features/ai_assistant/presentation/screens/ai_savings_assistant_screen.dart';
 import 'package:savingor_app/core/widgets/bottom_nav_shell.dart';
 import 'package:savingor_app/features/deals/data/mock_deals.dart';
@@ -210,14 +212,26 @@ GoRouter createAppRouter({required AppState appState}) {
         builder: (context, state) => DealsMapScreen(),
       ),
       GoRoute(
+        path: '/analytics/savings-opportunities',
+        builder: (context, state) => const SavingsOpportunitiesScreen(),
+      ),
+      GoRoute(
         path: '/analytics/product-price-insights',
         builder: (context, state) => const ProductPriceInsightsScreen(),
         routes: <RouteBase>[
           GoRoute(
             path: 'detail',
             builder: (context, state) {
+              final Object? extra = state.extra;
+              if (extra is SavingsOpportunity) {
+                return ProductPriceDetailScreen(
+                  normalizedProductName: extra.normalizedProductName,
+                  savingsOpportunity: extra,
+                );
+              }
+
               final String normalizedProductName =
-                  state.extra is String ? state.extra! as String : '';
+                  extra is String ? extra : '';
               return ProductPriceDetailScreen(
                 normalizedProductName: normalizedProductName,
               );

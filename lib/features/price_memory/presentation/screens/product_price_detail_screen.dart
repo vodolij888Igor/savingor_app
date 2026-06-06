@@ -5,16 +5,20 @@ import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/price_memory/data/price_memory_store.dart';
 import 'package:savingor_app/features/price_memory/domain/models/product_price_insight.dart';
 import 'package:savingor_app/features/price_memory/domain/models/product_price_record.dart';
+import 'package:savingor_app/features/price_memory/domain/models/savings_opportunity.dart';
 import 'package:savingor_app/features/price_memory/domain/price_memory_formatters.dart';
+import 'package:savingor_app/features/price_memory/presentation/widgets/savings_opportunity_summary_card.dart';
 import 'package:savingor_app/features/receipts/presentation/widgets/receipt_source_badge.dart';
 
 class ProductPriceDetailScreen extends StatelessWidget {
   const ProductPriceDetailScreen({
     super.key,
     required this.normalizedProductName,
+    this.savingsOpportunity,
   });
 
   final String normalizedProductName;
+  final SavingsOpportunity? savingsOpportunity;
 
   static const Color _pageBackground = Colors.white;
   static const Color _airyBorder = Color(0xFFF3F4F3);
@@ -44,12 +48,16 @@ class ProductPriceDetailScreen extends StatelessWidget {
       builder: (BuildContext context, Widget? _) {
         final ProductPriceInsight? insight =
             store.insightForNormalizedName(normalizedProductName);
+        final SavingsOpportunity? opportunitySummary =
+            _resolveOpportunitySummary(store);
 
         return Scaffold(
           backgroundColor: _pageBackground,
           appBar: AppBar(
             title: Text(
-              insight?.displayName ?? 'Product history',
+              opportunitySummary?.displayName ??
+                  insight?.displayName ??
+                  'Product history',
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
@@ -80,57 +88,86 @@ class ProductPriceDetailScreen extends StatelessWidget {
                     ),
                   ),
                 )
-              : _buildContent(insight, bottomInset),
+              : _buildContent(
+                  insight,
+                  opportunitySummary,
+                  bottomInset,
+                ),
         );
       },
     );
   }
 
-  Widget _buildContent(ProductPriceInsight insight, double bottomInset) {
+  SavingsOpportunity? _resolveOpportunitySummary(PriceMemoryStore store) {
+    if (savingsOpportunity == null) {
+      return null;
+    }
+
+    for (final SavingsOpportunity opportunity
+        in store.savingsOpportunities) {
+      if (opportunity.normalizedProductName ==
+          savingsOpportunity!.normalizedProductName) {
+        return opportunity;
+      }
+    }
+
+    return savingsOpportunity;
+  }
+
+  Widget _buildContent(
+    ProductPriceInsight insight,
+    SavingsOpportunity? opportunitySummary,
+    double bottomInset,
+  ) {
     return ListView(
       padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + bottomInset),
       children: <Widget>[
-        Container(
-          padding: const EdgeInsets.all(18),
-          decoration: _cardDecoration(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                insight.displayName,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: SavingorColors.darkGreen,
+        if (opportunitySummary != null) ...<Widget>[
+          SavingsOpportunitySummaryCard(opportunity: opportunitySummary),
+          const SizedBox(height: SavingorSpacing.lg),
+        ] else ...<Widget>[
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: _cardDecoration(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  insight.displayName,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: SavingorColors.darkGreen,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              _summaryLine(
-                'Latest',
-                '${PriceMemoryFormatters.formatPrice(insight.latestPrice, currency: insight.currency)} at ${insight.latestStoreName}',
-              ),
-              const SizedBox(height: 6),
-              _summaryLine(
-                'Lowest',
-                PriceMemoryFormatters.formatPrice(
-                  insight.lowestPrice,
-                  currency: insight.currency,
+                const SizedBox(height: 10),
+                _summaryLine(
+                  'Latest',
+                  '${PriceMemoryFormatters.formatPrice(insight.latestPrice, currency: insight.currency)} at ${insight.latestStoreName}',
                 ),
-              ),
-              const SizedBox(height: 6),
-              _summaryLine(
-                'Highest',
-                PriceMemoryFormatters.formatPrice(
-                  insight.highestPrice,
-                  currency: insight.currency,
+                const SizedBox(height: 6),
+                _summaryLine(
+                  'Lowest',
+                  PriceMemoryFormatters.formatPrice(
+                    insight.lowestPrice,
+                    currency: insight.currency,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 6),
-              _summaryLine('Records', insight.recordCountLabel),
-            ],
+                const SizedBox(height: 6),
+                _summaryLine(
+                  'Highest',
+                  PriceMemoryFormatters.formatPrice(
+                    insight.highestPrice,
+                    currency: insight.currency,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                _summaryLine('Records', insight.recordCountLabel),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: SavingorSpacing.lg),
+          const SizedBox(height: SavingorSpacing.lg),
+        ],
         const Text(
           'Price history',
           style: TextStyle(

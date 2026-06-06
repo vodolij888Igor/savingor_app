@@ -154,6 +154,8 @@ class SavingsAnalyticsScreen extends StatelessWidget {
         padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + bottomInset),
         children: <Widget>[
           _buildPriceInsightsEntry(context, priceMemoryStore),
+          const SizedBox(height: 12),
+          _buildSavingsOpportunitiesEntry(context, priceMemoryStore),
           const SizedBox(height: SavingorSpacing.xl),
           AppEmptyState(
             icon: Icons.insights_outlined,
@@ -172,6 +174,8 @@ class SavingsAnalyticsScreen extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + bottomInset),
       children: <Widget>[
         _buildPriceInsightsEntry(context, priceMemoryStore),
+        const SizedBox(height: 12),
+        _buildSavingsOpportunitiesEntry(context, priceMemoryStore),
         const SizedBox(height: SavingorSpacing.xl),
         _buildSummaryGrid(summary),
         const SizedBox(height: SavingorSpacing.xl),
@@ -306,6 +310,76 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                   children: <Widget>[
                     const Text(
                       'Product price insights',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: SavingorColors.darkGreen,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: SavingorColors.textSecondary,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: SavingorColors.textSecondary,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSavingsOpportunitiesEntry(
+    BuildContext context,
+    PriceMemoryStore priceMemoryStore,
+  ) {
+    final int opportunityCount = priceMemoryStore.savingsOpportunities.length;
+    final String subtitle = opportunityCount > 0
+        ? '$opportunityCount ${opportunityCount == 1 ? 'item' : 'items'} where you could save'
+        : 'Find items you bought cheaper before';
+
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => context.push('/analytics/savings-opportunities'),
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: _cardDecoration(),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: SavingorColors.lightGreen,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.savings_outlined,
+                  color: SavingorColors.primaryStroke,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    const Text(
+                      'Savings opportunities',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,

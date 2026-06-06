@@ -7,6 +7,8 @@ import 'package:savingor_app/features/price_memory/data/price_memory_firestore_s
 import 'package:savingor_app/features/price_memory/domain/models/product_price_insight.dart';
 import 'package:savingor_app/features/price_memory/domain/models/product_price_record.dart';
 import 'package:savingor_app/features/price_memory/domain/product_price_insights_grouper.dart';
+import 'package:savingor_app/features/price_memory/domain/savings_opportunity_finder.dart';
+import 'package:savingor_app/features/price_memory/domain/models/savings_opportunity.dart';
 
 /// App-level state for Firestore-backed product price memory.
 class PriceMemoryStore extends ChangeNotifier {
@@ -33,6 +35,9 @@ class PriceMemoryStore extends ChangeNotifier {
   List<ProductPriceRecord> get records => List<ProductPriceRecord>.unmodifiable(_records);
   List<ProductPriceInsight> get insights =>
       ProductPriceInsightsGrouper.group(_records);
+
+  List<SavingsOpportunity> get savingsOpportunities =>
+      SavingsOpportunityFinder.find(_records);
 
   String? get uid => _uid;
   bool get isAuthenticated => _uid != null;
