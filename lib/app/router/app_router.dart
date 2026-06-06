@@ -25,6 +25,8 @@ import 'package:savingor_app/features/start_saving/presentation/screens/start_sa
 import 'package:savingor_app/features/expenses/presentation/screens/add_grocery_expense_screen.dart';
 import 'package:savingor_app/features/expenses/presentation/screens/expenses_screen.dart';
 import 'package:savingor_app/features/analytics/presentation/screens/savings_analytics_screen.dart';
+import 'package:savingor_app/features/price_memory/presentation/screens/product_price_insights_screen.dart';
+import 'package:savingor_app/features/price_memory/presentation/screens/product_price_detail_screen.dart';
 import 'package:savingor_app/features/ai_assistant/presentation/screens/ai_savings_assistant_screen.dart';
 import 'package:savingor_app/core/widgets/bottom_nav_shell.dart';
 import 'package:savingor_app/features/deals/data/mock_deals.dart';
@@ -206,6 +208,22 @@ GoRouter createAppRouter({required AppState appState}) {
       GoRoute(
         path: '/nearby-stores',
         builder: (context, state) => DealsMapScreen(),
+      ),
+      GoRoute(
+        path: '/analytics/product-price-insights',
+        builder: (context, state) => const ProductPriceInsightsScreen(),
+        routes: <RouteBase>[
+          GoRoute(
+            path: 'detail',
+            builder: (context, state) {
+              final String normalizedProductName =
+                  state.extra is String ? state.extra! as String : '';
+              return ProductPriceDetailScreen(
+                normalizedProductName: normalizedProductName,
+              );
+            },
+          ),
+        ],
       ),
       GoRoute(
         path: '/saved',

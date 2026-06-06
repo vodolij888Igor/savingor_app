@@ -57,4 +57,28 @@ class PriceMemoryFirestoreService {
     await batch.commit();
     return snapshot.docs.length;
   }
+
+  Stream<List<ProductPriceRecord>> watchPriceRecordsForUser(String userId) {
+    return _priceRecordsCollection(userId)
+        .orderBy('purchaseDate', descending: true)
+        .snapshots()
+        .map(_recordsFromSnapshot);
+  }
+
+  List<ProductPriceRecord> _recordsFromSnapshot(
+    QuerySnapshot<Map<String, dynamic>> snapshot,
+  ) {
+    final List<ProductPriceRecord> records = <ProductPriceRecord>[];
+
+    for (final QueryDocumentSnapshot<Map<String, dynamic>> doc
+        in snapshot.docs) {
+      try {
+        records.add(ProductPriceRecord.fromMap(doc.data(), doc.id));
+      } catch (_) {
+        // Skip malformed documents.
+      }
+    }
+
+    return records;
+  }
 }

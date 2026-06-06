@@ -6,6 +6,7 @@ import 'package:savingor_app/core/widgets/app_screen_states.dart';
 import 'package:savingor_app/features/analytics/domain/expense_analytics_calculator.dart';
 import 'package:savingor_app/features/expenses/data/expenses_store.dart';
 import 'package:savingor_app/features/scanner/data/receipt_store.dart';
+import 'package:savingor_app/features/price_memory/data/price_memory_store.dart';
 
 class SavingsAnalyticsScreen extends StatelessWidget {
   const SavingsAnalyticsScreen({super.key});
@@ -63,6 +64,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final ExpensesStore expensesStore = ExpensesProvider.of(context);
     final ReceiptStore receiptStore = ReceiptProvider.of(context);
+    final PriceMemoryStore priceMemoryStore = PriceMemoryProvider.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return AnimatedBuilder(
@@ -71,6 +73,9 @@ class SavingsAnalyticsScreen extends StatelessWidget {
         return AnimatedBuilder(
           animation: receiptStore,
           builder: (BuildContext context, Widget? __) {
+            return AnimatedBuilder(
+              animation: priceMemoryStore,
+              builder: (BuildContext context, Widget? ___) {
             if (!expensesStore.isAuthenticated && !receiptStore.isAuthenticated) {
               return _buildSignInRequired(context);
             }
@@ -100,8 +105,11 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                 context,
                 expensesStore,
                 receiptStore,
+                priceMemoryStore,
                 bottomInset,
               ),
+            );
+              },
             );
           },
         );
@@ -113,6 +121,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     BuildContext context,
     ExpensesStore expensesStore,
     ReceiptStore receiptStore,
+    PriceMemoryStore priceMemoryStore,
     double bottomInset,
   ) {
     if (expensesStore.isLoading || receiptStore.isLoading) {
@@ -141,20 +150,29 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     );
 
     if (summary.isEmpty) {
-      return AppEmptyState(
-        icon: Icons.insights_outlined,
-        title: 'No spending data yet',
-        message:
-            'Add a receipt or expense to see spending totals, store breakdowns, and trends.',
-        actionLabel: 'Add receipt',
-        prominentAction: true,
-        onAction: () => context.push('/scanner/create'),
+      return ListView(
+        padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + bottomInset),
+        children: <Widget>[
+          _buildPriceInsightsEntry(context, priceMemoryStore),
+          const SizedBox(height: SavingorSpacing.xl),
+          AppEmptyState(
+            icon: Icons.insights_outlined,
+            title: 'No spending data yet',
+            message:
+                'Add a receipt or expense to see spending totals, store breakdowns, and trends.',
+            actionLabel: 'Add receipt',
+            prominentAction: true,
+            onAction: () => context.push('/scanner/create'),
+          ),
+        ],
       );
     }
 
     return ListView(
       padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + bottomInset),
       children: <Widget>[
+        _buildPriceInsightsEntry(context, priceMemoryStore),
+        const SizedBox(height: SavingorSpacing.xl),
         _buildSummaryGrid(summary),
         const SizedBox(height: SavingorSpacing.xl),
         _buildSpendingByStore(summary),
@@ -245,6 +263,76 @@ class SavingsAnalyticsScreen extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildPriceInsightsEntry(
+    BuildContext context,
+    PriceMemoryStore priceMemoryStore,
+  ) {
+    final int productCount = priceMemoryStore.insights.length;
+    final String subtitle = productCount > 0
+        ? '$productCount ${productCount == 1 ? 'product' : 'products'} tracked from your receipts'
+        : 'See prices remembered from your receipt line items';
+
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => context.push('/analytics/product-price-insights'),
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: _cardDecoration(),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: SavingorColors.lightGreen,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.price_change_outlined,
+                  color: SavingorColors.primaryStroke,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    const Text(
+                      'Product price insights',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: SavingorColors.darkGreen,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: SavingorColors.textSecondary,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: SavingorColors.textSecondary,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
