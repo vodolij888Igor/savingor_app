@@ -156,6 +156,8 @@ class SavingsAnalyticsScreen extends StatelessWidget {
           _buildPriceInsightsEntry(context, priceMemoryStore),
           const SizedBox(height: 12),
           _buildSavingsOpportunitiesEntry(context, priceMemoryStore),
+          const SizedBox(height: 12),
+          _buildBasketOptimizerEntry(context),
           const SizedBox(height: SavingorSpacing.xl),
           AppEmptyState(
             icon: Icons.insights_outlined,
@@ -176,6 +178,8 @@ class SavingsAnalyticsScreen extends StatelessWidget {
         _buildPriceInsightsEntry(context, priceMemoryStore),
         const SizedBox(height: 12),
         _buildSavingsOpportunitiesEntry(context, priceMemoryStore),
+        const SizedBox(height: 12),
+        _buildBasketOptimizerEntry(context),
         const SizedBox(height: SavingorSpacing.xl),
         _buildSummaryGrid(summary),
         const SizedBox(height: SavingorSpacing.xl),
@@ -390,6 +394,68 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                     Text(
                       subtitle,
                       style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: SavingorColors.textSecondary,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: SavingorColors.textSecondary,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBasketOptimizerEntry(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => context.push('/shopping/basket-optimizer'),
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          padding: const EdgeInsets.all(18),
+          decoration: _cardDecoration(),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: SavingorColors.lightGreen,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.shopping_basket_outlined,
+                  color: SavingorColors.primaryStroke,
+                ),
+              ),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      'Optimize all lists',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: SavingorColors.darkGreen,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Find the best known stores across your active shopping lists',
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                         color: SavingorColors.textSecondary,

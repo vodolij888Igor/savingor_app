@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:savingor_app/features/shopping/data/shopping_lists_firestore_service.dart';
 import 'package:savingor_app/features/shopping/domain/models/shopping_list.dart';
 import 'package:savingor_app/features/shopping/domain/models/shopping_list_item.dart';
+import 'package:savingor_app/features/shopping/domain/models/global_shopping_items_snapshot.dart';
 
 /// App-level state for Firestore-backed shopping lists.
 class ShoppingListsStore extends ChangeNotifier {
@@ -236,7 +237,7 @@ class ShoppingListsStore extends ChangeNotifier {
     }
   }
 
-  Future<bool> toggleItemChecked({
+  Future<bool> toggleItemCompleted({
     required String listId,
     required ShoppingListItem item,
   }) async {
@@ -244,10 +245,15 @@ class ShoppingListsStore extends ChangeNotifier {
 
     try {
       _mutationError = null;
+      final bool willComplete = !item.isCompleted;
       await _service.updateItem(
         uid: _uid!,
         listId: listId,
-        item: item.copyWith(isChecked: !item.isChecked),
+        item: item.copyWith(
+          isCompleted: willComplete,
+          completedAt: willComplete ? DateTime.now() : null,
+          clearCompletedAt: !willComplete,
+        ),
       );
       notifyListeners();
       return true;
@@ -299,6 +305,50 @@ class ShoppingListsStore extends ChangeNotifier {
       return true;
     } catch (_) {
       _mutationError = 'Could not remove the item. Please try again.';
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<List<ShoppingListItem>> fetchUncheckedItemsForList(String listId) async {
+    if (_uid == null) return const <ShoppingListItem>[];
+    return _service.fetchUncheckedItems(uid: _uid!, listId: listId);
+  }
+
+  Future<List<ShoppingListItem>> fetchAllUncheckedItems() async {
+    if (_uid == null) return const <ShoppingListItem>[];
+    final GlobalShoppingItemsSnapshot snapshot =
+        await _service.fetchGlobalShoppingItemsSnapshot(_uid!);
+    return snapshot.uncheckedItems;
+  }
+
+  Future<GlobalShoppingItemsSnapshot> fetchGlobalShoppingItemsSnapshot() async {
+    if (_uid == null) {
+      return const GlobalShoppingItemsSnapshot(
+        uncheckedItems: <ShoppingListItem>[],
+        activeListsIncluded: 0,
+      );
+    }
+    return _service.fetchGlobalShoppingItemsSnapshot(_uid!);
+  }
+
+  Future<bool> markLastFinalizedReceipt({
+    required String listId,
+    required String receiptId,
+  }) async {
+    if (_uid == null) return false;
+
+    try {
+      _mutationError = null;
+      await _service.updateLastFinalizedReceiptId(
+        uid: _uid!,
+        listId: listId,
+        receiptId: receiptId,
+      );
+      notifyListeners();
+      return true;
+    } catch (_) {
+      _mutationError = 'Could not update the shopping list. Please try again.';
       notifyListeners();
       return false;
     }

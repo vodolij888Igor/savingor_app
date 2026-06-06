@@ -5,6 +5,8 @@ import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
 import 'package:savingor_app/features/shopping/domain/models/shopping_list.dart';
 import 'package:savingor_app/features/shopping/domain/models/shopping_list_item.dart';
+import 'package:savingor_app/features/price_memory/presentation/widgets/basket_optimizer_entry_card.dart';
+import 'package:savingor_app/features/shopping/presentation/widgets/finalize_shopping_trip_entry_card.dart';
 import 'package:savingor_app/features/shopping/presentation/widgets/shopping_list_state_panel.dart';
 
 class ShoppingListDetailScreen extends StatefulWidget {
@@ -61,7 +63,7 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
     ShoppingListsStore store,
     ShoppingListItem item,
   ) async {
-    final bool ok = await store.toggleItemChecked(
+    final bool ok = await store.toggleItemCompleted(
       listId: widget.listId,
       item: item,
     );
@@ -132,6 +134,38 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
     _showMutationError(store);
   }
 
+  Future<void> _openFinalizeTrip(
+    BuildContext context,
+    ShoppingList list,
+  ) async {
+    if (list.lastFinalizedReceiptId != null) {
+      final bool? confirmed = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext dialogContext) {
+          return AlertDialog(
+            title: const Text('Create another receipt?'),
+            content: const Text(
+              'This list may already have a receipt. Create another receipt from purchased items?',
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child: const Text('Create receipt'),
+              ),
+            ],
+          );
+        },
+      );
+      if (confirmed != true || !context.mounted) return;
+    }
+
+    context.push('/shopping/list/${widget.listId}/finalize-trip');
+  }
+
   @override
   Widget build(BuildContext context) {
     final ShoppingListsStore store = ShoppingListsProvider.of(context);
@@ -198,7 +232,7 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
     if (list == null) return false;
     if (store.isLoadingLists || store.isLoadingItems) return false;
     if (store.itemsError != null || store.listsError != null) return false;
-    return true;
+    return store.items.isNotEmpty;
   }
 
   Widget _buildBody(
@@ -253,6 +287,13 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
       );
     }
 
+    final List<ShoppingListItem> activeItems = store.items
+        .where((ShoppingListItem item) => item.isActive)
+        .toList(growable: false);
+    final List<ShoppingListItem> completedItems = store.items
+        .where((ShoppingListItem item) => item.isCompleted)
+        .toList(growable: false);
+
     return Column(
       children: <Widget>[
         Padding(
@@ -264,8 +305,8 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(
-                  '${store.items.length} items'
-                  '${list.checkedCount > 0 ? ' · ${list.checkedCount} checked' : ''}',
+                  '${activeItems.length} active'
+                  '${completedItems.isNotEmpty ? ' · ${completedItems.length} purchased' : ''}',
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     color: SavingorColors.darkGreen,
@@ -282,28 +323,96 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
             ),
           ),
         ),
+        if (activeItems.isEmpty && completedItems.isNotEmpty)
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 0, 20, 12),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'All items purchased',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: SavingorColors.textSecondary,
+                ),
+              ),
+            ),
+          ),
+        if (activeItems.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+            child: BasketOptimizerEntryCard(
+              title: 'Optimize this basket',
+              subtitle: 'Find the best known stores for this list',
+              onTap: () => context.push(
+                '/shopping/basket-optimizer?listId=${widget.listId}',
+              ),
+            ),
+          ),
+        if (completedItems.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+            child: FinalizeShoppingTripEntryCard(
+              onTap: () => _openFinalizeTrip(context, list),
+            ),
+          ),
         Expanded(
-          child: ListView.separated(
+          child: ListView(
             padding: EdgeInsets.fromLTRB(20, 0, 20, 96 + bottomInset),
-            itemCount: store.items.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
-            itemBuilder: (BuildContext context, int index) {
-              final ShoppingListItem item = store.items[index];
-              return _ItemTile(
-                item: item,
-                maxQuantity: _maxQuantity,
-                onToggle: () => _toggleItem(store, item),
-                onIncrement: () {
-                  if (item.quantity >= _maxQuantity) return;
-                  _updateQuantity(store, item, item.quantity + 1);
-                },
-                onDecrement: () {
-                  if (item.quantity <= 1) return;
-                  _updateQuantity(store, item, item.quantity - 1);
-                },
-                onDelete: () => _deleteItem(store, item.id),
-              );
-            },
+            children: <Widget>[
+              ...activeItems.map(
+                (ShoppingListItem item) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: _ItemTile(
+                    item: item,
+                    maxQuantity: _maxQuantity,
+                    onToggle: () => _toggleItem(store, item),
+                    onIncrement: () {
+                      if (item.quantity >= _maxQuantity) return;
+                      _updateQuantity(store, item, item.quantity + 1);
+                    },
+                    onDecrement: () {
+                      if (item.quantity <= 1) return;
+                      _updateQuantity(store, item, item.quantity - 1);
+                    },
+                    onDelete: () => _deleteItem(store, item.id),
+                  ),
+                ),
+              ),
+              if (completedItems.isNotEmpty) ...<Widget>[
+                const Padding(
+                  padding: EdgeInsets.only(top: 8, bottom: 12),
+                  child: Text(
+                    'Purchased',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: SavingorColors.textSecondary,
+                    ),
+                  ),
+                ),
+                ...completedItems.map(
+                  (ShoppingListItem item) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _ItemTile(
+                      item: item,
+                      maxQuantity: _maxQuantity,
+                      isCompletedStyle: true,
+                      onToggle: () => _toggleItem(store, item),
+                      onIncrement: () {
+                        if (item.quantity >= _maxQuantity) return;
+                        _updateQuantity(store, item, item.quantity + 1);
+                      },
+                      onDecrement: () {
+                        if (item.quantity <= 1) return;
+                        _updateQuantity(store, item, item.quantity - 1);
+                      },
+                      onDelete: () => _deleteItem(store, item.id),
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       ],
@@ -319,6 +428,7 @@ class _ItemTile extends StatelessWidget {
     required this.onIncrement,
     required this.onDecrement,
     required this.onDelete,
+    this.isCompletedStyle = false,
   });
 
   final ShoppingListItem item;
@@ -327,9 +437,12 @@ class _ItemTile extends StatelessWidget {
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
   final VoidCallback onDelete;
+  final bool isCompletedStyle;
 
   @override
   Widget build(BuildContext context) {
+    final double contentOpacity = isCompletedStyle ? 0.55 : 1;
+
     return Dismissible(
       key: ValueKey<String>(item.id),
       direction: DismissDirection.endToStart,
@@ -343,13 +456,15 @@ class _ItemTile extends StatelessWidget {
         ),
         child: const Icon(Icons.delete_outline_rounded, color: Colors.white),
       ),
-      child: Container(
+      child: Opacity(
+        opacity: contentOpacity,
+        child: Container(
         decoration: shoppingListCardDecoration(radius: 16),
         padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
         child: Row(
           children: <Widget>[
             Checkbox(
-              value: item.isChecked,
+              value: item.isCompleted,
               activeColor: SavingorColors.primaryStroke,
               onChanged: (_) => onToggle(),
             ),
@@ -363,8 +478,9 @@ class _ItemTile extends StatelessWidget {
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: SavingorColors.darkGreen,
-                      decoration:
-                          item.isChecked ? TextDecoration.lineThrough : null,
+                      decoration: isCompletedStyle
+                          ? TextDecoration.lineThrough
+                          : null,
                     ),
                   ),
                   if (item.store != null && item.store!.isNotEmpty)
@@ -378,7 +494,7 @@ class _ItemTile extends StatelessWidget {
                 ],
               ),
             ),
-            if (item.unitPrice != null)
+            if (item.unitPrice != null && !isCompletedStyle)
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: Text(
@@ -403,6 +519,7 @@ class _ItemTile extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }

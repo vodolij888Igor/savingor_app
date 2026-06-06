@@ -31,13 +31,13 @@ class AiShoppingListSummary {
   const AiShoppingListSummary({
     required this.title,
     required this.itemCount,
-    required this.checkedCount,
+    required this.completedCount,
     this.estimatedTotal,
   });
 
   final String title;
   final int itemCount;
-  final int checkedCount;
+  final int completedCount;
   final double? estimatedTotal;
 }
 
@@ -46,14 +46,14 @@ class AiShoppingItemSummary {
   const AiShoppingItemSummary({
     required this.name,
     required this.quantity,
-    required this.isChecked,
+    required this.isCompleted,
     this.unitPrice,
     this.category,
   });
 
   final String name;
   final int quantity;
-  final bool isChecked;
+  final bool isCompleted;
   final double? unitPrice;
   final String? category;
 }
@@ -144,7 +144,7 @@ class AiSavingsContext {
             (AiShoppingListSummary list) => <String, dynamic>{
               'title': list.title,
               'itemCount': list.itemCount,
-              'checkedCount': list.checkedCount,
+              'completedCount': list.completedCount,
               if (list.estimatedTotal != null)
                 'estimatedTotal': _round(list.estimatedTotal!),
             },
@@ -155,7 +155,7 @@ class AiSavingsContext {
             (AiShoppingItemSummary item) => <String, dynamic>{
               'name': item.name,
               'quantity': item.quantity,
-              'isChecked': item.isChecked,
+              'isCompleted': item.isCompleted,
               if (item.unitPrice != null)
                 'unitPrice': _round(item.unitPrice!),
               if (item.category != null) 'category': item.category,

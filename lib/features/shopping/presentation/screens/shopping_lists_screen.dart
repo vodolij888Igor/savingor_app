@@ -6,6 +6,8 @@ import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/app_screen_states.dart';
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
 import 'package:savingor_app/features/shopping/domain/models/shopping_list.dart';
+import 'package:savingor_app/features/price_memory/presentation/widgets/basket_optimizer_entry_card.dart';
+import 'package:savingor_app/features/shopping/presentation/widgets/create_shopping_list_sheet.dart';
 import 'package:savingor_app/features/shopping/presentation/widgets/shopping_list_state_panel.dart';
 
 class ShoppingListsScreen extends StatelessWidget {
@@ -28,9 +30,7 @@ class ShoppingListsScreen extends StatelessWidget {
           return _buildSignInRequired(context, t);
         }
 
-        final bool showNewListFab = !store.isLoadingLists &&
-            store.listsError == null &&
-            store.lists.isNotEmpty;
+        final bool showNewListFab = !store.isLoadingLists && store.listsError == null;
 
         return Scaffold(
           backgroundColor: _pageBackground,
@@ -52,14 +52,31 @@ class ShoppingListsScreen extends StatelessWidget {
                   )
                 : null,
             automaticallyImplyLeading: showBackButton,
+            actions: <Widget>[
+              if (showNewListFab)
+                TextButton.icon(
+                  onPressed: () => CreateShoppingListSheet.show(context),
+                  icon: const Icon(
+                    Icons.add_rounded,
+                    color: SavingorColors.darkGreen,
+                  ),
+                  label: const Text(
+                    'New list',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: SavingorColors.darkGreen,
+                    ),
+                  ),
+                ),
+            ],
           ),
           body: _buildBody(context, store, bottomInset),
           floatingActionButton: showNewListFab
               ? FloatingActionButton.extended(
-                  onPressed: () => context.push('/shopping/create'),
+                  onPressed: () => CreateShoppingListSheet.show(context),
                   backgroundColor: SavingorColors.primaryGreen,
                   foregroundColor: SavingorColors.darkGreen,
-                  icon: const Icon(Icons.add_rounded),
+                  icon: const Icon(Icons.playlist_add_rounded),
                   label: const Text(
                     'New list',
                     style: TextStyle(fontWeight: FontWeight.w700),
@@ -95,25 +112,34 @@ class ShoppingListsScreen extends StatelessWidget {
         icon: Icons.checklist_rounded,
         title: 'No shopping lists yet',
         message:
-            'Create a list to plan groceries, compare deals, and save smarter.',
-        actionLabel: 'Create List',
+            'Create your first list to plan purchases and optimize your basket.',
+        actionLabel: 'Create list',
         prominentAction: true,
-        onAction: () => context.push('/shopping/create'),
+        onAction: () => CreateShoppingListSheet.show(context),
       );
     }
 
-    return ListView.separated(
+    return ListView(
       padding: EdgeInsets.fromLTRB(20, 8, 20, 96 + bottomInset),
-      itemCount: store.lists.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (BuildContext context, int index) {
-        final ShoppingList list = store.lists[index];
-        return _ShoppingListCard(
-          list: list,
-          onOpen: () => context.push('/shopping/list/${list.id}'),
-          onDelete: () => _confirmDelete(context, store, list),
-        );
-      },
+      children: <Widget>[
+        BasketOptimizerEntryCard(
+          title: 'Optimize all lists',
+          subtitle:
+              'Find the best known stores across your active shopping lists',
+          onTap: () => context.push('/shopping/basket-optimizer'),
+        ),
+        const SizedBox(height: 16),
+        ...store.lists.map(
+          (ShoppingList list) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _ShoppingListCard(
+              list: list,
+              onOpen: () => context.push('/shopping/list/${list.id}'),
+              onDelete: () => _confirmDelete(context, store, list),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -243,7 +269,7 @@ class _ShoppingListCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       '${list.itemCount} items'
-                      '${list.checkedCount > 0 ? ' · ${list.checkedCount} checked' : ''}',
+                      '${list.completedCount > 0 ? ' · ${list.completedCount} purchased' : ''}',
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,

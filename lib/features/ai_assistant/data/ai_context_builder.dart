@@ -53,19 +53,20 @@ abstract final class AiContextBuilder {
               (ShoppingList list) => AiShoppingListSummary(
                 title: list.title,
                 itemCount: list.itemCount,
-                checkedCount: list.checkedCount,
+                completedCount: list.completedCount,
                 estimatedTotal: list.estimatedTotal,
               ),
             )
             .toList(growable: false);
 
     final List<AiShoppingItemSummary> activeItems = shoppingListsStore.items
+        .where((ShoppingListItem item) => item.isActive)
         .take(12)
         .map(
           (ShoppingListItem item) => AiShoppingItemSummary(
             name: item.name,
             quantity: item.quantity,
-            isChecked: item.isChecked,
+            isCompleted: item.isCompleted,
             unitPrice: item.unitPrice,
             category: item.category,
           ),

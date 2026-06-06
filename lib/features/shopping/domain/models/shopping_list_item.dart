@@ -6,7 +6,8 @@ class ShoppingListItem {
     required this.id,
     required this.name,
     required this.quantity,
-    required this.isChecked,
+    required this.isCompleted,
+    this.completedAt,
     this.store,
     this.unitPrice,
     this.dealId,
@@ -20,7 +21,8 @@ class ShoppingListItem {
   final String id;
   final String name;
   final int quantity;
-  final bool isChecked;
+  final bool isCompleted;
+  final DateTime? completedAt;
   final String? store;
   final double? unitPrice;
   final String? dealId;
@@ -30,8 +32,10 @@ class ShoppingListItem {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  bool get isActive => !isCompleted;
+
   double? get lineTotal {
-    if (unitPrice == null || isChecked) return null;
+    if (unitPrice == null || isCompleted) return null;
     return unitPrice! * quantity;
   }
 
@@ -43,7 +47,8 @@ class ShoppingListItem {
       id: snapshot.id,
       name: (data['name'] as String?)?.trim() ?? '',
       quantity: ((data['quantity'] as num?)?.toInt() ?? 1).clamp(1, 999),
-      isChecked: data['isChecked'] as bool? ?? false,
+      isCompleted: _readCompletedFlag(data),
+      completedAt: _timestampToNullableDate(data['completedAt']),
       store: (data['store'] as String?)?.trim(),
       unitPrice: (data['unitPrice'] as num?)?.toDouble(),
       dealId: data['dealId'] as String?,
@@ -55,11 +60,22 @@ class ShoppingListItem {
     );
   }
 
+  static bool _readCompletedFlag(Map<String, dynamic> data) {
+    if (data.containsKey('isCompleted')) {
+      return data['isCompleted'] as bool? ?? false;
+    }
+    return data['isChecked'] as bool? ?? false;
+  }
+
   Map<String, dynamic> toFirestore({bool isCreate = false}) {
     return <String, dynamic>{
       'name': name,
       'quantity': quantity,
-      'isChecked': isChecked,
+      'isCompleted': isCompleted,
+      if (isCompleted && completedAt != null)
+        'completedAt': Timestamp.fromDate(completedAt!)
+      else
+        'completedAt': FieldValue.delete(),
       if (store != null && store!.isNotEmpty) 'store': store,
       if (unitPrice != null) 'unitPrice': unitPrice,
       if (dealId != null) 'dealId': dealId,
@@ -74,7 +90,9 @@ class ShoppingListItem {
   ShoppingListItem copyWith({
     String? name,
     int? quantity,
-    bool? isChecked,
+    bool? isCompleted,
+    DateTime? completedAt,
+    bool clearCompletedAt = false,
     String? store,
     double? unitPrice,
     String? dealId,
@@ -86,7 +104,8 @@ class ShoppingListItem {
       id: id,
       name: name ?? this.name,
       quantity: quantity ?? this.quantity,
-      isChecked: isChecked ?? this.isChecked,
+      isCompleted: isCompleted ?? this.isCompleted,
+      completedAt: clearCompletedAt ? null : (completedAt ?? this.completedAt),
       store: store ?? this.store,
       unitPrice: unitPrice ?? this.unitPrice,
       dealId: dealId ?? this.dealId,
@@ -102,6 +121,12 @@ class ShoppingListItem {
     if (value is Timestamp) return value.toDate();
     if (value is DateTime) return value;
     return DateTime.now();
+  }
+
+  static DateTime? _timestampToNullableDate(Object? value) {
+    if (value is Timestamp) return value.toDate();
+    if (value is DateTime) return value;
+    return null;
   }
 }
 

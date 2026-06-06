@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:savingor_app/features/shopping/domain/models/shopping_list.dart';
 import 'package:savingor_app/features/shopping/domain/models/shopping_list_item.dart';
+import 'package:savingor_app/features/shopping/domain/models/global_shopping_items_snapshot.dart';
+import 'package:savingor_app/features/shopping/domain/shopping_basket_item_grouper.dart';
 
 /// Firestore access for user shopping lists under `users/{uid}/shoppingLists`.
 class ShoppingListsFirestoreService {
@@ -77,7 +79,7 @@ class ShoppingListsFirestoreService {
         .toList(growable: false);
 
     double estimatedTotal = 0;
-    int checkedCount = 0;
+    int completedCount = 0;
     for (final NewShoppingListItemInput input in normalizedItems) {
       if (input.unitPrice != null) {
         estimatedTotal += input.unitPrice! * input.quantity;
@@ -87,7 +89,7 @@ class ShoppingListsFirestoreService {
     batch.set(listRef, <String, dynamic>{
       'title': trimmedTitle,
       'itemCount': normalizedItems.length,
-      'checkedCount': checkedCount,
+      'completedCount': completedCount,
       if (estimatedTotal > 0) 'estimatedTotal': estimatedTotal,
       'status': ShoppingListStatus.active.value,
       'source': ShoppingListSource.manual.value,
@@ -104,7 +106,7 @@ class ShoppingListsFirestoreService {
         id: itemRef.id,
         name: input.name.trim(),
         quantity: input.quantity.clamp(1, 999),
-        isChecked: false,
+        isCompleted: false,
         store: input.store?.trim(),
         unitPrice: input.unitPrice,
         sortOrder: index,
@@ -147,6 +149,29 @@ class ShoppingListsFirestoreService {
 
     final QuerySnapshot<Map<String, dynamic>> existing =
         await _itemsCollection(uid, listId).get();
+    final List<ShoppingListItem> existingItems = existing.docs
+        .map(ShoppingListItem.fromFirestore)
+        .toList(growable: false);
+    final String normalizedKey =
+        ShoppingBasketItemGrouper.normalizedKey(trimmedName);
+    final ShoppingListItem? duplicate =
+        ShoppingBasketItemGrouper.findActiveDuplicate(
+      items: existingItems,
+      normalizedKey: normalizedKey,
+    );
+
+    if (duplicate != null) {
+      final ShoppingListItem merged = ShoppingBasketItemGrouper.mergeItemPayload(
+        existing: duplicate,
+        newName: trimmedName,
+        addedQuantity: quantity,
+        addedStore: store,
+        addedUnitPrice: unitPrice,
+      );
+      await updateItem(uid: uid, listId: listId, item: merged);
+      return;
+    }
+
     final DocumentReference<Map<String, dynamic>> itemRef =
         _itemsCollection(uid, listId).doc();
 
@@ -155,7 +180,7 @@ class ShoppingListsFirestoreService {
         id: itemRef.id,
         name: trimmedName,
         quantity: quantity.clamp(1, 999),
-        isChecked: false,
+        isCompleted: false,
         store: store?.trim(),
         unitPrice: unitPrice,
         sortOrder: existing.size,
@@ -188,6 +213,89 @@ class ShoppingListsFirestoreService {
     await _refreshListSummary(uid: uid, listId: listId);
   }
 
+  Future<void> updateLastFinalizedReceiptId({
+    required String uid,
+    required String listId,
+    required String receiptId,
+  }) async {
+    await _listsCollection(uid).doc(listId).set(
+      <String, dynamic>{
+        'lastFinalizedReceiptId': receiptId,
+        'updatedAt': Timestamp.fromDate(DateTime.now()),
+      },
+      SetOptions(merge: true),
+    );
+  }
+
+  Future<List<ShoppingListItem>> fetchCompletedItems({
+    required String uid,
+    required String listId,
+  }) async {
+    final QuerySnapshot<Map<String, dynamic>> snapshot =
+        await _itemsCollection(uid, listId).get();
+    return snapshot.docs
+        .map(ShoppingListItem.fromFirestore)
+        .where((ShoppingListItem item) => item.isCompleted)
+        .toList(growable: false);
+  }
+
+  Future<List<ShoppingListItem>> fetchUncheckedItems({
+    required String uid,
+    required String listId,
+  }) async {
+    final QuerySnapshot<Map<String, dynamic>> snapshot =
+        await _itemsCollection(uid, listId).get();
+    return snapshot.docs
+        .map(ShoppingListItem.fromFirestore)
+        .where((ShoppingListItem item) => item.isActive)
+        .toList(growable: false);
+  }
+
+  Future<GlobalShoppingItemsSnapshot> fetchGlobalShoppingItemsSnapshot(
+    String uid,
+  ) async {
+    final QuerySnapshot<Map<String, dynamic>> listsSnapshot =
+        await _listsCollection(uid).get();
+    final List<ShoppingListItem> items = <ShoppingListItem>[];
+    int activeListsIncluded = 0;
+
+    for (final QueryDocumentSnapshot<Map<String, dynamic>> listDoc
+        in listsSnapshot.docs) {
+      final ShoppingList list = ShoppingList.fromFirestore(listDoc);
+      if (list.status != ShoppingListStatus.active) {
+        continue;
+      }
+
+      final QuerySnapshot<Map<String, dynamic>> itemsSnapshot =
+          await _itemsCollection(uid, listDoc.id).get();
+      bool listHasUnchecked = false;
+
+      for (final QueryDocumentSnapshot<Map<String, dynamic>> itemDoc
+          in itemsSnapshot.docs) {
+        final ShoppingListItem item = ShoppingListItem.fromFirestore(itemDoc);
+        if (item.isActive) {
+          items.add(item);
+          listHasUnchecked = true;
+        }
+      }
+
+      if (listHasUnchecked) {
+        activeListsIncluded += 1;
+      }
+    }
+
+    return GlobalShoppingItemsSnapshot(
+      uncheckedItems: items,
+      activeListsIncluded: activeListsIncluded,
+    );
+  }
+
+  Future<List<ShoppingListItem>> fetchAllUncheckedItems(String uid) async {
+    final GlobalShoppingItemsSnapshot snapshot =
+        await fetchGlobalShoppingItemsSnapshot(uid);
+    return snapshot.uncheckedItems;
+  }
+
   Future<void> _refreshListSummary({
     required String uid,
     required String listId,
@@ -198,11 +306,11 @@ class ShoppingListsFirestoreService {
         .map(ShoppingListItem.fromFirestore)
         .toList(growable: false);
 
-    int checkedCount = 0;
+    int completedCount = 0;
     double estimatedTotal = 0;
     for (final ShoppingListItem item in items) {
-      if (item.isChecked) {
-        checkedCount += 1;
+      if (item.isCompleted) {
+        completedCount += 1;
       } else if (item.unitPrice != null) {
         estimatedTotal += item.unitPrice! * item.quantity;
       }
@@ -211,7 +319,7 @@ class ShoppingListsFirestoreService {
     await _listsCollection(uid).doc(listId).set(
       <String, dynamic>{
         'itemCount': items.length,
-        'checkedCount': checkedCount,
+        'completedCount': completedCount,
         'estimatedTotal':
             estimatedTotal > 0 ? estimatedTotal : FieldValue.delete(),
         'updatedAt': Timestamp.fromDate(DateTime.now()),

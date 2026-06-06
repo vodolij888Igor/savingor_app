@@ -6,6 +6,7 @@ enum ReceiptSource {
   scanned('scanned', 'Scanned'),
   gallery('gallery', 'Gallery'),
   imported('imported', 'Imported'),
+  shoppingList('shoppingList', 'Shopping list'),
   unknown('unknown', 'Receipt');
 
   const ReceiptSource(this.value, this.label);
@@ -23,6 +24,8 @@ enum ReceiptSource {
         return Icons.photo_library_outlined;
       case ReceiptSource.imported:
         return Icons.upload_outlined;
+      case ReceiptSource.shoppingList:
+        return Icons.checklist_rounded;
       case ReceiptSource.unknown:
         return Icons.receipt_long_outlined;
     }
@@ -37,6 +40,8 @@ enum ReceiptSource {
         return 'Gallery scan notes';
       case ReceiptSource.imported:
         return 'Import notes';
+      case ReceiptSource.shoppingList:
+        return 'Trip notes';
       case ReceiptSource.manual:
       case ReceiptSource.unknown:
         return 'Notes';

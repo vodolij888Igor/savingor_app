@@ -20,6 +20,7 @@ import 'package:savingor_app/features/shopping/presentation/screens/shopping_lis
 import 'package:savingor_app/features/shopping/presentation/screens/shopping_list_detail_screen.dart';
 import 'package:savingor_app/features/shopping/presentation/screens/create_shopping_list_screen.dart';
 import 'package:savingor_app/features/shopping/presentation/screens/add_shopping_list_item_screen.dart';
+import 'package:savingor_app/features/shopping/presentation/screens/finalize_shopping_trip_screen.dart';
 import 'package:savingor_app/features/deals/presentation/screens/saved_deals_screen.dart';
 import 'package:savingor_app/features/start_saving/presentation/screens/start_saving_screen.dart';
 import 'package:savingor_app/features/expenses/presentation/screens/add_grocery_expense_screen.dart';
@@ -28,6 +29,7 @@ import 'package:savingor_app/features/analytics/presentation/screens/savings_ana
 import 'package:savingor_app/features/price_memory/presentation/screens/product_price_insights_screen.dart';
 import 'package:savingor_app/features/price_memory/presentation/screens/product_price_detail_screen.dart';
 import 'package:savingor_app/features/price_memory/presentation/screens/savings_opportunities_screen.dart';
+import 'package:savingor_app/features/price_memory/presentation/screens/basket_optimizer_screen.dart';
 import 'package:savingor_app/features/price_memory/domain/models/savings_opportunity.dart';
 import 'package:savingor_app/features/ai_assistant/presentation/screens/ai_savings_assistant_screen.dart';
 import 'package:savingor_app/core/widgets/bottom_nav_shell.dart';
@@ -143,6 +145,16 @@ GoRouter createAppRouter({required AppState appState}) {
         },
       ),
       GoRoute(
+        path: '/shopping/list/:listId/finalize-trip',
+        pageBuilder: (context, state) {
+          final String listId = state.pathParameters['listId'] ?? '';
+          return MaterialPage<void>(
+            key: state.pageKey,
+            child: FinalizeShoppingTripScreen(listId: listId),
+          );
+        },
+      ),
+      GoRoute(
         path: '/expenses/create',
         redirect: (context, state) => '/scanner/create',
       ),
@@ -210,6 +222,13 @@ GoRouter createAppRouter({required AppState appState}) {
       GoRoute(
         path: '/nearby-stores',
         builder: (context, state) => DealsMapScreen(),
+      ),
+      GoRoute(
+        path: '/shopping/basket-optimizer',
+        builder: (context, state) {
+          final String? listId = state.uri.queryParameters['listId'];
+          return BasketOptimizerScreen(listId: listId);
+        },
       ),
       GoRoute(
         path: '/analytics/savings-opportunities',

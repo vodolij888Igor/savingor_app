@@ -81,6 +81,8 @@ class Receipt {
         return 'Gallery receipt';
       case ReceiptSource.imported:
         return 'Imported receipt';
+      case ReceiptSource.shoppingList:
+        return 'Shopping list receipt';
       case ReceiptSource.manual:
         return 'Manual receipt';
       case ReceiptSource.unknown:

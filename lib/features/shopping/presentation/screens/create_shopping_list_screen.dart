@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
+import 'package:savingor_app/features/shopping/presentation/widgets/create_shopping_list_sheet.dart';
 import 'package:savingor_app/features/shopping/domain/models/shopping_list_item.dart';
 
 class CreateShoppingListScreen extends StatefulWidget {
@@ -17,12 +18,20 @@ class CreateShoppingListScreen extends StatefulWidget {
 
 class _CreateShoppingListScreenState extends State<CreateShoppingListScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _titleController = TextEditingController();
+  late final TextEditingController _titleController;
   final List<_ItemRowControllers> _itemRows = <_ItemRowControllers>[
     _ItemRowControllers(),
   ];
 
   bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(
+      text: CreateShoppingListSheet.defaultTitle,
+    );
+  }
 
   @override
   void dispose() {
