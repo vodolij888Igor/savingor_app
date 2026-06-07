@@ -68,16 +68,18 @@ class ShoppingListItem {
   }
 
   Map<String, dynamic> toFirestore({bool isCreate = false}) {
+    final double? safeUnitPrice = _safeUnitPrice(unitPrice);
+
     return <String, dynamic>{
       'name': name,
       'quantity': quantity,
       'isCompleted': isCompleted,
       if (isCompleted && completedAt != null)
         'completedAt': Timestamp.fromDate(completedAt!)
-      else
+      else if (!isCreate)
         'completedAt': FieldValue.delete(),
       if (store != null && store!.isNotEmpty) 'store': store,
-      if (unitPrice != null) 'unitPrice': unitPrice,
+      if (safeUnitPrice != null) 'unitPrice': safeUnitPrice,
       if (dealId != null) 'dealId': dealId,
       if (category != null && category!.isNotEmpty) 'category': category,
       if (notes != null && notes!.isNotEmpty) 'notes': notes,
@@ -85,6 +87,13 @@ class ShoppingListItem {
       'updatedAt': FieldValue.serverTimestamp(),
       if (isCreate) 'createdAt': FieldValue.serverTimestamp(),
     };
+  }
+
+  static double? _safeUnitPrice(double? value) {
+    if (value == null || !value.isFinite || value < 0) {
+      return null;
+    }
+    return value;
   }
 
   ShoppingListItem copyWith({

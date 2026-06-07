@@ -167,13 +167,21 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
     }
   }
 
-  double _computedSubtotal(List<ShoppingListItem> purchasedItems) {
+  double _computedSubtotalForItems(List<ShoppingListItem> purchasedItems) {
     return ShoppingTripReceiptBuilder.computeSubtotal(
       ShoppingTripReceiptBuilder.buildReceiptItems(
         purchasedItems: purchasedItems,
         unitPricesByItemId: _unitPricesByItemId(),
       ),
     );
+  }
+
+  double _computedGrandSubtotal(ShoppingTripReceiptDraft draft) {
+    return _computedSubtotalForItems(draft.purchasedItems);
+  }
+
+  double _computedGroupSubtotal(ShoppingTripStoreGroup group) {
+    return _computedSubtotalForItems(group.items);
   }
 
   Map<String, double> _unitPricesByItemId() {
@@ -213,7 +221,7 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
     return confirmed == true;
   }
 
-  Future<void> _save(ShoppingList list) async {
+  Future<void> _save(ShoppingList list, ShoppingTripReceiptDraft draft) async {
     if (!_formKey.currentState!.validate()) return;
 
     if (list.lastFinalizedReceiptId != null) {
@@ -221,29 +229,23 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
       if (!confirmed || !mounted) return;
     }
 
-    final double? total = double.tryParse(_totalController.text.trim());
-    if (total == null || total <= 0) {
+    final List<ShoppingListItem> purchasedItems = _itemFields
+        .map((PurchasedItemPriceFields fields) => fields.item)
+        .toList(growable: false);
+
+    if (draft.hasMultipleStores && !draft.allGroupsHaveStoreNames) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter a valid receipt total.')),
+        const SnackBar(
+          content: Text(
+            'Add a store to every purchased item before finalizing multiple receipts.',
+          ),
+        ),
       );
       return;
     }
 
-    final List<ShoppingListItem> purchasedItems = _itemFields
-        .map((PurchasedItemPriceFields fields) => fields.item)
-        .toList(growable: false);
-    final List<ReceiptItem> receiptItems =
-        ShoppingTripReceiptBuilder.buildReceiptItems(
-      purchasedItems: purchasedItems,
-      unitPricesByItemId: _unitPricesByItemId(),
-    );
-
-    if (receiptItems.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Add valid prices for at least one purchased item.'),
-        ),
-      );
+    final List<ShoppingTripStoreGroup> groups = draft.storeGroups;
+    if (groups.isEmpty) {
       return;
     }
 
@@ -254,42 +256,127 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
     final String? address = _addressController.text.trim().isEmpty
         ? null
         : _addressController.text.trim();
+    final String notes =
+        ShoppingTripReceiptBuilder.buildNotes(listTitle: list.title);
 
-    final String? receiptId = await receiptStore.createReceipt(
-      storeName: _storeController.text.trim(),
-      purchaseDate: _purchaseDate,
-      total: total,
-      subtotal: ShoppingTripReceiptBuilder.computeSubtotal(receiptItems),
-      source: ReceiptSource.shoppingList,
-      storeAddress: address,
-      notes: ShoppingTripReceiptBuilder.buildNotes(listTitle: list.title),
-      categorySummary: 'Grocery',
-      items: receiptItems,
+    final List<String> createdReceiptIds = <String>[];
+
+    for (final ShoppingTripStoreGroup group in groups) {
+      final String storeName = ShoppingTripReceiptBuilder.resolveStoreName(
+        group: group,
+        formStoreName: _storeController.text,
+      );
+
+      if (storeName.isEmpty) {
+        setState(() => _isSaving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Enter the store name for this trip.')),
+        );
+        return;
+      }
+
+      final List<ReceiptItem> receiptItems =
+          ShoppingTripReceiptBuilder.buildReceiptItems(
+        purchasedItems: group.items,
+        unitPricesByItemId: _unitPricesByItemId(),
+      );
+
+      if (receiptItems.isEmpty) {
+        setState(() => _isSaving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Add valid prices for purchased items at $storeName.',
+            ),
+          ),
+        );
+        return;
+      }
+
+      final double subtotal =
+          ShoppingTripReceiptBuilder.computeSubtotal(receiptItems);
+      final double total = draft.hasMultipleStores
+          ? subtotal
+          : (double.tryParse(_totalController.text.trim()) ?? subtotal);
+
+      if (total <= 0) {
+        setState(() => _isSaving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Enter a valid receipt total.')),
+        );
+        return;
+      }
+
+      final String? receiptId = await receiptStore.createReceipt(
+        storeName: storeName,
+        purchaseDate: _purchaseDate,
+        total: total,
+        subtotal: subtotal,
+        source: ReceiptSource.shoppingList,
+        storeAddress: address,
+        notes: notes,
+        categorySummary: 'Grocery',
+        items: receiptItems,
+      );
+
+      if (!mounted) return;
+
+      if (receiptId == null) {
+        setState(() => _isSaving = false);
+        final String? error = receiptStore.mutationError;
+        if (error != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(error)),
+          );
+        }
+        return;
+      }
+
+      createdReceiptIds.add(receiptId);
+    }
+
+    final bool itemsRemoved = await shoppingStore.deleteItems(
+      listId: widget.listId,
+      itemIds: purchasedItems.map((ShoppingListItem item) => item.id),
     );
 
     if (!mounted) return;
 
-    if (receiptId == null) {
+    if (!itemsRemoved) {
       setState(() => _isSaving = false);
-      final String? error = receiptStore.mutationError;
+      final String? error = shoppingStore.mutationError;
       if (error != null) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error)),
+        );
       }
       return;
     }
 
     await shoppingStore.markLastFinalizedReceipt(
       listId: widget.listId,
-      receiptId: receiptId,
+      receiptId: createdReceiptIds.last,
     );
 
     if (!mounted) return;
     setState(() => _isSaving = false);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Receipt saved. Price history updated.')),
+      SnackBar(
+        content: Text(
+          ShoppingTripReceiptBuilder.finalizeSuccessMessage(
+            createdReceiptIds.length,
+          ),
+        ),
+      ),
     );
-    context.push('/scanner/$receiptId');
+
+    if (createdReceiptIds.length == 1) {
+      context.push('/scanner/${createdReceiptIds.first}');
+      return;
+    }
+
+    context.pop();
   }
 
   @override
@@ -400,25 +487,48 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
           24 + bottomInset + keyboardInset,
         ),
         children: <Widget>[
-          TextFormField(
-            controller: _storeController,
-            enabled: !_isSaving,
-            textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(
-              labelText: 'Store name',
-              border: OutlineInputBorder(),
+          if (!draft.hasMultipleStores) ...<Widget>[
+            TextFormField(
+              controller: _storeController,
+              enabled: !_isSaving,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(
+                labelText: 'Store name',
+                border: OutlineInputBorder(),
+              ),
+              validator: (String? value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Enter the store name for this trip';
+                }
+                return null;
+              },
             ),
-            validator: (String? value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Enter the store name for this trip';
-              }
-              return null;
-            },
-          ),
-          if (draft.hasMultipleStores) ...<Widget>[
+          ] else ...<Widget>[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: SavingorColors.lightGreen.withOpacity(0.25),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: SavingorColors.primaryStroke.withOpacity(0.2),
+                ),
+              ),
+              child: Text(
+                'Creating ${draft.receiptCount} receipts — one per store.',
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: SavingorColors.darkGreen,
+                  height: 1.35,
+                ),
+              ),
+            ),
+          ],
+          if (draft.hasMultipleStores && !draft.allGroupsHaveStoreNames) ...<Widget>[
             const SizedBox(height: 8),
             const Text(
-              'Use the store from this shopping trip. For multiple stores, create separate receipts later.',
+              'Some purchased items are missing a store. Add a store on each item before finalizing.',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
@@ -455,59 +565,111 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
             },
           ),
           const SizedBox(height: 24),
-          const Text(
-            'Purchased items',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: SavingorColors.darkGreen,
+          if (draft.hasMultipleStores)
+            ...draft.storeGroups.expand(
+              (ShoppingTripStoreGroup group) => <Widget>[
+                Text(
+                  group.hasStoreName ? group.storeName : 'Missing store',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: SavingorColors.darkGreen,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ...group.items.map(
+                  (ShoppingListItem item) {
+                    final PurchasedItemPriceFields fields = _itemFields.firstWhere(
+                      (PurchasedItemPriceFields candidate) =>
+                          candidate.item.id == item.id,
+                    );
+                    return PurchasedItemPriceRow(
+                      item: fields.item,
+                      unitPriceController: fields.unitPriceController,
+                      onChanged: () => _syncTotalFromItems(),
+                    );
+                  },
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Receipt subtotal: '
+                  '\$${_computedGroupSubtotal(group).toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: SavingorColors.primaryStroke,
+                  ),
+                ),
+                const SizedBox(height: 18),
+              ],
+            )
+          else ...<Widget>[
+            const Text(
+              'Purchased items',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: SavingorColors.darkGreen,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          ..._itemFields.map(
-            (PurchasedItemPriceFields fields) => PurchasedItemPriceRow(
-              item: fields.item,
-              unitPriceController: fields.unitPriceController,
-              onChanged: () => _syncTotalFromItems(),
+            const SizedBox(height: 12),
+            ..._itemFields.map(
+              (PurchasedItemPriceFields fields) => PurchasedItemPriceRow(
+                item: fields.item,
+                unitPriceController: fields.unitPriceController,
+                onChanged: () => _syncTotalFromItems(),
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          TextFormField(
-            controller: _totalController,
-            enabled: !_isSaving,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            onChanged: (_) {
-              _totalManuallyEdited = true;
-            },
-            decoration: const InputDecoration(
-              labelText: 'Receipt total',
-              prefixText: '\$ ',
-              border: OutlineInputBorder(),
+          ],
+          if (!draft.hasMultipleStores) ...<Widget>[
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: _totalController,
+              enabled: !_isSaving,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              onChanged: (_) {
+                _totalManuallyEdited = true;
+              },
+              decoration: const InputDecoration(
+                labelText: 'Receipt total',
+                prefixText: '\$ ',
+                border: OutlineInputBorder(),
+              ),
+              validator: (String? value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Enter the receipt total';
+                }
+                final double? total = double.tryParse(value.trim());
+                if (total == null || total <= 0) {
+                  return 'Enter a valid receipt total';
+                }
+                return null;
+              },
             ),
-            validator: (String? value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Enter the receipt total';
-              }
-              final double? total = double.tryParse(value.trim());
-              if (total == null || total <= 0) {
-                return 'Enter a valid receipt total';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Subtotal from item prices: '
-            '\$${_computedSubtotal(draft.purchasedItems).toStringAsFixed(2)}',
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: SavingorColors.textSecondary,
+            const SizedBox(height: 8),
+            Text(
+              'Subtotal from item prices: '
+              '\$${_computedGrandSubtotal(draft).toStringAsFixed(2)}',
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: SavingorColors.textSecondary,
+              ),
             ),
-          ),
+          ] else ...<Widget>[
+            Text(
+              'Grand total across receipts: '
+              '\$${_computedGrandSubtotal(draft).toStringAsFixed(2)}',
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: SavingorColors.textSecondary,
+              ),
+            ),
+          ],
           const SizedBox(height: 24),
           FilledButton(
-            onPressed: _isSaving ? null : () => _save(list),
+            onPressed: _isSaving ? null : () => _save(list, draft),
             style: SavingorButtonStyles.primaryFilled(),
             child: _isSaving
                 ? const SizedBox(
@@ -515,7 +677,9 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
                     height: 22,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Save receipt'),
+                : Text(
+                    draft.hasMultipleStores ? 'Save receipts' : 'Save receipt',
+                  ),
           ),
         ],
       ),

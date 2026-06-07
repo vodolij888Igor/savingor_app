@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:savingor_app/features/shopping/domain/models/shopping_list.dart';
 import 'package:savingor_app/features/shopping/domain/models/shopping_list_item.dart';
 import 'package:savingor_app/features/shopping/domain/models/global_shopping_items_snapshot.dart';
 import 'package:savingor_app/features/shopping/domain/shopping_basket_item_grouper.dart';
+import 'package:savingor_app/features/shopping/domain/shopping_list_add_item_result.dart';
 
 /// Firestore access for user shopping lists under `users/{uid}/shoppingLists`.
 class ShoppingListsFirestoreService {
@@ -32,21 +34,29 @@ class ShoppingListsFirestoreService {
 
   Stream<List<ShoppingList>> watchLists(String uid) {
     return _listsCollection(uid).snapshots().map(
-          (QuerySnapshot<Map<String, dynamic>> snapshot) {
-            final List<ShoppingList> lists = snapshot.docs
-                .map(ShoppingList.fromFirestore)
-                .where(
-                  (ShoppingList list) =>
-                      list.status == ShoppingListStatus.active,
-                )
-                .toList(growable: false)
-              ..sort(
-                (ShoppingList a, ShoppingList b) =>
-                    b.updatedAt.compareTo(a.updatedAt),
-              );
-            return lists;
-          },
+          (QuerySnapshot<Map<String, dynamic>> snapshot) =>
+              _sortActiveLists(
+            snapshot.docs.map(ShoppingList.fromFirestore).toList(growable: false),
+          ),
         );
+  }
+
+  Future<List<ShoppingList>> fetchActiveLists(String uid) async {
+    final QuerySnapshot<Map<String, dynamic>> snapshot =
+        await _listsCollection(uid).get();
+    return _sortActiveLists(
+      snapshot.docs.map(ShoppingList.fromFirestore).toList(growable: false),
+    );
+  }
+
+  static List<ShoppingList> _sortActiveLists(List<ShoppingList> lists) {
+    final List<ShoppingList> active = lists
+        .where((ShoppingList list) => list.status == ShoppingListStatus.active)
+        .toList(growable: false)
+      ..sort(
+        (ShoppingList a, ShoppingList b) => b.updatedAt.compareTo(a.updatedAt),
+      );
+    return active;
   }
 
   Stream<List<ShoppingListItem>> watchItems(String uid, String listId) {
@@ -134,7 +144,7 @@ class ShoppingListsFirestoreService {
     await batch.commit();
   }
 
-  Future<void> addItem({
+  Future<ShoppingListAddItemResult> addItem({
     required String uid,
     required String listId,
     required String name,
@@ -142,54 +152,144 @@ class ShoppingListsFirestoreService {
     String? store,
     double? unitPrice,
   }) async {
-    final String trimmedName = name.trim();
+    final String trimmedName =
+        ShoppingBasketItemGrouper.formatDisplayName(name);
     if (trimmedName.isEmpty) {
       throw const ShoppingListsException('Item name is required.');
     }
 
-    final QuerySnapshot<Map<String, dynamic>> existing =
-        await _itemsCollection(uid, listId).get();
-    final List<ShoppingListItem> existingItems = existing.docs
-        .map(ShoppingListItem.fromFirestore)
-        .toList(growable: false);
-    final String normalizedKey =
-        ShoppingBasketItemGrouper.normalizedKey(trimmedName);
-    final ShoppingListItem? duplicate =
-        ShoppingBasketItemGrouper.findActiveDuplicate(
-      items: existingItems,
-      normalizedKey: normalizedKey,
-    );
+    final String? trimmedStore = _trimOptional(store);
+    final double? safeUnitPrice = _sanitizeUnitPrice(unitPrice);
 
-    if (duplicate != null) {
-      final ShoppingListItem merged = ShoppingBasketItemGrouper.mergeItemPayload(
-        existing: duplicate,
-        newName: trimmedName,
-        addedQuantity: quantity,
-        addedStore: store,
-        addedUnitPrice: unitPrice,
+    try {
+      final QuerySnapshot<Map<String, dynamic>> existing =
+          await _itemsCollection(uid, listId).get();
+      final List<ShoppingListItem> existingItems = existing.docs
+          .map(ShoppingListItem.fromFirestore)
+          .toList(growable: false);
+      final String normalizedKey =
+          ShoppingBasketItemGrouper.normalizedKey(trimmedName);
+      final ShoppingListItem? duplicate =
+          ShoppingBasketItemGrouper.findActiveDuplicate(
+        items: existingItems,
+        normalizedKey: normalizedKey,
       );
-      await updateItem(uid: uid, listId: listId, item: merged);
-      return;
+
+      if (duplicate != null) {
+        final ShoppingListItem merged =
+            ShoppingBasketItemGrouper.mergeItemPayload(
+          existing: duplicate,
+          newName: trimmedName,
+          addedQuantity: quantity,
+          addedStore: trimmedStore,
+          addedUnitPrice: safeUnitPrice,
+        );
+        await updateItem(uid: uid, listId: listId, item: merged);
+        return ShoppingListAddItemResult.quantityUpdated;
+      }
+
+      final DocumentReference<Map<String, dynamic>> itemRef =
+          _itemsCollection(uid, listId).doc();
+
+      await itemRef.set(
+        ShoppingListItem(
+          id: itemRef.id,
+          name: trimmedName,
+          quantity: quantity.clamp(1, 999),
+          isCompleted: false,
+          store: trimmedStore,
+          unitPrice: safeUnitPrice,
+          sortOrder: existing.size,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ).toFirestore(isCreate: true),
+      );
+
+      await _refreshListSummary(uid: uid, listId: listId);
+      return ShoppingListAddItemResult.added;
+    } catch (error, stackTrace) {
+      debugPrint(
+        'ShoppingListsFirestoreService.addItem failed for "$trimmedName": '
+        '$error\n$stackTrace',
+      );
+      rethrow;
+    }
+  }
+
+  /// Adds an item only when no active duplicate exists (idempotent quick-add).
+  Future<ShoppingListAddItemResult> addItemIfAbsent({
+    required String uid,
+    required String listId,
+    required String name,
+    int quantity = 1,
+    String? store,
+    double? unitPrice,
+  }) async {
+    final String trimmedName =
+        ShoppingBasketItemGrouper.formatDisplayName(name);
+    if (trimmedName.isEmpty) {
+      throw const ShoppingListsException('Item name is required.');
     }
 
-    final DocumentReference<Map<String, dynamic>> itemRef =
-        _itemsCollection(uid, listId).doc();
+    final String? trimmedStore = _trimOptional(store);
+    final double? safeUnitPrice = _sanitizeUnitPrice(unitPrice);
 
-    await itemRef.set(
-      ShoppingListItem(
-        id: itemRef.id,
-        name: trimmedName,
-        quantity: quantity.clamp(1, 999),
-        isCompleted: false,
-        store: store?.trim(),
-        unitPrice: unitPrice,
-        sortOrder: existing.size,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ).toFirestore(isCreate: true),
-    );
+    try {
+      final QuerySnapshot<Map<String, dynamic>> existing =
+          await _itemsCollection(uid, listId).get();
+      final List<ShoppingListItem> existingItems = existing.docs
+          .map(ShoppingListItem.fromFirestore)
+          .toList(growable: false);
+      final String normalizedKey =
+          ShoppingBasketItemGrouper.normalizedKey(trimmedName);
+      final ShoppingListItem? duplicate =
+          ShoppingBasketItemGrouper.findActiveDuplicate(
+        items: existingItems,
+        normalizedKey: normalizedKey,
+      );
 
-    await _refreshListSummary(uid: uid, listId: listId);
+      if (duplicate != null) {
+        return ShoppingListAddItemResult.alreadyExists;
+      }
+
+      final DocumentReference<Map<String, dynamic>> itemRef =
+          _itemsCollection(uid, listId).doc();
+
+      await itemRef.set(
+        ShoppingListItem(
+          id: itemRef.id,
+          name: trimmedName,
+          quantity: quantity.clamp(1, 999),
+          isCompleted: false,
+          store: trimmedStore,
+          unitPrice: safeUnitPrice,
+          sortOrder: existing.size,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ).toFirestore(isCreate: true),
+      );
+
+      await _refreshListSummary(uid: uid, listId: listId);
+      return ShoppingListAddItemResult.added;
+    } catch (error, stackTrace) {
+      debugPrint(
+        'ShoppingListsFirestoreService.addItemIfAbsent failed for '
+        '"$trimmedName": $error\n$stackTrace',
+      );
+      rethrow;
+    }
+  }
+
+  static String? _trimOptional(String? value) {
+    final String trimmed = value?.trim() ?? '';
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  static double? _sanitizeUnitPrice(double? unitPrice) {
+    if (unitPrice == null || !unitPrice.isFinite || unitPrice < 0) {
+      return null;
+    }
+    return unitPrice;
   }
 
   Future<void> updateItem({

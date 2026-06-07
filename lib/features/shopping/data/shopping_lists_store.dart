@@ -7,6 +7,8 @@ import 'package:savingor_app/features/shopping/data/shopping_lists_firestore_ser
 import 'package:savingor_app/features/shopping/domain/models/shopping_list.dart';
 import 'package:savingor_app/features/shopping/domain/models/shopping_list_item.dart';
 import 'package:savingor_app/features/shopping/domain/models/global_shopping_items_snapshot.dart';
+import 'package:savingor_app/features/shopping/domain/shopping_basket_item_grouper.dart';
+import 'package:savingor_app/features/shopping/domain/shopping_list_add_item_result.dart';
 
 /// App-level state for Firestore-backed shopping lists.
 class ShoppingListsStore extends ChangeNotifier {
@@ -18,6 +20,8 @@ class ShoppingListsStore extends ChangeNotifier {
     _authSubscription = _firebaseAuth.authStateChanges().listen(_onAuthChanged);
     _onAuthChanged(_firebaseAuth.currentUser);
   }
+
+  static const String defaultQuickAddListTitle = 'Weekly groceries';
 
   final ShoppingListsFirestoreService _service;
   final FirebaseAuth _firebaseAuth;
@@ -226,15 +230,92 @@ class ShoppingListsStore extends ChangeNotifier {
       );
       notifyListeners();
       return true;
-    } on ShoppingListsException catch (error) {
+    } on ShoppingListsException catch (error, stackTrace) {
+      debugPrint('ShoppingListsStore.addItem failed: $error\n$stackTrace');
       _mutationError = error.message;
       notifyListeners();
       return false;
-    } catch (_) {
+    } catch (error, stackTrace) {
+      debugPrint('ShoppingListsStore.addItem failed: $error\n$stackTrace');
       _mutationError = 'Could not add the item. Please try again.';
       notifyListeners();
       return false;
     }
+  }
+
+  /// Adds to the most recently updated active list, creating a default list if needed.
+  Future<ShoppingListAddItemResult> addToLatestActiveList({
+    required String name,
+    int quantity = 1,
+    String? store,
+    double? unitPrice,
+  }) async {
+    if (_uid == null) {
+      _mutationError = 'Sign in to add items to your shopping list.';
+      notifyListeners();
+      return ShoppingListAddItemResult.notAuthenticated;
+    }
+
+    final String formattedName =
+        ShoppingBasketItemGrouper.formatDisplayName(name);
+    if (formattedName.isEmpty) {
+      _mutationError = 'Item name is required.';
+      notifyListeners();
+      return ShoppingListAddItemResult.failed;
+    }
+
+    try {
+      _mutationError = null;
+
+      final String? listId = await _resolveTargetListId();
+      if (listId == null) {
+        return ShoppingListAddItemResult.failed;
+      }
+
+      final ShoppingListAddItemResult result = await _service.addItemIfAbsent(
+        uid: _uid!,
+        listId: listId,
+        name: formattedName,
+        quantity: quantity,
+        store: store,
+        unitPrice: unitPrice,
+      );
+
+      notifyListeners();
+      return result;
+    } on ShoppingListsException catch (error, stackTrace) {
+      debugPrint(
+        'ShoppingListsStore.addToLatestActiveList failed: $error\n$stackTrace',
+      );
+      _mutationError = error.message;
+      notifyListeners();
+      return ShoppingListAddItemResult.failed;
+    } catch (error, stackTrace) {
+      debugPrint(
+        'ShoppingListsStore.addToLatestActiveList failed: $error\n$stackTrace',
+      );
+      _mutationError = 'Could not add the item. Please try again.';
+      notifyListeners();
+      return ShoppingListAddItemResult.failed;
+    }
+  }
+
+  Future<String?> _resolveTargetListId() async {
+    if (_uid == null) {
+      return null;
+    }
+
+    if (_lists.isNotEmpty) {
+      return _lists.first.id;
+    }
+
+    final List<ShoppingList> fetched =
+        await _service.fetchActiveLists(_uid!);
+    if (fetched.isNotEmpty) {
+      return fetched.first.id;
+    }
+
+    return createList(title: defaultQuickAddListTitle);
   }
 
   Future<bool> toggleItemCompleted({
@@ -308,6 +389,19 @@ class ShoppingListsStore extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  Future<bool> deleteItems({
+    required String listId,
+    required Iterable<String> itemIds,
+  }) async {
+    for (final String itemId in itemIds) {
+      final bool ok = await deleteItem(listId: listId, itemId: itemId);
+      if (!ok) {
+        return false;
+      }
+    }
+    return true;
   }
 
   Future<List<ShoppingListItem>> fetchUncheckedItemsForList(String listId) async {

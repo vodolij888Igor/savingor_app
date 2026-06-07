@@ -4,6 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/app_screen_states.dart';
 import 'package:savingor_app/features/analytics/domain/expense_analytics_calculator.dart';
+import 'package:savingor_app/features/analytics/domain/savings_intelligence_service.dart';
+import 'package:savingor_app/features/analytics/domain/savings_recommendation_service.dart';
+import 'package:savingor_app/features/analytics/domain/models/savings_recommendation.dart';
+import 'package:savingor_app/features/analytics/domain/models/savings_summary.dart';
+import 'package:savingor_app/features/analytics/presentation/widgets/recommended_actions_section.dart';
+import 'package:savingor_app/features/analytics/presentation/widgets/savings_value_section.dart';
 import 'package:savingor_app/features/expenses/data/expenses_store.dart';
 import 'package:savingor_app/features/scanner/data/receipt_store.dart';
 import 'package:savingor_app/features/price_memory/data/price_memory_store.dart';
@@ -124,7 +130,9 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     PriceMemoryStore priceMemoryStore,
     double bottomInset,
   ) {
-    if (expensesStore.isLoading || receiptStore.isLoading) {
+    if (expensesStore.isLoading ||
+        receiptStore.isLoading ||
+        priceMemoryStore.isLoading) {
       return const AppLoadingState(message: 'Loading analytics…');
     }
 
@@ -144,6 +152,20 @@ class SavingsAnalyticsScreen extends StatelessWidget {
       );
     }
 
+    if (priceMemoryStore.loadError != null) {
+      return AppErrorState(
+        title: 'Could not load analytics',
+        message: priceMemoryStore.loadError!,
+        onRetry: priceMemoryStore.retry,
+      );
+    }
+
+    final SavingsSummary savingsSummary = SavingsIntelligenceService.compute(
+      priceMemoryStore.records,
+    );
+    final List<SavingsRecommendation> recommendations =
+        SavingsRecommendationService.compute(priceMemoryStore.records);
+
     final ExpenseAnalyticsSummary summary = ExpenseAnalyticsCalculator.compute(
       expensesStore.expenses,
       receipts: receiptStore.receipts,
@@ -153,11 +175,12 @@ class SavingsAnalyticsScreen extends StatelessWidget {
       return ListView(
         padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + bottomInset),
         children: <Widget>[
-          _buildPriceInsightsEntry(context, priceMemoryStore),
-          const SizedBox(height: 12),
-          _buildSavingsOpportunitiesEntry(context, priceMemoryStore),
-          const SizedBox(height: 12),
-          _buildBasketOptimizerEntry(context),
+          ..._buildHeaderSections(
+            context,
+            priceMemoryStore,
+            savingsSummary,
+            recommendations,
+          ),
           const SizedBox(height: SavingorSpacing.xl),
           AppEmptyState(
             icon: Icons.insights_outlined,
@@ -175,11 +198,12 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     return ListView(
       padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + bottomInset),
       children: <Widget>[
-        _buildPriceInsightsEntry(context, priceMemoryStore),
-        const SizedBox(height: 12),
-        _buildSavingsOpportunitiesEntry(context, priceMemoryStore),
-        const SizedBox(height: 12),
-        _buildBasketOptimizerEntry(context),
+        ..._buildHeaderSections(
+          context,
+          priceMemoryStore,
+          savingsSummary,
+          recommendations,
+        ),
         const SizedBox(height: SavingorSpacing.xl),
         _buildSummaryGrid(summary),
         const SizedBox(height: SavingorSpacing.xl),
@@ -188,6 +212,35 @@ class SavingsAnalyticsScreen extends StatelessWidget {
         _buildRecentActivity(summary),
       ],
     );
+  }
+
+  List<Widget> _buildHeaderSections(
+    BuildContext context,
+    PriceMemoryStore priceMemoryStore,
+    SavingsSummary savingsSummary,
+    List<SavingsRecommendation> recommendations,
+  ) {
+    return <Widget>[
+      _buildPriceInsightsEntry(context, priceMemoryStore),
+      const SizedBox(height: 12),
+      _buildSavingsOpportunitiesEntry(context, priceMemoryStore),
+      const SizedBox(height: 12),
+      _buildBasketOptimizerEntry(context),
+      const SizedBox(height: SavingorSpacing.xl),
+      SavingsValueSection(
+        summary: savingsSummary,
+        formatCurrency: _formatCurrency,
+      ),
+      const SizedBox(height: SavingorSpacing.xl),
+      RecommendedActionsSection(recommendations: recommendations),
+      if (savingsSummary.topProducts.isNotEmpty) ...<Widget>[
+        const SizedBox(height: SavingorSpacing.xl),
+        TopSavingsProductsSection(
+          products: savingsSummary.topProducts,
+          formatCurrency: _formatCurrency,
+        ),
+      ],
+    ];
   }
 
   Widget _buildSignInRequired(BuildContext context) {

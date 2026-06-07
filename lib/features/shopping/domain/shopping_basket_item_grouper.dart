@@ -7,6 +7,26 @@ abstract final class ShoppingBasketItemGrouper {
     return ProductNameNormalizer.normalize(productName);
   }
 
+  /// Trim and normalize casing for new shopping list rows when needed.
+  static String formatDisplayName(String productName) {
+    final String trimmed = productName.trim();
+    if (trimmed.isEmpty) {
+      return trimmed;
+    }
+    if (_hasUppercase(trimmed)) {
+      return trimmed;
+    }
+
+    return trimmed
+        .split(RegExp(r'\s+'))
+        .where((String part) => part.isNotEmpty)
+        .map(
+          (String part) =>
+              '${part[0].toUpperCase()}${part.substring(1).toLowerCase()}',
+        )
+        .join(' ');
+  }
+
   static String itemKey(ShoppingListItem item) {
     return normalizedKey(item.name);
   }
@@ -74,13 +94,14 @@ abstract final class ShoppingBasketItemGrouper {
         (existing.quantity + addedQuantity).clamp(1, 999);
     final String? trimmedStore = addedStore?.trim();
     final String? resolvedStore =
-        existing.store != null && existing.store!.isNotEmpty
-            ? existing.store
-            : (trimmedStore != null && trimmedStore.isNotEmpty
-                ? trimmedStore
+        trimmedStore != null && trimmedStore.isNotEmpty
+            ? trimmedStore
+            : (existing.store != null && existing.store!.isNotEmpty
+                ? existing.store
                 : null);
-    final double? resolvedPrice = existing.unitPrice ?? addedUnitPrice;
-    final String resolvedName = _preferDisplayName(existing.name, newName.trim());
+    final double? resolvedPrice = addedUnitPrice ?? existing.unitPrice;
+    final String resolvedName =
+        _preferDisplayName(existing.name, formatDisplayName(newName));
 
     return existing.copyWith(
       name: resolvedName,

@@ -6,11 +6,9 @@ import 'package:savingor_app/features/price_memory/domain/product_name_normalize
 
 /// Groups raw price records into product-level insights.
 abstract final class ProductPriceInsightsGrouper {
-  static List<ProductPriceInsight> group(List<ProductPriceRecord> records) {
-    if (records.isEmpty) {
-      return const <ProductPriceInsight>[];
-    }
-
+  static Map<String, List<ProductPriceRecord>> groupRecords(
+    List<ProductPriceRecord> records,
+  ) {
     final Map<String, List<ProductPriceRecord>> grouped =
         <String, List<ProductPriceRecord>>{};
 
@@ -21,6 +19,16 @@ abstract final class ProductPriceInsightsGrouper {
       }
       grouped.putIfAbsent(groupKey, () => <ProductPriceRecord>[]).add(record);
     }
+
+    return grouped;
+  }
+
+  static List<ProductPriceInsight> group(List<ProductPriceRecord> records) {
+    if (records.isEmpty) {
+      return const <ProductPriceInsight>[];
+    }
+
+    final Map<String, List<ProductPriceRecord>> grouped = groupRecords(records);
 
     final List<ProductPriceInsight> insights = grouped.entries
         .map(_buildInsight)
@@ -84,6 +92,10 @@ abstract final class ProductPriceInsightsGrouper {
       records: sortedRecords,
       currency: latestRecord.currency,
     );
+  }
+
+  static String displayNameFor(List<ProductPriceRecord> records) {
+    return _displayName(records);
   }
 
   static String _displayName(List<ProductPriceRecord> records) {

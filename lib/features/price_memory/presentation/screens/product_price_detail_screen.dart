@@ -7,6 +7,7 @@ import 'package:savingor_app/features/price_memory/domain/models/product_price_i
 import 'package:savingor_app/features/price_memory/domain/models/product_price_record.dart';
 import 'package:savingor_app/features/price_memory/domain/models/savings_opportunity.dart';
 import 'package:savingor_app/features/price_memory/domain/price_memory_formatters.dart';
+import 'package:savingor_app/features/price_memory/presentation/widgets/product_buying_advice_card.dart';
 import 'package:savingor_app/features/price_memory/presentation/widgets/savings_opportunity_summary_card.dart';
 import 'package:savingor_app/features/receipts/presentation/widgets/receipt_source_badge.dart';
 
@@ -168,6 +169,12 @@ class ProductPriceDetailScreen extends StatelessWidget {
           ),
           const SizedBox(height: SavingorSpacing.lg),
         ],
+        ProductBuyingAdviceCard(
+          productName: insight.displayName,
+          records: insight.records,
+          currency: insight.currency,
+        ),
+        const SizedBox(height: SavingorSpacing.lg),
         const Text(
           'Price history',
           style: TextStyle(
