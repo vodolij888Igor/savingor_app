@@ -175,12 +175,20 @@ class SavingsAnalyticsScreen extends StatelessWidget {
       return ListView(
         padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + bottomInset),
         children: <Widget>[
-          ..._buildHeaderSections(
-            context,
-            priceMemoryStore,
-            savingsSummary,
-            recommendations,
+          _buildOverviewGrid(summary, savingsSummary),
+          const SizedBox(height: SavingorSpacing.xl),
+          SavingsValueSection(
+            summary: savingsSummary,
+            formatCurrency: _formatCurrency,
+            proPaybackOnly: true,
           ),
+          const SizedBox(height: SavingorSpacing.xl),
+          RecommendedActionsSection(
+            recommendations: recommendations,
+            excludeWatchPriceRecommendations: true,
+          ),
+          const SizedBox(height: SavingorSpacing.xl),
+          ..._buildDetailLinks(context, priceMemoryStore),
           const SizedBox(height: SavingorSpacing.xl),
           AppEmptyState(
             icon: Icons.insights_outlined,
@@ -198,48 +206,45 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     return ListView(
       padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + bottomInset),
       children: <Widget>[
-        ..._buildHeaderSections(
-          context,
-          priceMemoryStore,
-          savingsSummary,
-          recommendations,
-        ),
+        _buildOverviewGrid(summary, savingsSummary),
         const SizedBox(height: SavingorSpacing.xl),
-        _buildSummaryGrid(summary),
+        SavingsValueSection(
+          summary: savingsSummary,
+          formatCurrency: _formatCurrency,
+          proPaybackOnly: true,
+        ),
         const SizedBox(height: SavingorSpacing.xl),
         _buildSpendingByStore(summary),
         const SizedBox(height: SavingorSpacing.xl),
         _buildRecentActivity(summary),
+        const SizedBox(height: SavingorSpacing.xl),
+        RecommendedActionsSection(
+          recommendations: recommendations,
+          excludeWatchPriceRecommendations: true,
+        ),
+        const SizedBox(height: SavingorSpacing.xl),
+        ..._buildDetailLinks(context, priceMemoryStore),
       ],
     );
   }
 
-  List<Widget> _buildHeaderSections(
+  List<Widget> _buildDetailLinks(
     BuildContext context,
     PriceMemoryStore priceMemoryStore,
-    SavingsSummary savingsSummary,
-    List<SavingsRecommendation> recommendations,
   ) {
     return <Widget>[
+      const Text(
+        'Explore details',
+        style: TextStyle(
+          fontSize: 17,
+          fontWeight: FontWeight.w700,
+          color: SavingorColors.darkGreen,
+        ),
+      ),
+      const SizedBox(height: SavingorSpacing.md),
       _buildPriceInsightsEntry(context, priceMemoryStore),
       const SizedBox(height: 12),
       _buildSavingsOpportunitiesEntry(context, priceMemoryStore),
-      const SizedBox(height: 12),
-      _buildBasketOptimizerEntry(context),
-      const SizedBox(height: SavingorSpacing.xl),
-      SavingsValueSection(
-        summary: savingsSummary,
-        formatCurrency: _formatCurrency,
-      ),
-      const SizedBox(height: SavingorSpacing.xl),
-      RecommendedActionsSection(recommendations: recommendations),
-      if (savingsSummary.topProducts.isNotEmpty) ...<Widget>[
-        const SizedBox(height: SavingorSpacing.xl),
-        TopSavingsProductsSection(
-          products: savingsSummary.topProducts,
-          formatCurrency: _formatCurrency,
-        ),
-      ],
     ];
   }
 
@@ -271,7 +276,17 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryGrid(ExpenseAnalyticsSummary summary) {
+  Widget _buildOverviewGrid(
+    ExpenseAnalyticsSummary summary,
+    SavingsSummary savingsSummary,
+  ) {
+    final String estimatedSaved = savingsSummary.hasCalculableData
+        ? _formatCurrency(savingsSummary.estimatedSavedThisMonth)
+        : '—';
+    final String potentialMissed = savingsSummary.hasCalculableData
+        ? _formatCurrency(savingsSummary.potentialMissedThisMonth)
+        : '—';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -296,9 +311,9 @@ class SavingsAnalyticsScreen extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: _SummaryCard(
-                label: 'This year',
-                value: _formatCurrency(summary.totalThisYear),
-                icon: Icons.date_range_outlined,
+                label: 'Receipts',
+                value: '${summary.receiptCount}',
+                icon: Icons.receipt_long_outlined,
               ),
             ),
           ],
@@ -308,17 +323,17 @@ class SavingsAnalyticsScreen extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: _SummaryCard(
-                label: 'Receipts',
-                value: '${summary.receiptCount}',
-                icon: Icons.receipt_long_outlined,
+                label: 'Estimated saved',
+                value: estimatedSaved,
+                icon: Icons.savings_outlined,
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: _SummaryCard(
-                label: 'Average receipt',
-                value: _formatCurrency(summary.averageReceiptAmount),
-                icon: Icons.payments_outlined,
+                label: 'Potential missed',
+                value: potentialMissed,
+                icon: Icons.trending_down_outlined,
               ),
             ),
           ],
@@ -333,8 +348,8 @@ class SavingsAnalyticsScreen extends StatelessWidget {
   ) {
     final int productCount = priceMemoryStore.insights.length;
     final String subtitle = productCount > 0
-        ? '$productCount ${productCount == 1 ? 'product' : 'products'} tracked from your receipts'
-        : 'See prices remembered from your receipt line items';
+        ? '$productCount ${productCount == 1 ? 'product' : 'products'} in your price history'
+        : 'Full price memory from your receipt line items';
 
     return Material(
       color: Colors.white,
@@ -403,8 +418,8 @@ class SavingsAnalyticsScreen extends StatelessWidget {
   ) {
     final int opportunityCount = priceMemoryStore.savingsOpportunities.length;
     final String subtitle = opportunityCount > 0
-        ? '$opportunityCount ${opportunityCount == 1 ? 'item' : 'items'} where you could save'
-        : 'Find items you bought cheaper before';
+        ? '$opportunityCount actionable ${opportunityCount == 1 ? 'opportunity' : 'opportunities'} to review'
+        : 'Products where you paid more than the best known price';
 
     return Material(
       color: Colors.white,
@@ -447,68 +462,6 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                     Text(
                       subtitle,
                       style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: SavingorColors.textSecondary,
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: SavingorColors.textSecondary,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBasketOptimizerEntry(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => context.push('/shopping/basket-optimizer'),
-        borderRadius: BorderRadius.circular(18),
-        child: Container(
-          padding: const EdgeInsets.all(18),
-          decoration: _cardDecoration(),
-          child: Row(
-            children: <Widget>[
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: SavingorColors.lightGreen,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(
-                  Icons.shopping_basket_outlined,
-                  color: SavingorColors.primaryStroke,
-                ),
-              ),
-              const SizedBox(width: 14),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      'Optimize all lists',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: SavingorColors.darkGreen,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Find the best known stores across your active shopping lists',
-                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                         color: SavingorColors.textSecondary,

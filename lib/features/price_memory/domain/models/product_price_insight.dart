@@ -7,7 +7,9 @@ class ProductPriceInsight {
     required this.displayName,
     required this.latestPrice,
     required this.lowestPrice,
+    required this.lowestStoreName,
     required this.highestPrice,
+    required this.averagePrice,
     required this.recordCount,
     required this.latestStoreName,
     required this.latestPurchaseDate,
@@ -19,7 +21,9 @@ class ProductPriceInsight {
   final String displayName;
   final double latestPrice;
   final double lowestPrice;
+  final String lowestStoreName;
   final double highestPrice;
+  final double averagePrice;
   final int recordCount;
   final String latestStoreName;
   final DateTime latestPurchaseDate;

@@ -18,9 +18,6 @@ class ProductPriceInsightCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String latestLine =
-        'Latest: ${PriceMemoryFormatters.formatPrice(insight.latestPrice, currency: insight.currency)} at ${insight.latestStoreName}';
-
     return Material(
       color: Colors.white,
       borderRadius: BorderRadius.circular(18),
@@ -55,45 +52,55 @@ class ProductPriceInsightCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Icon(
+                  Icon(
                     Icons.chevron_right_rounded,
-                    color: SavingorColors.textSecondary,
+                    color: SavingorColors.textSecondary.withOpacity(0.55),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              Text(
-                latestLine,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: SavingorColors.darkGreen.withOpacity(0.82),
-                  height: 1.35,
-                ),
+              _historyLine(
+                'Latest: ${PriceMemoryFormatters.formatPrice(insight.latestPrice, currency: insight.currency)} at ${insight.latestStoreName}',
+                emphasized: true,
+              ),
+              const SizedBox(height: 4),
+              _historyLine(
+                'Best known: ${PriceMemoryFormatters.formatPrice(insight.lowestPrice, currency: insight.currency)} at ${insight.lowestStoreName}',
+              ),
+              const SizedBox(height: 4),
+              _historyLine(
+                'Highest: ${PriceMemoryFormatters.formatPrice(insight.highestPrice, currency: insight.currency)}',
+              ),
+              const SizedBox(height: 4),
+              _historyLine(
+                'Average: ${PriceMemoryFormatters.formatPrice(insight.averagePrice, currency: insight.currency)}',
               ),
               const SizedBox(height: 6),
               Text(
-                'Lowest: ${PriceMemoryFormatters.formatPrice(insight.lowestPrice, currency: insight.currency)} · '
-                'Highest: ${PriceMemoryFormatters.formatPrice(insight.highestPrice, currency: insight.currency)}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: SavingorColors.textSecondary,
-                  height: 1.35,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
                 insight.recordCountLabel,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: SavingorColors.primaryStroke,
+                  color: SavingorColors.textSecondary.withOpacity(0.95),
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _historyLine(String text, {bool emphasized = false}) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 13,
+        fontWeight: emphasized ? FontWeight.w600 : FontWeight.w500,
+        color: emphasized
+            ? SavingorColors.darkGreen.withOpacity(0.85)
+            : SavingorColors.textSecondary,
+        height: 1.35,
       ),
     );
   }

@@ -79,13 +79,19 @@ abstract final class ProductPriceInsightsGrouper {
     final List<double> prices = sortedRecords
         .map((ProductPriceRecord record) => record.totalPrice)
         .toList(growable: false);
+    final double lowestPrice = prices.reduce(math.min);
+    final double priceSum = prices.fold<double>(0, (double sum, double price) {
+      return sum + price;
+    });
 
     return ProductPriceInsight(
       normalizedProductName: entry.key,
       displayName: _displayName(sortedRecords),
       latestPrice: latestRecord.totalPrice,
-      lowestPrice: prices.reduce(math.min),
+      lowestPrice: lowestPrice,
+      lowestStoreName: _storeNameForLowestPrice(sortedRecords, lowestPrice),
       highestPrice: prices.reduce(math.max),
+      averagePrice: priceSum / sortedRecords.length,
       recordCount: sortedRecords.length,
       latestStoreName: latestRecord.storeName,
       latestPurchaseDate: latestRecord.purchaseDate,
@@ -96,6 +102,25 @@ abstract final class ProductPriceInsightsGrouper {
 
   static String displayNameFor(List<ProductPriceRecord> records) {
     return _displayName(records);
+  }
+
+  static String _storeNameForLowestPrice(
+    List<ProductPriceRecord> records,
+    double lowestPrice,
+  ) {
+    ProductPriceRecord? bestMatch;
+
+    for (final ProductPriceRecord record in records) {
+      if (record.totalPrice != lowestPrice) {
+        continue;
+      }
+      if (bestMatch == null ||
+          record.purchaseDate.isAfter(bestMatch.purchaseDate)) {
+        bestMatch = record;
+      }
+    }
+
+    return bestMatch?.storeName ?? records.first.storeName;
   }
 
   static String _displayName(List<ProductPriceRecord> records) {

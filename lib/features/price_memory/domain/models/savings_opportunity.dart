@@ -32,6 +32,14 @@ class SavingsOpportunity {
 
   String get savingsMessage => 'Save up to ${_formatAmount(priceDifference)} per item';
 
+  String get recommendation {
+    if (latestStoreName.trim().toLowerCase() ==
+        lowestStoreName.trim().toLowerCase()) {
+      return 'Watch this product before buying again.';
+    }
+    return 'Buy at $lowestStoreName next time.';
+  }
+
   String _formatAmount(double amount) {
     if (currency == 'CAD') {
       return '\$${amount.toStringAsFixed(2)}';

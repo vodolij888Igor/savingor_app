@@ -10,10 +10,12 @@ class SavingsValueSection extends StatelessWidget {
     super.key,
     required this.summary,
     required this.formatCurrency,
+    this.proPaybackOnly = false,
   });
 
   final SavingsSummary summary;
   final String Function(double amount) formatCurrency;
+  final bool proPaybackOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +33,11 @@ class SavingsValueSection extends StatelessWidget {
         const SizedBox(height: SavingorSpacing.md),
         if (!summary.hasCalculableData)
           _buildEmptyState()
+        else if (proPaybackOnly)
+          _SubscriptionRoiCard(
+            summary: summary,
+            formatCurrency: formatCurrency,
+          )
         else ...<Widget>[
           Row(
             children: <Widget>[

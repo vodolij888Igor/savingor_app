@@ -8,12 +8,29 @@ class RecommendedActionsSection extends StatelessWidget {
   const RecommendedActionsSection({
     super.key,
     required this.recommendations,
+    this.maxCount = 3,
+    this.excludeWatchPriceRecommendations = false,
   });
 
   final List<SavingsRecommendation> recommendations;
+  final int maxCount;
+  final bool excludeWatchPriceRecommendations;
+
+  List<SavingsRecommendation> get _displayRecommendations {
+    Iterable<SavingsRecommendation> filtered = recommendations;
+    if (excludeWatchPriceRecommendations) {
+      filtered = filtered.where(
+        (SavingsRecommendation recommendation) =>
+            recommendation.type != SavingsRecommendationType.watchPrice,
+      );
+    }
+    return filtered.take(maxCount).toList(growable: false);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final List<SavingsRecommendation> displayed = _displayRecommendations;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -26,10 +43,10 @@ class RecommendedActionsSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: SavingorSpacing.md),
-        if (recommendations.isEmpty)
+        if (displayed.isEmpty)
           _buildEmptyState()
         else
-          ...recommendations.map(
+          ...displayed.map(
             (SavingsRecommendation recommendation) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: _RecommendationCard(recommendation: recommendation),

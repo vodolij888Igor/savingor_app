@@ -95,7 +95,7 @@ class ProductPriceInsightsScreen extends StatelessWidget {
       itemBuilder: (BuildContext context, int index) {
         if (index == 0) {
           return Text(
-            '${insights.length} ${insights.length == 1 ? 'product' : 'products'} tracked from your receipts',
+            '${insights.length} ${insights.length == 1 ? 'product' : 'products'} in your price history from receipts',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,

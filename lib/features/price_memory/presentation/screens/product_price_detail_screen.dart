@@ -8,7 +8,6 @@ import 'package:savingor_app/features/price_memory/domain/models/product_price_r
 import 'package:savingor_app/features/price_memory/domain/models/savings_opportunity.dart';
 import 'package:savingor_app/features/price_memory/domain/price_memory_formatters.dart';
 import 'package:savingor_app/features/price_memory/presentation/widgets/product_buying_advice_card.dart';
-import 'package:savingor_app/features/price_memory/presentation/widgets/savings_opportunity_summary_card.dart';
 import 'package:savingor_app/features/receipts/presentation/widgets/receipt_source_badge.dart';
 
 class ProductPriceDetailScreen extends StatelessWidget {
@@ -49,16 +48,12 @@ class ProductPriceDetailScreen extends StatelessWidget {
       builder: (BuildContext context, Widget? _) {
         final ProductPriceInsight? insight =
             store.insightForNormalizedName(normalizedProductName);
-        final SavingsOpportunity? opportunitySummary =
-            _resolveOpportunitySummary(store);
 
         return Scaffold(
           backgroundColor: _pageBackground,
           appBar: AppBar(
             title: Text(
-              opportunitySummary?.displayName ??
-                  insight?.displayName ??
-                  'Product history',
+              insight?.displayName ?? 'Product history',
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
@@ -91,7 +86,6 @@ class ProductPriceDetailScreen extends StatelessWidget {
                 )
               : _buildContent(
                   insight,
-                  opportunitySummary,
                   bottomInset,
                 ),
         );
@@ -99,76 +93,59 @@ class ProductPriceDetailScreen extends StatelessWidget {
     );
   }
 
-  SavingsOpportunity? _resolveOpportunitySummary(PriceMemoryStore store) {
-    if (savingsOpportunity == null) {
-      return null;
-    }
-
-    for (final SavingsOpportunity opportunity
-        in store.savingsOpportunities) {
-      if (opportunity.normalizedProductName ==
-          savingsOpportunity!.normalizedProductName) {
-        return opportunity;
-      }
-    }
-
-    return savingsOpportunity;
-  }
-
   Widget _buildContent(
     ProductPriceInsight insight,
-    SavingsOpportunity? opportunitySummary,
     double bottomInset,
   ) {
     return ListView(
       padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + bottomInset),
       children: <Widget>[
-        if (opportunitySummary != null) ...<Widget>[
-          SavingsOpportunitySummaryCard(opportunity: opportunitySummary),
-          const SizedBox(height: SavingorSpacing.lg),
-        ] else ...<Widget>[
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: _cardDecoration(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  insight.displayName,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    color: SavingorColors.darkGreen,
-                  ),
+        Container(
+          padding: const EdgeInsets.all(18),
+          decoration: _cardDecoration(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                insight.displayName,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: SavingorColors.darkGreen,
                 ),
-                const SizedBox(height: 10),
-                _summaryLine(
-                  'Latest',
-                  '${PriceMemoryFormatters.formatPrice(insight.latestPrice, currency: insight.currency)} at ${insight.latestStoreName}',
+              ),
+              const SizedBox(height: 10),
+              _summaryLine(
+                'Latest',
+                '${PriceMemoryFormatters.formatPrice(insight.latestPrice, currency: insight.currency)} at ${insight.latestStoreName}',
+              ),
+              const SizedBox(height: 6),
+              _summaryLine(
+                'Best known',
+                '${PriceMemoryFormatters.formatPrice(insight.lowestPrice, currency: insight.currency)} at ${insight.lowestStoreName}',
+              ),
+              const SizedBox(height: 6),
+              _summaryLine(
+                'Highest',
+                PriceMemoryFormatters.formatPrice(
+                  insight.highestPrice,
+                  currency: insight.currency,
                 ),
-                const SizedBox(height: 6),
-                _summaryLine(
-                  'Lowest',
-                  PriceMemoryFormatters.formatPrice(
-                    insight.lowestPrice,
-                    currency: insight.currency,
-                  ),
+              ),
+              const SizedBox(height: 6),
+              _summaryLine(
+                'Average',
+                PriceMemoryFormatters.formatPrice(
+                  insight.averagePrice,
+                  currency: insight.currency,
                 ),
-                const SizedBox(height: 6),
-                _summaryLine(
-                  'Highest',
-                  PriceMemoryFormatters.formatPrice(
-                    insight.highestPrice,
-                    currency: insight.currency,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                _summaryLine('Records', insight.recordCountLabel),
-              ],
-            ),
+              ),
+              const SizedBox(height: 6),
+              _summaryLine('Records', insight.recordCountLabel),
+            ],
           ),
-          const SizedBox(height: SavingorSpacing.lg),
-        ],
+        ),
+        const SizedBox(height: SavingorSpacing.lg),
         ProductBuyingAdviceCard(
           productName: insight.displayName,
           records: insight.records,

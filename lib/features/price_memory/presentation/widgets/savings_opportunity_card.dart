@@ -41,7 +41,6 @@ class SavingsOpportunityCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Expanded(
                     child: Text(
@@ -53,25 +52,23 @@ class SavingsOpportunityCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: SavingorColors.lightGreen.withOpacity(0.55),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      opportunity.savingsMessage,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: SavingorColors.primaryStroke,
-                      ),
-                    ),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    color: SavingorColors.textSecondary.withOpacity(0.55),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 8),
+              Text(
+                opportunity.savingsMessage,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: SavingorColors.primaryStroke,
+                  height: 1.3,
+                ),
+              ),
+              const SizedBox(height: 8),
               Text(
                 'You paid ${PriceMemoryFormatters.formatPrice(opportunity.latestPrice, currency: opportunity.currency)} at ${opportunity.latestStoreName}',
                 style: TextStyle(
@@ -81,9 +78,9 @@ class SavingsOpportunityCard extends StatelessWidget {
                   height: 1.35,
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 4),
               Text(
-                'Best seen: ${PriceMemoryFormatters.formatPrice(opportunity.lowestPrice, currency: opportunity.currency)} at ${opportunity.lowestStoreName}',
+                'Best known: ${PriceMemoryFormatters.formatPrice(opportunity.lowestPrice, currency: opportunity.currency)} at ${opportunity.lowestStoreName}',
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
@@ -92,34 +89,14 @@ class SavingsOpportunityCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Row(
-                children: <Widget>[
-                  Text(
-                    '${opportunity.recordCount} ${opportunity.recordCount == 1 ? 'record' : 'records'}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: SavingorColors.primaryStroke,
-                    ),
-                  ),
-                  const Text(
-                    ' · ',
-                    style: TextStyle(color: SavingorColors.textSecondary),
-                  ),
-                  Text(
-                    'Last bought ${PriceMemoryFormatters.formatDate(opportunity.latestPurchaseDate)}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: SavingorColors.textSecondary,
-                    ),
-                  ),
-                  const Spacer(),
-                  const Icon(
-                    Icons.chevron_right_rounded,
-                    color: SavingorColors.textSecondary,
-                  ),
-                ],
+              Text(
+                'Recommendation: ${opportunity.recommendation}',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: SavingorColors.darkGreen.withOpacity(0.78),
+                  height: 1.35,
+                ),
               ),
             ],
           ),

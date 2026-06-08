@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/app_state.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/expenses/data/expenses_store.dart';
 import 'package:savingor_app/features/expenses/domain/models/user_expense.dart';
+import 'package:savingor_app/features/home/domain/home_dashboard_summary.dart';
+import 'package:savingor_app/features/home/presentation/widgets/dashboard_best_action_card.dart';
+import 'package:savingor_app/features/home/presentation/widgets/dashboard_product_feature_cards_row.dart';
+import 'package:savingor_app/features/home/presentation/widgets/dashboard_summary_section.dart';
+import 'package:savingor_app/features/price_memory/data/price_memory_store.dart';
 import 'package:savingor_app/features/scanner/data/receipt_store.dart';
 import 'package:savingor_app/features/scanner/domain/models/receipt.dart';
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
@@ -70,67 +76,28 @@ class HomeDashboardScreen extends StatelessWidget {
       latestReceipt = sorted.first;
     }
 
-    final double weeklySpending = _sumSpendingSince(
-      expensesStore: expensesStore,
-      receiptStore: receiptStore,
-      since: DateTime.now().subtract(const Duration(days: 7)),
-    );
-    final double activeListEstimate = shoppingListsStore.activeListEstimate;
     final bool hasInsightData = expensesStore.expenses.isNotEmpty ||
         receiptStore.receipts.isNotEmpty ||
         shoppingListsStore.listCount > 0;
-    final double potentialSavingsEstimate = _estimatePotentialSavings(
-      weeklySpending: weeklySpending,
-      estimatedShoppingTotal: estimatedShoppingTotal,
-      activeListEstimate: activeListEstimate,
-    );
 
     return _DashboardData(
       totalExpenses: totalExpenses,
       expenseCount: expensesStore.expenses.length,
       receiptCount: receiptStore.receipts.length,
-      receiptsTotal: receiptsTotal,
       shoppingListCount: shoppingListsStore.listCount,
       estimatedShoppingTotal: estimatedShoppingTotal,
-      weeklySpending: weeklySpending,
-      potentialSavingsEstimate: potentialSavingsEstimate,
       hasInsightData: hasInsightData,
       latestExpense: latestExpense,
       latestReceipt: latestReceipt,
     );
   }
 
-  static double _sumSpendingSince({
-    required ExpensesStore expensesStore,
-    required ReceiptStore receiptStore,
-    required DateTime since,
-  }) {
-    double total = 0;
-    for (final UserExpense expense in expensesStore.expenses) {
-      if (!expense.purchaseDate.isBefore(since)) {
-        total += expense.totalAmount;
-      }
+  static String _languageBadgeLabel(String? code) {
+    final String normalized = (code ?? 'en').trim().toLowerCase();
+    if (normalized.isEmpty) {
+      return 'EN';
     }
-    for (final Receipt receipt in receiptStore.receipts) {
-      if (!receipt.date.isBefore(since)) {
-        total += receipt.total;
-      }
-    }
-    return total;
-  }
-
-  /// Conservative estimate from saved spending and list totals — not live store prices.
-  static double _estimatePotentialSavings({
-    required double weeklySpending,
-    required double estimatedShoppingTotal,
-    required double activeListEstimate,
-  }) {
-    final double fromRecentSpending = weeklySpending * 0.05;
-    final double listBasis = estimatedShoppingTotal > 0
-        ? estimatedShoppingTotal
-        : activeListEstimate;
-    final double fromLists = listBasis * 0.08;
-    return fromRecentSpending > fromLists ? fromRecentSpending : fromLists;
+    return normalized.toUpperCase();
   }
 
   static String _formatActivityDate(DateTime date) {
@@ -245,14 +212,20 @@ class HomeDashboardScreen extends StatelessWidget {
     );
   }
 
-  void _snack(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
-
   void _onStartSaving(BuildContext context) {
     context.push('/start-saving');
+  }
+
+  Widget _statusPill({required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(SavingorRadius.pill),
+        border: Border.all(color: _airyBorder.withOpacity(0.5), width: 0.5),
+      ),
+      child: child,
+    );
   }
 
   @override
@@ -261,6 +234,8 @@ class HomeDashboardScreen extends StatelessWidget {
     final ShoppingListsStore shoppingListsStore =
         ShoppingListsProvider.of(context);
     final ReceiptStore receiptStore = ReceiptProvider.of(context);
+    final PriceMemoryStore priceMemoryStore = PriceMemoryProvider.of(context);
+    final String? languageCode = AppStateProvider.of(context).language;
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return ListenableBuilder(
@@ -272,52 +247,84 @@ class HomeDashboardScreen extends StatelessWidget {
             return ListenableBuilder(
               listenable: receiptStore,
               builder: (BuildContext context, Widget? ___) {
-                final _DashboardData data = _computeDashboardData(
-                  expensesStore,
-                  shoppingListsStore,
-                  receiptStore,
-                );
-                final double goalProgress =
-                    (data.totalExpenses / _goalAmount).clamp(0.0, 1.0);
+                return ListenableBuilder(
+                  listenable: priceMemoryStore,
+                  builder: (BuildContext context, Widget? ____) {
+                    final _DashboardData data = _computeDashboardData(
+                      expensesStore,
+                      shoppingListsStore,
+                      receiptStore,
+                    );
+                    final HomeDashboardSummary summary =
+                        HomeDashboardSummaryBuilder.build(
+                      expenses: expensesStore.expenses,
+                      receipts: receiptStore.receipts,
+                      priceRecords: priceMemoryStore.records,
+                    );
+                    final double goalProgress =
+                        (data.totalExpenses / _goalAmount).clamp(0.0, 1.0);
 
-                return Scaffold(
-                  backgroundColor: _pageWhite,
-                  body: SafeArea(
-                    child: SingleChildScrollView(
-                      padding: EdgeInsets.fromLTRB(
-                        20,
-                        0,
-                        20,
-                        32 + bottomInset + 72,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          _buildHeader(context),
-                          const SizedBox(height: 44),
-                          _buildSavingsHero(
-                            data.totalExpenses,
-                            goalProgress,
-                            data.expenseCount,
+                    return Scaffold(
+                      backgroundColor: _pageWhite,
+                      body: SafeArea(
+                        child: SingleChildScrollView(
+                          padding: EdgeInsets.fromLTRB(
+                            20,
+                            0,
+                            20,
+                            32 + bottomInset + 72,
                           ),
-                          const SizedBox(height: SavingorSpacing.xl),
-                          _buildStartSavingButton(context),
-                          const SizedBox(height: SavingorSpacing.md),
-                          _buildAiPremiumCta(context, data),
-                          const SizedBox(height: SavingorSpacing.md),
-                          _buildNearbyStoresMapCta(context),
-                          const SizedBox(height: SavingorSpacing.xl),
-                          _buildMetricsRow(data),
-                          const SizedBox(height: SavingorSpacing.xl),
-                          _buildMonthlyGoal(data.totalExpenses, goalProgress),
-                          const SizedBox(height: SavingorSpacing.xl),
-                          _buildTopDeals(context),
-                          const SizedBox(height: SavingorSpacing.xl),
-                          _buildRecentActivity(data),
-                        ],
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: <Widget>[
+                              _buildStatusRow(
+                                context,
+                                languageCode: languageCode,
+                              ),
+                              const SizedBox(height: SavingorSpacing.lg + SavingorSpacing.sm),
+                              _buildGreeting(),
+                              const SizedBox(
+                                height:
+                                    SavingorSpacing.lg + SavingorSpacing.md,
+                              ),
+                              _buildMetricsRow(
+                                data,
+                                spentThisMonth: summary.spentThisMonth,
+                              ),
+                              const SizedBox(height: SavingorSpacing.lg + SavingorSpacing.sm),
+                              _buildSavingsHero(
+                                data.totalExpenses,
+                                goalProgress,
+                                data.expenseCount,
+                              ),
+                              const SizedBox(height: SavingorSpacing.lg + SavingorSpacing.sm),
+                              _buildStartSavingButton(context),
+                              const SizedBox(height: SavingorSpacing.lg + SavingorSpacing.sm),
+                              DashboardBestActionCard(
+                                recommendation: summary.topRecommendation,
+                              ),
+                              const SizedBox(height: SavingorSpacing.lg),
+                              DashboardProductFeatureCardsRow(
+                                records: priceMemoryStore.records,
+                              ),
+                              const SizedBox(height: SavingorSpacing.lg),
+                              DashboardSummarySection(
+                                summary: summary,
+                                formatCurrency: _formatCurrency,
+                              ),
+                              const SizedBox(height: SavingorSpacing.lg),
+                              _buildRecentActivity(data),
+                              const SizedBox(height: SavingorSpacing.lg),
+                              _buildMonthlyGoal(
+                                data.totalExpenses,
+                                goalProgress,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 );
               },
             );
@@ -327,57 +334,67 @@ class HomeDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildStatusRow(
+    BuildContext context, {
+    required String? languageCode,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          _statusPill(
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  '🇨🇦',
+                  style: TextStyle(fontSize: 14, height: 1.1),
+                ),
+                SizedBox(width: 6),
+                Text(
+                  'Canada · CAD',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: SavingorColors.darkGreen,
+                    height: 1.1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Spacer(),
+          _statusPill(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                const Text(
+                  '🌐',
+                  style: TextStyle(fontSize: 14, height: 1.1),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  _languageBadgeLabel(languageCode),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: SavingorColors.darkGreen,
+                    height: 1.1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGreeting() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const SizedBox(height: 14),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(SavingorRadius.pill),
-                border: Border.all(color: _airyBorder.withOpacity(0.5), width: 0.5),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text(
-                    '🇨🇦',
-                    style: TextStyle(fontSize: 14, height: 1.1),
-                  ),
-                  SizedBox(width: 6),
-                  Text(
-                    'Canada • CAD',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: SavingorColors.darkGreen,
-                      height: 1.1,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Spacer(),
-            IconButton(
-              onPressed: () => _snack(context, 'Notifications coming soon.'),
-              icon: const Icon(Icons.notifications_none_rounded),
-              color: SavingorColors.darkGreen,
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.white,
-                padding: const EdgeInsets.all(8),
-                side: BorderSide(color: _airyBorder.withOpacity(0.5), width: 0.5),
-              ),
-            ),
-            const SizedBox(width: 4),
-            _buildStreakBadge(context),
-          ],
-        ),
-        const SizedBox(height: 6),
         const Text(
           'Welcome back, Igor! 👋',
           style: TextStyle(
@@ -399,64 +416,6 @@ class HomeDashboardScreen extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildStreakBadge(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _snack(context, 'Streak details coming soon.'),
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(10, 7, 4, 7),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: _airyBorder.withOpacity(0.5), width: 0.5),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    '🔥 12',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w800,
-                      color: _nearBlack,
-                      height: 1.1,
-                    ),
-                  ),
-                  Text(
-                    'Day streak',
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w500,
-                      color: SavingorColors.textSecondary,
-                      height: 1.1,
-                    ),
-                  ),
-                ],
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 16,
-                color: SavingorColors.textSecondary.withOpacity(0.65),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -536,14 +495,12 @@ class HomeDashboardScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 6),
-                        Text(
-                          totalExpenses > 0
-                              ? 'Tracked in Savingor'
-                              : 'Add your first expense',
+                        const Text(
+                          'Tracked in Savingor',
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                             color: SavingorColors.primaryStroke,
@@ -635,17 +592,20 @@ class HomeDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMetricsRow(_DashboardData data) {
+  Widget _buildMetricsRow(
+    _DashboardData data, {
+    required double spentThisMonth,
+  }) {
     return SizedBox(
-      height: 126,
+      height: 118,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           _metricCard(
             icon: Icons.trending_up,
-            iconSize: 38,
+            iconSize: 34,
             title: 'This month',
-            value: _formatCurrency(data.totalExpenses),
+            value: _formatCurrency(spentThisMonth),
             suffix: 'spent',
             iconColor: const Color(0xFFEF4444),
           ),
@@ -685,26 +645,26 @@ class HomeDashboardScreen extends StatelessWidget {
     final int progressPercent = (progress * 100).round();
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-      decoration: _airyCardDecoration(),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      decoration: _airyCardDecoration(radius: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           const Text(
             'Monthly goal',
             style: TextStyle(
-              fontSize: 17,
+              fontSize: 15,
               fontWeight: FontWeight.w700,
               color: SavingorColors.darkGreen,
             ),
           ),
-          const SizedBox(height: SavingorSpacing.md),
+          const SizedBox(height: 10),
           Row(
             children: <Widget>[
               Text(
                 '${_formatCurrency(totalExpenses)} / ${_formatCurrency(_goalAmount)}',
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   fontWeight: FontWeight.w800,
                   color: _nearBlack,
                 ),
@@ -713,19 +673,19 @@ class HomeDashboardScreen extends StatelessWidget {
               Text(
                 '$progressPercent%',
                 style: const TextStyle(
-                  fontSize: 15,
+                  fontSize: 14,
                   fontWeight: FontWeight.w700,
                   color: SavingorColors.primaryStroke,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: SavingorSpacing.md),
+          const SizedBox(height: 10),
           ClipRRect(
             borderRadius: BorderRadius.circular(999),
             child: LinearProgressIndicator(
               value: progress,
-              minHeight: 8,
+              minHeight: 7,
               backgroundColor: const Color(0xFFF0F2F1),
               valueColor: const AlwaysStoppedAnimation<Color>(
                 SavingorColors.primaryGreen,
@@ -734,318 +694,6 @@ class HomeDashboardScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildAiPremiumCta(BuildContext context, _DashboardData data) {
-    final String savingsLine = data.hasInsightData
-        ? 'Potential savings: ${_formatCurrency(data.potentialSavingsEstimate)}'
-        : 'Add receipts and lists to unlock insights';
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => context.push('/ai-assistant'),
-        borderRadius: BorderRadius.circular(20),
-        child: Ink(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: <Color>[
-                SavingorColors.lightGreen.withOpacity(0.85),
-                const Color(0xFFE2F4DE),
-                Colors.white.withOpacity(0.92),
-              ],
-              stops: const <double>[0.0, 0.5, 1.0],
-            ),
-            border: Border.all(
-              color: SavingorColors.primaryStroke.withOpacity(0.28),
-              width: 1.2,
-            ),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: SavingorColors.primaryStroke.withOpacity(0.18),
-                blurRadius: 18,
-                offset: const Offset(0, 6),
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              children: <Widget>[
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.88),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: SavingorColors.primaryStroke.withOpacity(0.15),
-                    ),
-                    boxShadow: <BoxShadow>[
-                      BoxShadow(
-                        color: SavingorColors.primaryStroke.withOpacity(0.12),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.auto_awesome_rounded,
-                    size: 24,
-                    color: SavingorColors.primaryStroke,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const Text(
-                        'AI Savings Assistant',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: SavingorColors.darkGreen,
-                          height: 1.15,
-                          letterSpacing: -0.2,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Get smart tips from your receipts and shopping lists',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: SavingorColors.darkGreen.withOpacity(0.72),
-                          height: 1.3,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        savingsLine,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: SavingorColors.textSecondary.withOpacity(0.95),
-                          height: 1.2,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.75),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 18,
-                    color: SavingorColors.primaryStroke,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNearbyStoresMapCta(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => context.push('/nearby-stores'),
-        borderRadius: BorderRadius.circular(18),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: SavingorColors.primaryStroke.withOpacity(0.32),
-              width: 1.2,
-            ),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: SavingorColors.primaryStroke.withOpacity(0.1),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            child: Row(
-              children: <Widget>[
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: SavingorColors.lightGreen.withOpacity(0.42),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: SavingorColors.primaryStroke.withOpacity(0.18),
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.location_on_rounded,
-                    size: 26,
-                    color: SavingorColors.primaryStroke,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const Text(
-                        'Nearby Stores Map',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: SavingorColors.darkGreen,
-                          height: 1.15,
-                          letterSpacing: -0.2,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Find stores near you, choose a radius, and get directions.',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: SavingorColors.darkGreen.withOpacity(0.72),
-                          height: 1.3,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        'Open map →',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: SavingorColors.primaryStroke,
-                          height: 1.2,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Icon(
-                  Icons.arrow_forward_rounded,
-                  size: 22,
-                  color: SavingorColors.primaryStroke.withOpacity(0.85),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTopDeals(BuildContext context) {
-    const List<_DealPreview> deals = <_DealPreview>[
-      _DealPreview(
-        emoji: '🍌',
-        title: 'Bananas 1 lb',
-        store: 'Walmart',
-        price: '\$0.68',
-        save: 'Save \$0.31',
-      ),
-      _DealPreview(
-        emoji: '🍗',
-        title: 'Chicken Breast',
-        store: 'Costco',
-        price: '\$3.79',
-        save: 'Save \$2.20',
-      ),
-      _DealPreview(
-        emoji: '🥛',
-        title: 'Milk 2L',
-        store: 'No Frills',
-        price: '\$1.89',
-        save: 'Save \$0.90',
-      ),
-      _DealPreview(
-        emoji: '🍞',
-        title: 'Whole Wheat Bread',
-        store: 'Metro',
-        price: '\$2.49',
-        save: 'Save \$0.80',
-      ),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Row(
-          children: <Widget>[
-            const Expanded(
-              child: Text(
-                'Top deals for you',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: SavingorColors.darkGreen,
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () => context.push('/nearby-stores'),
-              style: TextButton.styleFrom(
-                foregroundColor: SavingorColors.primaryStroke,
-                padding: EdgeInsets.zero,
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              child: const Text(
-                'See all',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: SavingorSpacing.sm),
-        SizedBox(
-          height: 210,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: deals.length,
-            separatorBuilder: (_, __) => const SizedBox(width: SavingorSpacing.sm),
-            itemBuilder: (BuildContext context, int index) {
-              return _DealTile(deal: deals[index]);
-            },
-          ),
-        ),
-      ],
     );
   }
 
@@ -1121,11 +769,8 @@ class _DashboardData {
     required this.totalExpenses,
     required this.expenseCount,
     required this.receiptCount,
-    required this.receiptsTotal,
     required this.shoppingListCount,
     required this.estimatedShoppingTotal,
-    required this.weeklySpending,
-    required this.potentialSavingsEstimate,
     required this.hasInsightData,
     required this.latestExpense,
     required this.latestReceipt,
@@ -1134,125 +779,9 @@ class _DashboardData {
   final double totalExpenses;
   final int expenseCount;
   final int receiptCount;
-  final double receiptsTotal;
   final int shoppingListCount;
   final double estimatedShoppingTotal;
-  final double weeklySpending;
-  final double potentialSavingsEstimate;
   final bool hasInsightData;
   final UserExpense? latestExpense;
   final Receipt? latestReceipt;
-}
-
-class _DealPreview {
-  const _DealPreview({
-    required this.emoji,
-    required this.title,
-    required this.store,
-    required this.price,
-    required this.save,
-  });
-
-  final String emoji;
-  final String title;
-  final String store;
-  final String price;
-  final String save;
-}
-
-class _DealTile extends StatelessWidget {
-  const _DealTile({required this.deal});
-
-  static const double _tileHeight = 210;
-
-  final _DealPreview deal;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 160,
-      height: _tileHeight,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: HomeDashboardScreen._airyBorder.withOpacity(0.6),
-            width: 0.5,
-          ),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Center(
-              child: Text(
-                deal.emoji,
-                style: const TextStyle(fontSize: 44, height: 1.05),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              deal.title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: HomeDashboardScreen._nearBlack,
-                height: 1.2,
-              ),
-            ),
-            const SizedBox(height: 3),
-            Text(
-              deal.store,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary,
-              ),
-            ),
-            const Spacer(),
-            Text(
-              deal.price,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-                color: HomeDashboardScreen._nearBlack,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(
-                color: SavingorColors.primaryGreen.withOpacity(0.75),
-                borderRadius: BorderRadius.circular(SavingorRadius.pill),
-              ),
-              child: Text(
-                deal.save,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                  color: HomeDashboardScreen._nearBlack,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

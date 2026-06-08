@@ -8,14 +8,19 @@ class AppState extends ChangeNotifier {
 
   static const _kLang = 'savingor_selected_language_code';
   static const _kOnboarding = 'savingor_onboarding_flow_completed';
+  static const _kMonthlyGroceryBudget = 'savingor_monthly_grocery_budget';
+  static const double defaultMonthlyGroceryBudget = 100;
 
   String? _language;
   bool _onboardingCompleted = false;
+  double _monthlyGroceryBudget = defaultMonthlyGroceryBudget;
   bool _hydrated = false;
 
   String? get language => _language;
 
   bool get onboardingCompleted => _onboardingCompleted;
+
+  double get monthlyGroceryBudget => _monthlyGroceryBudget;
 
   /// Prefs have been read at least once ([hydrateFromDisk] ran).
   bool get isHydrated => _hydrated;
@@ -24,6 +29,8 @@ class AppState extends ChangeNotifier {
     final raw = _prefs.getString(_kLang);
     _language = (raw != null && raw.isNotEmpty) ? raw : null;
     _onboardingCompleted = _prefs.getBool(_kOnboarding) ?? false;
+    _monthlyGroceryBudget =
+        _prefs.getDouble(_kMonthlyGroceryBudget) ?? defaultMonthlyGroceryBudget;
     _hydrated = true;
     notifyListeners();
   }
@@ -40,6 +47,13 @@ class AppState extends ChangeNotifier {
   void setOnboardingFlowCompleted([bool value = true]) {
     _onboardingCompleted = value;
     _prefs.setBool(_kOnboarding, value);
+    notifyListeners();
+  }
+
+  void setMonthlyGroceryBudget(double amount) {
+    final double normalized = amount.isFinite && amount > 0 ? amount : defaultMonthlyGroceryBudget;
+    _monthlyGroceryBudget = normalized;
+    _prefs.setDouble(_kMonthlyGroceryBudget, normalized);
     notifyListeners();
   }
 

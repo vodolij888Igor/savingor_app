@@ -8,141 +8,13 @@ class StartSavingScreen extends StatelessWidget {
   const StartSavingScreen({super.key});
 
   static const Color _pageWhite = Color(0xFFFFFEFE);
-  static const String _scanReceiptRoute = '/scanner';
-  static const String _shoppingListRoute = '/start-saving/shopping-list';
-  static const String _addGroceryExpenseRoute = '/expenses/create';
 
-  void _snack(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
-
-  bool _routeExists(GoRouter router, String path) {
-    bool search(RouteBase route, String parentPath) {
-      if (route is GoRoute) {
-        final String fullPath = route.path.startsWith('/')
-            ? route.path
-            : '$parentPath/${route.path}'.replaceAll('//', '/');
-        if (fullPath == path) return true;
-        for (final RouteBase child in route.routes) {
-          if (search(child, fullPath)) return true;
-        }
-      } else if (route is ShellRoute) {
-        for (final RouteBase child in route.routes) {
-          if (search(child, parentPath)) return true;
-        }
-      }
-      return false;
-    }
-
-    for (final RouteBase route in router.configuration.routes) {
-      if (search(route, '')) return true;
-    }
-    return false;
-  }
-
-  void _pushIfRouteExists(
-    BuildContext context, {
-    required String path,
-    required String missingMessage,
-  }) {
-    final GoRouter router = GoRouter.of(context);
-    if (_routeExists(router, path)) {
-      context.push(path);
-    } else {
-      _snack(context, missingMessage);
-    }
-  }
-
-  void _goToScanner(BuildContext context) {
-    final GoRouter router = GoRouter.of(context);
-    if (!_routeExists(router, _scanReceiptRoute)) {
-      _snack(context, 'Receipt scanner is unavailable.');
+  void _onBack(BuildContext context) {
+    if (context.canPop()) {
+      context.pop();
       return;
     }
-    if (router.state.uri.path == _scanReceiptRoute) {
-      return;
-    }
-    context.go(_scanReceiptRoute);
-  }
-
-  void _returnToDashboard(BuildContext context) {
     context.go('/deals');
-  }
-
-  void _showAiInsightSheet(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.white,
-      isScrollControlled: true,
-      isDismissible: true,
-      enableDrag: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-      ),
-      builder: (BuildContext sheetContext) {
-        final double bottomInset = MediaQuery.paddingOf(sheetContext).bottom;
-        return Padding(
-          padding: EdgeInsets.fromLTRB(24, 12, 24, 24 + bottomInset),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: SavingorColors.border.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Row(
-                children: <Widget>[
-                  Icon(
-                    Icons.auto_awesome_rounded,
-                    size: 22,
-                    color: SavingorColors.primaryStroke,
-                  ),
-                  SizedBox(width: 8),
-                  Text(
-                    'AI Savings Assistant',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: SavingorColors.darkGreen,
-                      height: 1.2,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                'You could save \$12.40 this week by switching 3 products to better deals.',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
-                  color: SavingorColors.textPrimary,
-                  height: 1.45,
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: () => Navigator.of(sheetContext).pop(),
-                  style: SavingorButtonStyles.primaryFilled(),
-                  child: const Text('Got it'),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   @override
@@ -163,11 +35,11 @@ class StartSavingScreen extends StatelessWidget {
             color: SavingorColors.darkGreen,
             size: 20,
           ),
-          onPressed: () => _returnToDashboard(context),
+          onPressed: () => _onBack(context),
         ),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(20, 0, 20, 24 + bottomInset),
+        padding: EdgeInsets.fromLTRB(20, 0, 20, 32 + bottomInset + 88),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -183,7 +55,7 @@ class StartSavingScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Choose how you want to save today.',
+              'Choose a saving action to continue.',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -193,52 +65,54 @@ class StartSavingScreen extends StatelessWidget {
             ),
             const SizedBox(height: SavingorSpacing.xl),
             StartSavingActionCard(
-              icon: Icons.receipt_long_outlined,
-              title: 'Scan receipt',
-              subtitle: 'Upload or scan a receipt to track spending.',
-              iconColor: const Color(0xFF5B8FA8),
-              onTap: () => _goToScanner(context),
-            ),
-            const SizedBox(height: 12),
-            StartSavingActionCard(
               icon: Icons.add_shopping_cart_outlined,
               title: 'Add grocery expense',
               subtitle: 'Manually add a purchase or grocery expense.',
               iconColor: const Color(0xFFC4895A),
-              onTap: () => _pushIfRouteExists(
-                context,
-                path: _addGroceryExpenseRoute,
-                missingMessage: 'Add expense screen is unavailable.',
-              ),
+              onTap: () => context.push('/add-grocery-expense'),
             ),
             const SizedBox(height: 12),
             StartSavingActionCard(
               icon: Icons.checklist_rounded,
               title: 'Create shopping list',
-              subtitle: 'Plan what to buy and compare better deals.',
+              subtitle: 'Plan what to buy before your next trip.',
               iconColor: const Color(0xFF6B9E78),
-              onTap: () => _pushIfRouteExists(
-                context,
-                path: _shoppingListRoute,
-                missingMessage: 'Shopping list screen is coming next.',
-              ),
+              onTap: () => context.push('/shopping/create'),
             ),
             const SizedBox(height: 12),
             StartSavingActionCard(
-              icon: Icons.local_offer_outlined,
-              title: 'View local deals',
-              subtitle: 'Discover current deals near you.',
-              iconColor: const Color(0xFF8B6BA8),
-              onTap: () => _returnToDashboard(context),
+              icon: Icons.shopping_basket_outlined,
+              title: 'Optimize shopping basket',
+              subtitle: 'Compare your list with known prices and stores.',
+              iconColor: const Color(0xFF5B8FA8),
+              onTap: () => context.push('/shopping/basket-optimizer'),
             ),
             const SizedBox(height: 12),
             StartSavingActionCard(
-              icon: Icons.auto_awesome_rounded,
-              title: 'Ask AI Savings Assistant',
+              icon: Icons.task_alt_rounded,
+              title: 'Finalize shopping trip',
               subtitle:
-                  'Get smart suggestions based on receipts and shopping habits.',
+                  'Turn purchased items into a receipt and update price history.',
+              iconColor: const Color(0xFF8B6BA8),
+              onTap: () =>
+                  context.push('/start-saving/select-list-to-finalize'),
+            ),
+            const SizedBox(height: 12),
+            StartSavingActionCard(
+              icon: Icons.track_changes_rounded,
+              title: 'Monthly goal / Budget',
+              subtitle: 'Review or adjust your monthly grocery spending goal.',
+              iconColor: const Color(0xFF9B7BB8),
+              onTap: () => context.push('/start-saving/monthly-goal-budget'),
+            ),
+            const SizedBox(height: 12),
+            StartSavingActionCard(
+              icon: Icons.insights_outlined,
+              title: 'Savings analytics',
+              subtitle:
+                  'Spending overview, savings value, and recommended actions.',
               iconColor: SavingorColors.primaryStroke,
-              onTap: () => _showAiInsightSheet(context),
+              onTap: () => context.push('/analytics'),
             ),
           ],
         ),

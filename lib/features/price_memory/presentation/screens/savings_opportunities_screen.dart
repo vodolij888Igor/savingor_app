@@ -95,7 +95,7 @@ class SavingsOpportunitiesScreen extends StatelessWidget {
       itemBuilder: (BuildContext context, int index) {
         if (index == 0) {
           return Text(
-            '${opportunities.length} ${opportunities.length == 1 ? 'item' : 'items'} where you paid more than your best known price',
+            '${opportunities.length} actionable ${opportunities.length == 1 ? 'opportunity' : 'opportunities'} where you paid more than the best known price',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,

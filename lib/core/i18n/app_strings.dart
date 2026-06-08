@@ -52,6 +52,8 @@ class AppStrings {
   String get noDealsFound => _s['no_deals_found'] ?? 'No deals found';
   String get resetFilters => _s['reset_filters'] ?? 'Reset filters';
   String get filtersTitle => _s['filters_title'] ?? 'Filters';
+  String get aiAssistant => _s['ai_assistant'] ?? 'AI';
+  String get storesMap => _s['stores_map'] ?? 'Map';
   String get stores => _s['stores'] ?? 'Stores';
   String get maxPrice => _s['max_price'] ?? 'Max price';
   String get sort => _s['sort'] ?? 'Sort';
