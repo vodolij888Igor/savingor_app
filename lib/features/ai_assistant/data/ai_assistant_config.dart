@@ -16,6 +16,5 @@ abstract final class AiAssistantConfig {
   static bool get hasOpenAiApiKey => openAiApiKey.isNotEmpty;
 
   static String get missingApiKeyMessage =>
-      'OpenAI API key is not configured. '
-      'Run the app with --dart-define=OPENAI_API_KEY=your_key';
+      'AI assistant is ready. Connect an API key to enable live answers.';
 }

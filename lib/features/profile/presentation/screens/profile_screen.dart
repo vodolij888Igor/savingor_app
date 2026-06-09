@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/app_state.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/features/profile/data/user_profile_service.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -19,26 +20,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   UserProfile? _profile;
   String? _profileError;
 
-  static const Color _pageBackground = Color(0xFFF3FAF1);
-  static const Color _emailMuted = Color(0xFF5F7A68);
+  static const Color _pageBackground = SavingorColors.pageWhite;
+  static const Color _emailMuted = Color(0xFF64748B);
   static const double _heroRadius = 28;
   static const double _cardRadius = 22;
   static const double _buttonRadius = 18;
 
-  static const TextStyle _screenTitleStyle = TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.w800,
-    color: SavingorColors.darkGreen,
-    letterSpacing: 0.2,
-    height: 1.15,
-  );
-
   static const TextStyle _cardHeadingStyle = TextStyle(
     fontSize: 18,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w800,
     color: SavingorColors.darkGreen,
-    letterSpacing: 0.1,
-    height: 1.2,
   );
 
   static const TextStyle _bodyMutedStyle = TextStyle(
@@ -87,7 +78,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: _pageBackground,
       appBar: AppBar(
-        title: const Text('Profile', style: _screenTitleStyle),
+        title: const Text(
+          'Profile',
+          style: SavingorAppTextStyles.screenTitle,
+        ),
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -140,38 +134,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  ButtonStyle get _primaryButtonStyle => ElevatedButton.styleFrom(
-        elevation: 0,
-        shadowColor: Colors.transparent,
-        surfaceTintColor: Colors.transparent,
-        backgroundColor: SavingorColors.primaryGreen,
-        foregroundColor: SavingorColors.darkGreen,
-        minimumSize: const Size.fromHeight(52),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(_buttonRadius),
-          side: const BorderSide(
-            color: SavingorColors.primaryStroke,
-            width: 1,
-          ),
-        ),
-        textStyle: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.12,
-        ),
-      );
-
   Widget _primaryButton({
     required String label,
     required VoidCallback? onPressed,
   }) {
-    return SizedBox(
+    return SavingorInteractiveFilledButton(
+      onPressed: onPressed,
       width: double.infinity,
-      child: ElevatedButton(
-        style: _primaryButtonStyle,
-        onPressed: onPressed,
-        child: Text(label),
-      ),
+      borderRadius: BorderRadius.circular(_buttonRadius),
+      child: Text(label),
     );
   }
 
@@ -186,38 +157,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 28, 24, 26),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(_heroRadius),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            Color(0xFFE8F6E4),
-            Color(0xFFF7FCF5),
-            Color(0xFFFFFFFF),
-          ],
-          stops: <double>[0.0, 0.45, 1.0],
-        ),
-        border: Border.all(
-          color: SavingorColors.primaryStroke.withOpacity(0.22),
-        ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: SavingorColors.darkGreen.withOpacity(0.12),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
+      decoration: SavingorSurfaces.profileHero(radius: _heroRadius),
       child: Column(
         children: <Widget>[
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.75),
+              color: Colors.white.withOpacity(0.85),
               borderRadius: BorderRadius.circular(SavingorRadius.pill),
               border: Border.all(
-                color: SavingorColors.primaryStroke.withOpacity(0.3),
+                color: SavingorColors.primaryStroke.withOpacity(0.35),
               ),
             ),
             child: const Text(
@@ -225,7 +174,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: SavingorColors.darkGreen,
+                color: SavingorColors.primaryStroke,
                 letterSpacing: 0.15,
               ),
             ),
@@ -237,16 +186,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               border: Border.all(color: Colors.white, width: 3),
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: SavingorColors.darkGreen.withOpacity(0.14),
-                  blurRadius: 14,
-                  offset: const Offset(0, 5),
+                  color: SavingorColors.primaryStroke.withOpacity(0.22),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
                 ),
               ],
             ),
             child: CircleAvatar(
-              radius: 42,
+              radius: 44,
               backgroundColor: SavingorColors.primaryGreen,
-              foregroundColor: SavingorColors.darkGreen,
+              foregroundColor: SavingorColors.deepGreen,
               child: Text(
                 _initialsFor(displayName),
                 style: const TextStyle(
@@ -264,7 +213,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             style: const TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w800,
-              color: SavingorColors.darkGreen,
+              color: SavingorColors.deepGreen,
               height: 1.15,
               letterSpacing: 0.1,
             ),
@@ -289,7 +238,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: SavingorColors.primaryStroke,
+              color: SavingorColors.textSecondary,
               letterSpacing: 0.2,
               height: 1.3,
             ),
@@ -307,6 +256,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             icon: Icons.map_outlined,
             label: 'Region',
             value: 'Canada',
+            accent: SavingorAccentColors.map,
           ),
         ),
         const SizedBox(width: SavingorSpacing.sm),
@@ -315,6 +265,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             icon: Icons.translate_rounded,
             label: 'Language',
             value: appLanguage,
+            accent: SavingorAccentColors.savings,
           ),
         ),
         const SizedBox(width: SavingorSpacing.sm),
@@ -323,6 +274,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             icon: Icons.brightness_auto_rounded,
             label: 'Theme',
             value: 'System',
+            accent: SavingorAccentColors.budget,
           ),
         ),
       ],
@@ -333,46 +285,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required IconData icon,
     required String label,
     required String value,
+    required Color accent,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: SavingorSpacing.sm,
-        vertical: SavingorSpacing.md,
+        vertical: SavingorSpacing.md + 2,
       ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: SavingorColors.primaryStroke.withOpacity(0.18),
-        ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: SavingorColors.darkGreen.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: SavingorSurfaces.premiumCard(radius: 16),
       child: Column(
         children: <Widget>[
-          Icon(icon, size: 20, color: SavingorColors.darkGreen),
-          const SizedBox(height: 6),
+          Container(
+            width: 34,
+            height: 34,
+            decoration: SavingorSurfaces.accentIconBlock(
+              accent: accent,
+              radius: 10,
+            ),
+            child: Icon(icon, size: 18, color: accent),
+          ),
+          const SizedBox(height: 8),
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: SavingorColors.textSecondary,
-            ),
+            style: SavingorAppTextStyles.bodySecondary(fontSize: 11),
           ),
           const SizedBox(height: 2),
           Text(
             value,
             textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: SavingorColors.darkGreen,
+              color: SavingorColors.textPrimary,
               height: 1.2,
             ),
           ),
@@ -392,7 +338,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: SavingorColors.darkGreen,
+                color: SavingorAccentColors.savings,
               ),
             ),
             SizedBox(width: 12),
@@ -480,10 +426,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: SavingorColors.lightGreen,
+                color: SavingorAccentColors.savings.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(SavingorRadius.pill),
                 border: Border.all(
-                  color: SavingorColors.primaryStroke.withOpacity(0.35),
+                  color: SavingorAccentColors.savings.withOpacity(0.25),
                 ),
               ),
               child: const Text(
@@ -491,7 +437,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: SavingorColors.darkGreen,
+                  color: SavingorAccentColors.savings,
                 ),
               ),
             ),
@@ -503,7 +449,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w800,
-            color: SavingorColors.darkGreen,
+            color: SavingorColors.textPrimary,
             height: 1.15,
           ),
         ),
@@ -519,18 +465,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onPressed: () => context.push('/subscription'),
         ),
         const SizedBox(height: SavingorSpacing.xs),
-        TextButton(
+        SavingorInteractiveTextButton(
           onPressed: () => _showSnack(
             'Subscription management will be available soon.',
           ),
-          style: TextButton.styleFrom(
-            foregroundColor: SavingorColors.darkGreen,
-            textStyle: const TextStyle(
+          foregroundColor: SavingorColors.textSecondary,
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: const Text(
+            'Manage subscription',
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
           ),
-          child: const Text('Manage subscription'),
         ),
       ],
     );
@@ -635,14 +582,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-      decoration: BoxDecoration(
-        color: SavingorColors.card,
-        borderRadius: BorderRadius.circular(_cardRadius),
-        border: Border.all(
-          color: SavingorColors.primaryStroke.withOpacity(0.12),
-        ),
-        boxShadow: SavingorShadows.soft,
-      ),
+      decoration: SavingorSurfaces.premiumCard(radius: _cardRadius),
       child: child,
     );
   }
@@ -673,14 +613,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Container(
             width: 36,
             height: 36,
-            decoration: BoxDecoration(
-              color: SavingorColors.lightGreen,
-              borderRadius: BorderRadius.circular(12),
+            decoration: SavingorSurfaces.accentIconBlock(
+              accent: SavingorAccentColors.savings,
+              radius: 12,
             ),
             child: Icon(
               icon,
               size: 18,
-              color: SavingorColors.darkGreen.withOpacity(0.85),
+              color: SavingorAccentColors.savings,
             ),
           ),
           const SizedBox(width: SavingorSpacing.md),

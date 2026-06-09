@@ -41,46 +41,49 @@ class NearbyLocationSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF3F4F3)),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: <Widget>[
+        Container(
+          padding: const EdgeInsets.all(18),
+          decoration: SavingorSurfaces.locationCard(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              _buildLocationHeader(),
+              const SizedBox(height: 12),
+              _buildLocationBody(context),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 14),
+                child: Divider(height: 1, color: SavingorColors.border),
+              ),
+              const Text(
+                'Search radius',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: SavingorColors.darkGreen,
+                ),
+              ),
+              const SizedBox(height: 10),
+              NearbyRadiusSelector(
+                selectedRadiusKm: selectedRadiusKm,
+                radiusOptionsKm: radiusOptionsKm,
+                onRadiusSelected: onRadiusSelected,
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          _buildLocationHeader(),
-          const SizedBox(height: 10),
-          _buildLocationBody(context),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 14),
-            child: Divider(height: 1, color: Color(0xFFEEF1EF)),
+        ),
+        Positioned(
+          top: -6,
+          right: 14,
+          child: Icon(
+            Icons.location_on_rounded,
+            size: 28,
+            color: SavingorAccentColors.map.withOpacity(0.18),
           ),
-          const Text(
-            'Search radius',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: SavingorColors.darkGreen,
-            ),
-          ),
-          const SizedBox(height: 10),
-          NearbyRadiusSelector(
-            selectedRadiusKm: selectedRadiusKm,
-            radiusOptionsKm: radiusOptionsKm,
-            onRadiusSelected: onRadiusSelected,
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -90,27 +93,49 @@ class NearbyLocationSection extends StatelessWidget {
 
     return Row(
       children: <Widget>[
-        Icon(
-          Icons.my_location_rounded,
-          size: 20,
-          color: SavingorColors.primaryStroke.withOpacity(0.85),
+        Container(
+          width: 40,
+          height: 40,
+          decoration: SavingorSurfaces.accentIconBlock(
+            accent: SavingorAccentColors.map,
+            radius: 12,
+          ),
+          child: const Icon(
+            Icons.pin_drop_rounded,
+            size: 22,
+            color: SavingorAccentColors.map,
+          ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 12),
         const Expanded(
-          child: Text(
-            'Your location',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: SavingorColors.darkGreen,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'Your location',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: SavingorColors.darkGreen,
+                ),
+              ),
+              SizedBox(height: 2),
+              Text(
+                'Find grocery stores near you',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: SavingorColors.textSecondary,
+                ),
+              ),
+            ],
           ),
         ),
         if (isActive)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: SavingorColors.lightGreen.withOpacity(0.45),
+              color: SavingorColors.primaryGreen.withOpacity(0.15),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Text(
@@ -128,29 +153,20 @@ class NearbyLocationSection extends StatelessWidget {
 
   Widget _buildLocationBody(BuildContext context) {
     if (isLoadingLocation) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      return Row(
         children: <Widget>[
-          Row(
-            children: <Widget>[
-              SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: SavingorColors.primaryStroke.withOpacity(0.85),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                'Checking location...',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: SavingorColors.textSecondary.withOpacity(0.95),
-                ),
-              ),
-            ],
+          SizedBox(
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: SavingorColors.primaryStroke.withOpacity(0.85),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            'Checking location...',
+            style: SavingorAppTextStyles.bodySecondary(fontSize: 13),
           ),
         ],
       );
@@ -171,23 +187,12 @@ class NearbyLocationSection extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             manualLocationLabel!,
-            style: TextStyle(
-              fontSize: 13,
+            style: const TextStyle(
+              fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: SavingorColors.darkGreen.withOpacity(0.85),
+              color: SavingorColors.textPrimary,
             ),
           ),
-          if (coords != null) ...<Widget>[
-            const SizedBox(height: 4),
-            Text(
-              'Lat: ${coords!.latitudeLabel}, Lng: ${coords!.longitudeLabel}',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary.withOpacity(0.9),
-              ),
-            ),
-          ],
           const SizedBox(height: 12),
           _buildLocationActions(showUseMyLocation: true),
         ],
@@ -208,24 +213,9 @@ class NearbyLocationSection extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Lat: ${coords!.latitudeLabel}, Lng: ${coords!.longitudeLabel}',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: SavingorColors.textSecondary.withOpacity(0.9),
-            ),
+            'Ready to search nearby grocery stores.',
+            style: SavingorAppTextStyles.bodySecondary(fontSize: 13),
           ),
-          if (locationDebug?.usedLastKnownPosition == true) ...<Widget>[
-            const SizedBox(height: 4),
-            Text(
-              'Using last known position.',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary.withOpacity(0.75),
-              ),
-            ),
-          ],
           const SizedBox(height: 12),
           _buildLocationActions(showUseMyLocation: true),
         ],
@@ -240,17 +230,8 @@ class NearbyLocationSection extends StatelessWidget {
         children: <Widget>[
           Text(
             locationMessage ?? 'Could not access your location.',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: SavingorColors.darkGreen.withOpacity(0.82),
-              height: 1.35,
-            ),
+            style: SavingorAppTextStyles.bodySecondary(fontSize: 13),
           ),
-          if (locationDebug != null) ...<Widget>[
-            const SizedBox(height: 8),
-            _buildDebugInfo(locationDebug!),
-          ],
           const SizedBox(height: 12),
           _buildLocationActions(showUseMyLocation: true, primaryLabel: 'Retry'),
         ],
@@ -261,13 +242,8 @@ class NearbyLocationSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         Text(
-          'Enable location to prepare for nearby store search.',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-            color: SavingorColors.textSecondary.withOpacity(0.95),
-            height: 1.35,
-          ),
+          'Enable location to find grocery stores near you.',
+          style: SavingorAppTextStyles.bodySecondary(fontSize: 13),
         ),
         const SizedBox(height: 12),
         _buildLocationActions(showUseMyLocation: true),
@@ -286,7 +262,8 @@ class NearbyLocationSection extends StatelessWidget {
       children: <Widget>[
         if (showUseMyLocation)
           FilledButton.icon(
-            onPressed: primaryLabel == 'Retry' ? onRetryLocation : onUseMyLocation,
+            onPressed:
+                primaryLabel == 'Retry' ? onRetryLocation : onUseMyLocation,
             icon: Icon(
               primaryLabel == 'Retry'
                   ? Icons.refresh_rounded
@@ -295,11 +272,12 @@ class NearbyLocationSection extends StatelessWidget {
             ),
             label: Text(primaryLabel),
             style: FilledButton.styleFrom(
-              backgroundColor: SavingorColors.primaryStroke,
-              foregroundColor: Colors.white,
+              backgroundColor: SavingorColors.primaryGreen,
+              foregroundColor: SavingorColors.deepGreen,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: SavingorColors.primaryStroke),
               ),
               textStyle: const TextStyle(
                 fontSize: 13,
@@ -312,7 +290,7 @@ class NearbyLocationSection extends StatelessWidget {
           style: OutlinedButton.styleFrom(
             foregroundColor: SavingorColors.primaryStroke,
             side: BorderSide(
-              color: SavingorColors.primaryStroke.withOpacity(0.35),
+              color: SavingorAccentColors.map.withOpacity(0.4),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             shape: RoundedRectangleBorder(
@@ -326,28 +304,6 @@ class NearbyLocationSection extends StatelessWidget {
           child: const Text('Enter city manually'),
         ),
       ],
-    );
-  }
-
-  Widget _buildDebugInfo(UserLocationDebugInfo debug) {
-    final List<String> lines = <String>[
-      if (debug.serviceEnabled != null)
-        'service enabled: ${debug.serviceEnabled}',
-      if (debug.permissionLabel != null) 'permission: ${debug.permissionLabel}',
-      if (debug.lastError != null) 'last error: ${debug.lastError}',
-    ];
-
-    if (lines.isEmpty) return const SizedBox.shrink();
-
-    return Text(
-      lines.join('\n'),
-      style: TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w500,
-        color: SavingorColors.textSecondary.withOpacity(0.78),
-        height: 1.35,
-        fontFamily: 'monospace',
-      ),
     );
   }
 }

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/app_state.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/features/analytics/domain/expense_analytics_calculator.dart';
 import 'package:savingor_app/features/expenses/data/expenses_store.dart';
 import 'package:savingor_app/features/scanner/data/receipt_store.dart';
@@ -132,11 +133,7 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                   appBar: AppBar(
                     title: const Text(
                       'Monthly goal / Budget',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        color: SavingorColors.darkGreen,
-                      ),
+                      style: SavingorAppTextStyles.screenTitle,
                     ),
                     elevation: 0,
                     scrolledUnderElevation: 0,
@@ -145,7 +142,7 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                     leading: IconButton(
                       icon: const Icon(
                         Icons.arrow_back_ios_new_rounded,
-                        color: SavingorColors.darkGreen,
+                        color: SavingorColors.textPrimary,
                         size: 20,
                       ),
                       onPressed: () => context.pop(),
@@ -245,11 +242,7 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                               children: <Widget>[
                                 const Text(
                                   'Update monthly budget',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w800,
-                                    color: SavingorColors.darkGreen,
-                                  ),
+                                  style: SavingorAppTextStyles.cardTitle,
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
@@ -313,39 +306,33 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                                   },
                                 ),
                                 const SizedBox(height: 16),
-                                SizedBox(
+                                SavingorInteractiveFilledButton(
+                                  onPressed: _isSaving
+                                      ? null
+                                      : () => _saveBudget(appState),
                                   width: double.infinity,
-                                  child: FilledButton(
-                                    onPressed: _isSaving
-                                        ? null
-                                        : () => _saveBudget(appState),
-                                    style: FilledButton.styleFrom(
-                                      backgroundColor:
-                                          SavingorColors.primaryGreen,
-                                      foregroundColor: SavingorColors.darkGreen,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 14,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(14),
-                                      ),
-                                    ),
-                                    child: _isSaving
-                                        ? const SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                            ),
-                                          )
-                                        : const Text(
-                                            'Save budget',
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w800,
-                                            ),
-                                          ),
+                                  minHeight: 48,
+                                  borderRadius:
+                                      BorderRadius.circular(14),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
                                   ),
+                                  child: _isSaving
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: SavingorColors.darkGreen,
+                                          ),
+                                        )
+                                      : const Text(
+                                          'Save budget',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                        ),
                                 ),
                               ],
                             ),
@@ -387,7 +374,7 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w800,
-            color: valueColor ?? SavingorColors.darkGreen,
+            color: valueColor ?? SavingorColors.textPrimary,
           ),
         ),
       ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/features/analytics/domain/models/product_savings_insight.dart';
 import 'package:savingor_app/features/analytics/domain/models/savings_summary.dart';
 
@@ -24,11 +25,7 @@ class SavingsValueSection extends StatelessWidget {
       children: <Widget>[
         const Text(
           'Savings value',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: SavingorColors.darkGreen,
-          ),
+          style: SavingorAppTextStyles.sectionTitle,
         ),
         const SizedBox(height: SavingorSpacing.md),
         if (!summary.hasCalculableData)
@@ -129,11 +126,7 @@ class TopSavingsProductsSection extends StatelessWidget {
       children: <Widget>[
         const Text(
           'Top savings products',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: SavingorColors.darkGreen,
-          ),
+          style: SavingorAppTextStyles.sectionTitle,
         ),
         const SizedBox(height: SavingorSpacing.md),
         ...products.map(
@@ -182,14 +175,12 @@ class _SavingsMetricCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Icon(icon, size: 22, color: SavingorColors.primaryStroke),
+          Icon(icon, size: 22, color: SavingorAccentColors.savings),
           const SizedBox(height: 10),
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 12,
+            style: SavingorAppTextStyles.bodySecondary(fontSize: 12).copyWith(
               fontWeight: FontWeight.w700,
-              color: SavingorColors.darkGreen,
             ),
           ),
           const SizedBox(height: 4),
@@ -244,18 +235,21 @@ class _SubscriptionRoiCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: SavingorColors.lightGreen,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFF3F4F3).withOpacity(0.6)),
-      ),
+      decoration: SavingorSurfaces.premiumCard(),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Icon(
-            Icons.workspace_premium_outlined,
-            color: SavingorColors.primaryStroke,
-            size: 24,
+          Container(
+            width: 40,
+            height: 40,
+            decoration: SavingorSurfaces.accentIconBlock(
+              accent: SavingorAccentColors.budget,
+            ),
+            child: const Icon(
+              Icons.workspace_premium_outlined,
+              color: SavingorAccentColors.budget,
+              size: 22,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -264,10 +258,8 @@ class _SubscriptionRoiCard extends StatelessWidget {
               children: <Widget>[
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 12,
+                  style: SavingorAppTextStyles.bodySecondary(fontSize: 12).copyWith(
                     fontWeight: FontWeight.w700,
-                    color: SavingorColors.darkGreen,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -333,7 +325,7 @@ class _SavingsProgressCard extends StatelessWidget {
             children: <Widget>[
               Icon(
                 Icons.trending_up_outlined,
-                color: SavingorColors.primaryStroke,
+                color: SavingorAccentColors.savings,
                 size: 22,
               ),
               SizedBox(width: 10),
@@ -342,7 +334,7 @@ class _SavingsProgressCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: SavingorColors.darkGreen,
+                  color: SavingorColors.textPrimary,
                 ),
               ),
             ],
@@ -351,13 +343,13 @@ class _SavingsProgressCard extends StatelessWidget {
           _ProgressMetricRow(
             label: 'Estimated saved this month',
             value: formatCurrency(summary.estimatedSavedThisMonth),
-            valueColor: SavingorColors.primaryStroke,
+            valueColor: SavingorAccentColors.savings,
           ),
           const SizedBox(height: 10),
           _ProgressMetricRow(
             label: 'Potential savings found',
             value: formatCurrency(summary.potentialMissedThisMonth),
-            valueColor: SavingorColors.darkGreen,
+            valueColor: SavingorAccentColors.budget,
           ),
           const SizedBox(height: 14),
           const Text(
@@ -429,17 +421,13 @@ class _ProductInsightCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
+    return SavingorInteractiveCard(
+      onTap: () => _openProductDetail(context),
       borderRadius: BorderRadius.circular(18),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => _openProductDetail(context),
-        child: Ink(
-          decoration: _cardDecoration(),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
+      accentTint: SavingorAccentColors.savings,
+      borderColor: _airyBorder.withOpacity(0.6),
+      padding: const EdgeInsets.all(16),
+      child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Row(
@@ -477,14 +465,14 @@ class _ProductInsightCard extends StatelessWidget {
                   _ProductMetricRow(
                     label: 'Estimated saved vs your average price',
                     value: formatCurrency(product.estimatedSaved),
-                    valueColor: SavingorColors.primaryStroke,
+                    valueColor: SavingorAccentColors.savings,
                   ),
                 if (product.potentialMissed > 0) ...<Widget>[
                   if (product.estimatedSaved > 0) const SizedBox(height: 8),
                   _ProductMetricRow(
                     label: 'Potential savings missed',
                     value: formatCurrency(product.potentialMissed),
-                    valueColor: SavingorColors.darkGreen,
+                    valueColor: SavingorAccentColors.budget,
                   ),
                 ],
                 const SizedBox(height: 12),
@@ -529,9 +517,6 @@ class _ProductInsightCard extends StatelessWidget {
                     ),
                 ],
               ],
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -548,20 +533,6 @@ class _ProductInsightCard extends StatelessWidget {
     );
   }
 
-  BoxDecoration _cardDecoration() {
-    return BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-      border: Border.all(color: _airyBorder.withOpacity(0.6)),
-      boxShadow: <BoxShadow>[
-        BoxShadow(
-          color: Colors.black.withOpacity(0.04),
-          blurRadius: 12,
-          offset: const Offset(0, 2),
-        ),
-      ],
-    );
-  }
 }
 
 class _ProductMetricRow extends StatelessWidget {

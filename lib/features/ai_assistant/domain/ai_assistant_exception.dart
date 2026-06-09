@@ -6,8 +6,7 @@ class AiAssistantException implements Exception {
   final String? code;
 
   static const AiAssistantException missingApiKey = AiAssistantException(
-    'OpenAI API key is not configured. '
-    'Run the app with --dart-define=OPENAI_API_KEY=your_key',
+    'AI assistant is ready. Connect an API key to enable live answers.',
     code: 'missing_api_key',
   );
 

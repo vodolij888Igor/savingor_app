@@ -58,11 +58,7 @@ class _ManualLocationSheetState extends State<ManualLocationSheet> {
           const SizedBox(height: 16),
           const Text(
             'Set location',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              color: SavingorColors.darkGreen,
-            ),
+            style: SavingorAppTextStyles.sectionTitleLarge,
           ),
           const SizedBox(height: SavingorSpacing.md),
           TextField(
@@ -104,9 +100,9 @@ class _ManualLocationSheetState extends State<ManualLocationSheet> {
                 child: OutlinedButton(
                   onPressed: () => Navigator.of(context).pop(),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: SavingorColors.darkGreen,
+                    foregroundColor: SavingorColors.textSecondary,
                     side: BorderSide(
-                      color: SavingorColors.primaryStroke.withOpacity(0.3),
+                      color: SavingorColors.border.withOpacity(0.85),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(

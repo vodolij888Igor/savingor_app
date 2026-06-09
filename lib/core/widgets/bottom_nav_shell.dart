@@ -2,11 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:savingor_app/core/i18n/app_strings.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 
 class BottomNavShell extends StatelessWidget {
   const BottomNavShell({super.key, required this.child});
 
   final Widget child;
+
+  /// Main app-level destinations only — deeper workflow screens hide the bar.
+  static const Set<String> _mainTabPaths = <String>{
+    '/deals',
+    '/start-saving',
+    '/nearby-stores',
+    '/scanner',
+    '/ai-assistant',
+    '/profile',
+  };
+
+  static bool shouldShowBottomNav(String location) {
+    final String path = _normalizePath(location);
+    return _mainTabPaths.contains(path);
+  }
+
+  static String _normalizePath(String location) {
+    if (location.isEmpty) {
+      return '/';
+    }
+    return location.endsWith('/') && location.length > 1
+        ? location.substring(0, location.length - 1)
+        : location;
+  }
 
   int _indexFromLocation(String location) {
     if (location.startsWith('/start-saving')) return 0;
@@ -42,20 +67,23 @@ class BottomNavShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final String location = GoRouterState.of(context).uri.path;
     final int currentIndex = _indexFromLocation(location);
+    final bool showBottomNav = shouldShowBottomNav(location);
     final AppStrings t = AppStrings.of(context);
 
     return Scaffold(
-      extendBody: true,
+      extendBody: showBottomNav,
       backgroundColor: SavingorColors.background,
       body: child,
-      bottomNavigationBar: _PremiumNavBar(
-        currentIndex: currentIndex,
-        homeLabel: t.home,
-        mapLabel: t.storesMap,
-        aiLabel: t.aiAssistant,
-        profileLabel: t.profile,
-        onTabSelected: (int index) => _onTabSelected(context, index),
-      ),
+      bottomNavigationBar: showBottomNav
+          ? _PremiumNavBar(
+              currentIndex: currentIndex,
+              homeLabel: t.home,
+              mapLabel: t.storesMap,
+              aiLabel: t.aiAssistant,
+              profileLabel: t.profile,
+              onTabSelected: (int index) => _onTabSelected(context, index),
+            )
+          : null,
     );
   }
 }
@@ -178,63 +206,67 @@ class _SideNavItem extends StatelessWidget {
 
   static const double _iconSize = 22;
   static const double _activeIconSize = 24;
-  static const Duration _animDuration = Duration(milliseconds: 200);
-
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: label,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              SizedBox(
-                height: 36,
-                child: Center(
-                  child: AnimatedContainer(
-                    duration: _animDuration,
-                    width: selected ? 38 : 34,
-                    height: selected ? 38 : 34,
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? SavingorColors.lightGreen.withOpacity(0.62)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      selected ? filledIcon : outlinedIcon,
-                      size: selected ? _activeIconSize : _iconSize,
-                      color: selected
-                          ? SavingorColors.darkGreen
-                          : SavingorColors.textSecondary.withOpacity(0.82),
-                    ),
+    return SavingorInteractivePressable(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      liftOnHover: false,
+      hoverScale: 1.04,
+      semanticLabel: label,
+      builder: (BuildContext context, SavingorInteractionState state) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            SizedBox(
+              height: 36,
+              child: Center(
+                child: AnimatedContainer(
+                  duration: SavingorInteraction.duration,
+                  curve: SavingorInteraction.curve,
+                  width: selected ? 38 : state.hovered ? 36 : 34,
+                  height: selected ? 38 : state.hovered ? 36 : 34,
+                  decoration: BoxDecoration(
+                    color: selected
+                        ? SavingorColors.lightGreen.withOpacity(0.62)
+                        : state.hovered
+                            ? SavingorColors.lightGreen.withOpacity(0.55)
+                            : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                    border: state.hovered && !selected
+                        ? Border.all(
+                            color: SavingorColors.primaryStroke.withOpacity(0.4),
+                          )
+                        : null,
+                  ),
+                  child: Icon(
+                    selected ? filledIcon : outlinedIcon,
+                    size: selected ? _activeIconSize : _iconSize,
+                    color: selected
+                        ? SavingorColors.darkGreen
+                        : SavingorColors.textSecondary.withOpacity(0.82),
                   ),
                 ),
               ),
-              const SizedBox(height: 3),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                  color: selected
-                      ? SavingorColors.darkGreen
-                      : SavingorColors.textSecondary.withOpacity(0.88),
-                  height: 1.15,
-                ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                color: selected
+                    ? SavingorColors.darkGreen
+                    : SavingorColors.textSecondary.withOpacity(0.88),
+                height: 1.15,
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -248,81 +280,79 @@ class _ScanReceiptNavItem extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  static const Duration _animDuration = Duration(milliseconds: 200);
   static const double _buttonWidth = 92;
   static const double _buttonHeight = 50;
   static const double _buttonRadius = 24;
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: 'Scan receipt',
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(_buttonRadius),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-            child: Center(
-              child: AnimatedContainer(
-                duration: _animDuration,
-                curve: Curves.easeOutCubic,
-                width: _buttonWidth,
-                height: _buttonHeight,
-                decoration: BoxDecoration(
-                  color: selected
-                      ? SavingorColors.primaryGreen
-                      : SavingorColors.primaryGreen.withOpacity(0.88),
-                  borderRadius: BorderRadius.circular(_buttonRadius),
-                  border: Border.all(
+    return SavingorInteractivePressable(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(_buttonRadius),
+      hoverScale: 1.02,
+      semanticLabel: 'Scan receipt',
+      builder: (BuildContext context, SavingorInteractionState state) {
+        final bool hovered = state.hovered;
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+          child: Center(
+            child: AnimatedContainer(
+              duration: SavingorInteraction.duration,
+              curve: SavingorInteraction.curve,
+              width: _buttonWidth,
+              height: _buttonHeight,
+              decoration: BoxDecoration(
+                color: selected
+                    ? SavingorColors.primaryGreen
+                    : hovered
+                        ? const Color(0xFF8DD480)
+                        : SavingorColors.primaryGreen.withOpacity(0.88),
+                borderRadius: BorderRadius.circular(_buttonRadius),
+                border: Border.all(
+                  color: SavingorColors.primaryStroke
+                      .withOpacity(selected ? 0.24 : hovered ? 0.22 : 0.14),
+                  width: 1.1,
+                ),
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
                     color: SavingorColors.primaryStroke
-                        .withOpacity(selected ? 0.24 : 0.14),
-                    width: 1.1,
+                        .withOpacity(hovered ? 0.2 : selected ? 0.18 : 0.1),
+                    blurRadius: hovered ? 12 : 10,
+                    offset: Offset(0, hovered ? 4 : 3),
                   ),
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: SavingorColors.primaryStroke
-                          .withOpacity(selected ? 0.18 : 0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Icon(
-                      selected
-                          ? Icons.document_scanner_rounded
-                          : Icons.document_scanner_outlined,
-                      size: 24,
+                ],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    selected
+                        ? Icons.document_scanner_rounded
+                        : Icons.document_scanner_outlined,
+                    size: 24,
+                    color: SavingorColors.darkGreen,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'Scan receipt',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: selected ? FontWeight.w800 : FontWeight.w700,
                       color: SavingorColors.darkGreen,
+                      height: 1.05,
+                      letterSpacing: 0.01,
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Scan receipt',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 9,
-                        fontWeight:
-                            selected ? FontWeight.w800 : FontWeight.w700,
-                        color: SavingorColors.darkGreen,
-                        height: 1.05,
-                        letterSpacing: 0.01,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

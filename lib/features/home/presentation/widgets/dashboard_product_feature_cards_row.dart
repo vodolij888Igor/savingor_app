@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/core/widgets/savingor_interactive.dart';
+import 'package:savingor_app/core/widgets/product_thumbnail_avatar.dart';
 import 'package:savingor_app/features/price_memory/domain/models/product_price_record.dart';
 import 'package:savingor_app/features/price_memory/domain/models/savings_opportunity.dart';
 import 'package:savingor_app/features/price_memory/domain/price_memory_formatters.dart';
@@ -38,13 +40,7 @@ class DashboardProductFeatureCardsRow extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-      decoration: BoxDecoration(
-        color: SavingorColors.lightGreen.withOpacity(0.22),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: SavingorColors.primaryStroke.withOpacity(0.12),
-        ),
-      ),
+      decoration: SavingorSurfaces.premiumCard(radius: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -53,30 +49,15 @@ class DashboardProductFeatureCardsRow extends StatelessWidget {
               const Expanded(
                 child: Text(
                   'Top saving opportunities',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: SavingorColors.darkGreen,
-                  ),
+                  style: SavingorAppTextStyles.sectionTitleLarge,
                 ),
               ),
               if (hasOpportunities)
-                TextButton(
+                SavingorInteractiveTextButton(
                   onPressed: () =>
                       context.push('/analytics/savings-opportunities'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: SavingorColors.primaryStroke,
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: const Text(
-                    'See all',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  child: const Text('See all'),
                 ),
             ],
           ),
@@ -111,58 +92,6 @@ class DashboardProductFeatureCardsRow extends StatelessWidget {
   }
 }
 
-/// Grocery-style icon from product name — no savings/piggy-bank icons.
-abstract final class _GroceryProductIcons {
-  static IconData forProduct(String productName) {
-    final String lower = productName.toLowerCase();
-
-    if (lower.contains('milk') ||
-        lower.contains('juice') ||
-        lower.contains('water') ||
-        lower.contains('soda') ||
-        lower.contains('drink')) {
-      return Icons.local_drink_rounded;
-    }
-    if (lower.contains('bread') ||
-        lower.contains('bagel') ||
-        lower.contains('toast') ||
-        lower.contains('bun') ||
-        lower.contains('roll') ||
-        lower.contains('croissant')) {
-      return Icons.bakery_dining_rounded;
-    }
-    if (lower.contains('egg')) {
-      return Icons.egg_alt_rounded;
-    }
-    if (lower.contains('chicken') ||
-        lower.contains('beef') ||
-        lower.contains('pork') ||
-        lower.contains('meat') ||
-        lower.contains('fish') ||
-        lower.contains('salmon') ||
-        lower.contains('turkey') ||
-        lower.contains('steak')) {
-      return Icons.restaurant_rounded;
-    }
-    if (lower.contains('banana') ||
-        lower.contains('apple') ||
-        lower.contains('fruit') ||
-        lower.contains('berry') ||
-        lower.contains('vegetable') ||
-        lower.contains('lettuce') ||
-        lower.contains('tomato')) {
-      return Icons.eco_rounded;
-    }
-    if (lower.contains('cheese') ||
-        lower.contains('yogurt') ||
-        lower.contains('butter')) {
-      return Icons.breakfast_dining_rounded;
-    }
-
-    return Icons.shopping_basket_outlined;
-  }
-}
-
 class _EmptySavingOpportunitiesCard extends StatelessWidget {
   const _EmptySavingOpportunitiesCard({required this.onAddReceipt});
 
@@ -189,13 +118,13 @@ class _EmptySavingOpportunitiesCard extends StatelessWidget {
               Container(
                 width: 40,
                 height: 40,
-                decoration: BoxDecoration(
-                  color: SavingorColors.lightGreen.withOpacity(0.55),
-                  shape: BoxShape.circle,
+                decoration: SavingorSurfaces.accentIconBlock(
+                  accent: SavingorAccentColors.savings,
+                  radius: 20,
                 ),
                 child: const Icon(
                   Icons.receipt_long_outlined,
-                  color: SavingorColors.primaryStroke,
+                  color: SavingorAccentColors.savings,
                   size: 20,
                 ),
               ),
@@ -206,7 +135,7 @@ class _EmptySavingOpportunitiesCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: SavingorColors.darkGreen,
+                    color: SavingorColors.textPrimary,
                     height: 1.35,
                   ),
                 ),
@@ -214,28 +143,19 @@ class _EmptySavingOpportunitiesCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: onAddReceipt,
-              icon: const Icon(Icons.add_a_photo_outlined, size: 16),
-              label: const Text(
-                'Add receipt',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: SavingorColors.darkGreen,
-                side: BorderSide(
-                  color: SavingorColors.primaryStroke.withOpacity(0.35),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+          SavingorInteractiveOutlinedButton(
+            onPressed: onAddReceipt,
+            foregroundColor: SavingorColors.textPrimary,
+            borderColor: SavingorColors.border.withOpacity(0.85),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Icon(Icons.add_a_photo_outlined, size: 16),
+                SizedBox(width: 6),
+                Text('Add receipt'),
+              ],
             ),
           ),
         ],
@@ -264,67 +184,48 @@ class _SavingOpportunityTile extends StatelessWidget {
         'Latest paid: ${PriceMemoryFormatters.formatPrice(opportunity.latestPrice, currency: currency)} at ${opportunity.latestStoreName}';
     final String saveBadge =
         'Save up to ${PriceMemoryFormatters.formatPrice(opportunity.priceDifference, currency: currency)}';
-    final IconData productIcon =
-        _GroceryProductIcons.forProduct(opportunity.displayName);
 
     return SizedBox(
       width: width,
       height: DashboardProductFeatureCardsRow._listHeight,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
-          child: Ink(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: SavingorColors.primaryStroke.withOpacity(0.22),
-                width: 1.2,
-              ),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: SavingorColors.primaryStroke.withOpacity(0.08),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  blurRadius: 6,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
-              child: Column(
+      child: SavingorInteractiveCard(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        accentTint: SavingorColors.primaryStroke,
+        borderColor: SavingorColors.primaryStroke.withOpacity(0.22),
+        hoverBorderColor: SavingorColors.primaryStroke.withOpacity(0.34),
+        boxShadow: <BoxShadow>[
+          BoxShadow(
+            color: SavingorColors.primaryStroke.withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        hoverBoxShadow: <BoxShadow>[
+          BoxShadow(
+            color: SavingorColors.primaryStroke.withOpacity(0.14),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+        child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   Center(
-                    child: Container(
-                      width: 58,
-                      height: 58,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: SavingorColors.primaryStroke.withOpacity(0.16),
-                        ),
-                        boxShadow: <BoxShadow>[
-                          BoxShadow(
-                            color:
-                                SavingorColors.primaryStroke.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        productIcon,
-                        size: 30,
-                        color: SavingorColors.primaryStroke,
-                      ),
+                    child: ProductThumbnailAvatar(
+                      productName: opportunity.displayName,
+                      size: 58,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -360,10 +261,10 @@ class _SavingOpportunityTile extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
-                      color: SavingorColors.darkGreen.withOpacity(0.82),
+                      color: SavingorColors.textSecondary,
                       height: 1.25,
                     ),
                   ),
@@ -409,9 +310,6 @@ class _SavingOpportunityTile extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
-          ),
-        ),
       ),
     );
   }

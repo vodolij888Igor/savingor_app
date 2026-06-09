@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/features/analytics/domain/models/savings_recommendation.dart';
 
 class RecommendedActionsSection extends StatelessWidget {
@@ -36,11 +37,7 @@ class RecommendedActionsSection extends StatelessWidget {
       children: <Widget>[
         const Text(
           'Recommended actions',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: SavingorColors.darkGreen,
-          ),
+          style: SavingorAppTextStyles.sectionTitle,
         ),
         const SizedBox(height: SavingorSpacing.md),
         if (displayed.isEmpty)
@@ -112,20 +109,13 @@ class _RecommendationCard extends StatelessWidget {
       );
     }
 
-    return Material(
-      color: Colors.white,
+    return SavingorInteractiveCard(
+      onTap: () => _openProductDetail(context),
       borderRadius: BorderRadius.circular(18),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => _openProductDetail(context),
-        child: Ink(
-          decoration: _cardDecoration(),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: content,
-          ),
-        ),
-      ),
+      accentTint: SavingorAccentColors.savings,
+      borderColor: _airyBorder.withOpacity(0.6),
+      padding: const EdgeInsets.all(16),
+      child: content,
     );
   }
 
@@ -165,7 +155,7 @@ class _RecommendationCard extends StatelessWidget {
           children: <Widget>[
             Icon(
               _iconForType(recommendation.type),
-              color: SavingorColors.primaryStroke,
+              color: _accentForType(recommendation.type),
               size: 22,
             ),
             const SizedBox(width: 10),
@@ -175,7 +165,7 @@ class _RecommendationCard extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF111827),
+                  color: SavingorColors.textPrimary,
                   height: 1.3,
                 ),
               ),
@@ -206,7 +196,7 @@ class _RecommendationCard extends StatelessWidget {
           style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
-            color: SavingorColors.darkGreen,
+            color: SavingorAccentColors.savings,
             height: 1.3,
           ),
         ),
@@ -233,6 +223,17 @@ class _RecommendationCard extends StatelessWidget {
         return Icons.visibility_outlined;
       case SavingsRecommendationType.bestKnownStore:
         return Icons.place_outlined;
+    }
+  }
+
+  Color _accentForType(SavingsRecommendationType type) {
+    switch (type) {
+      case SavingsRecommendationType.storeSwitch:
+        return SavingorAccentColors.map;
+      case SavingsRecommendationType.watchPrice:
+        return SavingorAccentColors.priceMemory;
+      case SavingsRecommendationType.bestKnownStore:
+        return SavingorAccentColors.savings;
     }
   }
 }

@@ -59,13 +59,12 @@ class SelectedStoreBottomSheet extends StatelessWidget {
               Container(
                 width: 48,
                 height: 48,
-                decoration: BoxDecoration(
-                  color: SavingorColors.lightGreen.withOpacity(0.45),
-                  borderRadius: BorderRadius.circular(14),
+                decoration: SavingorSurfaces.accentIconBlock(
+                  accent: SavingorAccentColors.map,
                 ),
                 child: const Icon(
                   Icons.storefront_rounded,
-                  color: SavingorColors.primaryStroke,
+                  color: SavingorAccentColors.map,
                   size: 24,
                 ),
               ),
@@ -76,11 +75,9 @@ class SelectedStoreBottomSheet extends StatelessWidget {
                   children: <Widget>[
                     Text(
                       store.name,
-                      style: const TextStyle(
+                      style: SavingorAppTextStyles.cardTitle.copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
-                        color: SavingorColors.darkGreen,
-                        height: 1.2,
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -99,7 +96,7 @@ class SelectedStoreBottomSheet extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: SavingorColors.lightGreen.withOpacity(0.35),
+                  color: SavingorAccentColors.map.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -107,7 +104,7 @@ class SelectedStoreBottomSheet extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: SavingorColors.primaryStroke,
+                    color: SavingorAccentColors.map,
                   ),
                 ),
               ),
@@ -121,18 +118,13 @@ class SelectedStoreBottomSheet extends StatelessWidget {
                 Icon(
                   Icons.location_on_outlined,
                   size: 18,
-                  color: SavingorColors.primaryStroke.withOpacity(0.8),
+                  color: SavingorAccentColors.map.withOpacity(0.85),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     store.displayAddress!,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: SavingorColors.darkGreen.withOpacity(0.82),
-                      height: 1.4,
-                    ),
+                    style: SavingorAppTextStyles.bodySecondary(fontSize: 13),
                   ),
                 ),
               ],
@@ -142,11 +134,7 @@ class SelectedStoreBottomSheet extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               store.statusText,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: SavingorColors.darkGreen.withOpacity(0.68),
-              ),
+              style: SavingorAppTextStyles.bodySecondary(fontSize: 12),
             ),
           ],
           const SizedBox(height: 18),
@@ -157,9 +145,9 @@ class SelectedStoreBottomSheet extends StatelessWidget {
               icon: const Icon(Icons.directions_rounded, size: 18),
               label: const Text('Directions'),
               style: OutlinedButton.styleFrom(
-                foregroundColor: SavingorColors.primaryStroke,
+                foregroundColor: SavingorAccentColors.map,
                 side: BorderSide(
-                  color: SavingorColors.primaryStroke.withOpacity(0.4),
+                  color: SavingorAccentColors.map.withOpacity(0.35),
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(

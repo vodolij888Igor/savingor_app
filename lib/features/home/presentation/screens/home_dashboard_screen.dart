@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/app_state.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/features/expenses/data/expenses_store.dart';
 import 'package:savingor_app/features/expenses/domain/models/user_expense.dart';
 import 'package:savingor_app/features/home/domain/home_dashboard_summary.dart';
@@ -13,15 +14,15 @@ import 'package:savingor_app/features/price_memory/data/price_memory_store.dart'
 import 'package:savingor_app/features/scanner/data/receipt_store.dart';
 import 'package:savingor_app/features/scanner/domain/models/receipt.dart';
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
+import 'package:savingor_app/features/profile/data/user_profile_service.dart';
 
 /// First-tab Savingor home dashboard at `/deals`.
 class HomeDashboardScreen extends StatelessWidget {
   const HomeDashboardScreen({super.key});
 
-  static const Color _pageWhite = Color(0xFFFFFEFE);
+  static const Color _pageWhite = SavingorColors.pageWhite;
   static const Color _nearBlack = Color(0xFF111827);
   static const Color _airyBorder = Color(0xFFF3F4F3);
-  static const double _goalAmount = 100;
 
   static String _formatCurrency(double amount) {
     final String fixed = amount.abs().toStringAsFixed(2);
@@ -146,8 +147,7 @@ class HomeDashboardScreen extends StatelessWidget {
     required String title,
     required String value,
     required String suffix,
-    required Color iconColor,
-    double iconSize = 33,
+    required Color iconAccent,
   }) {
     return Expanded(
       child: Container(
@@ -157,7 +157,14 @@ class HomeDashboardScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Icon(icon, size: iconSize, color: iconColor),
+            Center(
+              child: Icon(
+                icon,
+                size: 32,
+                color: iconAccent,
+                fill: 1.0,
+              ),
+            ),
             const SizedBox(height: 8),
             Text(
               title,
@@ -235,7 +242,9 @@ class HomeDashboardScreen extends StatelessWidget {
         ShoppingListsProvider.of(context);
     final ReceiptStore receiptStore = ReceiptProvider.of(context);
     final PriceMemoryStore priceMemoryStore = PriceMemoryProvider.of(context);
-    final String? languageCode = AppStateProvider.of(context).language;
+    final AppState appState = AppStateProvider.of(context);
+    final String? languageCode = appState.language;
+    final double monthlyBudget = appState.monthlyGroceryBudget;
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return ListenableBuilder(
@@ -261,8 +270,13 @@ class HomeDashboardScreen extends StatelessWidget {
                       receipts: receiptStore.receipts,
                       priceRecords: priceMemoryStore.records,
                     );
-                    final double goalProgress =
-                        (data.totalExpenses / _goalAmount).clamp(0.0, 1.0);
+                    final double heroRingProgress = monthlyBudget <= 0
+                        ? 0
+                        : (data.totalExpenses / monthlyBudget).clamp(0.0, 1.0);
+                    final double monthlyGoalProgress = monthlyBudget <= 0
+                        ? 0
+                        : (summary.spentThisMonth / monthlyBudget)
+                            .clamp(0.0, 1.0);
 
                     return Scaffold(
                       backgroundColor: _pageWhite,
@@ -294,7 +308,7 @@ class HomeDashboardScreen extends StatelessWidget {
                               const SizedBox(height: SavingorSpacing.lg + SavingorSpacing.sm),
                               _buildSavingsHero(
                                 data.totalExpenses,
-                                goalProgress,
+                                heroRingProgress,
                                 data.expenseCount,
                               ),
                               const SizedBox(height: SavingorSpacing.lg + SavingorSpacing.sm),
@@ -316,8 +330,9 @@ class HomeDashboardScreen extends StatelessWidget {
                               _buildRecentActivity(data),
                               const SizedBox(height: SavingorSpacing.lg),
                               _buildMonthlyGoal(
-                                data.totalExpenses,
-                                goalProgress,
+                                summary.spentThisMonth,
+                                monthlyGoalProgress,
+                                monthlyBudget,
                               ),
                             ],
                           ),
@@ -357,7 +372,7 @@ class HomeDashboardScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: SavingorColors.darkGreen,
+                    color: SavingorColors.textPrimary,
                     height: 1.1,
                   ),
                 ),
@@ -379,7 +394,7 @@ class HomeDashboardScreen extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: SavingorColors.darkGreen,
+                    color: SavingorColors.textPrimary,
                     height: 1.1,
                   ),
                 ),
@@ -392,31 +407,7 @@ class HomeDashboardScreen extends StatelessWidget {
   }
 
   Widget _buildGreeting() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        const Text(
-          'Welcome back, Igor! 👋',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w800,
-            color: SavingorColors.darkGreen,
-            height: 1.1,
-            letterSpacing: -0.4,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          'Ready to save smarter today?',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: SavingorColors.textSecondary.withOpacity(0.95),
-            height: 1.35,
-          ),
-        ),
-      ],
-    );
+    return const _DashboardGreeting();
   }
 
   Widget _buildSavingsHero(
@@ -533,30 +524,40 @@ class HomeDashboardScreen extends StatelessWidget {
   }
 
   Widget _buildStartSavingButton(BuildContext context) {
-    return Material(
+    return SavingorInteractivePressable(
+      onTap: () => _onStartSaving(context),
       borderRadius: BorderRadius.circular(28),
-      elevation: 0,
-      child: InkWell(
-        onTap: () => _onStartSaving(context),
-        borderRadius: BorderRadius.circular(28),
-        child: Ink(
+      semanticLabel: 'Start saving',
+      builder: (BuildContext context, SavingorInteractionState state) {
+        final bool active = state.isInteractive && state.hovered;
+
+        return AnimatedContainer(
+          duration: SavingorInteraction.duration,
+          curve: SavingorInteraction.curve,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(28),
-            gradient: const LinearGradient(
+            gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: <Color>[
-                Color(0xFF9AD88F),
-                Color(0xFF7BC96F),
-                SavingorColors.primaryGreen,
-              ],
-              stops: <double>[0.0, 0.45, 1.0],
+              colors: active
+                  ? const <Color>[
+                      Color(0xFFA3D99C),
+                      Color(0xFF88D07E),
+                      Color(0xFF7BC96E),
+                    ]
+                  : const <Color>[
+                      Color(0xFF96CF8F),
+                      Color(0xFF7BC96E),
+                      Color(0xFF72C067),
+                    ],
+              stops: const <double>[0.0, 0.45, 1.0],
             ),
             boxShadow: <BoxShadow>[
               BoxShadow(
-                color: SavingorColors.primaryStroke.withOpacity(0.28),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
+                color: SavingorColors.primaryStroke
+                    .withOpacity(active ? 0.28 : 0.22),
+                blurRadius: active ? 18 : 14,
+                offset: Offset(0, active ? 7 : 5),
               ),
             ],
           ),
@@ -587,8 +588,8 @@ class HomeDashboardScreen extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -602,46 +603,46 @@ class HomeDashboardScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           _metricCard(
-            icon: Icons.trending_up,
-            iconSize: 34,
+            icon: Icons.trending_up_rounded,
             title: 'This month',
             value: _formatCurrency(spentThisMonth),
             suffix: 'spent',
-            iconColor: const Color(0xFFEF4444),
+            iconAccent: const Color(0xFFEF4444),
           ),
           const SizedBox(width: 7),
           _metricCard(
-            icon: Icons.receipt_long_outlined,
-            iconSize: 33,
+            icon: Icons.receipt_long_rounded,
             title: 'Receipts',
             value: '${data.receiptCount}',
             suffix: 'recorded',
-            iconColor: const Color(0xFF5B8FA8),
+            iconAccent: const Color(0xFF64748B),
           ),
           const SizedBox(width: 7),
           _metricCard(
             icon: Icons.checklist_rounded,
-            iconSize: 33,
             title: 'Shopping list',
             value: '${data.shoppingListCount}',
             suffix: 'lists',
-            iconColor: const Color(0xFFC4895A),
+            iconAccent: const Color(0xFFF97316),
           ),
           const SizedBox(width: 7),
           _metricCard(
-            icon: Icons.local_offer_outlined,
-            iconSize: 33,
+            icon: Icons.sell_rounded,
             title: 'Active deals',
             value: _formatCurrency(data.estimatedShoppingTotal),
             suffix: 'estimated',
-            iconColor: const Color(0xFF8B6BA8),
+            iconAccent: const Color(0xFF9333EA),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMonthlyGoal(double totalExpenses, double progress) {
+  Widget _buildMonthlyGoal(
+    double spentThisMonth,
+    double progress,
+    double monthlyBudget,
+  ) {
     final int progressPercent = (progress * 100).round();
 
     return Container(
@@ -655,14 +656,14 @@ class HomeDashboardScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: SavingorColors.darkGreen,
+              color: SavingorColors.textPrimary,
             ),
           ),
           const SizedBox(height: 10),
           Row(
             children: <Widget>[
               Text(
-                '${_formatCurrency(totalExpenses)} / ${_formatCurrency(_goalAmount)}',
+                '${_formatCurrency(spentThisMonth)} / ${_formatCurrency(monthlyBudget)}',
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
@@ -708,13 +709,13 @@ class HomeDashboardScreen extends StatelessWidget {
           Container(
             width: 44,
             height: 44,
-            decoration: BoxDecoration(
-              color: SavingorColors.lightGreen.withOpacity(0.55),
-              borderRadius: BorderRadius.circular(14),
+            decoration: SavingorSurfaces.accentIconBlock(
+              accent: SavingorAccentColors.expenses,
+              radius: 14,
             ),
-            child: Icon(
+            child: const Icon(
               Icons.receipt_long_rounded,
-              color: SavingorColors.primaryStroke.withOpacity(0.9),
+              color: SavingorAccentColors.expenses,
               size: 22,
             ),
           ),
@@ -728,7 +729,7 @@ class HomeDashboardScreen extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: SavingorColors.darkGreen,
+                    color: SavingorColors.textPrimary,
                     height: 1.2,
                   ),
                 ),
@@ -784,4 +785,61 @@ class _DashboardData {
   final bool hasInsightData;
   final UserExpense? latestExpense;
   final Receipt? latestReceipt;
+}
+
+class _DashboardGreeting extends StatefulWidget {
+  const _DashboardGreeting();
+
+  @override
+  State<_DashboardGreeting> createState() => _DashboardGreetingState();
+}
+
+class _DashboardGreetingState extends State<_DashboardGreeting> {
+  final UserProfileService _userProfileService = UserProfileService();
+  String? _firstName;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadGreetingName();
+  }
+
+  Future<void> _loadGreetingName() async {
+    try {
+      final String? firstName =
+          await _userProfileService.resolveGreetingFirstName();
+      if (!mounted) {
+        return;
+      }
+      setState(() => _firstName = firstName);
+    } catch (_) {
+      // Keep generic greeting on failure.
+    }
+  }
+
+  String get _greetingLine {
+    final String? firstName = _firstName?.trim();
+    if (firstName != null && firstName.isNotEmpty) {
+      return 'Welcome back, $firstName! 👋';
+    }
+    return 'Welcome back! 👋';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          _greetingLine,
+          style: SavingorAppTextStyles.greetingTitle,
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Ready to save smarter today?',
+          style: SavingorAppTextStyles.bodySecondary(fontSize: 16),
+        ),
+      ],
+    );
+  }
 }

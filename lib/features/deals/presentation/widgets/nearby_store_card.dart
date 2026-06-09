@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/features/deals/domain/models/nearby_store.dart';
 
 class NearbyStoreCard extends StatelessWidget {
@@ -13,24 +14,11 @@ class NearbyStoreCard extends StatelessWidget {
   final NearbyStore store;
   final VoidCallback onDirections;
 
-  static const Color _airyBorder = Color(0xFFF3F4F3);
-
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _airyBorder, width: 0.5),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      decoration: SavingorSurfaces.premiumCard(radius: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -40,13 +28,13 @@ class NearbyStoreCard extends StatelessWidget {
               Container(
                 width: 44,
                 height: 44,
-                decoration: BoxDecoration(
-                  color: SavingorColors.lightGreen.withOpacity(0.45),
-                  borderRadius: BorderRadius.circular(12),
+                decoration: SavingorSurfaces.accentIconBlock(
+                  accent: SavingorAccentColors.map,
+                  radius: 12,
                 ),
                 child: const Icon(
                   Icons.storefront_rounded,
-                  color: SavingorColors.primaryStroke,
+                  color: SavingorAccentColors.map,
                   size: 22,
                 ),
               ),
@@ -69,11 +57,7 @@ class NearbyStoreCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       store.category.label,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: SavingorColors.textSecondary.withOpacity(0.9),
-                      ),
+                      style: SavingorAppTextStyles.bodySecondary(fontSize: 12),
                     ),
                     if (store.hasAddress) ...<Widget>[
                       const SizedBox(height: 4),
@@ -81,23 +65,29 @@ class NearbyStoreCard extends StatelessWidget {
                         store.displayAddress!,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: SavingorColors.darkGreen.withOpacity(0.72),
-                          height: 1.35,
-                        ),
+                        style: SavingorAppTextStyles.bodySecondary(fontSize: 12),
                       ),
                     ],
                   ],
                 ),
               ),
-              Text(
-                store.distanceLabel,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: SavingorColors.primaryStroke,
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: SavingorAccentColors.map.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(SavingorRadius.pill),
+                  border: Border.all(
+                    color: SavingorAccentColors.map.withOpacity(0.25),
+                  ),
+                ),
+                child: Text(
+                  store.distanceLabel,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: SavingorAccentColors.map,
+                  ),
                 ),
               ),
             ],
@@ -105,31 +95,17 @@ class NearbyStoreCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             store.statusText,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: SavingorColors.darkGreen.withOpacity(0.72),
-            ),
+            style: SavingorAppTextStyles.bodySecondary(fontSize: 12),
           ),
           const SizedBox(height: 12),
           Align(
             alignment: Alignment.centerRight,
-            child: OutlinedButton(
+            child: SavingorInteractiveOutlinedButton(
               onPressed: onDirections,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: SavingorColors.primaryStroke,
-                side: BorderSide(
-                  color: SavingorColors.primaryStroke.withOpacity(0.35),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                textStyle: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+              accentTint: SavingorAccentColors.map,
+              foregroundColor: SavingorColors.primaryStroke,
+              borderColor: SavingorAccentColors.map.withOpacity(0.45),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: const Text('Directions'),
             ),
           ),

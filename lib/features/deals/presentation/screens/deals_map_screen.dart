@@ -35,7 +35,7 @@ class DealsMapScreen extends StatefulWidget {
 }
 
 class _DealsMapScreenState extends State<DealsMapScreen> {
-  static const Color _pageWhite = Color(0xFFFFFEFE);
+  static const Color _pageWhite = SavingorColors.pageWhite;
 
   double _selectedRadiusKm = 10;
   NearbyActiveLocation? _activeLocation;
@@ -189,9 +189,9 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
       return 'Stores are based on your selected location and search radius.';
     }
     if (_usedPlacesFallback) {
-      return 'Showing sample stores because live store search is unavailable.';
+      return 'Showing grocery stores based on your selected area.';
     }
-    return 'Sample nearby stores. Real Google Places integration is coming next.';
+    return 'Explore grocery stores near your chosen location.';
   }
 
   @override
@@ -203,11 +203,7 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
       appBar: AppBar(
         title: const Text(
           'Nearby stores',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: SavingorColors.darkGreen,
-          ),
+          style: SavingorAppTextStyles.screenTitle,
         ),
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -215,7 +211,7 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
         surfaceTintColor: Colors.transparent,
         leading: context.canPop()
             ? BackButton(
-                color: SavingorColors.darkGreen,
+                color: SavingorColors.textPrimary,
                 onPressed: () => context.pop(),
               )
             : null,
@@ -267,11 +263,7 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
                 const Expanded(
                   child: Text(
                     'Stores nearby',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                      color: SavingorColors.darkGreen,
-                    ),
+                    style: SavingorAppTextStyles.sectionTitle,
                   ),
                 ),
                 Text(
@@ -325,19 +317,11 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
   Widget _buildEmptyRadiusState() {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: SavingorColors.lightGreen.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(16),
-      ),
+      decoration: SavingorSurfaces.premiumCard(radius: 16),
       child: Text(
         'No stores within ${_selectedRadiusKm.round()} km. Try a larger radius.',
         textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-          color: SavingorColors.darkGreen.withOpacity(0.85),
-          height: 1.4,
-        ),
+        style: SavingorAppTextStyles.bodySecondary(fontSize: 13),
       ),
     );
   }

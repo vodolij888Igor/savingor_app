@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/features/analytics/domain/models/savings_recommendation.dart';
 
 class DashboardBestActionCard extends StatelessWidget {
@@ -19,11 +20,7 @@ class DashboardBestActionCard extends StatelessWidget {
       children: <Widget>[
         const Text(
           'Best action now',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w800,
-            color: SavingorColors.darkGreen,
-          ),
+          style: SavingorAppTextStyles.sectionTitle,
         ),
         const SizedBox(height: SavingorSpacing.xs),
         if (recommendation == null)
@@ -43,19 +40,13 @@ class _EmptyBestActionCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: SavingorColors.lightGreen.withOpacity(0.35),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: SavingorColors.primaryStroke.withOpacity(0.2),
-        ),
-      ),
+      decoration: SavingorSurfaces.premiumCard(radius: 16),
       child: const Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Icon(
             Icons.lightbulb_outline_rounded,
-            color: SavingorColors.primaryStroke,
+            color: SavingorAccentColors.savings,
             size: 20,
           ),
           SizedBox(width: 10),
@@ -64,8 +55,8 @@ class _EmptyBestActionCard extends StatelessWidget {
               'Add more receipts to unlock personalized savings.',
               style: TextStyle(
                 fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: SavingorColors.darkGreen,
+                fontWeight: FontWeight.w600,
+                color: SavingorColors.textPrimary,
                 height: 1.25,
               ),
             ),
@@ -114,7 +105,7 @@ class _RecommendationCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
-                    color: SavingorColors.darkGreen,
+                    color: SavingorColors.textPrimary,
                     height: 1.2,
                   ),
                 ),
@@ -160,33 +151,16 @@ class _RecommendationCard extends StatelessWidget {
     if (!isTappable) {
       return Container(
         width: double.infinity,
-        decoration: BoxDecoration(
-          color: SavingorColors.lightGreen.withOpacity(0.35),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: SavingorColors.primaryStroke.withOpacity(0.2),
-          ),
-        ),
+        decoration: SavingorSurfaces.premiumCard(radius: 16),
         child: content,
       );
     }
 
-    return Material(
-      color: SavingorColors.lightGreen.withOpacity(0.35),
+    return SavingorInteractiveCard(
+      onTap: () => _onTap(context),
       borderRadius: BorderRadius.circular(16),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => _onTap(context),
-        child: Ink(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: SavingorColors.primaryStroke.withOpacity(0.2),
-            ),
-          ),
-          child: content,
-        ),
-      ),
+      accentTint: SavingorAccentColors.savings,
+      child: content,
     );
   }
 }

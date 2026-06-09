@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 
 class BasketOptimizerEntryCard extends StatelessWidget {
   const BasketOptimizerEntryCard({
@@ -19,73 +20,57 @@ class BasketOptimizerEntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
+    return SavingorInteractiveCard(
+      onTap: onTap,
       borderRadius: BorderRadius.circular(18),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: _airyBorder.withOpacity(0.6), width: 0.5),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
+      accentTint: SavingorColors.primaryStroke,
+      borderColor: _airyBorder.withOpacity(0.6),
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: SavingorColors.lightGreen,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(
+              Icons.shopping_basket_outlined,
+              color: SavingorColors.primaryStroke,
+            ),
           ),
-          child: Row(
-            children: <Widget>[
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: SavingorColors.lightGreen,
-                  borderRadius: BorderRadius.circular(14),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: SavingorColors.darkGreen,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.shopping_basket_outlined,
-                  color: SavingorColors.primaryStroke,
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: SavingorColors.textSecondary,
+                    height: 1.35,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        color: SavingorColors.darkGreen,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: SavingorColors.textSecondary,
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: SavingorColors.textSecondary,
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+          const Icon(
+            Icons.chevron_right_rounded,
+            color: SavingorColors.textSecondary,
+          ),
+        ],
       ),
     );
   }

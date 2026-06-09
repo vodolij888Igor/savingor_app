@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/core/widgets/app_screen_states.dart';
 import 'package:savingor_app/features/scanner/data/receipt_ocr_parser.dart';
 import 'package:savingor_app/features/scanner/data/receipt_ocr_service.dart';
@@ -508,17 +509,14 @@ class _ReceiptCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
+    return SavingorInteractiveCard(
+      onTap: onTap,
       borderRadius: BorderRadius.circular(18),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
-          child: Row(
-            children: <Widget>[
+      accentTint: SavingorColors.primaryStroke,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
+        child: Row(
+          children: <Widget>[
               Container(
                 width: 46,
                 height: 46,
@@ -593,7 +591,6 @@ class _ReceiptCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
     );
   }
 

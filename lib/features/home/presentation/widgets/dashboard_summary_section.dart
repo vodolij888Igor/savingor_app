@@ -20,11 +20,7 @@ class DashboardSummarySection extends StatelessWidget {
       children: <Widget>[
         const Text(
           'Your savings snapshot',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-            color: SavingorColors.darkGreen,
-          ),
+          style: SavingorAppTextStyles.sectionTitleLarge,
         ),
         const SizedBox(height: SavingorSpacing.md),
         Row(
@@ -34,7 +30,7 @@ class DashboardSummarySection extends StatelessWidget {
                 icon: Icons.payments_outlined,
                 label: 'This month spent',
                 value: formatCurrency(summary.spentThisMonth),
-                iconColor: SavingorColors.darkGreen,
+                iconColor: SavingorAccentColors.expenses,
               ),
             ),
             const SizedBox(width: 10),

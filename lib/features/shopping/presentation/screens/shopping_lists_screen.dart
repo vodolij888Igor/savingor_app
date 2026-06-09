@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/i18n/app_strings.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/core/widgets/app_screen_states.dart';
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
 import 'package:savingor_app/features/shopping/domain/models/shopping_list.dart';
@@ -230,17 +231,14 @@ class _ShoppingListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onOpen,
-        borderRadius: BorderRadius.circular(18),
-        child: Ink(
-          decoration: shoppingListCardDecoration(),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
-            child: Row(
-              children: <Widget>[
+    return SavingorInteractiveCard(
+      onTap: onOpen,
+      borderRadius: BorderRadius.circular(18),
+      accentTint: SavingorColors.primaryStroke,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
+        child: Row(
+          children: <Widget>[
               Container(
                 width: 46,
                 height: 46,
@@ -302,8 +300,6 @@ class _ShoppingListCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    ),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/core/widgets/app_screen_states.dart';
 import 'package:savingor_app/features/analytics/domain/expense_analytics_calculator.dart';
 import 'package:savingor_app/features/analytics/domain/savings_intelligence_service.dart';
@@ -91,18 +92,14 @@ class SavingsAnalyticsScreen extends StatelessWidget {
               appBar: AppBar(
                 title: const Text(
                   'Savings analytics',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: SavingorColors.darkGreen,
-                  ),
+                  style: SavingorAppTextStyles.screenTitle,
                 ),
                 elevation: 0,
                 scrolledUnderElevation: 0,
                 backgroundColor: _pageBackground,
                 surfaceTintColor: Colors.transparent,
                 leading: BackButton(
-                  color: SavingorColors.darkGreen,
+                  color: SavingorColors.textPrimary,
                   onPressed: () => _goBack(context),
                 ),
                 automaticallyImplyLeading: false,
@@ -235,11 +232,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     return <Widget>[
       const Text(
         'Explore details',
-        style: TextStyle(
-          fontSize: 17,
-          fontWeight: FontWeight.w700,
-          color: SavingorColors.darkGreen,
-        ),
+        style: SavingorAppTextStyles.sectionTitle,
       ),
       const SizedBox(height: SavingorSpacing.md),
       _buildPriceInsightsEntry(context, priceMemoryStore),
@@ -254,17 +247,13 @@ class SavingsAnalyticsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'Savings analytics',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: SavingorColors.darkGreen,
-          ),
+          style: SavingorAppTextStyles.screenTitle,
         ),
         backgroundColor: _pageBackground,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: BackButton(
-          color: SavingorColors.darkGreen,
+          color: SavingorColors.textPrimary,
           onPressed: () => _goBack(context),
         ),
         automaticallyImplyLeading: false,
@@ -292,11 +281,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
       children: <Widget>[
         const Text(
           'Overview',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: SavingorColors.darkGreen,
-          ),
+          style: SavingorAppTextStyles.sectionTitle,
         ),
         const SizedBox(height: SavingorSpacing.md),
         Row(
@@ -351,63 +336,51 @@ class SavingsAnalyticsScreen extends StatelessWidget {
         ? '$productCount ${productCount == 1 ? 'product' : 'products'} in your price history'
         : 'Full price memory from your receipt line items';
 
-    return Material(
-      color: Colors.white,
+    return SavingorInteractiveCard(
+      onTap: () => context.push('/analytics/product-price-insights'),
       borderRadius: BorderRadius.circular(18),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => context.push('/analytics/product-price-insights'),
-        borderRadius: BorderRadius.circular(18),
-        child: Container(
-          padding: const EdgeInsets.all(18),
-          decoration: _cardDecoration(),
-          child: Row(
-            children: <Widget>[
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: SavingorColors.lightGreen,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(
-                  Icons.price_change_outlined,
-                  color: SavingorColors.primaryStroke,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    const Text(
-                      'Product price insights',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: SavingorColors.darkGreen,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: SavingorColors.textSecondary,
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: SavingorColors.textSecondary,
-              ),
-            ],
+      accentTint: SavingorAccentColors.priceMemory,
+      padding: const EdgeInsets.all(18),
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: 46,
+            height: 46,
+            decoration: SavingorSurfaces.accentIconBlock(
+              accent: SavingorAccentColors.priceMemory,
+            ),
+            child: const Icon(
+              Icons.price_change_outlined,
+              color: SavingorAccentColors.priceMemory,
+            ),
           ),
-        ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const Text(
+                  'Product price insights',
+                  style: SavingorAppTextStyles.cardTitle,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: SavingorColors.textSecondary,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(
+            Icons.chevron_right_rounded,
+            color: SavingorColors.textSecondary,
+          ),
+        ],
       ),
     );
   }
@@ -421,63 +394,51 @@ class SavingsAnalyticsScreen extends StatelessWidget {
         ? '$opportunityCount actionable ${opportunityCount == 1 ? 'opportunity' : 'opportunities'} to review'
         : 'Products where you paid more than the best known price';
 
-    return Material(
-      color: Colors.white,
+    return SavingorInteractiveCard(
+      onTap: () => context.push('/analytics/savings-opportunities'),
       borderRadius: BorderRadius.circular(18),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => context.push('/analytics/savings-opportunities'),
-        borderRadius: BorderRadius.circular(18),
-        child: Container(
-          padding: const EdgeInsets.all(18),
-          decoration: _cardDecoration(),
-          child: Row(
-            children: <Widget>[
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: SavingorColors.lightGreen,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(
-                  Icons.savings_outlined,
-                  color: SavingorColors.primaryStroke,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    const Text(
-                      'Savings opportunities',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                        color: SavingorColors.darkGreen,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: SavingorColors.textSecondary,
-                        height: 1.35,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: SavingorColors.textSecondary,
-              ),
-            ],
+      accentTint: SavingorAccentColors.savings,
+      padding: const EdgeInsets.all(18),
+      child: Row(
+        children: <Widget>[
+          Container(
+            width: 46,
+            height: 46,
+            decoration: SavingorSurfaces.accentIconBlock(
+              accent: SavingorAccentColors.savings,
+            ),
+            child: const Icon(
+              Icons.savings_outlined,
+              color: SavingorAccentColors.savings,
+            ),
           ),
-        ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                const Text(
+                  'Savings opportunities',
+                  style: SavingorAppTextStyles.cardTitle,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: SavingorColors.textSecondary,
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(
+            Icons.chevron_right_rounded,
+            color: SavingorColors.textSecondary,
+          ),
+        ],
       ),
     );
   }
@@ -495,11 +456,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
         children: <Widget>[
           const Text(
             'Spending by store',
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              color: SavingorColors.darkGreen,
-            ),
+            style: SavingorAppTextStyles.sectionTitle,
           ),
           const SizedBox(height: SavingorSpacing.md),
           ...summary.spendingByStore.map(
@@ -525,7 +482,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w800,
-                          color: SavingorColors.darkGreen,
+                          color: SavingorAccentColors.expenses,
                         ),
                       ),
                     ],
@@ -571,11 +528,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
         children: <Widget>[
           const Text(
             'Recent activity',
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              color: SavingorColors.darkGreen,
-            ),
+            style: SavingorAppTextStyles.sectionTitle,
           ),
           const SizedBox(height: SavingorSpacing.md),
           ...summary.recentActivity.map(
@@ -586,15 +539,18 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                   Container(
                     width: 40,
                     height: 40,
-                    decoration: BoxDecoration(
-                      color: SavingorColors.lightGreen,
-                      borderRadius: BorderRadius.circular(12),
+                    decoration: SavingorSurfaces.accentIconBlock(
+                      accent: entry.typeLabel == 'receipt'
+                          ? SavingorAccentColors.expenses
+                          : SavingorAccentColors.map,
                     ),
                     child: Icon(
                       entry.typeLabel == 'receipt'
                           ? Icons.receipt_long_outlined
                           : Icons.storefront_outlined,
-                      color: SavingorColors.primaryStroke,
+                      color: entry.typeLabel == 'receipt'
+                          ? SavingorAccentColors.expenses
+                          : SavingorAccentColors.map,
                       size: 20,
                     ),
                   ),
@@ -639,7 +595,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
-                      color: SavingorColors.darkGreen,
+                      color: SavingorColors.textPrimary,
                     ),
                   ),
                 ],

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -23,14 +25,45 @@ class AiSavingsAssistantScreen extends StatefulWidget {
 }
 
 class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
-  static const Color _pageBackground = Colors.white;
-  static const Color _airyBorder = Color(0xFFF3F4F3);
+  static const Color _pageBackground = Color(0xFFFAFAF7);
+  static const Color _airyBorder = Color(0xFFE5E7EB);
+  static const Color _titleCharcoal = Color(0xFF1F2937);
+  static const Color _mutedText = Color(0xFF6B7280);
+  static const Color _deepGreen = Color(0xFF166534);
+  static const Color _sendGreen = Color(0xFF7BC96E);
+  static const Color _sendGreenStroke = Color(0xFF4F9D47);
 
-  static const List<String> _suggestedQuestions = <String>[
-    'How can I save more money this week?',
-    'Which store do I spend the most at?',
-    'Analyze my grocery spending.',
-    'What should I buy first from my shopping list?',
+  // Tasteful accent families for chips and question cards.
+  static const Color _accentSavings = Color(0xFF4F9D47);
+  static const Color _accentStore = Color(0xFF0F766E);
+  static const Color _accentAnalysis = Color(0xFFB45309);
+  static const Color _accentList = Color(0xFF7C6B9E);
+  static const Color _chipTeal = Color(0xFF0D9488);
+  static const Color _chipBlue = Color(0xFF4B6B9E);
+  static const Color _chipAmber = Color(0xFFCA8A04);
+  static const Color _infoAmber = Color(0xFFD97706);
+
+  static const List<_SuggestionItem> _suggestedQuestions = <_SuggestionItem>[
+    _SuggestionItem(
+      question: 'How can I save more money this week?',
+      icon: Icons.savings_outlined,
+      accent: _accentSavings,
+    ),
+    _SuggestionItem(
+      question: 'Which store do I spend the most at?',
+      icon: Icons.storefront_outlined,
+      accent: _accentStore,
+    ),
+    _SuggestionItem(
+      question: 'Analyze my grocery spending.',
+      icon: Icons.pie_chart_outline_rounded,
+      accent: _accentAnalysis,
+    ),
+    _SuggestionItem(
+      question: 'What should I buy first from my shopping list?',
+      icon: Icons.checklist_outlined,
+      accent: _accentList,
+    ),
   ];
 
   final TextEditingController _questionController = TextEditingController();
@@ -170,18 +203,14 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
           appBar: AppBar(
             title: const Text(
               'AI Savings Assistant',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: SavingorColors.darkGreen,
-              ),
+              style: SavingorAppTextStyles.screenTitle,
             ),
             elevation: 0,
             scrolledUnderElevation: 0,
             backgroundColor: _pageBackground,
             surfaceTintColor: Colors.transparent,
             leading: BackButton(
-              color: SavingorColors.darkGreen,
+              color: _deepGreen,
               onPressed: _goBack,
             ),
             automaticallyImplyLeading: false,
@@ -246,7 +275,8 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
       );
     }
 
-    final bool canAsk = service.isConfigured && !_isAsking;
+    final bool canSend = !_isAsking;
+    final bool isLive = service.isConfigured;
 
     return Column(
       children: <Widget>[
@@ -254,10 +284,10 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
             children: <Widget>[
-              _buildHeaderBanner(),
+              _buildHeaderBanner(isLive: isLive),
               if (!service.isConfigured) ...<Widget>[
                 const SizedBox(height: SavingorSpacing.lg),
-                _buildConfigErrorCard(),
+                _buildConfigInfoCard(),
               ],
               const SizedBox(height: SavingorSpacing.lg),
               _buildContextSummary(contextSnapshot),
@@ -265,21 +295,22 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
               const Text(
                 'Suggested questions',
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 17,
                   fontWeight: FontWeight.w700,
-                  color: SavingorColors.darkGreen,
+                  color: _titleCharcoal,
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               Wrap(
-                spacing: 8,
-                runSpacing: 8,
+                spacing: 10,
+                runSpacing: 10,
                 children: _suggestedQuestions
                     .map(
-                      (String question) => _SuggestionChip(
-                        label: question,
-                        enabled: canAsk,
-                        onTap: () => _askQuestion(question),
+                      (_SuggestionItem item) => _SuggestionChip(
+                        label: item.question,
+                        icon: item.icon,
+                        accent: item.accent,
+                        onTap: canSend ? () => _askQuestion(item.question) : null,
                       ),
                     )
                     .toList(),
@@ -314,43 +345,140 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
             ],
           ),
         ),
-        _buildInputBar(canAsk: canAsk, bottomInset: bottomInset),
+        _buildInputBar(
+          canSend: canSend,
+          isLive: isLive,
+          bottomInset: bottomInset,
+        ),
       ],
     );
   }
 
-  Widget _buildHeaderBanner() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            SavingorColors.lightGreen.withOpacity(0.72),
-            const Color(0xFFEAF6E8),
-            Colors.white.withOpacity(0.9),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _airyBorder.withOpacity(0.45), width: 0.5),
-      ),
-      child: const Row(
+  Widget _buildHeaderBanner({required bool isLive}) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(22),
+      child: Stack(
         children: <Widget>[
-          Icon(
-            Icons.auto_awesome_rounded,
-            color: SavingorColors.primaryStroke,
-            size: 28,
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[
+                  Color(0xFFF6FBF8),
+                  Color(0xFFF0F9F4),
+                  Color(0xFFFBF9F4),
+                  Color(0xFFFAFAF7),
+                ],
+                stops: <double>[0.0, 0.42, 0.72, 1.0],
+              ),
+              border: Border.all(
+                color: SavingorColors.primaryStroke.withOpacity(0.14),
+                width: 0.75,
+              ),
+              boxShadow: const <BoxShadow>[
+                BoxShadow(
+                  color: Color(0x0A4F9D47),
+                  blurRadius: 16,
+                  offset: Offset(0, 4),
+                ),
+                BoxShadow(
+                  color: Color(0x06000000),
+                  blurRadius: 8,
+                  offset: Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                SizedBox(
+                  width: 58,
+                  height: 58,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: <Widget>[
+                      Container(
+                        width: 58,
+                        height: 58,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                          border: Border.all(
+                            color: SavingorColors.primaryStroke.withOpacity(0.2),
+                            width: 1,
+                          ),
+                          boxShadow: const <BoxShadow>[
+                            BoxShadow(
+                              color: Color(0x0F4F9D47),
+                              blurRadius: 10,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.auto_awesome_outlined,
+                          color: SavingorColors.primaryStroke,
+                          size: 26,
+                        ),
+                      ),
+                      Positioned(
+                        top: 1,
+                        right: 1,
+                        child: Container(
+                          width: 9,
+                          height: 9,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _accentList.withOpacity(0.75),
+                            border: Border.all(color: Colors.white, width: 1.5),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const Text(
+                        'Your AI savings coach',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: _deepGreen,
+                          height: 1.2,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        isLive
+                            ? 'Ask about spending, receipts, and shopping lists.'
+                            : 'Preview insights from your saved data — connect an API key for live answers.',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: _mutedText,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              'Ask about your spending, receipts, and shopping lists.',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: SavingorColors.darkGreen,
-                height: 1.35,
+          Positioned.fill(
+            child: IgnorePointer(
+              child: CustomPaint(
+                painter: _AiHeroSparklePainter(
+                  sparkleColor: SavingorColors.primaryStroke.withOpacity(0.07),
+                  dotColor: _chipAmber.withOpacity(0.12),
+                ),
               ),
             ),
           ),
@@ -359,32 +487,40 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
     );
   }
 
-  Widget _buildConfigErrorCard() {
+  Widget _buildConfigInfoCard() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF8F0),
+        color: const Color(0xFFFFFAF3),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE8C9A0)),
+        border: Border.all(
+          color: _infoAmber.withOpacity(0.28),
+          width: 0.75,
+        ),
+        boxShadow: const <BoxShadow>[
+          BoxShadow(
+            color: Color(0x08CA8A04),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: const Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Icon(
-            Icons.key_off_outlined,
-            color: Color(0xFFC4895A),
+            Icons.lightbulb_outline_rounded,
+            color: _infoAmber,
             size: 22,
           ),
           SizedBox(width: 12),
           Expanded(
             child: Text(
-              'OpenAI API key is not configured.\n'
-              'Run with:\n'
-              'flutter run --dart-define=OPENAI_API_KEY=your_key',
+              'AI assistant is ready. Connect an API key to enable live answers.',
               style: TextStyle(
                 fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: SavingorColors.darkGreen,
+                fontWeight: FontWeight.w600,
+                color: _titleCharcoal,
                 height: 1.45,
               ),
             ),
@@ -396,16 +532,16 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
 
   Widget _buildContextSummary(AiSavingsContext contextSnapshot) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _airyBorder, width: 0.5),
-        boxShadow: <BoxShadow>[
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: _airyBorder, width: 0.75),
+        boxShadow: const <BoxShadow>[
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Color(0x10000000),
+            blurRadius: 14,
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -415,12 +551,12 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
           const Text(
             'Your data snapshot',
             style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: SavingorColors.darkGreen,
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: _titleCharcoal,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -429,28 +565,33 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
                 _SummaryChip(
                   icon: Icons.receipt_long_outlined,
                   label: '${contextSnapshot.receiptCount} receipts',
+                  accent: _chipTeal,
                 ),
               if (contextSnapshot.hasManualExpenses)
                 _SummaryChip(
                   icon: Icons.payments_outlined,
                   label: '${contextSnapshot.manualExpenseCount} expenses',
+                  accent: _chipBlue,
                 ),
               if (contextSnapshot.totalSpending > 0)
                 _SummaryChip(
                   icon: Icons.account_balance_wallet_outlined,
                   label:
                       '\$${contextSnapshot.totalSpending.toStringAsFixed(0)} total',
+                  accent: _accentSavings,
                 ),
               if (contextSnapshot.hasShoppingLists)
                 _SummaryChip(
-                  icon: Icons.checklist_rounded,
+                  icon: Icons.checklist_outlined,
                   label: '${contextSnapshot.shoppingListCount} lists',
+                  accent: _chipAmber,
                 ),
               if (contextSnapshot.activeListEstimate > 0)
                 _SummaryChip(
                   icon: Icons.shopping_cart_outlined,
                   label:
                       '\$${contextSnapshot.activeListEstimate.toStringAsFixed(0)} list est.',
+                  accent: _accentStore,
                 ),
             ],
           ),
@@ -478,7 +619,7 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: SavingorColors.darkGreen,
+                color: Color(0xFF991B1B),
                 height: 1.4,
               ),
             ),
@@ -494,21 +635,7 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
   }) {
     return Container(
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: SavingorColors.lightGreen.withOpacity(0.6),
-          width: 1,
-        ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: SavingorColors.primaryStroke.withOpacity(0.08),
-            blurRadius: 14,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
+      decoration: SavingorSurfaces.premiumCard(radius: 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -529,7 +656,7 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
-              color: SavingorColors.darkGreen,
+              color: SavingorColors.textPrimary,
               height: 1.5,
             ),
           ),
@@ -538,7 +665,11 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
     );
   }
 
-  Widget _buildInputBar({required bool canAsk, required double bottomInset}) {
+  Widget _buildInputBar({
+    required bool canSend,
+    required bool isLive,
+    required double bottomInset,
+  }) {
     return Container(
       padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + bottomInset),
       decoration: BoxDecoration(
@@ -557,60 +688,88 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
         children: <Widget>[
           Expanded(
             child: TextField(
-              controller: _questionController,
-              focusNode: _questionFocus,
-              enabled: canAsk,
-              maxLines: 3,
-              minLines: 1,
-              textInputAction: TextInputAction.send,
-              onSubmitted: canAsk ? _askQuestion : null,
-              decoration: InputDecoration(
-                hintText: canAsk
-                    ? 'Ask about your spending or shopping list…'
-                    : 'Configure API key to ask questions',
-                hintStyle: TextStyle(
-                  color: SavingorColors.textSecondary.withOpacity(0.7),
+                controller: _questionController,
+                focusNode: _questionFocus,
+                enabled: canSend,
+                maxLines: 3,
+                minLines: 1,
+                textInputAction: TextInputAction.send,
+                onSubmitted: canSend ? _askQuestion : null,
+                style: const TextStyle(
                   fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: _titleCharcoal,
                 ),
-                filled: true,
-                fillColor: const Color(0xFFF8FAF8),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: _airyBorder),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(
-                    color: SavingorColors.primaryStroke,
-                    width: 1.5,
+                decoration: InputDecoration(
+                  hintText: isLive
+                      ? 'Ask about your spending or shopping list…'
+                      : 'Type a question — connect an API key for live answers',
+                  hintStyle: const TextStyle(
+                    color: _mutedText,
+                    fontSize: 14,
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 13,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: _airyBorder),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(
+                      color: _sendGreenStroke.withOpacity(0.45),
+                      width: 1.25,
+                    ),
                   ),
                 ),
               ),
-            ),
           ),
           const SizedBox(width: 10),
           Material(
-            color: canAsk
-                ? SavingorColors.primaryStroke
-                : SavingorColors.textSecondary.withOpacity(0.3),
+            color: canSend ? _sendGreen : _sendGreen.withOpacity(0.45),
             borderRadius: BorderRadius.circular(14),
+            elevation: 0,
             child: InkWell(
-              onTap: canAsk
+              onTap: canSend
                   ? () => _askQuestion(_questionController.text)
                   : null,
               borderRadius: BorderRadius.circular(14),
-              child: const SizedBox(
-                width: 48,
-                height: 48,
-                child: Icon(Icons.send_rounded, color: Colors.white, size: 22),
+              child: Ink(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: _sendGreenStroke.withOpacity(canSend ? 0.32 : 0.18),
+                    width: 0.75,
+                  ),
+                  boxShadow: canSend
+                      ? const <BoxShadow>[
+                          BoxShadow(
+                            color: Color(0x144F9D47),
+                            blurRadius: 8,
+                            offset: Offset(0, 2),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: Icon(
+                    Icons.send_rounded,
+                    color: canSend
+                        ? _deepGreen
+                        : _deepGreen.withOpacity(0.45),
+                    size: 22,
+                  ),
+                ),
               ),
             ),
           ),
@@ -620,38 +779,93 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
   }
 }
 
+class _SuggestionItem {
+  const _SuggestionItem({
+    required this.question,
+    required this.icon,
+    required this.accent,
+  });
+
+  final String question;
+  final IconData icon;
+  final Color accent;
+}
+
 class _SuggestionChip extends StatelessWidget {
   const _SuggestionChip({
     required this.label,
-    required this.enabled,
+    required this.icon,
+    required this.accent,
     required this.onTap,
   });
 
+  static const Color _cardBorder = Color(0xFFE5E7EB);
+
   final String label;
-  final bool enabled;
-  final VoidCallback onTap;
+  final IconData icon;
+  final Color accent;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final double maxChipWidth = MediaQuery.sizeOf(context).width - 48;
+
     return Material(
-      color: enabled
-          ? SavingorColors.lightGreen.withOpacity(0.35)
-          : const Color(0xFFF3F4F3),
-      borderRadius: BorderRadius.circular(20),
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
       child: InkWell(
-        onTap: enabled ? onTap : null,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: enabled
-                  ? SavingorColors.darkGreen
-                  : SavingorColors.textSecondary.withOpacity(0.6),
-              height: 1.3,
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        splashColor: accent.withOpacity(0.08),
+        highlightColor: accent.withOpacity(0.04),
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: const Color(0xFFFFFEFE),
+            border: Border.all(
+              color: _cardBorder.withOpacity(0.9),
+              width: 0.75,
+            ),
+            boxShadow: const <BoxShadow>[
+              BoxShadow(
+                color: Color(0x06000000),
+                blurRadius: 6,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+          child: SizedBox(
+            width: maxChipWidth,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  width: 4,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: accent.withOpacity(0.82),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Icon(icon, size: 19, color: accent.withOpacity(0.9)),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1F2937),
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -661,34 +875,103 @@ class _SuggestionChip extends StatelessWidget {
 }
 
 class _SummaryChip extends StatelessWidget {
-  const _SummaryChip({required this.icon, required this.label});
+  const _SummaryChip({
+    required this.icon,
+    required this.label,
+    required this.accent,
+  });
 
   final IconData icon;
   final String label;
+  final Color accent;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
       decoration: BoxDecoration(
-        color: SavingorColors.lightGreen.withOpacity(0.25),
+        color: accent.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: accent.withOpacity(0.22),
+          width: 0.75,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Icon(icon, size: 14, color: SavingorColors.primaryStroke),
+          Icon(icon, size: 15, color: accent.withOpacity(0.92)),
           const SizedBox(width: 6),
           Text(
             label,
             style: const TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: SavingorColors.darkGreen,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF1F2937),
             ),
           ),
         ],
       ),
     );
+  }
+}
+
+class _AiHeroSparklePainter extends CustomPainter {
+  _AiHeroSparklePainter({
+    required this.sparkleColor,
+    required this.dotColor,
+  });
+
+  final Color sparkleColor;
+  final Color dotColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint sparklePaint = Paint()..color = sparkleColor;
+    final Paint dotPaint = Paint()..color = dotColor;
+
+    final List<Offset> sparkles = <Offset>[
+      Offset(size.width * 0.78, size.height * 0.18),
+      Offset(size.width * 0.88, size.height * 0.42),
+      Offset(size.width * 0.72, size.height * 0.68),
+    ];
+    for (final Offset point in sparkles) {
+      _drawSparkle(canvas, point, 5, sparklePaint);
+    }
+
+    final List<Offset> dots = <Offset>[
+      Offset(size.width * 0.62, size.height * 0.22),
+      Offset(size.width * 0.92, size.height * 0.28),
+      Offset(size.width * 0.55, size.height * 0.55),
+      Offset(size.width * 0.85, size.height * 0.78),
+    ];
+    for (final Offset point in dots) {
+      canvas.drawCircle(point, 2, dotPaint);
+    }
+  }
+
+  void _drawSparkle(Canvas canvas, Offset center, double radius, Paint paint) {
+    final Path path = Path();
+    for (int i = 0; i < 8; i++) {
+      final double angle = i * 3.1415926535 / 4;
+      final double r = i.isEven ? radius : radius * 0.4;
+      final Offset point = Offset(
+        center.dx + r * math.cos(angle),
+        center.dy + r * math.sin(angle),
+      );
+      if (i == 0) {
+        path.moveTo(point.dx, point.dy);
+      } else {
+        path.lineTo(point.dx, point.dy);
+      }
+    }
+    path.close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _AiHeroSparklePainter oldDelegate) {
+    return oldDelegate.sparkleColor != sparkleColor ||
+        oldDelegate.dotColor != dotColor;
   }
 }

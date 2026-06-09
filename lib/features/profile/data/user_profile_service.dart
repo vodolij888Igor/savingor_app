@@ -62,4 +62,62 @@ class UserProfileService {
 
     return UserProfile.fromFirestore(user.uid, data);
   }
+
+  /// First name for dashboard greeting: Firestore profile, then Auth displayName,
+  /// then email prefix. Returns `null` when no usable name is available.
+  Future<String?> resolveGreetingFirstName() async {
+    final User? user = _firebaseAuth.currentUser;
+    if (user == null) {
+      return null;
+    }
+
+    final DocumentSnapshot<Map<String, dynamic>> snapshot = await _firestore
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    if (snapshot.exists) {
+      final Map<String, dynamic>? data = snapshot.data();
+      if (data != null) {
+        for (final String field in <String>['fullName', 'name', 'displayName']) {
+          final String? rawName = _nonEmptyString(data[field]);
+          if (rawName != null) {
+            return _firstNameFrom(rawName);
+          }
+        }
+      }
+    }
+
+    final String? authDisplayName = _nonEmptyString(user.displayName);
+    if (authDisplayName != null) {
+      return _firstNameFrom(authDisplayName);
+    }
+
+    final String? email = _nonEmptyString(user.email);
+    if (email != null && email.contains('@')) {
+      final String prefix = email.split('@').first.trim();
+      if (prefix.isNotEmpty) {
+        return prefix;
+      }
+    }
+
+    return null;
+  }
+
+  static String? _nonEmptyString(Object? value) {
+    if (value == null) {
+      return null;
+    }
+    final String trimmed = value.toString().trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  static String _firstNameFrom(String value) {
+    final List<String> parts =
+        value.trim().split(RegExp(r'\s+')).where((String part) => part.isNotEmpty).toList();
+    if (parts.isEmpty) {
+      return value.trim();
+    }
+    return parts.first;
+  }
 }

@@ -342,39 +342,93 @@ class _NearbyStoresMapCardState extends State<NearbyStoresMapCard> {
   }
 
   Widget _buildLocationPrompt() {
-    return ColoredBox(
-      color: const Color(0xFFE8EFE6),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(
-              Icons.map_outlined,
-              size: 32,
-              color: SavingorColors.primaryStroke.withOpacity(0.55),
+    return Stack(
+      fit: StackFit.expand,
+      children: <Widget>[
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: <Color>[
+                Color(0xFFECFDF5),
+                Color(0xFFD1FAE5),
+                Color(0xFFE6FFFA),
+              ],
             ),
-            const SizedBox(height: 8),
-            const Text(
-              'Set your location',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: SavingorColors.darkGreen,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Use GPS or choose a city to view the map.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary.withOpacity(0.9),
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+        CustomPaint(
+          painter: _MapPatternPainter(
+            color: SavingorAccentColors.map.withOpacity(0.08),
+          ),
+        ),
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Container(
+                  width: 56,
+                  height: 56,
+                  decoration: SavingorSurfaces.accentIconBlock(
+                    accent: SavingorAccentColors.map,
+                    radius: 16,
+                  ),
+                  child: const Icon(
+                    Icons.map_outlined,
+                    size: 28,
+                    color: SavingorAccentColors.map,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'Set your location',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: SavingorColors.darkGreen,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Use GPS or choose a city to view nearby stores.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: SavingorColors.textSecondary.withOpacity(0.95),
+                    height: 1.35,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
+  }
+}
+
+class _MapPatternPainter extends CustomPainter {
+  _MapPatternPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint dotPaint = Paint()..color = color;
+    const double step = 28;
+    for (double x = 0; x < size.width; x += step) {
+      for (double y = 0; y < size.height; y += step) {
+        canvas.drawCircle(Offset(x + 6, y + 6), 1.5, dotPaint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _MapPatternPainter oldDelegate) {
+    return oldDelegate.color != color;
   }
 }
