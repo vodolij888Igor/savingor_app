@@ -2,21 +2,191 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/features/subscription/data/subscription_service.dart';
 
-/// Pricing surface for Free and Pro plans. Checkout is not wired yet.
-class SubscriptionScreen extends StatelessWidget {
+/// Pricing surface for Free and Pro plans.
+///
+/// TODO: Replace demo subscription activation with RevenueCat / StoreKit /
+/// Google Play Billing integration before production release.
+class SubscriptionScreen extends StatefulWidget {
   const SubscriptionScreen({super.key});
+
+  @override
+  State<SubscriptionScreen> createState() => _SubscriptionScreenState();
+}
+
+class _SubscriptionScreenState extends State<SubscriptionScreen> {
+  final SubscriptionService _subscriptionService = SubscriptionService();
+
+  SubscriptionStatus _subscription = SubscriptionStatus.free;
+  bool _isActivating = false;
+  bool _isRestoring = false;
 
   static const Color _pageBackground = Color(0xFFF3FAF1);
 
-  static void _onUpgradeToPro(BuildContext context) {
+  bool get _isPro => _subscription.isPro;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSubscription();
+  }
+
+  Future<void> _loadSubscription() async {
+    try {
+      final SubscriptionStatus status =
+          await _subscriptionService.getCurrentSubscription();
+      if (!mounted) return;
+      setState(() => _subscription = status);
+    } catch (_) {
+      // Keep showing Free state; purchasing will surface real errors.
+    }
+  }
+
+  void _showSnack(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Pro subscription checkout will be available soon.',
-        ),
-      ),
+      SnackBar(content: Text(message)),
     );
+  }
+
+  Future<void> _onStartProSubscription() async {
+    if (_subscriptionService.isRevenueCatConfigured) {
+      await _purchaseProMonthly();
+    } else {
+      await _showProviderNotConfiguredModal();
+    }
+  }
+
+  /// Real store purchase via RevenueCat (entitlement is the source of truth).
+  Future<void> _purchaseProMonthly() async {
+    setState(() => _isActivating = true);
+    try {
+      await _subscriptionService.purchaseProMonthly();
+      if (!mounted) return;
+      setState(() => _isActivating = false);
+      _showSnack('Pro subscription activated.');
+      await _loadSubscription();
+    } on SubscriptionException catch (e) {
+      if (!mounted) return;
+      setState(() => _isActivating = false);
+      _showSnack(e.message);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isActivating = false);
+      _showSnack('Could not complete the purchase. Please try again.');
+    }
+  }
+
+  /// Shown when RevenueCat keys/products are not configured in this build.
+  Future<void> _showProviderNotConfiguredModal() async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22),
+          ),
+          title: const Text(
+            'Subscription provider not configured',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: SavingorColors.darkGreen,
+            ),
+          ),
+          content: const Text(
+            'Savingor Pro is prepared for RevenueCat-powered Apple and '
+            'Google in-app subscriptions. This local portfolio build does '
+            'not include RevenueCat keys or store products yet.',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: SavingorColors.textSecondary,
+              height: 1.45,
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              style: TextButton.styleFrom(
+                foregroundColor: SavingorColors.textSecondary,
+              ),
+              child: const Text('Cancel'),
+            ),
+            // Clearly secondary: demo fallback is for local testing only.
+            OutlinedButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: SavingorColors.darkGreen,
+                side: BorderSide(
+                  color: SavingorColors.primaryStroke.withOpacity(0.5),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              child: const Text('Activate Pro demo for testing'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true || !mounted) return;
+    await _activateProDemoFallback();
+  }
+
+  Future<void> _activateProDemoFallback() async {
+    setState(() => _isActivating = true);
+    try {
+      await _subscriptionService.activateProDemoFallback();
+      if (!mounted) return;
+      setState(() => _isActivating = false);
+      _showSnack('Pro demo fallback activated — no real payment processed.');
+      await _loadSubscription();
+    } on SubscriptionException catch (e) {
+      if (!mounted) return;
+      setState(() => _isActivating = false);
+      _showSnack(e.message);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isActivating = false);
+      _showSnack('Could not activate Pro demo. Please try again.');
+    }
+  }
+
+  Future<void> _onRestorePurchases() async {
+    if (!_subscriptionService.isRevenueCatConfigured) {
+      _showSnack('Payment provider is not configured in this local build.');
+      return;
+    }
+    setState(() => _isRestoring = true);
+    try {
+      final SubscriptionStatus status =
+          await _subscriptionService.restorePurchases();
+      if (!mounted) return;
+      setState(() {
+        _subscription = status;
+        _isRestoring = false;
+      });
+      _showSnack(
+        status.isPro ? 'Purchases restored.' : 'No purchases to restore.',
+      );
+    } on SubscriptionException catch (e) {
+      if (!mounted) return;
+      setState(() => _isRestoring = false);
+      _showSnack(e.message);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isRestoring = false);
+      _showSnack('Could not restore purchases. Please try again.');
+    }
   }
 
   @override
@@ -61,12 +231,36 @@ class SubscriptionScreen extends StatelessWidget {
                 children: <Widget>[
                   const _ProHeroHeader(),
                   const SizedBox(height: SavingorSpacing.md),
-                  const _PlanSelectorRow(),
+                  _PlanSelectorRow(isPro: _isPro),
                   const SizedBox(height: SavingorSpacing.md),
-                  const _FreeCompactCard(),
+                  _FreeCompactCard(isCurrentPlan: !_isPro),
                   const SizedBox(height: SavingorSpacing.sm),
                   _ProMainCard(
-                    onUpgrade: () => _onUpgradeToPro(context),
+                    isCurrentPlan: _isPro,
+                    isDemoFallback: _subscription.isDemo,
+                    isActivating: _isActivating,
+                    onUpgrade: _onStartProSubscription,
+                  ),
+                  const SizedBox(height: SavingorSpacing.sm),
+                  Center(
+                    child: TextButton.icon(
+                      onPressed: _isRestoring ? null : _onRestorePurchases,
+                      style: TextButton.styleFrom(
+                        foregroundColor: SavingorColors.textSecondary,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                      ),
+                      icon: const Icon(Icons.restore_rounded, size: 17),
+                      label: Text(
+                        _isRestoring ? 'Restoring...' : 'Restore purchases',
+                        style: const TextStyle(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -180,9 +374,11 @@ class _ProHeroHeader extends StatelessWidget {
   }
 }
 
-/// Visual-only segmented row; Pro is always shown as selected.
+/// Visual segmented row reflecting the user's current plan.
 class _PlanSelectorRow extends StatelessWidget {
-  const _PlanSelectorRow();
+  const _PlanSelectorRow({required this.isPro});
+
+  final bool isPro;
 
   @override
   Widget build(BuildContext context) {
@@ -196,19 +392,19 @@ class _PlanSelectorRow extends StatelessWidget {
         ),
         boxShadow: SavingorShadows.soft,
       ),
-      child: const Row(
+      child: Row(
         children: <Widget>[
           Expanded(
             child: _SelectorChip(
               label: 'Free',
-              selected: false,
+              selected: !isPro,
             ),
           ),
-          SizedBox(width: 4),
+          const SizedBox(width: 4),
           Expanded(
             child: _SelectorChip(
               label: 'Pro',
-              selected: true,
+              selected: isPro,
             ),
           ),
         ],
@@ -255,7 +451,9 @@ class _SelectorChip extends StatelessWidget {
 }
 
 class _FreeCompactCard extends StatelessWidget {
-  const _FreeCompactCard();
+  const _FreeCompactCard({required this.isCurrentPlan});
+
+  final bool isCurrentPlan;
 
   static const List<String> _features = <String>[
     'Basic deals browsing',
@@ -304,22 +502,24 @@ class _FreeCompactCard extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF3F4F6),
-                  borderRadius: BorderRadius.circular(SavingorRadius.pill),
-                  border: Border.all(color: const Color(0xFFE5E7EB)),
-                ),
-                child: const Text(
-                  'Current plan',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: SavingorColors.textSecondary,
+              if (isCurrentPlan)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF3F4F6),
+                    borderRadius: BorderRadius.circular(SavingorRadius.pill),
+                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                  ),
+                  child: const Text(
+                    'Current plan',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: SavingorColors.textSecondary,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: SavingorSpacing.sm),
@@ -354,8 +554,16 @@ class _FreeCompactCard extends StatelessWidget {
 }
 
 class _ProMainCard extends StatelessWidget {
-  const _ProMainCard({required this.onUpgrade});
+  const _ProMainCard({
+    required this.isCurrentPlan,
+    required this.isDemoFallback,
+    required this.isActivating,
+    required this.onUpgrade,
+  });
 
+  final bool isCurrentPlan;
+  final bool isDemoFallback;
+  final bool isActivating;
   final VoidCallback onUpgrade;
 
   static const List<String> _features = <String>[
@@ -428,9 +636,9 @@ class _ProMainCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const Text(
-                  'Best value',
-                  style: TextStyle(
+                child: Text(
+                  isCurrentPlan ? 'Current plan' : 'Best value',
+                  style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
                     color: SavingorColors.darkGreen,
@@ -511,30 +719,77 @@ class _ProMainCard extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             height: 52,
-            child: ElevatedButton(
-              onPressed: onUpgrade,
-              style: ElevatedButton.styleFrom(
-                elevation: 0,
-                shadowColor: Colors.transparent,
-                surfaceTintColor: Colors.transparent,
-                backgroundColor: SavingorColors.primaryGreen,
-                foregroundColor: SavingorColors.darkGreen,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  side: const BorderSide(
-                    color: SavingorColors.primaryStroke,
-                    width: 1,
+            child: isCurrentPlan
+                ? OutlinedButton.icon(
+                    onPressed: null,
+                    style: OutlinedButton.styleFrom(
+                      disabledForegroundColor: SavingorColors.darkGreen,
+                      backgroundColor: Colors.white.withOpacity(0.6),
+                      side: BorderSide(
+                        color: SavingorColors.primaryStroke.withOpacity(0.5),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    icon: const Icon(
+                      Icons.check_circle_rounded,
+                      size: 20,
+                      color: SavingorColors.primaryStroke,
+                    ),
+                    label: const Text('Current plan'),
+                  )
+                : ElevatedButton(
+                    onPressed: isActivating ? null : onUpgrade,
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      shadowColor: Colors.transparent,
+                      surfaceTintColor: Colors.transparent,
+                      backgroundColor: SavingorColors.primaryGreen,
+                      foregroundColor: SavingorColors.darkGreen,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        side: const BorderSide(
+                          color: SavingorColors.primaryStroke,
+                          width: 1,
+                        ),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.1,
+                      ),
+                    ),
+                    child: isActivating
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: SavingorColors.darkGreen,
+                            ),
+                          )
+                        : const Text('Start Pro subscription'),
                   ),
-                ),
-                textStyle: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
+          ),
+          if (isCurrentPlan && isDemoFallback) ...<Widget>[
+            const SizedBox(height: 8),
+            Center(
+              child: Text(
+                'Demo fallback active — no real payment processed.',
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                  color: SavingorColors.textSecondary.withOpacity(0.9),
                   letterSpacing: 0.1,
                 ),
               ),
-              child: const Text('Upgrade to Pro'),
             ),
-          ),
+          ],
         ],
       ),
     );

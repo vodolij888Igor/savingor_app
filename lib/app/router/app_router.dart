@@ -7,6 +7,7 @@ import 'package:savingor_app/features/onboarding/presentation/screens/auth_scree
 import 'package:savingor_app/features/onboarding/presentation/screens/language_select_screen.dart';
 import 'package:savingor_app/features/onboarding/presentation/screens/mini_splash_screen.dart';
 import 'package:savingor_app/features/onboarding/presentation/screens/splash_screen.dart';
+import 'package:savingor_app/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:savingor_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:savingor_app/features/subscription/presentation/screens/subscription_screen.dart';
 import 'package:savingor_app/features/deals/presentation/screens/deals_map_screen.dart';
@@ -325,6 +326,12 @@ GoRouter createAppRouter({required AppState appState}) {
           GoRoute(
             path: '/profile',
             builder: (context, state) => const ProfileScreen(),
+            routes: [
+              GoRoute(
+                path: 'edit',
+                builder: (context, state) => const EditProfileScreen(),
+              ),
+            ],
           ),
         ],
       ),

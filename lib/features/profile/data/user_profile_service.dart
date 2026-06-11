@@ -104,6 +104,106 @@ class UserProfileService {
     return null;
   }
 
+  /// Updates `users/{uid}.fullName` and keeps Auth displayName in sync.
+  /// Throws [UserProfileException] with a user-friendly message on failure.
+  Future<void> updateFullName(String fullName) async {
+    final User? user = _firebaseAuth.currentUser;
+    if (user == null) {
+      throw const UserProfileException('You need to be signed in to edit your profile.');
+    }
+
+    final String trimmed = fullName.trim();
+    if (trimmed.isEmpty) {
+      throw const UserProfileException('Please enter your full name.');
+    }
+
+    try {
+      await _firestore.collection('users').doc(user.uid).set(
+        <String, dynamic>{
+          'fullName': trimmed,
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
+      await user.updateDisplayName(trimmed);
+    } on FirebaseException {
+      throw const UserProfileException(
+        'Could not save your changes. Please try again.',
+      );
+    }
+  }
+
+  /// Securely changes the password: re-authenticates with [currentPassword],
+  /// then calls `updatePassword`. Never stores or logs passwords.
+  /// Throws [UserProfileException] with a user-friendly message on failure.
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    final User? user = _firebaseAuth.currentUser;
+    final String? email = _nonEmptyString(user?.email);
+    if (user == null || email == null) {
+      throw const UserProfileException(
+        'You need to be signed in to change your password.',
+      );
+    }
+
+    try {
+      final AuthCredential credential = EmailAuthProvider.credential(
+        email: email,
+        password: currentPassword.trim(),
+      );
+      await user.reauthenticateWithCredential(credential);
+      await user.updatePassword(newPassword.trim());
+    } on FirebaseAuthException catch (e) {
+      throw UserProfileException(_changePasswordMessageForCode(e.code));
+    }
+  }
+
+  static String _changePasswordMessageForCode(String code) {
+    switch (code) {
+      case 'wrong-password':
+      case 'invalid-credential':
+      case 'user-mismatch':
+        return 'Current password is incorrect.';
+      case 'weak-password':
+        return 'New password is too weak. Use at least 6 characters.';
+      case 'network-request-failed':
+        return 'Network error. Check your connection and try again.';
+      case 'requires-recent-login':
+        return 'For security, please sign in again and retry.';
+      case 'too-many-requests':
+        return 'Too many attempts. Please try again later.';
+      default:
+        return 'Could not update your password. Please try again.';
+    }
+  }
+
+  /// Sends a password reset email to the signed-in user's email address.
+  /// Throws [UserProfileException] with a user-friendly message on failure.
+  Future<void> sendPasswordResetEmail() async {
+    final User? user = _firebaseAuth.currentUser;
+    final String? email = _nonEmptyString(user?.email);
+    if (email == null) {
+      throw const UserProfileException(
+        'No email is linked to this account.',
+      );
+    }
+
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'network-request-failed') {
+        throw const UserProfileException(
+          'Network error. Check your connection and try again.',
+        );
+      }
+      throw const UserProfileException(
+        'Could not send the reset email. Please try again.',
+      );
+    }
+  }
+
   static String? _nonEmptyString(Object? value) {
     if (value == null) {
       return null;
@@ -120,4 +220,14 @@ class UserProfileService {
     }
     return parts.first;
   }
+}
+
+/// Thrown when a profile operation fails with a user-facing message.
+class UserProfileException implements Exception {
+  const UserProfileException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
 }

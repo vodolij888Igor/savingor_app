@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -16,10 +17,18 @@ import 'package:savingor_app/features/expenses/data/expenses_store.dart';
 import 'package:savingor_app/features/scanner/data/receipt_store.dart';
 import 'package:savingor_app/features/price_memory/data/price_memory_store.dart';
 import 'package:savingor_app/features/ai_assistant/data/ai_savings_assistant_provider.dart';
+import 'package:savingor_app/features/subscription/data/subscription_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  // Safe no-op when RevenueCat keys are not supplied (local demo builds).
+  final String? signedInUid = FirebaseAuth.instance.currentUser?.uid;
+  if (signedInUid != null) {
+    await SubscriptionService().configureRevenueCat(appUserId: signedInUid);
+  }
+
   final prefs = await SharedPreferences.getInstance();
   final appState = AppState(prefs);
   appState.hydrateFromDisk();
