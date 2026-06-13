@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/i18n/ai_assistant_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/app_screen_states.dart';
 import 'package:savingor_app/features/ai_assistant/data/ai_context_builder.dart';
@@ -15,6 +16,7 @@ import 'package:savingor_app/features/ai_assistant/domain/models/ai_assistant_re
 import 'package:savingor_app/features/expenses/data/expenses_store.dart';
 import 'package:savingor_app/features/scanner/data/receipt_store.dart';
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class AiSavingsAssistantScreen extends StatefulWidget {
   const AiSavingsAssistantScreen({super.key});
@@ -43,28 +45,43 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
   static const Color _chipAmber = Color(0xFFCA8A04);
   static const Color _infoAmber = Color(0xFFD97706);
 
-  static const List<_SuggestionItem> _suggestedQuestions = <_SuggestionItem>[
-    _SuggestionItem(
-      question: 'How can I save more money this week?',
+  static const List<_SuggestionTemplate> _suggestionTemplates =
+      <_SuggestionTemplate>[
+    _SuggestionTemplate(
       icon: Icons.savings_outlined,
       accent: _accentSavings,
     ),
-    _SuggestionItem(
-      question: 'Which store do I spend the most at?',
+    _SuggestionTemplate(
       icon: Icons.storefront_outlined,
       accent: _accentStore,
     ),
-    _SuggestionItem(
-      question: 'Analyze my grocery spending.',
+    _SuggestionTemplate(
       icon: Icons.pie_chart_outline_rounded,
       accent: _accentAnalysis,
     ),
-    _SuggestionItem(
-      question: 'What should I buy first from my shopping list?',
+    _SuggestionTemplate(
       icon: Icons.checklist_outlined,
       accent: _accentList,
     ),
   ];
+
+  List<_SuggestionItem> _buildSuggestedQuestions(AppLocalizations l10n) {
+    final List<String> questions = <String>[
+      l10n.aiSuggestSaveMoreThisWeek,
+      l10n.aiSuggestTopStore,
+      l10n.aiSuggestAnalyzeSpending,
+      l10n.aiSuggestShoppingListPriority,
+    ];
+
+    return List<_SuggestionItem>.generate(
+      _suggestionTemplates.length,
+      (int index) => _SuggestionItem(
+        question: questions[index],
+        icon: _suggestionTemplates[index].icon,
+        accent: _suggestionTemplates[index].accent,
+      ),
+    );
+  }
 
   final TextEditingController _questionController = TextEditingController();
   final FocusNode _questionFocus = FocusNode();
@@ -120,7 +137,10 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
 
     if (!service.isConfigured) {
       setState(() {
-        _askError = AiAssistantException.missingApiKey.message;
+        _askError = AiAssistantL10n.localizeException(
+          context,
+          AiAssistantException.missingApiKey,
+        );
         _lastResponse = null;
         _lastQuestion = trimmed;
       });
@@ -141,6 +161,7 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
         AiAssistantRequest(
           question: trimmed,
           context: contextSnapshot,
+          responseLanguageCode: Localizations.localeOf(context).languageCode,
         ),
       );
 
@@ -152,13 +173,13 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
     } on AiAssistantException catch (error) {
       if (!mounted) return;
       setState(() {
-        _askError = error.message;
+        _askError = AiAssistantL10n.localizeException(context, error);
         _isAsking = false;
       });
     } catch (_) {
       if (!mounted) return;
       setState(() {
-        _askError = 'Could not get an answer. Please try again.';
+        _askError = AppLocalizations.of(context).aiCouldNotGetAnswer;
         _isAsking = false;
       });
     }
@@ -198,11 +219,13 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
         shoppingListsStore,
       ]),
       builder: (BuildContext context, Widget? _) {
+        final AppLocalizations l10n = AppLocalizations.of(context);
+
         return Scaffold(
           backgroundColor: _pageBackground,
           appBar: AppBar(
-            title: const Text(
-              'AI Savings Assistant',
+            title: Text(
+              l10n.aiSavingsAssistant,
               style: SavingorAppTextStyles.screenTitle,
             ),
             elevation: 0,
@@ -216,6 +239,7 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
             automaticallyImplyLeading: false,
           ),
           body: _buildBody(
+            l10n: l10n,
             expensesStore: expensesStore,
             receiptStore: receiptStore,
             shoppingListsStore: shoppingListsStore,
@@ -228,6 +252,7 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
   }
 
   Widget _buildBody({
+    required AppLocalizations l10n,
     required ExpensesStore expensesStore,
     required ReceiptStore receiptStore,
     required ShoppingListsStore shoppingListsStore,
@@ -236,14 +261,15 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
   }) {
     if (!expensesStore.isAuthenticated) {
       return AppSignInRequiredState(
-        message:
-            'Sign in to ask the AI assistant about your receipts and shopping lists.',
+        title: l10n.signInRequired,
+        message: l10n.aiSignInPrompt,
+        actionLabel: l10n.signIn,
         onSignIn: () => context.push('/auth'),
       );
     }
 
     if (_isFirestoreLoading(expensesStore, receiptStore, shoppingListsStore)) {
-      return const AppLoadingState(message: 'Loading your data…');
+      return AppLoadingState(message: l10n.aiLoadingYourData);
     }
 
     if (expensesStore.loadError != null ||
@@ -252,10 +278,11 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
       final String message = expensesStore.loadError ??
           receiptStore.loadError ??
           shoppingListsStore.listsError ??
-          'Something went wrong.';
+          l10n.somethingWentWrong;
       return AppErrorState(
-        title: 'Could not load your data',
+        title: l10n.aiCouldNotLoadData,
         message: message,
+        actionLabel: l10n.tryAgain,
         onRetry: _retryStores,
       );
     }
@@ -265,11 +292,9 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
     if (!contextSnapshot.hasData) {
       return AppEmptyState(
         icon: Icons.auto_awesome_outlined,
-        title: 'Add data to get AI insights',
-        message:
-            'Scan a receipt, add an expense, or create a shopping list. '
-            'The assistant analyzes your saved data — not live store prices.',
-        actionLabel: 'Scan a receipt',
+        title: l10n.aiEmptyTitle,
+        message: l10n.aiEmptyMessage,
+        actionLabel: l10n.scanReceipt,
         onAction: () => context.push('/scanner/create'),
         prominentAction: true,
       );
@@ -277,6 +302,8 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
 
     final bool canSend = !_isAsking;
     final bool isLive = service.isConfigured;
+    final List<_SuggestionItem> suggestedQuestions =
+        _buildSuggestedQuestions(l10n);
 
     return Column(
       children: <Widget>[
@@ -284,17 +311,17 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
             children: <Widget>[
-              _buildHeaderBanner(isLive: isLive),
+              _buildHeaderBanner(l10n: l10n, isLive: isLive),
               if (!service.isConfigured) ...<Widget>[
                 const SizedBox(height: SavingorSpacing.lg),
-                _buildConfigInfoCard(),
+                _buildConfigInfoCard(l10n),
               ],
               const SizedBox(height: SavingorSpacing.lg),
-              _buildContextSummary(contextSnapshot),
+              _buildContextSummary(l10n, contextSnapshot),
               const SizedBox(height: SavingorSpacing.xl),
-              const Text(
-                'Suggested questions',
-                style: TextStyle(
+              Text(
+                l10n.aiSuggestedQuestions,
+                style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
                   color: _titleCharcoal,
@@ -304,7 +331,7 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
               Wrap(
                 spacing: 10,
                 runSpacing: 10,
-                children: _suggestedQuestions
+                children: suggestedQuestions
                     .map(
                       (_SuggestionItem item) => _SuggestionChip(
                         label: item.question,
@@ -317,7 +344,7 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
               ),
               if (_isAsking) ...<Widget>[
                 const SizedBox(height: SavingorSpacing.xl),
-                const AppLoadingState(message: 'Analyzing your data…'),
+                AppLoadingState(message: l10n.aiAnalyzingYourData),
               ],
               if (_askError != null) ...<Widget>[
                 const SizedBox(height: SavingorSpacing.xl),
@@ -332,8 +359,7 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
               ],
               const SizedBox(height: SavingorSpacing.lg),
               Text(
-                'Insights are based on your saved receipts, expenses, and '
-                'shopping lists in Savingor — not live store prices or deals.',
+                l10n.aiInsightsDisclaimer,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 12,
@@ -346,6 +372,7 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
           ),
         ),
         _buildInputBar(
+          l10n: l10n,
           canSend: canSend,
           isLive: isLive,
           bottomInset: bottomInset,
@@ -354,7 +381,10 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
     );
   }
 
-  Widget _buildHeaderBanner({required bool isLive}) {
+  Widget _buildHeaderBanner({
+    required AppLocalizations l10n,
+    required bool isLive,
+  }) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(22),
       child: Stack(
@@ -444,9 +474,9 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      const Text(
-                        'Your AI savings coach',
-                        style: TextStyle(
+                      Text(
+                        l10n.aiHeroTitle,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
                           color: _deepGreen,
@@ -457,8 +487,8 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
                       const SizedBox(height: 6),
                       Text(
                         isLive
-                            ? 'Ask about spending, receipts, and shopping lists.'
-                            : 'Preview insights from your saved data — connect an API key for live answers.',
+                            ? l10n.aiHeroSubtitleLive
+                            : l10n.aiHeroSubtitlePreview,
                         style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
@@ -487,7 +517,7 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
     );
   }
 
-  Widget _buildConfigInfoCard() {
+  Widget _buildConfigInfoCard(AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -505,19 +535,19 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
           ),
         ],
       ),
-      child: const Row(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Icon(
+          const Icon(
             Icons.lightbulb_outline_rounded,
             color: _infoAmber,
             size: 22,
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'AI assistant is ready. Connect an API key to enable live answers.',
-              style: TextStyle(
+              l10n.aiConfigReadyMessage,
+              style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: _titleCharcoal,
@@ -530,7 +560,10 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
     );
   }
 
-  Widget _buildContextSummary(AiSavingsContext contextSnapshot) {
+  Widget _buildContextSummary(
+    AppLocalizations l10n,
+    AiSavingsContext contextSnapshot,
+  ) {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -548,9 +581,9 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text(
-            'Your data snapshot',
-            style: TextStyle(
+          Text(
+            l10n.aiDataSnapshot,
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w800,
               color: _titleCharcoal,
@@ -564,33 +597,35 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
               if (contextSnapshot.hasReceipts)
                 _SummaryChip(
                   icon: Icons.receipt_long_outlined,
-                  label: '${contextSnapshot.receiptCount} receipts',
+                  label: l10n.aiReceiptCount(contextSnapshot.receiptCount),
                   accent: _chipTeal,
                 ),
               if (contextSnapshot.hasManualExpenses)
                 _SummaryChip(
                   icon: Icons.payments_outlined,
-                  label: '${contextSnapshot.manualExpenseCount} expenses',
+                  label: l10n.aiExpenseCount(contextSnapshot.manualExpenseCount),
                   accent: _chipBlue,
                 ),
               if (contextSnapshot.totalSpending > 0)
                 _SummaryChip(
                   icon: Icons.account_balance_wallet_outlined,
-                  label:
-                      '\$${contextSnapshot.totalSpending.toStringAsFixed(0)} total',
+                  label: l10n.aiTotalSpendingLabel(
+                    '\$${contextSnapshot.totalSpending.toStringAsFixed(0)}',
+                  ),
                   accent: _accentSavings,
                 ),
               if (contextSnapshot.hasShoppingLists)
                 _SummaryChip(
                   icon: Icons.checklist_outlined,
-                  label: '${contextSnapshot.shoppingListCount} lists',
+                  label: l10n.aiListCount(contextSnapshot.shoppingListCount),
                   accent: _chipAmber,
                 ),
               if (contextSnapshot.activeListEstimate > 0)
                 _SummaryChip(
                   icon: Icons.shopping_cart_outlined,
-                  label:
-                      '\$${contextSnapshot.activeListEstimate.toStringAsFixed(0)} list est.',
+                  label: l10n.aiListEstimateLabel(
+                    '\$${contextSnapshot.activeListEstimate.toStringAsFixed(0)}',
+                  ),
                   accent: _accentStore,
                 ),
             ],
@@ -666,6 +701,7 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
   }
 
   Widget _buildInputBar({
+    required AppLocalizations l10n,
     required bool canSend,
     required bool isLive,
     required double bottomInset,
@@ -702,8 +738,8 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
                 ),
                 decoration: InputDecoration(
                   hintText: isLive
-                      ? 'Ask about your spending or shopping list…'
-                      : 'Type a question — connect an API key for live answers',
+                      ? l10n.aiInputHintLive
+                      : l10n.aiInputHintPreview,
                   hintStyle: const TextStyle(
                     color: _mutedText,
                     fontSize: 14,
@@ -733,41 +769,45 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
               ),
           ),
           const SizedBox(width: 10),
-          Material(
-            color: canSend ? _sendGreen : _sendGreen.withOpacity(0.45),
-            borderRadius: BorderRadius.circular(14),
-            elevation: 0,
-            child: InkWell(
-              onTap: canSend
-                  ? () => _askQuestion(_questionController.text)
-                  : null,
+          Semantics(
+            button: true,
+            label: l10n.aiSend,
+            child: Material(
+              color: canSend ? _sendGreen : _sendGreen.withOpacity(0.45),
               borderRadius: BorderRadius.circular(14),
-              child: Ink(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: _sendGreenStroke.withOpacity(canSend ? 0.32 : 0.18),
-                    width: 0.75,
+              elevation: 0,
+              child: InkWell(
+                onTap: canSend
+                    ? () => _askQuestion(_questionController.text)
+                    : null,
+                borderRadius: BorderRadius.circular(14),
+                child: Ink(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: _sendGreenStroke.withOpacity(canSend ? 0.32 : 0.18),
+                      width: 0.75,
+                    ),
+                    boxShadow: canSend
+                        ? const <BoxShadow>[
+                            BoxShadow(
+                              color: Color(0x144F9D47),
+                              blurRadius: 8,
+                              offset: Offset(0, 2),
+                            ),
+                          ]
+                        : null,
                   ),
-                  boxShadow: canSend
-                      ? const <BoxShadow>[
-                          BoxShadow(
-                            color: Color(0x144F9D47),
-                            blurRadius: 8,
-                            offset: Offset(0, 2),
-                          ),
-                        ]
-                      : null,
-                ),
-                child: SizedBox(
-                  width: 48,
-                  height: 48,
-                  child: Icon(
-                    Icons.send_rounded,
-                    color: canSend
-                        ? _deepGreen
-                        : _deepGreen.withOpacity(0.45),
-                    size: 22,
+                  child: SizedBox(
+                    width: 48,
+                    height: 48,
+                    child: Icon(
+                      Icons.send_rounded,
+                      color: canSend
+                          ? _deepGreen
+                          : _deepGreen.withOpacity(0.45),
+                      size: 22,
+                    ),
                   ),
                 ),
               ),
@@ -777,6 +817,16 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
       ),
     );
   }
+}
+
+class _SuggestionTemplate {
+  const _SuggestionTemplate({
+    required this.icon,
+    required this.accent,
+  });
+
+  final IconData icon;
+  final Color accent;
 }
 
 class _SuggestionItem {

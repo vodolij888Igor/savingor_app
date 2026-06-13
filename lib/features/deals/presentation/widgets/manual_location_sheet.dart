@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 /// Bottom sheet for entering a city or area manually.
 class ManualLocationSheet extends StatefulWidget {
@@ -37,6 +38,7 @@ class _ManualLocationSheetState extends State<ManualLocationSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final double bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
     return Padding(
@@ -56,8 +58,8 @@ class _ManualLocationSheetState extends State<ManualLocationSheet> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Set location',
+          Text(
+            l10n.mapSetLocation,
             style: SavingorAppTextStyles.sectionTitleLarge,
           ),
           const SizedBox(height: SavingorSpacing.md),
@@ -67,9 +69,9 @@ class _ManualLocationSheetState extends State<ManualLocationSheet> {
             textInputAction: TextInputAction.done,
             onSubmitted: (_) => _save(),
             decoration: InputDecoration(
-              labelText: 'City or area',
+              labelText: l10n.mapCityOrArea,
               hintText: 'Calgary',
-              helperText: 'Example: Calgary, Cochrane, Edmonton',
+              helperText: l10n.mapCityOrAreaExample,
               helperStyle: TextStyle(
                 fontSize: 12,
                 color: SavingorColors.textSecondary.withOpacity(0.9),
@@ -109,9 +111,9 @@ class _ManualLocationSheetState extends State<ManualLocationSheet> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(
+                  child: Text(
+                    l10n.cancel,
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),
@@ -130,9 +132,9 @@ class _ManualLocationSheetState extends State<ManualLocationSheet> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    'Save',
-                    style: TextStyle(
+                  child: Text(
+                    l10n.save,
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),

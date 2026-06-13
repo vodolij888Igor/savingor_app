@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:savingor_app/core/app_settings_options.dart';
 import 'package:savingor_app/core/app_state.dart';
+import 'package:savingor_app/core/i18n/app_settings_l10n.dart';
+import 'package:savingor_app/core/i18n/subscription_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/features/profile/data/user_profile_service.dart';
 import 'package:savingor_app/features/subscription/data/subscription_service.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -21,7 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   bool _isLoadingProfile = true;
   UserProfile? _profile;
-  String? _profileError;
+  bool _profileLoadFailed = false;
   SubscriptionStatus _subscription = SubscriptionStatus.free;
 
   static const Color _pageBackground = SavingorColors.pageWhite;
@@ -64,7 +68,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadProfile() async {
     setState(() {
       _isLoadingProfile = true;
-      _profileError = null;
+      _profileLoadFailed = false;
     });
 
     try {
@@ -80,7 +84,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _profile = null;
         _isLoadingProfile = false;
-        _profileError = 'Could not load your profile. Please try again.';
+        _profileLoadFailed = true;
       });
     }
   }
@@ -88,14 +92,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final AppState appState = AppStateProvider.of(context);
-    final String appLanguage = appState.language ?? 'not set';
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
       backgroundColor: _pageBackground,
       appBar: AppBar(
-        title: const Text(
-          'Profile',
+        title: Text(
+          l10n.profile,
           style: SavingorAppTextStyles.screenTitle,
         ),
         centerTitle: false,
@@ -109,36 +113,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            _buildProfileHero(),
+            _buildProfileHero(l10n),
             const SizedBox(height: SavingorSpacing.lg),
-            _buildSavingsSnapshotRow(appLanguage),
+            _buildSavingsSnapshotRow(context, appState, l10n),
             const SizedBox(height: SavingorSpacing.lg),
             _headingCard(
-              title: 'Account',
-              trailing: _buildEditAction(context),
-              child: _buildAccountSection(),
+              title: l10n.account,
+              trailing: _buildEditAction(context, l10n),
+              child: _buildAccountSection(l10n),
             ),
             const SizedBox(height: SavingorSpacing.lg),
             _headingCard(
-              title: 'Plan & subscription',
-              child: _buildPlanSection(context),
+              title: l10n.planAndSubscription,
+              child: _buildPlanSection(context, l10n),
             ),
             const SizedBox(height: SavingorSpacing.lg),
             _headingCard(
-              title: 'App settings',
-              child: _buildAppSettingsSection(
-                context,
-                appState,
-                appLanguage,
-              ),
-            ),
-            const SizedBox(height: SavingorSpacing.lg),
-            _headingCard(
-              title: 'Savings preferences',
-              child: _buildSavingsPreferencesSection(),
+              title: l10n.appSettings,
+              child: _buildAppSettingsSection(context, appState, l10n),
             ),
             const SizedBox(height: SavingorSpacing.xl),
-            _buildSignOutSection(context, appState),
+            _buildSignOutSection(context, appState, l10n),
           ],
         ),
       ),
@@ -163,10 +158,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileHero() {
+  Widget _buildProfileHero(AppLocalizations l10n) {
     final String displayName = _profile != null && _profile!.fullName.isNotEmpty
         ? _profile!.fullName
-        : 'Your account';
+        : l10n.yourAccount;
     final String? email =
         _profile != null && _profile!.email.isNotEmpty ? _profile!.email : null;
 
@@ -233,7 +228,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(width: 5),
                 Text(
-                  _subscription.isPro ? 'Pro plan' : 'Free plan',
+                  _subscription.isPro ? l10n.proPlan : l10n.freePlan,
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -320,10 +315,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ],
           const SizedBox(height: 11),
-          const Text(
-            'Ready to save smarter today',
+          Text(
+            l10n.readyToSaveSmarterToday,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: SavingorColors.primaryStroke,
@@ -336,37 +331,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  /// Readable display names for stored language codes — never show raw codes.
-  static const Map<String, String> _languageDisplayNames = <String, String>{
-    'en': 'English',
-    'uk': 'Ukrainian',
-    'ru': 'Russian',
-    'es': 'Spanish',
-    'de': 'German',
-    'fr': 'French',
-    'pl': 'Polish',
-  };
-
-  static String _languageDisplayName(String? code) {
-    if (code == null) return 'English';
-    final String normalized = code.trim().toLowerCase();
-    if (normalized.isEmpty) return 'English';
-    return _languageDisplayNames[normalized] ?? code;
-  }
-
   // Refined accents for the status card row — color lives in the icon badge.
   static const Color _regionAccent = Color(0xFF0E8074);
   static const Color _languageAccent = Color(0xFF4F9D47);
   static const Color _appearanceAccent = Color(0xFFC8861A);
 
-  Widget _buildSavingsSnapshotRow(String appLanguage) {
+  Widget _buildSavingsSnapshotRow(
+    BuildContext context,
+    AppState appState,
+    AppLocalizations l10n,
+  ) {
     return Row(
       children: <Widget>[
         Expanded(
           child: _snapshotChip(
             icon: Icons.public_rounded,
-            label: 'Region',
-            value: 'Canada',
+            label: l10n.region,
+            value: AppSettingsL10n.regionLabel(context, appState.region),
             accent: _regionAccent,
           ),
         ),
@@ -374,8 +355,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Expanded(
           child: _snapshotChip(
             icon: Icons.translate_rounded,
-            label: 'Language',
-            value: _languageDisplayName(appLanguage),
+            label: l10n.language,
+            value: AppSettingsOptions.languageNativeName(appState.language),
             accent: _languageAccent,
           ),
         ),
@@ -383,8 +364,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Expanded(
           child: _snapshotChip(
             icon: Icons.light_mode_rounded,
-            label: 'Appearance',
-            value: 'Light',
+            label: l10n.appearance,
+            value: AppSettingsL10n.appearanceLabel(context, appState.appearance),
             accent: _appearanceAccent,
           ),
         ),
@@ -455,13 +436,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildAccountSection() {
+  Widget _buildAccountSection(AppLocalizations l10n) {
     if (_isLoadingProfile) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 8),
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
         child: Row(
           children: <Widget>[
-            SizedBox(
+            const SizedBox(
               width: 20,
               height: 20,
               child: CircularProgressIndicator(
@@ -469,10 +450,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 color: SavingorAccentColors.savings,
               ),
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Text(
-              'Loading profile...',
-              style: TextStyle(
+              l10n.loadingProfile,
+              style: const TextStyle(
                 fontSize: 14,
                 color: SavingorColors.textSecondary,
               ),
@@ -482,7 +463,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
-    if (_profileError != null) {
+    if (_profileLoadFailed) {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.all(SavingorSpacing.md),
@@ -494,7 +475,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         child: Text(
-          _profileError!,
+          l10n.couldNotLoadProfile,
           style: TextStyle(
             color: Theme.of(context).colorScheme.error,
             fontSize: 14,
@@ -505,8 +486,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     if (_profile == null) {
-      return const Text(
-        'No profile found for this account yet.',
+      return Text(
+        l10n.noProfileFound,
         style: _bodyMutedStyle,
       );
     }
@@ -515,27 +496,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: <Widget>[
         _iconInfoRow(
           icon: Icons.person_outline_rounded,
-          label: 'Full name',
+          label: l10n.fullName,
           value: _displayValue(_profile!.fullName),
         ),
         _rowDivider(),
         _iconInfoRow(
           icon: Icons.mail_outline_rounded,
-          label: 'Email',
+          label: l10n.email,
           value: _displayValue(_profile!.email),
         ),
         _rowDivider(),
         _iconInfoRow(
           icon: Icons.lock_outline_rounded,
-          label: 'Password & security',
-          value: 'Manage password',
+          label: l10n.passwordAndSecurity,
+          value: l10n.managePassword,
           isLast: true,
         ),
       ],
     );
   }
 
-  Widget _buildEditAction(BuildContext context) {
+  Widget _buildEditAction(BuildContext context, AppLocalizations l10n) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -546,20 +527,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _loadProfile();
           }
         },
-        child: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Icon(
+              const Icon(
                 Icons.edit_outlined,
                 size: 15,
                 color: SavingorColors.darkGreen,
               ),
-              SizedBox(width: 5),
+              const SizedBox(width: 5),
               Text(
-                'Edit',
-                style: TextStyle(
+                l10n.edit,
+                style: const TextStyle(
                   fontSize: 13.5,
                   fontWeight: FontWeight.w700,
                   color: SavingorColors.darkGreen,
@@ -573,7 +554,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildPlanSection(BuildContext context) {
+  Widget _buildPlanSection(BuildContext context, AppLocalizations l10n) {
     final bool isPro = _subscription.isPro;
 
     return Column(
@@ -581,10 +562,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: <Widget>[
         Row(
           children: <Widget>[
-            const Expanded(
+            Expanded(
               child: Text(
-                'Current plan',
-                style: TextStyle(
+                l10n.currentPlan,
+                style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                   color: SavingorColors.textSecondary,
@@ -601,7 +582,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               child: Text(
-                isPro ? 'Pro' : 'Free',
+                isPro ? l10n.pro : l10n.free,
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -613,7 +594,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         const SizedBox(height: SavingorSpacing.sm),
         Text(
-          isPro ? 'Pro' : 'Free',
+          isPro ? l10n.pro : l10n.free,
           style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w800,
@@ -623,23 +604,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         const SizedBox(height: SavingorSpacing.md),
         if (isPro) ...<Widget>[
-          _subscriptionDetailRow('Status', _subscription.statusLabel),
-          _subscriptionDetailRow('Provider', _subscription.providerLabel),
-          _subscriptionDetailRow('Price', '\$14.99 / month'),
+          _subscriptionDetailRow(
+            l10n.status,
+            SubscriptionL10n.statusLabelFromL10n(l10n, _subscription.status),
+          ),
+          _subscriptionDetailRow(
+            l10n.provider,
+            SubscriptionL10n.providerLabel(context, _subscription.provider),
+          ),
+          _subscriptionDetailRow(
+            l10n.price,
+            SubscriptionL10n.formatPricePerMonth(context, _subscription),
+          ),
         ] else ...<Widget>[
-          _subscriptionDetailRow('Status', 'Inactive'),
+          _subscriptionDetailRow(l10n.status, l10n.inactive),
           const SizedBox(height: 2),
-          const Text(
-            'You are currently on the Free plan. Upgrade to Pro to unlock '
-            'AI savings insights, receipt analytics, smart alerts, and '
-            'spending reports.',
+          Text(
+            l10n.freePlanUpgradeMessage,
             style: _bodyMutedStyle,
           ),
         ],
         const SizedBox(height: SavingorSpacing.lg),
         if (isPro) ...<Widget>[
           _primaryButton(
-            label: 'Manage subscription',
+            label: l10n.manageSubscription,
             onPressed: () => _showManageSubscriptionSheet(context),
           ),
           const SizedBox(height: SavingorSpacing.xs),
@@ -650,9 +638,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             },
             foregroundColor: SavingorColors.textSecondary,
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: const Text(
-              'View plans',
-              style: TextStyle(
+            child: Text(
+              l10n.viewPlans,
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -660,7 +648,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ] else ...<Widget>[
           _primaryButton(
-            label: 'View plans',
+            label: l10n.viewPlans,
             onPressed: () async {
               await context.push('/subscription');
               // Plan may change on the Plans screen (demo activation).
@@ -672,9 +660,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onPressed: () => _showManageSubscriptionSheet(context),
             foregroundColor: SavingorColors.textSecondary,
             padding: const EdgeInsets.symmetric(vertical: 8),
-            child: const Text(
-              'Manage subscription',
-              style: TextStyle(
+            child: Text(
+              l10n.manageSubscription,
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -686,6 +674,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _showManageSubscriptionSheet(BuildContext context) async {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final bool isPro = _subscription.isPro;
 
     await showModalBottomSheet<void>(
@@ -717,9 +706,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Manage subscription',
-                  style: TextStyle(
+                Text(
+                  l10n.manageSubscription,
+                  style: const TextStyle(
                     fontSize: 19,
                     fontWeight: FontWeight.w800,
                     color: SavingorColors.darkGreen,
@@ -727,17 +716,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 const SizedBox(height: 16),
                 if (isPro) ...<Widget>[
-                  _subscriptionDetailRow('Plan', 'Pro'),
-                  _subscriptionDetailRow('Status', _subscription.statusLabel),
-                  _subscriptionDetailRow('Price', '\$14.99 / month'),
                   _subscriptionDetailRow(
-                      'Provider', _subscription.providerLabel),
+                    l10n.subscriptionPlanLabel,
+                    SubscriptionL10n.planLabel(context, _subscription.plan),
+                  ),
+                  _subscriptionDetailRow(
+                    l10n.status,
+                    SubscriptionL10n.statusLabelFromL10n(
+                      l10n,
+                      _subscription.status,
+                    ),
+                  ),
+                  _subscriptionDetailRow(
+                    l10n.price,
+                    SubscriptionL10n.formatPricePerMonth(context, _subscription),
+                  ),
+                  _subscriptionDetailRow(
+                    l10n.provider,
+                    SubscriptionL10n.providerLabel(context, _subscription.provider),
+                  ),
                   const SizedBox(height: 18),
                   if (_subscription.isRevenueCat) ...<Widget>[
-                    const Text(
-                      'Your subscription is managed by App Store or Google '
-                      'Play. You can cancel or update it from your store '
-                      'subscription settings.',
+                    Text(
+                      l10n.subscriptionManagedByStore,
                       style: _bodyMutedStyle,
                     ),
                     const SizedBox(height: 14),
@@ -746,7 +747,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: OutlinedButton(
                         onPressed: () async {
                           Navigator.of(sheetContext).pop();
-                          await _openStoreSubscriptionManagement();
+                          await _openStoreSubscriptionManagement(l10n);
                         },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: SavingorColors.darkGreen,
@@ -763,7 +764,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        child: const Text('Manage in App Store / Google Play'),
+                        child: Text(l10n.manageInAppStoreGooglePlay),
                       ),
                     ),
                   ] else
@@ -772,7 +773,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: OutlinedButton(
                         onPressed: () async {
                           Navigator.of(sheetContext).pop();
-                          await _cancelProDemo();
+                          await _cancelProDemo(l10n);
                         },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: const Color(0xFFB45309),
@@ -786,20 +787,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        child: const Text('Cancel Pro demo'),
+                        child: Text(l10n.cancelProDemo),
                       ),
                     ),
                 ] else ...<Widget>[
-                  _subscriptionDetailRow('Plan', 'Free'),
-                  _subscriptionDetailRow('Status', 'Inactive'),
+                  _subscriptionDetailRow(
+                    l10n.subscriptionPlanLabel,
+                    l10n.free,
+                  ),
+                  _subscriptionDetailRow(
+                    l10n.status,
+                    l10n.inactive,
+                  ),
                   const SizedBox(height: 4),
-                  const Text(
-                    'No active subscription.',
+                  Text(
+                    l10n.noActiveSubscription,
                     style: _bodyMutedStyle,
                   ),
                   const SizedBox(height: 18),
                   _primaryButton(
-                    label: 'View plans',
+                    label: l10n.viewPlans,
                     onPressed: () async {
                       Navigator.of(sheetContext).pop();
                       await context.push('/subscription');
@@ -812,7 +819,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: TextButton.icon(
                     onPressed: () async {
                       Navigator.of(sheetContext).pop();
-                      await _restorePurchases();
+                      await _restorePurchases(l10n);
                     },
                     style: TextButton.styleFrom(
                       foregroundColor: SavingorColors.textSecondary,
@@ -822,9 +829,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     icon: const Icon(Icons.restore_rounded, size: 17),
-                    label: const Text(
-                      'Restore purchases',
-                      style: TextStyle(
+                    label: Text(
+                      l10n.restorePurchases,
+                      style: const TextStyle(
                         fontSize: 13.5,
                         fontWeight: FontWeight.w600,
                       ),
@@ -842,12 +849,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   /// Opens the store subscription management page (App Store / Google Play)
   /// via the RevenueCat management URL. Real subscriptions are cancelled in
   /// the store — never by editing the Firestore mirror.
-  Future<void> _openStoreSubscriptionManagement() async {
+  Future<void> _openStoreSubscriptionManagement(AppLocalizations l10n) async {
     final String? url = await _subscriptionService.getManagementUrl();
     if (!mounted) return;
 
     if (url == null) {
-      await _showManagementUrlUnavailableDialog();
+      await _showManagementUrlUnavailableDialog(l10n);
       return;
     }
 
@@ -856,11 +863,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       mode: LaunchMode.externalApplication,
     );
     if (!launched && mounted) {
-      _showSnack('Could not open the subscription management page.');
+      _showSnack(l10n.couldNotOpenSubscriptionManagement);
     }
   }
 
-  Future<void> _showManagementUrlUnavailableDialog() async {
+  Future<void> _showManagementUrlUnavailableDialog(
+    AppLocalizations l10n,
+  ) async {
     await showDialog<void>(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -870,19 +879,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(22),
           ),
-          title: const Text(
-            'Management not available',
-            style: TextStyle(
+          title: Text(
+            l10n.managementNotAvailable,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w800,
               color: SavingorColors.darkGreen,
             ),
           ),
-          content: const Text(
-            'Subscription management URL is not available in this test '
-            'build. For RevenueCat Test Store purchases, reset the test '
-            'customer in RevenueCat dashboard or use a new test user.',
-            style: TextStyle(
+          content: Text(
+            l10n.managementUrlUnavailableMessage,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: SavingorColors.textSecondary,
@@ -895,7 +902,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: TextButton.styleFrom(
                 foregroundColor: SavingorColors.darkGreen,
               ),
-              child: const Text('OK'),
+              child: Text(l10n.ok),
             ),
           ],
         );
@@ -903,9 +910,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Future<void> _restorePurchases() async {
+  Future<void> _restorePurchases(AppLocalizations l10n) async {
     if (!_subscriptionService.isRevenueCatConfigured) {
-      _showSnack('Payment provider is not configured in this local build.');
+      _showSnack(l10n.paymentProviderNotConfiguredSnack);
       return;
     }
     try {
@@ -914,14 +921,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!mounted) return;
       setState(() => _subscription = status);
       _showSnack(
-        status.isPro ? 'Purchases restored.' : 'No purchases to restore.',
+        status.isPro ? l10n.purchaseRestored : l10n.noPurchasesFound,
       );
     } on SubscriptionException catch (e) {
       if (!mounted) return;
-      _showSnack(e.message);
+      _showSnack(SubscriptionL10n.localizeException(context, e));
     } catch (_) {
       if (!mounted) return;
-      _showSnack('Could not restore purchases. Please try again.');
+      _showSnack(l10n.couldNotRestorePurchases);
     }
   }
 
@@ -953,98 +960,153 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Future<void> _cancelProDemo() async {
+  Future<void> _cancelProDemo(AppLocalizations l10n) async {
     try {
       await _subscriptionService.cancelProDemoFallback();
       if (!mounted) return;
       setState(() => _subscription = SubscriptionStatus.free);
-      _showSnack('Pro demo cancelled. You are back on the Free plan.');
+      _showSnack(l10n.proDemoCancelled);
     } on SubscriptionException catch (e) {
       if (!mounted) return;
-      _showSnack(e.message);
+      _showSnack(SubscriptionL10n.localizeException(context, e));
     } catch (_) {
       if (!mounted) return;
-      _showSnack('Could not cancel Pro demo. Please try again.');
+      _showSnack(l10n.couldNotCancelProDemo);
     }
   }
 
   Widget _buildAppSettingsSection(
     BuildContext context,
     AppState appState,
-    String appLanguage,
+    AppLocalizations l10n,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         _iconInfoRow(
           icon: Icons.language_rounded,
-          label: 'Language',
-          value: _languageDisplayName(appLanguage),
+          label: l10n.language,
+          value: AppSettingsOptions.languageNativeName(appState.language),
         ),
         _rowDivider(),
         _iconInfoRow(
-          icon: Icons.brightness_auto_rounded,
-          label: 'Theme',
-          value: 'System',
+          icon: Icons.light_mode_rounded,
+          label: l10n.appearance,
+          value: AppSettingsL10n.appearanceLabel(context, appState.appearance),
+        ),
+        _rowDivider(),
+        _iconInfoRow(
+          icon: Icons.map_outlined,
+          label: l10n.region,
+          value: AppSettingsL10n.regionLabel(context, appState.region),
+        ),
+        _rowDivider(),
+        _iconInfoRow(
+          icon: Icons.attach_money_rounded,
+          label: l10n.currency,
+          value: appState.currency,
         ),
         _rowDivider(),
         _iconInfoRow(
           icon: Icons.notifications_none_rounded,
-          label: 'Notifications',
-          value: 'Coming soon',
+          label: l10n.notifications,
+          value: l10n.comingSoon,
           valueMuted: true,
           isLast: true,
         ),
         const SizedBox(height: SavingorSpacing.lg),
         _primaryButton(
-          label: 'Change language',
-          onPressed: () => context.go('/language'),
+          label: l10n.manageSettings,
+          onPressed: () => context.push('/profile/settings'),
         ),
       ],
     );
   }
 
-  Widget _buildSavingsPreferencesSection() {
-    return Column(
-      children: <Widget>[
-        _iconInfoRow(
-          icon: Icons.map_outlined,
-          label: 'Region',
-          value: 'Canada',
+  static const Color _signOutRed = Color(0xFFB42318);
+
+  Widget _buildSignOutSection(
+    BuildContext context,
+    AppState appState,
+    AppLocalizations l10n,
+  ) {
+    return OutlinedButton(
+      onPressed: () => _confirmSignOut(context, appState, l10n),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: _signOutRed,
+        backgroundColor: Colors.white,
+        minimumSize: const Size.fromHeight(52),
+        side: const BorderSide(color: Color(0xFFE8C7C2)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(_buttonRadius),
         ),
-        _rowDivider(),
-        _iconInfoRow(
-          icon: Icons.attach_money_rounded,
-          label: 'Currency',
-          value: 'CAD',
+        textStyle: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.1,
         ),
-        _rowDivider(),
-        _iconInfoRow(
-          icon: Icons.flag_outlined,
-          label: 'Monthly savings goal',
-          value: '\$100',
-        ),
-        _rowDivider(),
-        _iconInfoRow(
-          icon: Icons.storefront_outlined,
-          label: 'Favorite stores',
-          value: 'Walmart, Costco, Superstore',
-          isLast: true,
-        ),
-      ],
+      ),
+      child: Text(l10n.signOut),
     );
   }
 
-  Widget _buildSignOutSection(BuildContext context, AppState appState) {
-    return _primaryButton(
-      label: 'Sign out (reset start flow)',
-      onPressed: () {
-        // TODO(auth): Replace full startup reset with token-only logout when
-        // authentication exists; then route via [createAppRouter.redirect] only.
-        appState.resetStartupFlowToBeginning();
-        context.go('/mini-splash');
+  Future<void> _confirmSignOut(
+    BuildContext context,
+    AppState appState,
+    AppLocalizations l10n,
+  ) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22),
+          ),
+          title: Text(
+            l10n.signOutQuestion,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: SavingorColors.darkGreen,
+            ),
+          ),
+          content: Text(
+            l10n.signOutMessage,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: SavingorColors.textSecondary,
+              height: 1.45,
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              style: TextButton.styleFrom(
+                foregroundColor: SavingorColors.textSecondary,
+              ),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              style: TextButton.styleFrom(foregroundColor: _signOutRed),
+              child: Text(l10n.signOut),
+            ),
+          ],
+        );
       },
     );
+
+    if (confirmed != true || !mounted) return;
+
+    // TODO(auth): Replace full startup reset with token-only logout when
+    // authentication exists; then route via [createAppRouter.redirect] only.
+    appState.resetStartupFlowToBeginning();
+    if (mounted) {
+      this.context.go('/mini-splash');
+    }
   }
 
   Widget _headingCard({

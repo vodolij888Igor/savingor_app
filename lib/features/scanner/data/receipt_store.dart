@@ -108,6 +108,7 @@ class ReceiptStore extends ChangeNotifier {
     String? notes,
     String? categorySummary,
     List<ReceiptItem> items = const <ReceiptItem>[],
+    String currency = 'CAD',
   }) async {
     if (_uid == null) {
       _mutationError = 'Sign in to save receipts.';
@@ -131,6 +132,7 @@ class ReceiptStore extends ChangeNotifier {
         subtotal: subtotal,
         tax: tax,
         total: total,
+        currency: currency.toUpperCase(),
         source: source,
         notes: _trimOrNull(notes),
         categorySummary: _trimOrNull(categorySummary) ?? 'Grocery',

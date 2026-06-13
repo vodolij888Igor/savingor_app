@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/i18n/subscription_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/subscription/data/subscription_service.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 /// Pricing surface for Free and Pro plans.
 ///
@@ -49,6 +51,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     );
   }
 
+  void _showSubscriptionError(SubscriptionException error) {
+    _showSnack(SubscriptionL10n.localizeException(context, error));
+  }
+
   Future<void> _onStartProSubscription() async {
     if (_subscriptionService.isRevenueCatConfigured) {
       await _purchaseProMonthly();
@@ -64,21 +70,22 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       await _subscriptionService.purchaseProMonthly();
       if (!mounted) return;
       setState(() => _isActivating = false);
-      _showSnack('Pro subscription activated.');
+      _showSnack(AppLocalizations.of(context).proSubscriptionActivated);
       await _loadSubscription();
     } on SubscriptionException catch (e) {
       if (!mounted) return;
       setState(() => _isActivating = false);
-      _showSnack(e.message);
+      _showSubscriptionError(e);
     } catch (_) {
       if (!mounted) return;
       setState(() => _isActivating = false);
-      _showSnack('Could not complete the purchase. Please try again.');
+      _showSnack(AppLocalizations.of(context).couldNotCompletePurchase);
     }
   }
 
   /// Shown when RevenueCat keys/products are not configured in this build.
   Future<void> _showProviderNotConfiguredModal() async {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -88,19 +95,18 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(22),
           ),
-          title: const Text(
-            'Subscription provider not configured',
-            style: TextStyle(
+          title: Text(
+            l10n.subscriptionSetup,
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w800,
               color: SavingorColors.darkGreen,
             ),
           ),
-          content: const Text(
-            'Savingor Pro is prepared for RevenueCat-powered Apple and '
-            'Google in-app subscriptions. This local portfolio build does '
-            'not include RevenueCat keys or store products yet.',
-            style: TextStyle(
+          content: Text(
+            '${l10n.subscriptionSetupPrepared}\n\n'
+            '${l10n.subscriptionSetupNotConfigured}',
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: SavingorColors.textSecondary,
@@ -113,9 +119,8 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
               style: TextButton.styleFrom(
                 foregroundColor: SavingorColors.textSecondary,
               ),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
-            // Clearly secondary: demo fallback is for local testing only.
             OutlinedButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
               style: OutlinedButton.styleFrom(
@@ -131,7 +136,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              child: const Text('Activate Pro demo for testing'),
+              child: Text(l10n.activateProDemoForTesting),
             ),
           ],
         );
@@ -148,22 +153,23 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       await _subscriptionService.activateProDemoFallback();
       if (!mounted) return;
       setState(() => _isActivating = false);
-      _showSnack('Pro demo fallback activated — no real payment processed.');
+      _showSnack(AppLocalizations.of(context).proDemoFallbackActivated);
       await _loadSubscription();
     } on SubscriptionException catch (e) {
       if (!mounted) return;
       setState(() => _isActivating = false);
-      _showSnack(e.message);
+      _showSubscriptionError(e);
     } catch (_) {
       if (!mounted) return;
       setState(() => _isActivating = false);
-      _showSnack('Could not activate Pro demo. Please try again.');
+      _showSnack(AppLocalizations.of(context).couldNotActivateProDemo);
     }
   }
 
   Future<void> _onRestorePurchases() async {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     if (!_subscriptionService.isRevenueCatConfigured) {
-      _showSnack('Payment provider is not configured in this local build.');
+      _showSnack(l10n.paymentProviderNotConfiguredSnack);
       return;
     }
     setState(() => _isRestoring = true);
@@ -176,30 +182,31 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         _isRestoring = false;
       });
       _showSnack(
-        status.isPro ? 'Purchases restored.' : 'No purchases to restore.',
+        status.isPro ? l10n.purchaseRestored : l10n.noPurchasesFound,
       );
     } on SubscriptionException catch (e) {
       if (!mounted) return;
       setState(() => _isRestoring = false);
-      _showSnack(e.message);
+      _showSubscriptionError(e);
     } catch (_) {
       if (!mounted) return;
       setState(() => _isRestoring = false);
-      _showSnack('Could not restore purchases. Please try again.');
+      _showSnack(l10n.couldNotRestorePurchases);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final double bottomSafe = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
       backgroundColor: _pageBackground,
       appBar: AppBar(
         toolbarHeight: 48,
-        title: const Text(
-          'Plans',
-          style: TextStyle(
+        title: Text(
+          l10n.plans,
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
             color: SavingorColors.darkGreen,
@@ -254,7 +261,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                       ),
                       icon: const Icon(Icons.restore_rounded, size: 17),
                       label: Text(
-                        _isRestoring ? 'Restoring...' : 'Restore purchases',
+                        _isRestoring ? l10n.restoring : l10n.restorePurchases,
                         style: const TextStyle(
                           fontSize: 13.5,
                           fontWeight: FontWeight.w600,
@@ -277,6 +284,8 @@ class _ProHeroHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(22, 20, 22, 22),
@@ -317,9 +326,9 @@ class _ProHeroHeader extends StatelessWidget {
                     color: SavingorColors.primaryStroke.withOpacity(0.3),
                   ),
                 ),
-                child: const Text(
-                  'Free today • Pro when ready',
-                  style: TextStyle(
+                child: Text(
+                  l10n.freeTodayProWhenReady,
+                  style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
                     color: SavingorColors.darkGreen,
@@ -347,9 +356,9 @@ class _ProHeroHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          const Text(
-            'Save smarter with AI',
-            style: TextStyle(
+          Text(
+            l10n.saveSmarterWithAi,
+            style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,
               color: SavingorColors.darkGreen,
@@ -359,8 +368,7 @@ class _ProHeroHeader extends StatelessWidget {
           ),
           const SizedBox(height: SavingorSpacing.sm),
           Text(
-            'Unlock AI savings insights, receipt analytics, smart alerts, '
-            'and deeper spending reports.',
+            l10n.unlockProFeaturesDescription,
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
@@ -382,6 +390,8 @@ class _PlanSelectorRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
@@ -396,14 +406,14 @@ class _PlanSelectorRow extends StatelessWidget {
         children: <Widget>[
           Expanded(
             child: _SelectorChip(
-              label: 'Free',
+              label: l10n.free,
               selected: !isPro,
             ),
           ),
           const SizedBox(width: 4),
           Expanded(
             child: _SelectorChip(
-              label: 'Pro',
+              label: l10n.pro,
               selected: isPro,
             ),
           ),
@@ -455,14 +465,15 @@ class _FreeCompactCard extends StatelessWidget {
 
   final bool isCurrentPlan;
 
-  static const List<String> _features = <String>[
-    'Basic deals browsing',
-    'Shopping list',
-    'Manual expense tracking',
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final List<String> features = <String>[
+      l10n.basicDealsBrowsing,
+      l10n.shoppingList,
+      l10n.manualExpenseTracking,
+    ];
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
@@ -484,9 +495,9 @@ class _FreeCompactCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              const Text(
-                'Free',
-                style: TextStyle(
+              Text(
+                l10n.free,
+                style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
                   color: SavingorColors.darkGreen,
@@ -511,9 +522,9 @@ class _FreeCompactCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(SavingorRadius.pill),
                     border: Border.all(color: const Color(0xFFE5E7EB)),
                   ),
-                  child: const Text(
-                    'Current plan',
-                    style: TextStyle(
+                  child: Text(
+                    l10n.currentPlan,
+                    style: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                       color: SavingorColors.textSecondary,
@@ -523,7 +534,7 @@ class _FreeCompactCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: SavingorSpacing.sm),
-          ..._features.map(
+          ...features.map(
             (String feature) => Padding(
               padding: const EdgeInsets.only(bottom: 4),
               child: Row(
@@ -566,16 +577,18 @@ class _ProMainCard extends StatelessWidget {
   final bool isActivating;
   final VoidCallback onUpgrade;
 
-  static const List<String> _features = <String>[
-    'AI Savings Assistant',
-    'Receipt analytics',
-    'Smart savings insights',
-    'Spending reports',
-    'Smart alerts',
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final List<String> features = <String>[
+      l10n.aiSavingsAssistant,
+      l10n.receiptAnalytics,
+      l10n.smartSavingsInsights,
+      l10n.spendingReports,
+      l10n.smartAlerts,
+    ];
+    final String proPriceLabel = l10n.pricePerMonth('\$14.99');
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
@@ -609,10 +622,10 @@ class _ProMainCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Pro',
-                  style: TextStyle(
+                  l10n.pro,
+                  style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
                     color: SavingorColors.darkGreen,
@@ -637,7 +650,7 @@ class _ProMainCard extends StatelessWidget {
                   ],
                 ),
                 child: Text(
-                  isCurrentPlan ? 'Current plan' : 'Best value',
+                  isCurrentPlan ? l10n.currentPlan : l10n.bestValue,
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
@@ -649,31 +662,19 @@ class _ProMainCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 4),
-          const Text.rich(
-            TextSpan(
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.w800,
-                color: SavingorColors.darkGreen,
-                height: 1.05,
-              ),
-              children: <TextSpan>[
-                TextSpan(text: '\$14.99'),
-                TextSpan(
-                  text: ' / month',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: SavingorColors.textSecondary,
-                  ),
-                ),
-              ],
+          Text(
+            proPriceLabel,
+            style: const TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.w800,
+              color: SavingorColors.darkGreen,
+              height: 1.05,
             ),
           ),
           const SizedBox(height: SavingorSpacing.sm),
-          const Text(
-            'AI-powered tools for smarter grocery savings.',
-            style: TextStyle(
+          Text(
+            l10n.aiPoweredToolsDescription,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: SavingorColors.textSecondary,
@@ -681,7 +682,7 @@ class _ProMainCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: SavingorSpacing.md),
-          ..._features.map(
+          ...features.map(
             (String feature) => Padding(
               padding: const EdgeInsets.only(bottom: 6),
               child: Row(
@@ -741,7 +742,7 @@ class _ProMainCard extends StatelessWidget {
                       size: 20,
                       color: SavingorColors.primaryStroke,
                     ),
-                    label: const Text('Current plan'),
+                    label: Text(l10n.currentPlan),
                   )
                 : ElevatedButton(
                     onPressed: isActivating ? null : onUpgrade,
@@ -773,14 +774,14 @@ class _ProMainCard extends StatelessWidget {
                               color: SavingorColors.darkGreen,
                             ),
                           )
-                        : const Text('Start Pro subscription'),
+                        : Text(l10n.startProSubscription),
                   ),
           ),
           if (isCurrentPlan && isDemoFallback) ...<Widget>[
             const SizedBox(height: 8),
             Center(
               child: Text(
-                'Demo fallback active — no real payment processed.',
+                l10n.demoFallbackActive,
                 style: TextStyle(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w600,

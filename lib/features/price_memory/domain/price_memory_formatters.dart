@@ -1,10 +1,9 @@
+import 'package:savingor_app/core/services/currency_formatter.dart';
+
 /// Formats product prices for price memory UI.
 abstract final class PriceMemoryFormatters {
   static String formatPrice(double amount, {String currency = 'CAD'}) {
-    if (currency == 'CAD') {
-      return '\$${amount.toStringAsFixed(2)}';
-    }
-    return '$currency ${amount.toStringAsFixed(2)}';
+    return CurrencyFormatter.format(amount, currency);
   }
 
   static String formatDate(DateTime date) {

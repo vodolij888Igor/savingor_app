@@ -36,6 +36,7 @@ class ExpenseFirestoreService {
     required String storeName,
     required DateTime purchaseDate,
     required double totalAmount,
+    String currency = 'CAD',
   }) async {
     final String trimmedStore = storeName.trim();
     if (trimmedStore.isEmpty) {
@@ -56,6 +57,7 @@ class ExpenseFirestoreService {
         purchaseDate: purchaseDate,
         totalAmount: totalAmount,
         createdAt: DateTime.now(),
+        currency: currency.toUpperCase(),
       ).toFirestore(isCreate: true),
     );
 

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/i18n/profile_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/features/profile/data/user_profile_service.dart';
 import 'package:savingor_app/features/profile/presentation/screens/change_password_screen.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 /// Internal Edit profile screen — full name editing and password reset email.
 /// Opened from the Profile Account section; no bottom navigation here.
@@ -23,7 +25,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _isLoading = true;
   bool _isSaving = false;
   bool _isSendingReset = false;
-  String? _loadError;
+  String? _loadErrorKey;
   String _email = '';
 
   static const Color _pageBackground = SavingorColors.pageWhite;
@@ -56,7 +58,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> _loadProfile() async {
     setState(() {
       _isLoading = true;
-      _loadError = null;
+      _loadErrorKey = null;
     });
 
     try {
@@ -66,7 +68,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (profile == null) {
         setState(() {
           _isLoading = false;
-          _loadError = 'Sign in to edit your profile.';
+          _loadErrorKey = 'signIn';
         });
         return;
       }
@@ -79,7 +81,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _loadError = 'Could not load your profile. Please try again.';
+        _loadErrorKey = 'load';
       });
     }
   }
@@ -94,20 +96,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       await _profileService.updateFullName(_nameController.text);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated.')),
+        SnackBar(content: Text(AppLocalizations.of(context).changesSaved)),
       );
       context.pop(true);
     } on UserProfileException catch (e) {
       if (!mounted) return;
       setState(() => _isSaving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
+        SnackBar(content: Text(ProfileL10n.localizeException(context, e))),
       );
     } catch (_) {
       if (!mounted) return;
       setState(() => _isSaving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not save your changes. Please try again.')),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).couldNotSaveChanges),
+        ),
       );
     }
   }
@@ -120,17 +124,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       await _profileService.sendPasswordResetEmail();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password reset email sent.')),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).passwordResetEmailSent),
+        ),
       );
     } on UserProfileException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
+        SnackBar(content: Text(ProfileL10n.localizeException(context, e))),
       );
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not send the reset email. Please try again.')),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).couldNotSendResetEmail),
+        ),
       );
     } finally {
       if (mounted) {
@@ -147,15 +155,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
+  String? _loadErrorMessage(AppLocalizations l10n) {
+    return switch (_loadErrorKey) {
+      'signIn' => l10n.signInToEditProfile,
+      'load' => l10n.couldNotLoadProfile,
+      _ => null,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
       backgroundColor: _pageBackground,
       appBar: AppBar(
-        title: const Text(
-          'Edit profile',
+        title: Text(
+          l10n.editProfile,
           style: SavingorAppTextStyles.screenTitle,
         ),
         centerTitle: false,
@@ -172,11 +189,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           onPressed: _goBack,
         ),
       ),
-      body: _buildBody(bottomInset),
+      body: _buildBody(l10n, bottomInset),
     );
   }
 
-  Widget _buildBody(double bottomInset) {
+  Widget _buildBody(AppLocalizations l10n, double bottomInset) {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(
@@ -185,7 +202,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       );
     }
 
-    if (_loadError != null) {
+    final String? loadError = _loadErrorMessage(l10n);
+    if (loadError != null) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -193,7 +211,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Text(
-                _loadError!,
+                loadError,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 14,
@@ -206,7 +224,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               OutlinedButton(
                 onPressed: _loadProfile,
                 style: SavingorButtonStyles.secondaryOutlined(),
-                child: const Text('Try again'),
+                child: Text(l10n.tryAgain),
               ),
             ],
           ),
@@ -222,11 +240,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             _sectionCard(
-              title: 'Personal information',
+              title: l10n.personalInformation,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  const Text('Full name', style: _fieldLabelStyle),
+                  Text(l10n.fullName, style: _fieldLabelStyle),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _nameController,
@@ -237,16 +255,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       fontWeight: FontWeight.w600,
                       color: _titleCharcoal,
                     ),
-                    decoration: _fieldDecoration(hint: 'Your full name'),
+                    decoration: _fieldDecoration(
+                      hint: l10n.editProfileFullNameHint,
+                    ),
                     validator: (String? value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter your full name';
+                        return l10n.pleaseEnterFullName;
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
-                  const Text('Email', style: _fieldLabelStyle),
+                  Text(l10n.email, style: _fieldLabelStyle),
                   const SizedBox(height: 8),
                   TextFormField(
                     initialValue: _email,
@@ -262,7 +282,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Email changes are not available in this version.',
+                    l10n.emailChangesNotAvailable,
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -275,11 +295,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ),
             const SizedBox(height: SavingorSpacing.lg),
             _sectionCard(
-              title: 'Password & security',
+              title: l10n.passwordAndSecurity,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  const Text('Password', style: _fieldLabelStyle),
+                  Text(l10n.password, style: _fieldLabelStyle),
                   const SizedBox(height: 6),
                   const Text(
                     '••••••••••',
@@ -293,7 +313,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'For security, your current password is never shown.',
+                    l10n.passwordNeverShown,
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -303,9 +323,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   const SizedBox(height: 14),
                   OutlinedButton.icon(
-                    // Navigator.push (not go_router path) so this can never
-                    // hit "Page Not Found"; the pushed page covers the shell,
-                    // so no bottom navigation is shown.
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute<void>(
@@ -316,7 +333,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     },
                     style: SavingorButtonStyles.secondaryOutlined(),
                     icon: const Icon(Icons.lock_outline_rounded, size: 19),
-                    label: const Text('Change password'),
+                    label: Text(l10n.changePassword),
                   ),
                   const SizedBox(height: 4),
                   TextButton(
@@ -330,8 +347,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                     child: Text(
                       _isSendingReset
-                          ? 'Sending reset email...'
-                          : 'Send password reset email instead',
+                          ? l10n.sendingResetEmail
+                          : l10n.sendPasswordResetEmailInstead,
                       style: const TextStyle(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w600,
@@ -356,7 +373,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         color: SavingorColors.darkGreen,
                       ),
                     )
-                  : const Text('Save changes'),
+                  : Text(l10n.saveChanges),
             ),
           ],
         ),

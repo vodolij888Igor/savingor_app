@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/i18n/shopping_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class AddShoppingListItemScreen extends StatefulWidget {
   const AddShoppingListItemScreen({super.key, required this.listId});
@@ -56,22 +58,23 @@ class _AddShoppingListItemScreenState extends State<AddShoppingListItemScreen> {
     final String? error = store.mutationError;
     if (error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error)),
+        SnackBar(content: Text(ShoppingL10n.localizeError(context, error))),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
     final double keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
 
     return Scaffold(
       backgroundColor: AddShoppingListItemScreen._pageBackground,
       appBar: AppBar(
-        title: const Text(
-          'Add item',
-          style: TextStyle(
+        title: Text(
+          l10n.addItem,
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w800,
             color: SavingorColors.darkGreen,
@@ -105,13 +108,13 @@ class _AddShoppingListItemScreenState extends State<AddShoppingListItemScreen> {
               TextFormField(
                 controller: _nameController,
                 textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
-                  labelText: 'Item name',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.itemName,
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (String? value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Enter an item name';
+                    return l10n.enterItemName;
                   }
                   return null;
                 },
@@ -120,9 +123,9 @@ class _AddShoppingListItemScreenState extends State<AddShoppingListItemScreen> {
               TextFormField(
                 controller: _storeController,
                 textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
-                  labelText: 'Store (optional)',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.storeOptional,
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
@@ -131,9 +134,9 @@ class _AddShoppingListItemScreenState extends State<AddShoppingListItemScreen> {
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 textInputAction: TextInputAction.done,
-                decoration: const InputDecoration(
-                  labelText: 'Price (optional)',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.priceOptional,
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 24),
@@ -146,7 +149,7 @@ class _AddShoppingListItemScreenState extends State<AddShoppingListItemScreen> {
                         height: 22,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Save item'),
+                    : Text(l10n.saveItem),
               ),
             ],
           ),

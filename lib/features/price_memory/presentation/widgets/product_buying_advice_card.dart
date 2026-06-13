@@ -6,6 +6,7 @@ import 'package:savingor_app/features/price_memory/domain/price_memory_formatter
 import 'package:savingor_app/features/price_memory/domain/product_buying_advice.dart';
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
 import 'package:savingor_app/features/shopping/domain/shopping_list_add_item_result.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class ProductBuyingAdviceCard extends StatefulWidget {
   const ProductBuyingAdviceCard({
@@ -27,14 +28,17 @@ class ProductBuyingAdviceCard extends StatefulWidget {
 class _ProductBuyingAdviceCardState extends State<ProductBuyingAdviceCard> {
   bool _isAdding = false;
 
-  Future<void> _addToShoppingList(ProductBuyingAdvice advice) async {
+  Future<void> _addToShoppingList(
+    ProductBuyingAdvice advice,
+    AppLocalizations l10n,
+  ) async {
     if (_isAdding) {
       return;
     }
 
     final ShoppingListsStore store = ShoppingListsProvider.of(context);
     if (!store.isAuthenticated) {
-      _showSnackBar('Sign in to add items to your shopping list.');
+      _showSnackBar(l10n.signInToAddShoppingItems);
       return;
     }
 
@@ -54,18 +58,18 @@ class _ProductBuyingAdviceCardState extends State<ProductBuyingAdviceCard> {
 
     switch (result) {
       case ShoppingListAddItemResult.added:
-        _showSnackBar('Added to shopping list');
+        _showSnackBar(l10n.addedToShoppingList);
       case ShoppingListAddItemResult.alreadyExists:
-        _showSnackBar('Already in shopping list');
+        _showSnackBar(l10n.alreadyInShoppingList);
       case ShoppingListAddItemResult.quantityUpdated:
-        _showSnackBar('Quantity updated');
+        _showSnackBar(l10n.quantityUpdatedSnack);
       case ShoppingListAddItemResult.notAuthenticated:
         _showSnackBar(
-          store.mutationError ?? 'Sign in to add items to your shopping list.',
+          store.mutationError ?? l10n.signInToAddShoppingItems,
         );
       case ShoppingListAddItemResult.failed:
         _showSnackBar(
-          store.mutationError ?? 'Could not add the item. Please try again.',
+          store.mutationError ?? l10n.couldNotAddItem,
         );
     }
   }
@@ -76,8 +80,49 @@ class _ProductBuyingAdviceCardState extends State<ProductBuyingAdviceCard> {
     );
   }
 
+  String _recommendationText(
+    ProductBuyingAdvice advice,
+    AppLocalizations l10n,
+  ) {
+    final String? store = advice.bestStore;
+    if (store == null || store.isEmpty) {
+      return l10n.buyItemAtBestPriceWhenFitsRoute;
+    }
+    return l10n.buyItemAtStoreWhenFitsRoute(store);
+  }
+
+  String _neutralMessage(ProductBuyingAdvice advice, AppLocalizations l10n) {
+    switch (advice.kind) {
+      case ProductBuyingAdviceKind.insufficientHistory:
+        return l10n.buyingAdviceInsufficientHistory;
+      case ProductBuyingAdviceKind.paidBestPrice:
+        return l10n.buyingAdvicePaidBestPrice;
+      case ProductBuyingAdviceKind.noBetterPriceYet:
+        return l10n.buyingAdviceNoBetterPriceYet;
+      case ProductBuyingAdviceKind.savingAvailable:
+        return '';
+    }
+  }
+
+  String _priceAtStore(
+    AppLocalizations l10n,
+    double price,
+    String? store,
+    String currency,
+  ) {
+    final String formatted = PriceMemoryFormatters.formatPrice(
+      price,
+      currency: currency,
+    );
+    if (store == null || store.isEmpty) {
+      return formatted;
+    }
+    return l10n.priceAtStore(formatted, store);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final ProductBuyingAdvice advice = ProductBuyingAdviceBuilder.build(
       widget.records,
       currency: widget.currency,
@@ -96,9 +141,9 @@ class _ProductBuyingAdviceCardState extends State<ProductBuyingAdviceCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text(
-            'Buying advice',
-            style: TextStyle(
+          Text(
+            l10n.buyingAdvice,
+            style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
               color: SavingorColors.primaryStroke,
@@ -106,12 +151,12 @@ class _ProductBuyingAdviceCardState extends State<ProductBuyingAdviceCard> {
             ),
           ),
           const SizedBox(height: 12),
-          ..._buildBody(advice),
+          ..._buildBody(advice, l10n),
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: _isAdding ? null : () => _addToShoppingList(advice),
+              onPressed: _isAdding ? null : () => _addToShoppingList(advice, l10n),
               style: OutlinedButton.styleFrom(
                 foregroundColor: SavingorColors.darkGreen,
                 side: BorderSide(
@@ -129,9 +174,9 @@ class _ProductBuyingAdviceCardState extends State<ProductBuyingAdviceCard> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.playlist_add_rounded, size: 20),
-              label: const Text(
-                'Add to shopping list',
-                style: TextStyle(
+              label: Text(
+                l10n.addToShoppingList,
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
                 ),
@@ -143,38 +188,36 @@ class _ProductBuyingAdviceCardState extends State<ProductBuyingAdviceCard> {
     );
   }
 
-  List<Widget> _buildBody(ProductBuyingAdvice advice) {
+  List<Widget> _buildBody(ProductBuyingAdvice advice, AppLocalizations l10n) {
     switch (advice.kind) {
       case ProductBuyingAdviceKind.insufficientHistory:
-        return <Widget>[
-          Text(
-            advice.neutralMessage,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: SavingorColors.textSecondary,
-              height: 1.4,
-            ),
-          ),
-        ];
       case ProductBuyingAdviceKind.paidBestPrice:
       case ProductBuyingAdviceKind.noBetterPriceYet:
         return <Widget>[
           Text(
-            advice.neutralMessage,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: SavingorColors.darkGreen,
-              height: 1.35,
+            _neutralMessage(advice, l10n),
+            style: TextStyle(
+              fontSize: advice.kind == ProductBuyingAdviceKind.insufficientHistory
+                  ? 14
+                  : 15,
+              fontWeight: advice.kind == ProductBuyingAdviceKind.insufficientHistory
+                  ? FontWeight.w600
+                  : FontWeight.w700,
+              color: advice.kind == ProductBuyingAdviceKind.insufficientHistory
+                  ? SavingorColors.textSecondary
+                  : SavingorColors.darkGreen,
+              height: advice.kind == ProductBuyingAdviceKind.insufficientHistory
+                  ? 1.4
+                  : 1.35,
             ),
           ),
         ];
       case ProductBuyingAdviceKind.savingAvailable:
         return <Widget>[
           _detailLine(
-            'Best known price',
+            l10n.bestKnownPriceAdviceLabel,
             _priceAtStore(
+              l10n,
               advice.bestKnownUnitPrice!,
               advice.bestStore,
               advice.currency,
@@ -182,8 +225,9 @@ class _ProductBuyingAdviceCardState extends State<ProductBuyingAdviceCard> {
           ),
           const SizedBox(height: 8),
           _detailLine(
-            'Latest paid',
+            l10n.latestPaidAdviceLabel,
             _priceAtStore(
+              l10n,
               advice.latestPaidUnitPrice!,
               advice.latestStore,
               advice.currency,
@@ -191,7 +235,12 @@ class _ProductBuyingAdviceCardState extends State<ProductBuyingAdviceCard> {
           ),
           const SizedBox(height: 10),
           Text(
-            'Potential saving: ${PriceMemoryFormatters.formatPrice(advice.potentialSavingPerItem!, currency: advice.currency)} per item',
+            l10n.potentialSavingPerItem(
+              PriceMemoryFormatters.formatPrice(
+                advice.potentialSavingPerItem!,
+                currency: advice.currency,
+              ),
+            ),
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w800,
@@ -199,31 +248,18 @@ class _ProductBuyingAdviceCardState extends State<ProductBuyingAdviceCard> {
               height: 1.3,
             ),
           ),
-          if (advice.recommendationText != null) ...<Widget>[
-            const SizedBox(height: 10),
-            Text(
-              advice.recommendationText!,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: SavingorColors.darkGreen,
-                height: 1.4,
-              ),
+          const SizedBox(height: 10),
+          Text(
+            _recommendationText(advice, l10n),
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: SavingorColors.darkGreen,
+              height: 1.4,
             ),
-          ],
+          ),
         ];
     }
-  }
-
-  String _priceAtStore(double price, String? store, String currency) {
-    final String formatted = PriceMemoryFormatters.formatPrice(
-      price,
-      currency: currency,
-    );
-    if (store == null || store.isEmpty) {
-      return formatted;
-    }
-    return '$formatted at $store';
   }
 
   Widget _detailLine(String label, String value) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:savingor_app/core/i18n/receipt_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt_source.dart';
 
@@ -41,7 +42,7 @@ class ReceiptSourceBadge extends StatelessWidget {
           ),
           const SizedBox(width: 4),
           Text(
-            source.label,
+            ReceiptL10n.sourceLabel(context, source),
             style: TextStyle(
               fontSize: fontSize,
               fontWeight: FontWeight.w700,

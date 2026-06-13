@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/app_state.dart';
+import 'package:savingor_app/core/i18n/expense_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/expenses/data/expenses_store.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class CreateExpenseScreen extends StatefulWidget {
   const CreateExpenseScreen({super.key});
@@ -77,18 +80,20 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
         double.tryParse(_amountController.text.trim());
     if (totalAmount == null || totalAmount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter a valid total amount.')),
+        SnackBar(content: Text(AppLocalizations.of(context).enterValidTotalAmount)),
       );
       return;
     }
 
     setState(() => _isSaving = true);
     final ExpensesStore store = ExpensesProvider.of(context);
+    final AppState appState = AppStateProvider.of(context);
 
     final String? expenseId = await store.createExpense(
       storeName: _storeController.text.trim(),
       purchaseDate: _selectedDate,
       totalAmount: totalAmount,
+      currency: appState.currency,
     );
 
     if (!mounted) return;
@@ -102,22 +107,23 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
     final String? error = store.mutationError;
     if (error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error)),
+        SnackBar(content: Text(ExpenseL10n.localizeError(context, error))),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
     final double keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
 
     return Scaffold(
       backgroundColor: CreateExpenseScreen._pageBackground,
       appBar: AppBar(
-        title: const Text(
-          'Add expense',
-          style: TextStyle(
+        title: Text(
+          l10n.addExpense,
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w800,
             color: SavingorColors.darkGreen,
@@ -151,13 +157,13 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
               TextFormField(
                 controller: _storeController,
                 textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
-                  labelText: 'Store Name',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.storeName,
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (String? value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Enter a store name';
+                    return l10n.enterStoreName;
                   }
                   return null;
                 },
@@ -167,14 +173,14 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
                 controller: _dateController,
                 readOnly: true,
                 onTap: _isSaving ? null : _pickDate,
-                decoration: const InputDecoration(
-                  labelText: 'Purchase Date',
-                  border: OutlineInputBorder(),
-                  suffixIcon: Icon(Icons.calendar_today_outlined),
+                decoration: InputDecoration(
+                  labelText: l10n.purchaseDate,
+                  border: const OutlineInputBorder(),
+                  suffixIcon: const Icon(Icons.calendar_today_outlined),
                 ),
                 validator: (String? value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Select a purchase date';
+                    return l10n.selectPurchaseDate;
                   }
                   return null;
                 },
@@ -185,18 +191,18 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 textInputAction: TextInputAction.done,
-                decoration: const InputDecoration(
-                  labelText: 'Total Amount',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.totalAmount,
+                  border: const OutlineInputBorder(),
                   prefixText: '\$ ',
                 ),
                 validator: (String? value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Enter the total amount';
+                    return l10n.enterTotalAmount;
                   }
                   final double? amount = double.tryParse(value.trim());
                   if (amount == null || amount <= 0) {
-                    return 'Enter a valid amount';
+                    return l10n.enterValidAmount;
                   }
                   return null;
                 },
@@ -211,7 +217,7 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
                         height: 22,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Save expense'),
+                    : Text(l10n.saveExpense),
               ),
             ],
           ),

@@ -5,9 +5,20 @@ import 'package:go_router/go_router.dart';
 import 'package:savingor_app/core/app_state.dart';
 import 'package:savingor_app/core/i18n/startup_flow_strings.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
+
+enum LanguageSelectMode {
+  onboarding,
+  settings,
+}
 
 class LanguageSelectScreen extends StatefulWidget {
-  const LanguageSelectScreen({super.key});
+  const LanguageSelectScreen({
+    super.key,
+    this.mode = LanguageSelectMode.onboarding,
+  });
+
+  final LanguageSelectMode mode;
 
   @override
   State<LanguageSelectScreen> createState() => _LanguageSelectScreenState();
@@ -83,14 +94,10 @@ class _LanguageSelectScreenState extends State<LanguageSelectScreen>
     }
   }
 
-  /// UI language used to render the language screen's own title / subtitle /
-  /// Continue label. Driven by [_selectedCode] so every dropdown tap triggers
-  /// an immediate rebuild of the screen in the chosen language. The initial
-  /// value of [_selectedCode] is seeded in [didChangeDependencies] from the
-  /// saved app-state language (returning users) or the system locale when it
-  /// is one of the supported codes, falling back to `'en'`.
-  String _pickerUiLang() =>
-      StartupFlowStrings.normalizeLanguageCode(_selectedCode);
+  /// UI language used to render the language screen from the current selection.
+  AppLocalizations _pickerL10n(String code) => lookupAppLocalizations(
+        Locale(StartupFlowStrings.normalizeLanguageCode(code)),
+      );
 
   _LangChoice _choiceFor(String code) {
     return _choices.firstWhere(
@@ -99,9 +106,27 @@ class _LanguageSelectScreenState extends State<LanguageSelectScreen>
     );
   }
 
-  void _continue() {
-    final app = AppStateProvider.of(context);
-    final hadLanguageAlready = app.language != null;
+  bool get _isSettingsMode =>
+      widget.mode == LanguageSelectMode.settings;
+
+  void _goBack() {
+    final NavigatorState navigator = Navigator.of(context);
+    if (navigator.canPop()) {
+      navigator.pop();
+    } else if (_isSettingsMode) {
+      context.go('/profile/settings');
+    }
+  }
+
+  void _onPrimaryAction() {
+    final AppState app = AppStateProvider.of(context);
+    if (_isSettingsMode) {
+      app.setLanguage(_selectedCode);
+      _goBack();
+      return;
+    }
+
+    final bool hadLanguageAlready = app.language != null;
     app.setLanguage(_selectedCode);
     if (hadLanguageAlready) {
       context.go('/deals');
@@ -138,8 +163,113 @@ class _LanguageSelectScreenState extends State<LanguageSelectScreen>
 
   @override
   Widget build(BuildContext context) {
-    final String ui = _pickerUiLang();
+    final AppLocalizations l10n = _pickerL10n(_selectedCode);
     final _LangChoice current = _choiceFor(_selectedCode);
+    final String titleText = l10n.chooseYourLanguage;
+    final String subtitleText = _isSettingsMode
+        ? l10n.chooseLanguageSubtitle
+        : l10n.langSubtitleOnboarding;
+    final String primaryButtonLabel = _isSettingsMode
+        ? l10n.applyLanguage
+        : l10n.continueButton;
+
+    if (_isSettingsMode) {
+      return Scaffold(
+        backgroundColor: SavingorColors.pageWhite,
+        body: Column(
+          children: <Widget>[
+            SafeArea(
+              bottom: false,
+              child: _SettingsLanguageHeader(
+                onBack: _goBack,
+                title: titleText,
+              ),
+            ),
+            Expanded(
+              child: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  Positioned.fill(
+                    child: Image.asset(
+                      _backgroundAsset,
+                      fit: BoxFit.cover,
+                      alignment: Alignment.topCenter,
+                      filterQuality: FilterQuality.high,
+                    ),
+                  ),
+                  SafeArea(
+                    top: false,
+                    child: LayoutBuilder(
+                      builder: (BuildContext context, BoxConstraints constraints) {
+                        final double safeHeight = constraints.maxHeight;
+                        // Logo stays in the background artwork; these offsets place
+                        // subtitle and selector as one centered group beneath it.
+                        final double logoBottomEstimate =
+                            (safeHeight * 0.27).clamp(96.0, 172.0);
+                        final double logoToSubtitleGap =
+                            (safeHeight * 0.024).clamp(16.0, 20.0);
+                        final double subtitleTopOffset =
+                            logoBottomEstimate + logoToSubtitleGap;
+                        final double subtitleToSelectorGap =
+                            (safeHeight * 0.034).clamp(22.0, 26.0);
+                        const double buttonBlock = 64.0;
+                        const double subtitleBlock = 44.0;
+                        final double listMaxHeight = (safeHeight -
+                                subtitleTopOffset -
+                                subtitleToSelectorGap -
+                                subtitleBlock -
+                                buttonBlock)
+                            .clamp(150.0, 300.0);
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 22),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: <Widget>[
+                              SizedBox(height: subtitleTopOffset),
+                              Text(
+                                subtitleText,
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                style: SavingorTextStyles.onboardingSubtitle
+                                    .copyWith(
+                                  shadows: _copyShadows,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.35,
+                                ),
+                              ),
+                              SizedBox(height: subtitleToSelectorGap),
+                              _InlineLanguageDropdown(
+                                current: current,
+                                choices: _choices,
+                                selectedCode: _selectedCode,
+                                animation: _dropdownAnim,
+                                listMaxHeight: listMaxHeight,
+                                onToggle: _toggleDropdown,
+                                onSelect: _selectLanguage,
+                              ),
+                              const Spacer(),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 8),
+                                child: FilledButton(
+                                  style: SavingorButtonStyles.primaryFilled(),
+                                  onPressed: _onPrimaryAction,
+                                  child: Text(primaryButtonLabel),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -161,11 +291,6 @@ class _LanguageSelectScreenState extends State<LanguageSelectScreen>
               builder: (BuildContext context, BoxConstraints constraints) {
                 final double safeHeight = constraints.maxHeight;
                 final double topInset = safeHeight * 0.26;
-                // Cap the expanded list so the open dropdown never overflows
-                // and the Continue button stays anchored to the bottom.
-                // Tuned so the Spacer never collapses below ~20 px on common
-                // phone safe areas; the list becomes scrollable if 6 rows
-                // exceed the cap.
                 final double listMaxHeight =
                     (safeHeight * 0.32).clamp(170.0, 330.0);
                 return Padding(
@@ -175,7 +300,7 @@ class _LanguageSelectScreenState extends State<LanguageSelectScreen>
                     children: <Widget>[
                       SizedBox(height: topInset),
                       Text(
-                        StartupFlowStrings.tPicker(ui, 'lang_title'),
+                        titleText,
                         textAlign: TextAlign.center,
                         style: SavingorTextStyles.onboardingTitle.copyWith(
                           shadows: _copyShadows,
@@ -183,7 +308,7 @@ class _LanguageSelectScreenState extends State<LanguageSelectScreen>
                       ),
                       const SizedBox(height: SavingorSpacing.sm),
                       Text(
-                        StartupFlowStrings.tPicker(ui, 'lang_subtitle'),
+                        subtitleText,
                         textAlign: TextAlign.center,
                         style: SavingorTextStyles.onboardingSubtitle.copyWith(
                           shadows: _copyShadows,
@@ -204,10 +329,8 @@ class _LanguageSelectScreenState extends State<LanguageSelectScreen>
                         padding: const EdgeInsets.only(bottom: 8),
                         child: FilledButton(
                           style: SavingorButtonStyles.primaryFilled(),
-                          onPressed: _continue,
-                          child: Text(
-                            StartupFlowStrings.tPicker(ui, 'lang_continue'),
-                          ),
+                          onPressed: _onPrimaryAction,
+                          child: Text(primaryButtonLabel),
                         ),
                       ),
                     ],
@@ -216,6 +339,52 @@ class _LanguageSelectScreenState extends State<LanguageSelectScreen>
               },
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SettingsLanguageHeader extends StatelessWidget {
+  const _SettingsLanguageHeader({
+    required this.onBack,
+    required this.title,
+  });
+
+  final VoidCallback onBack;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: SavingorColors.pageWhite,
+        border: Border(
+          bottom: BorderSide(
+            color: SavingorColors.border.withOpacity(0.65),
+          ),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(4, 4, 12, 10),
+      child: Row(
+        children: <Widget>[
+          IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: SavingorColors.darkGreen,
+              size: 20,
+            ),
+            onPressed: onBack,
+          ),
+          Expanded(
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              style: SavingorAppTextStyles.screenTitle,
+            ),
+          ),
+          const SizedBox(width: 48),
         ],
       ),
     );

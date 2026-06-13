@@ -9,6 +9,7 @@ class UserExpense {
     required this.purchaseDate,
     required this.totalAmount,
     required this.createdAt,
+    this.currency = 'CAD',
   });
 
   final String id;
@@ -17,6 +18,7 @@ class UserExpense {
   final DateTime purchaseDate;
   final double totalAmount;
   final DateTime createdAt;
+  final String currency;
 
   factory UserExpense.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> snapshot,
@@ -29,6 +31,7 @@ class UserExpense {
       purchaseDate: _timestampToDate(data['purchaseDate']),
       totalAmount: (data['totalAmount'] as num?)?.toDouble() ?? 0,
       createdAt: _timestampToDate(data['createdAt']),
+      currency: _parseCurrency(data['currency']),
     );
   }
 
@@ -38,8 +41,16 @@ class UserExpense {
       'storeName': storeName,
       'purchaseDate': Timestamp.fromDate(purchaseDate),
       'totalAmount': totalAmount,
+      'currency': currency,
       if (isCreate) 'createdAt': FieldValue.serverTimestamp(),
     };
+  }
+
+  static String _parseCurrency(Object? value) {
+    if (value is String && value.trim().isNotEmpty) {
+      return value.trim().toUpperCase();
+    }
+    return 'CAD';
   }
 
   static DateTime _timestampToDate(Object? value) {

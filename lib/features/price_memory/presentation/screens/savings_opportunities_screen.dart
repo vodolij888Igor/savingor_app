@@ -6,6 +6,7 @@ import 'package:savingor_app/core/widgets/app_screen_states.dart';
 import 'package:savingor_app/features/price_memory/data/price_memory_store.dart';
 import 'package:savingor_app/features/price_memory/domain/models/savings_opportunity.dart';
 import 'package:savingor_app/features/price_memory/presentation/widgets/savings_opportunity_card.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class SavingsOpportunitiesScreen extends StatelessWidget {
   const SavingsOpportunitiesScreen({super.key});
@@ -14,6 +15,7 @@ class SavingsOpportunitiesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final PriceMemoryStore store = PriceMemoryProvider.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
@@ -23,9 +25,9 @@ class SavingsOpportunitiesScreen extends StatelessWidget {
         return Scaffold(
           backgroundColor: _pageBackground,
           appBar: AppBar(
-            title: const Text(
-              'Savings opportunities',
-              style: TextStyle(
+            title: Text(
+              l10n.savingsOpportunities,
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
                 color: SavingorColors.darkGreen,
@@ -44,7 +46,7 @@ class SavingsOpportunitiesScreen extends StatelessWidget {
               onPressed: () => context.pop(),
             ),
           ),
-          body: _buildBody(context, store, bottomInset),
+          body: _buildBody(context, store, bottomInset, l10n),
         );
       },
     );
@@ -54,21 +56,22 @@ class SavingsOpportunitiesScreen extends StatelessWidget {
     BuildContext context,
     PriceMemoryStore store,
     double bottomInset,
+    AppLocalizations l10n,
   ) {
     if (!store.isAuthenticated) {
       return AppSignInRequiredState(
-        message: 'Sign in to see savings opportunities from your receipts.',
+        message: l10n.signInForSavingsOpportunities,
         onSignIn: () => context.push('/auth'),
       );
     }
 
     if (store.isLoading) {
-      return const AppLoadingState(message: 'Loading savings opportunities…');
+      return AppLoadingState(message: l10n.loadingSavingsOpportunities);
     }
 
     if (store.loadError != null) {
       return AppErrorState(
-        title: 'Could not load savings opportunities',
+        title: l10n.couldNotLoadSavingsOpportunities,
         message: store.loadError!,
         onRetry: store.retry,
       );
@@ -79,10 +82,9 @@ class SavingsOpportunitiesScreen extends StatelessWidget {
     if (opportunities.isEmpty) {
       return AppEmptyState(
         icon: Icons.savings_outlined,
-        title: 'No savings opportunities yet',
-        message:
-            'Add more receipts with line items so Savingor can compare prices across stores.',
-        actionLabel: 'Add receipt',
+        title: l10n.noSavingsOpportunitiesYet,
+        message: l10n.noSavingsOpportunitiesMessage,
+        actionLabel: l10n.addReceipt,
         prominentAction: true,
         onAction: () => context.push('/scanner/create'),
       );
@@ -95,7 +97,7 @@ class SavingsOpportunitiesScreen extends StatelessWidget {
       itemBuilder: (BuildContext context, int index) {
         if (index == 0) {
           return Text(
-            '${opportunities.length} actionable ${opportunities.length == 1 ? 'opportunity' : 'opportunities'} where you paid more than the best known price',
+            l10n.savingsOpportunitiesPaidMoreCount(opportunities.length),
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,

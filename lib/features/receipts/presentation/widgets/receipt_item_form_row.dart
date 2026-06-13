@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 /// Editable receipt line item row for manual receipt entry.
 class ReceiptItemFormRow extends StatelessWidget {
@@ -23,6 +24,8 @@ class ReceiptItemFormRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -38,10 +41,10 @@ class ReceiptItemFormRow extends StatelessWidget {
         children: <Widget>[
           Row(
             children: <Widget>[
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Item',
-                  style: TextStyle(
+                  l10n.item,
+                  style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: SavingorColors.darkGreen,
@@ -55,7 +58,7 @@ class ReceiptItemFormRow extends StatelessWidget {
                   size: 20,
                   color: SavingorColors.textSecondary,
                 ),
-                tooltip: 'Remove item',
+                tooltip: l10n.removeItem,
               ),
             ],
           ),
@@ -63,14 +66,14 @@ class ReceiptItemFormRow extends StatelessWidget {
             controller: nameController,
             enabled: enabled,
             textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(
-              labelText: 'Item name',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.itemName,
+              border: const OutlineInputBorder(),
               isDense: true,
             ),
             validator: (String? value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Enter an item name';
+                return l10n.enterItemName;
               }
               return null;
             },
@@ -85,18 +88,18 @@ class ReceiptItemFormRow extends StatelessWidget {
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
                   textInputAction: TextInputAction.next,
-                  decoration: const InputDecoration(
-                    labelText: 'Qty',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.qty,
+                    border: const OutlineInputBorder(),
                     isDense: true,
                   ),
                   validator: (String? value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Qty';
+                      return l10n.qty;
                     }
                     final double? qty = double.tryParse(value.trim());
                     if (qty == null || qty <= 0) {
-                      return 'Invalid';
+                      return l10n.invalidValue;
                     }
                     return null;
                   },
@@ -111,19 +114,19 @@ class ReceiptItemFormRow extends StatelessWidget {
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
                   textInputAction: TextInputAction.next,
-                  decoration: const InputDecoration(
-                    labelText: 'Price',
+                  decoration: InputDecoration(
+                    labelText: l10n.price,
                     prefixText: '\$ ',
-                    border: OutlineInputBorder(),
+                    border: const OutlineInputBorder(),
                     isDense: true,
                   ),
                   validator: (String? value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Price';
+                      return l10n.price;
                     }
                     final double? price = double.tryParse(value.trim());
                     if (price == null || price < 0) {
-                      return 'Invalid';
+                      return l10n.invalidValue;
                     }
                     return null;
                   },
@@ -136,9 +139,9 @@ class ReceiptItemFormRow extends StatelessWidget {
             controller: categoryController,
             enabled: enabled,
             textInputAction: TextInputAction.done,
-            decoration: const InputDecoration(
-              labelText: 'Category (optional)',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.categoryOptional,
+              border: const OutlineInputBorder(),
               isDense: true,
             ),
           ),

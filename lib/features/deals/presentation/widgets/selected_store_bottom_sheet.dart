@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'package:savingor_app/core/i18n/map_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/deals/domain/models/nearby_store.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 /// Bottom sheet with store details and directions from a map marker tap.
 class SelectedStoreBottomSheet extends StatelessWidget {
@@ -34,6 +36,7 @@ class SelectedStoreBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Padding(
@@ -82,7 +85,7 @@ class SelectedStoreBottomSheet extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      store.category.label,
+                      MapL10n.storeCategoryLabel(context, store.category),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -133,7 +136,7 @@ class SelectedStoreBottomSheet extends StatelessWidget {
           if (store.isRealData) ...<Widget>[
             const SizedBox(height: 10),
             Text(
-              store.statusText,
+              MapL10n.localizedStoreStatusText(context, store.statusText),
               style: SavingorAppTextStyles.bodySecondary(fontSize: 12),
             ),
           ],
@@ -143,7 +146,7 @@ class SelectedStoreBottomSheet extends StatelessWidget {
             child: OutlinedButton.icon(
               onPressed: onDirections,
               icon: const Icon(Icons.directions_rounded, size: 18),
-              label: const Text('Directions'),
+              label: Text(l10n.directions),
               style: OutlinedButton.styleFrom(
                 foregroundColor: SavingorAccentColors.map,
                 side: BorderSide(

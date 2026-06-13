@@ -79,6 +79,7 @@ class BottomNavShell extends StatelessWidget {
               currentIndex: currentIndex,
               homeLabel: t.home,
               mapLabel: t.storesMap,
+              scanLabel: t.scanReceipt,
               aiLabel: t.aiAssistant,
               profileLabel: t.profile,
               onTabSelected: (int index) => _onTabSelected(context, index),
@@ -93,6 +94,7 @@ class _PremiumNavBar extends StatelessWidget {
     required this.currentIndex,
     required this.homeLabel,
     required this.mapLabel,
+    required this.scanLabel,
     required this.aiLabel,
     required this.profileLabel,
     required this.onTabSelected,
@@ -101,6 +103,7 @@ class _PremiumNavBar extends StatelessWidget {
   final int currentIndex;
   final String homeLabel;
   final String mapLabel;
+  final String scanLabel;
   final String aiLabel;
   final String profileLabel;
   final ValueChanged<int> onTabSelected;
@@ -158,6 +161,7 @@ class _PremiumNavBar extends StatelessWidget {
                 ),
                 Expanded(
                   child: _ScanReceiptNavItem(
+                    label: scanLabel,
                     selected: currentIndex == 2,
                     onTap: () => onTabSelected(2),
                   ),
@@ -273,10 +277,12 @@ class _SideNavItem extends StatelessWidget {
 
 class _ScanReceiptNavItem extends StatelessWidget {
   const _ScanReceiptNavItem({
+    required this.label,
     required this.selected,
     required this.onTap,
   });
 
+  final String label;
   final bool selected;
   final VoidCallback onTap;
 
@@ -290,7 +296,7 @@ class _ScanReceiptNavItem extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(_buttonRadius),
       hoverScale: 1.02,
-      semanticLabel: 'Scan receipt',
+      semanticLabel: label,
       builder: (BuildContext context, SavingorInteractionState state) {
         final bool hovered = state.hovered;
 
@@ -335,7 +341,7 @@ class _ScanReceiptNavItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    'Scan receipt',
+                    label,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,

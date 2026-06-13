@@ -1,3 +1,4 @@
+import 'package:savingor_app/core/app_state.dart';
 import 'package:savingor_app/features/analytics/domain/expense_analytics_calculator.dart';
 import 'package:savingor_app/features/analytics/domain/models/savings_recommendation.dart';
 import 'package:savingor_app/features/analytics/domain/savings_intelligence_service.dart';
@@ -28,10 +29,12 @@ abstract final class HomeDashboardSummaryBuilder {
     required List<UserExpense> expenses,
     required List<Receipt> receipts,
     required List<ProductPriceRecord> priceRecords,
+    DisplayAmountConverter? convertToDisplay,
   }) {
     final ExpenseAnalyticsSummary analytics = ExpenseAnalyticsCalculator.compute(
       expenses,
       receipts: receipts,
+      convertToDisplay: convertToDisplay,
     );
     final savingsSummary = SavingsIntelligenceService.compute(priceRecords);
     final List<SavingsRecommendation> recommendations =

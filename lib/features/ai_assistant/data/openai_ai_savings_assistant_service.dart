@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import 'package:savingor_app/core/i18n/ai_assistant_l10n.dart';
 import 'package:savingor_app/features/ai_assistant/data/ai_assistant_config.dart';
 import 'package:savingor_app/features/ai_assistant/domain/ai_assistant_exception.dart';
 import 'package:savingor_app/features/ai_assistant/domain/ai_savings_assistant_service.dart';
@@ -29,9 +30,12 @@ class OpenAiAiSavingsAssistantService implements AiSavingsAssistantService {
       throw AiAssistantException.missingApiKey;
     }
 
+    final String languageName = AiAssistantL10n.responseLanguageNameForCode(
+      request.responseLanguageCode,
+    );
     final String answer = await _completeChat(
-      systemPrompt: _systemPrompt,
-      userPrompt: _buildUserPrompt(request),
+      systemPrompt: _systemPrompt(languageName),
+      userPrompt: _buildUserPrompt(request, languageName),
     );
 
     return AiAssistantResponse(
@@ -119,7 +123,7 @@ class OpenAiAiSavingsAssistantService implements AiSavingsAssistantService {
     return content.trim();
   }
 
-  static const String _systemPrompt = '''
+  static String _systemPrompt(String languageName) => '''
 You are Savingor AI Savings Assistant, a helpful grocery budgeting coach.
 
 Rules:
@@ -129,9 +133,11 @@ Rules:
 - You may suggest comparing prices, using shopping lists, or reviewing recent spending patterns.
 - Be practical, concise, and mobile-friendly (short paragraphs or bullets).
 - If data is missing for part of a question, say what is missing and answer with what is available.
+- Respond in $languageName. Use clear, practical language appropriate for the user's selected Savingor app language.
+- Keep store names, brands, currency codes, and numeric values unchanged.
 ''';
 
-  String _buildUserPrompt(AiAssistantRequest request) {
+  String _buildUserPrompt(AiAssistantRequest request, String languageName) {
     final String contextJson =
         const JsonEncoder.withIndent('  ').convert(request.context.toPromptMap());
 
@@ -142,7 +148,7 @@ ${request.question.trim()}
 Structured Savingor user context (JSON):
 $contextJson
 
-Respond in plain English for a mobile app user.
+Respond in $languageName for a mobile app user.
 ''';
   }
 }

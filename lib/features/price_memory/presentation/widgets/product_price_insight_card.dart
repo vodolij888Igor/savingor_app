@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'package:savingor_app/core/i18n/product_display_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/features/price_memory/domain/models/product_price_insight.dart';
 import 'package:savingor_app/features/price_memory/domain/price_memory_formatters.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class ProductPriceInsightCard extends StatelessWidget {
   const ProductPriceInsightCard({
@@ -17,8 +19,21 @@ class ProductPriceInsightCard extends StatelessWidget {
 
   static const Color _airyBorder = Color(0xFFF3F4F3);
 
+  String _displayName(BuildContext context) {
+    final String localized = ProductDisplayL10n.localizedProductName(
+      context,
+      insight.normalizedProductName,
+    );
+    if (localized != insight.normalizedProductName) {
+      return localized;
+    }
+    return insight.displayName;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+
     return SavingorInteractiveCard(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
@@ -32,7 +47,7 @@ class ProductPriceInsightCard extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  insight.displayName,
+                  _displayName(context),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
@@ -48,24 +63,34 @@ class ProductPriceInsightCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           _historyLine(
-            'Latest: ${PriceMemoryFormatters.formatPrice(insight.latestPrice, currency: insight.currency)} at ${insight.latestStoreName}',
+            context,
+            '${l10n.latestPriceLabel}: ${l10n.priceAtStore(
+              PriceMemoryFormatters.formatPrice(insight.latestPrice, currency: insight.currency),
+              insight.latestStoreName,
+            )}',
             emphasized: true,
           ),
           const SizedBox(height: 4),
           _historyLine(
-            'Best known: ${PriceMemoryFormatters.formatPrice(insight.lowestPrice, currency: insight.currency)} at ${insight.lowestStoreName}',
+            context,
+            '${l10n.bestKnownPriceLabel}: ${l10n.priceAtStore(
+              PriceMemoryFormatters.formatPrice(insight.lowestPrice, currency: insight.currency),
+              insight.lowestStoreName,
+            )}',
           ),
           const SizedBox(height: 4),
           _historyLine(
-            'Highest: ${PriceMemoryFormatters.formatPrice(insight.highestPrice, currency: insight.currency)}',
+            context,
+            '${l10n.highestPriceLabel}: ${PriceMemoryFormatters.formatPrice(insight.highestPrice, currency: insight.currency)}',
           ),
           const SizedBox(height: 4),
           _historyLine(
-            'Average: ${PriceMemoryFormatters.formatPrice(insight.averagePrice, currency: insight.currency)}',
+            context,
+            '${l10n.averagePriceLabel}: ${PriceMemoryFormatters.formatPrice(insight.averagePrice, currency: insight.currency)}',
           ),
           const SizedBox(height: 6),
           Text(
-            insight.recordCountLabel,
+            l10n.priceRecordCount(insight.recordCount),
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -77,7 +102,7 @@ class ProductPriceInsightCard extends StatelessWidget {
     );
   }
 
-  Widget _historyLine(String text, {bool emphasized = false}) {
+  Widget _historyLine(BuildContext context, String text, {bool emphasized = false}) {
     return Text(
       text,
       style: TextStyle(

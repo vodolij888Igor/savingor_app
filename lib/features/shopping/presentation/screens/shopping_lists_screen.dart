@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:savingor_app/core/i18n/app_strings.dart';
+import 'package:savingor_app/core/i18n/shopping_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/core/widgets/app_screen_states.dart';
@@ -10,6 +10,7 @@ import 'package:savingor_app/features/shopping/domain/models/shopping_list.dart'
 import 'package:savingor_app/features/price_memory/presentation/widgets/basket_optimizer_entry_card.dart';
 import 'package:savingor_app/features/shopping/presentation/widgets/create_shopping_list_sheet.dart';
 import 'package:savingor_app/features/shopping/presentation/widgets/shopping_list_state_panel.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class ShoppingListsScreen extends StatelessWidget {
   const ShoppingListsScreen({super.key, this.showBackButton = false});
@@ -20,7 +21,7 @@ class ShoppingListsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AppStrings t = AppStrings.of(context);
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final ShoppingListsStore store = ShoppingListsProvider.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
@@ -28,7 +29,7 @@ class ShoppingListsScreen extends StatelessWidget {
       animation: store,
       builder: (BuildContext context, Widget? child) {
         if (!store.isAuthenticated) {
-          return _buildSignInRequired(context, t);
+          return _buildSignInRequired(context, l10n);
         }
 
         final bool showNewListFab = !store.isLoadingLists && store.listsError == null;
@@ -36,7 +37,7 @@ class ShoppingListsScreen extends StatelessWidget {
         return Scaffold(
           backgroundColor: _pageBackground,
           appBar: AppBar(
-            title: Text(t.shoppingList, style: _titleStyle),
+            title: Text(l10n.shoppingList, style: _titleStyle),
             centerTitle: false,
             elevation: 0,
             scrolledUnderElevation: 0,
@@ -61,9 +62,9 @@ class ShoppingListsScreen extends StatelessWidget {
                     Icons.add_rounded,
                     color: SavingorColors.darkGreen,
                   ),
-                  label: const Text(
-                    'New list',
-                    style: TextStyle(
+                  label: Text(
+                    l10n.newList,
+                    style: const TextStyle(
                       fontWeight: FontWeight.w700,
                       color: SavingorColors.darkGreen,
                     ),
@@ -71,16 +72,16 @@ class ShoppingListsScreen extends StatelessWidget {
                 ),
             ],
           ),
-          body: _buildBody(context, store, bottomInset),
+          body: _buildBody(context, store, bottomInset, l10n),
           floatingActionButton: showNewListFab
               ? FloatingActionButton.extended(
                   onPressed: () => CreateShoppingListSheet.show(context),
                   backgroundColor: SavingorColors.primaryGreen,
                   foregroundColor: SavingorColors.darkGreen,
                   icon: const Icon(Icons.playlist_add_rounded),
-                  label: const Text(
-                    'New list',
-                    style: TextStyle(fontWeight: FontWeight.w700),
+                  label: Text(
+                    l10n.newList,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                 )
               : null,
@@ -93,17 +94,18 @@ class ShoppingListsScreen extends StatelessWidget {
     BuildContext context,
     ShoppingListsStore store,
     double bottomInset,
+    AppLocalizations l10n,
   ) {
     if (store.isLoadingLists) {
       return ShoppingListStatePanel.loading(
-        message: 'Loading shopping lists…',
+        message: l10n.loadingShoppingLists,
       );
     }
 
     if (store.listsError != null) {
       return ShoppingListStatePanel.error(
-        title: 'Could not load lists',
-        message: store.listsError!,
+        title: l10n.couldNotLoadLists,
+        message: ShoppingL10n.localizeListsError(context, store.listsError),
         onRetry: store.retryLists,
       );
     }
@@ -111,10 +113,9 @@ class ShoppingListsScreen extends StatelessWidget {
     if (store.lists.isEmpty) {
       return ShoppingListStatePanel.empty(
         icon: Icons.checklist_rounded,
-        title: 'No shopping lists yet',
-        message:
-            'Create your first list to plan purchases and optimize your basket.',
-        actionLabel: 'Create list',
+        title: l10n.noShoppingListsYet,
+        message: l10n.noShoppingListsYetMessage,
+        actionLabel: l10n.createList,
         prominentAction: true,
         onAction: () => CreateShoppingListSheet.show(context),
       );
@@ -124,9 +125,8 @@ class ShoppingListsScreen extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(20, 8, 20, 96 + bottomInset),
       children: <Widget>[
         BasketOptimizerEntryCard(
-          title: 'Optimize all lists',
-          subtitle:
-              'Find the best known stores across your active shopping lists',
+          title: l10n.optimizeAllLists,
+          subtitle: l10n.optimizeAllListsSubtitle,
           onTap: () => context.push('/shopping/basket-optimizer'),
         ),
         const SizedBox(height: 16),
@@ -136,7 +136,7 @@ class ShoppingListsScreen extends StatelessWidget {
             child: _ShoppingListCard(
               list: list,
               onOpen: () => context.push('/shopping/list/${list.id}'),
-              onDelete: () => _confirmDelete(context, store, list),
+              onDelete: () => _confirmDelete(context, store, list, l10n),
             ),
           ),
         ),
@@ -144,11 +144,11 @@ class ShoppingListsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSignInRequired(BuildContext context, AppStrings t) {
+  Widget _buildSignInRequired(BuildContext context, AppLocalizations l10n) {
     return Scaffold(
       backgroundColor: _pageBackground,
       appBar: AppBar(
-        title: Text(t.shoppingList, style: _titleStyle),
+        title: Text(l10n.shoppingList, style: _titleStyle),
         backgroundColor: _pageBackground,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
@@ -166,8 +166,10 @@ class ShoppingListsScreen extends StatelessWidget {
         automaticallyImplyLeading: showBackButton,
       ),
       body: AppSignInRequiredState(
-        message: 'Create and sync shopping lists with your Savingor account.',
+        title: l10n.signInRequired,
+        message: l10n.signInToSyncShoppingLists,
         onSignIn: () => context.push('/auth'),
+        actionLabel: l10n.signIn,
       ),
     );
   }
@@ -176,23 +178,24 @@ class ShoppingListsScreen extends StatelessWidget {
     BuildContext context,
     ShoppingListsStore store,
     ShoppingList list,
+    AppLocalizations l10n,
   ) async {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Delete list?'),
-          content: Text('“${list.title}” will be permanently removed.'),
+          title: Text(l10n.deleteListQuestion),
+          content: Text(l10n.deleteListConfirmMessage(list.title)),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text(
-                'Delete',
-                style: TextStyle(color: Color(0xFFB91C1C)),
+              child: Text(
+                l10n.delete,
+                style: const TextStyle(color: Color(0xFFB91C1C)),
               ),
             ),
           ],
@@ -205,7 +208,9 @@ class ShoppingListsScreen extends StatelessWidget {
     if (!context.mounted) return;
     final String? error = store.mutationError;
     if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(ShoppingL10n.localizeError(context, error))),
+      );
     }
   }
 
@@ -231,6 +236,8 @@ class _ShoppingListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+
     return SavingorInteractiveCard(
       onTap: onOpen,
       borderRadius: BorderRadius.circular(18),
@@ -266,8 +273,8 @@ class _ShoppingListCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '${list.itemCount} items'
-                      '${list.completedCount > 0 ? ' · ${list.completedCount} purchased' : ''}',
+                      '${l10n.receiptItemsCount(list.itemCount)}'
+                      '${list.completedCount > 0 ? ' · ${l10n.purchasedSummary(list.completedCount)}' : ''}',
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
@@ -277,7 +284,9 @@ class _ShoppingListCard extends StatelessWidget {
                     if (list.estimatedTotal != null) ...<Widget>[
                       const SizedBox(height: 4),
                       Text(
-                        'Est. \$${list.estimatedTotal!.toStringAsFixed(2)}',
+                        l10n.estimatedShort(
+                          '\$${list.estimatedTotal!.toStringAsFixed(2)}',
+                        ),
                         style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/app_state.dart';
+import 'package:savingor_app/core/i18n/product_display_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/core/widgets/product_thumbnail_avatar.dart';
 import 'package:savingor_app/features/price_memory/domain/models/product_price_record.dart';
 import 'package:savingor_app/features/price_memory/domain/models/savings_opportunity.dart';
-import 'package:savingor_app/features/price_memory/domain/price_memory_formatters.dart';
 import 'package:savingor_app/features/price_memory/domain/savings_opportunity_finder.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 /// Horizontal saving-opportunity cards from real price memory data.
 class DashboardProductFeatureCardsRow extends StatelessWidget {
@@ -34,6 +36,7 @@ class DashboardProductFeatureCardsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final List<SavingsOpportunity> opportunities =
         SavingsOpportunityFinder.find(records).take(maxCards).toList();
     final bool hasOpportunities = opportunities.isNotEmpty;
@@ -46,9 +49,9 @@ class DashboardProductFeatureCardsRow extends StatelessWidget {
         children: <Widget>[
           Row(
             children: <Widget>[
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Top saving opportunities',
+                  l10n.topSavingOpportunities,
                   style: SavingorAppTextStyles.sectionTitleLarge,
                 ),
               ),
@@ -57,7 +60,7 @@ class DashboardProductFeatureCardsRow extends StatelessWidget {
                   onPressed: () =>
                       context.push('/analytics/savings-opportunities'),
                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                  child: const Text('See all'),
+                  child: Text(l10n.seeAll),
                 ),
             ],
           ),
@@ -177,13 +180,26 @@ class _SavingOpportunityTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String currency = opportunity.currency;
-    final String bestKnownLine =
-        'Best known: ${PriceMemoryFormatters.formatPrice(opportunity.lowestPrice, currency: currency)} at ${opportunity.lowestStoreName}';
-    final String latestLine =
-        'Latest paid: ${PriceMemoryFormatters.formatPrice(opportunity.latestPrice, currency: currency)} at ${opportunity.latestStoreName}';
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final AppState appState = AppStateProvider.of(context);
+    final String Function(double) formatAmount = (double amount) =>
+        appState.formatMoney(amount, originalCurrency: opportunity.currency);
+
+    final String bestKnownLine = l10n.bestKnownAtStore(
+      formatAmount(opportunity.lowestPrice),
+      opportunity.lowestStoreName,
+    );
+    final String latestLine = l10n.latestPaidAtStore(
+      formatAmount(opportunity.latestPrice),
+      opportunity.latestStoreName,
+    );
     final String saveBadge =
-        'Save up to ${PriceMemoryFormatters.formatPrice(opportunity.priceDifference, currency: currency)}';
+        l10n.saveUpToAmount(formatAmount(opportunity.priceDifference));
+
+    final String displayLabel = ProductDisplayL10n.localizedProductName(
+      context,
+      opportunity.normalizedProductName,
+    );
 
     return SizedBox(
       width: width,
@@ -220,96 +236,97 @@ class _SavingOpportunityTile extends StatelessWidget {
         ],
         padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
         child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  Center(
-                    child: ProductThumbnailAvatar(
-                      productName: opportunity.displayName,
-                      size: 58,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    opportunity.displayName,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: DashboardProductFeatureCardsRow._nearBlack,
-                      height: 1.15,
-                      letterSpacing: -0.2,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    bestKnownLine,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: SavingorColors.textSecondary,
-                      height: 1.25,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    latestLine,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: SavingorColors.textSecondary,
-                      height: 1.25,
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: SavingorColors.primaryGreen.withOpacity(0.82),
-                      borderRadius: BorderRadius.circular(SavingorRadius.pill),
-                      boxShadow: <BoxShadow>[
-                        BoxShadow(
-                          color: SavingorColors.primaryStroke.withOpacity(0.12),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      saveBadge,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                        color: DashboardProductFeatureCardsRow._nearBlack,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Based on receipt history',
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w500,
-                      color: SavingorColors.textSecondary,
-                      height: 1.1,
-                    ),
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Center(
+              child: ProductThumbnailAvatar(
+                productName: opportunity.normalizedProductName,
+                size: 58,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              displayLabel,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: DashboardProductFeatureCardsRow._nearBlack,
+                height: 1.15,
+                letterSpacing: -0.2,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              bestKnownLine,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: SavingorColors.textSecondary,
+                height: 1.25,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              latestLine,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: SavingorColors.textSecondary,
+                height: 1.25,
+              ),
+            ),
+            const Spacer(),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: SavingorColors.primaryGreen.withOpacity(0.82),
+                borderRadius: BorderRadius.circular(SavingorRadius.pill),
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
+                    color: SavingorColors.primaryStroke.withOpacity(0.12),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
+              child: Text(
+                saveBadge,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  color: DashboardProductFeatureCardsRow._nearBlack,
+                  height: 1.15,
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              l10n.basedOnReceiptHistory,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w500,
+                color: SavingorColors.textSecondary,
+                height: 1.15,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

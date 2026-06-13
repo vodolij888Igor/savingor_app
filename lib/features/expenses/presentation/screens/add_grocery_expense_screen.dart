@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/expenses/data/expense_store.dart';
 import 'package:savingor_app/features/expenses/domain/models/expense.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class AddGroceryExpenseScreen extends StatefulWidget {
   const AddGroceryExpenseScreen({super.key});
@@ -144,15 +145,15 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
     );
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Expense saved.')),
+      SnackBar(content: Text(AppLocalizations.of(context).expenseSaved)),
     );
 
     _clearForm();
   }
 
-  Widget _buildExpenseTile(Expense expense) {
+  Widget _buildExpenseTile(Expense expense, AppLocalizations l10n) {
     final String categoryLabel = expense.category.isEmpty
-        ? 'Uncategorized'
+        ? l10n.uncategorized
         : expense.category;
 
     return Container(
@@ -223,14 +224,14 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
     );
   }
 
-  Widget _buildRecentExpenses(ExpenseStore store) {
+  Widget _buildRecentExpenses(ExpenseStore store, AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         const SizedBox(height: SavingorSpacing.xl),
-        const Text(
-          'Recent expenses',
-          style: TextStyle(
+        Text(
+          l10n.recentExpenses,
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
             color: SavingorColors.darkGreen,
@@ -240,7 +241,7 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
         const SizedBox(height: 12),
         if (store.expenses.isEmpty)
           Text(
-            'No expenses added yet.',
+            l10n.noExpensesAddedYet,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
@@ -250,7 +251,7 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
           )
         else
           Column(
-            children: store.expenses.map(_buildExpenseTile).toList(),
+            children: store.expenses.map((Expense e) => _buildExpenseTile(e, l10n)).toList(),
           ),
       ],
     );
@@ -258,6 +259,7 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
     final ExpenseStore expenseStore = _expenseStore!;
 
@@ -270,9 +272,9 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
         scrolledUnderElevation: 0,
         backgroundColor: _pageWhite,
         surfaceTintColor: Colors.transparent,
-        title: const Text(
-          'Add grocery expense',
-          style: TextStyle(
+        title: Text(
+          l10n.addGroceryExpense,
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
             color: SavingorColors.darkGreen,
@@ -308,10 +310,10 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
                 readOnly: false,
                 keyboardType: TextInputType.text,
                 textInputAction: TextInputAction.next,
-                decoration: _fieldDecoration('Store name'),
+                decoration: _fieldDecoration(l10n.storeName),
                 validator: (String? value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a store name.';
+                    return l10n.pleaseEnterStoreName;
                   }
                   return null;
                 },
@@ -323,10 +325,10 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
                 readOnly: false,
                 keyboardType: TextInputType.text,
                 textInputAction: TextInputAction.next,
-                decoration: _fieldDecoration('Item name'),
+                decoration: _fieldDecoration(l10n.itemName),
                 validator: (String? value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter an item name.';
+                    return l10n.pleaseEnterItemName;
                   }
                   return null;
                 },
@@ -338,15 +340,15 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
                 readOnly: false,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 textInputAction: TextInputAction.next,
-                decoration: _fieldDecoration('Price'),
+                decoration: _fieldDecoration(l10n.price),
                 validator: (String? value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a price.';
+                    return l10n.pleaseEnterPrice;
                   }
                   final double? parsed =
                       double.tryParse(value.trim().replaceAll('\$', ''));
                   if (parsed == null || parsed <= 0) {
-                    return 'Please enter a valid price.';
+                    return l10n.pleaseEnterValidPrice;
                   }
                   return null;
                 },
@@ -358,7 +360,7 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
                 readOnly: false,
                 keyboardType: TextInputType.text,
                 textInputAction: TextInputAction.done,
-                decoration: _fieldDecoration('Category'),
+                decoration: _fieldDecoration(l10n.category),
               ),
               const SizedBox(height: 14),
               TextFormField(
@@ -366,7 +368,7 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
                 readOnly: true,
                 enableInteractiveSelection: false,
                 onTap: _pickDate,
-                decoration: _fieldDecoration('Date').copyWith(
+                decoration: _fieldDecoration(l10n.date).copyWith(
                   suffixIcon: IconButton(
                     icon: const Icon(
                       Icons.calendar_today_rounded,
@@ -381,12 +383,12 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
               FilledButton(
                 onPressed: _saveExpense,
                 style: SavingorButtonStyles.primaryFilled(),
-                child: const Text('Save expense'),
+                child: Text(l10n.saveExpense),
               ),
               ListenableBuilder(
                 listenable: expenseStore,
                 builder: (BuildContext context, Widget? child) {
-                  return _buildRecentExpenses(expenseStore);
+                  return _buildRecentExpenses(expenseStore, l10n);
                 },
               ),
             ],

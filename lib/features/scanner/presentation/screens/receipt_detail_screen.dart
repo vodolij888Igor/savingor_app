@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/app_state.dart';
+import 'package:savingor_app/core/i18n/product_display_l10n.dart';
+import 'package:savingor_app/core/i18n/receipt_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt_item.dart';
 import 'package:savingor_app/features/receipts/presentation/widgets/receipt_source_badge.dart';
 import 'package:savingor_app/features/scanner/data/receipt_store.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class ReceiptDetailScreen extends StatelessWidget {
   const ReceiptDetailScreen({super.key, required this.receiptId});
@@ -45,17 +49,28 @@ class ReceiptDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ReceiptStore store = ReceiptProvider.of(context);
+    final AppState appState = AppStateProvider.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
-    return AnimatedBuilder(
-      animation: store,
-      builder: (BuildContext context, Widget? _) {
+    return ListenableBuilder(
+      listenable: appState,
+      builder: (BuildContext context, Widget? __) {
+        return AnimatedBuilder(
+          animation: store,
+          builder: (BuildContext context, Widget? _) {
         final Receipt? receipt = store.receiptById(receiptId);
+        String formatMoney(double amount) => appState.formatMoney(
+              amount,
+              originalCurrency: receipt?.currency ?? 'CAD',
+            );
 
         return Scaffold(
           backgroundColor: _pageBackground,
           appBar: AppBar(
-            title: const Text('Receipt details', style: _appBarTitleStyle),
+            title: Text(
+              AppLocalizations.of(context).receiptDetails,
+              style: _appBarTitleStyle,
+            ),
             elevation: 0,
             scrolledUnderElevation: 0,
             backgroundColor: _pageBackground,
@@ -70,17 +85,25 @@ class ReceiptDetailScreen extends StatelessWidget {
             ),
           ),
           body: receipt == null
-              ? const Center(
+              ? Center(
                   child: Text(
-                    'Receipt not found.',
-                    style: TextStyle(
+                    AppLocalizations.of(context).receiptNotFound,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                       color: SavingorColors.textSecondary,
                     ),
                   ),
                 )
-              : _buildContent(context, store, receipt, bottomInset),
+              : _buildContent(
+                  context,
+                  store,
+                  receipt,
+                  bottomInset,
+                  formatMoney,
+                ),
+        );
+          },
         );
       },
     );
@@ -91,7 +114,9 @@ class ReceiptDetailScreen extends StatelessWidget {
     ReceiptStore store,
     Receipt receipt,
     double bottomInset,
+    String Function(double amount) formatMoney,
   ) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final String formattedDate = _formatDate(receipt.purchaseDate);
     final bool hasNotes =
         receipt.notes != null && receipt.notes!.trim().isNotEmpty;
@@ -166,7 +191,7 @@ class ReceiptDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                receipt.formattedTotal,
+                formatMoney(receipt.total),
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
@@ -178,7 +203,7 @@ class ReceiptDetailScreen extends StatelessWidget {
                 const SizedBox(height: 8),
                 if (receipt.subtotal != null)
                   Text(
-                    'Subtotal: \$${receipt.subtotal!.toStringAsFixed(2)}',
+                    l10n.subtotalLabel(formatMoney(receipt.subtotal!)),
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
@@ -187,7 +212,7 @@ class ReceiptDetailScreen extends StatelessWidget {
                   ),
                 if (receipt.tax != null)
                   Text(
-                    'Tax: \$${receipt.tax!.toStringAsFixed(2)}',
+                    l10n.taxLabel(formatMoney(receipt.tax!)),
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
@@ -201,10 +226,10 @@ class ReceiptDetailScreen extends StatelessWidget {
         const SizedBox(height: SavingorSpacing.lg),
         Row(
           children: <Widget>[
-            const Expanded(
+            Expanded(
               child: Text(
-                'Items',
-                style: TextStyle(
+                l10n.items,
+                style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
                   color: SavingorColors.darkGreen,
@@ -212,7 +237,9 @@ class ReceiptDetailScreen extends StatelessWidget {
               ),
             ),
             Text(
-              receipt.hasItems ? '${receipt.itemCount} items' : 'No items saved',
+              receipt.hasItems
+                  ? l10n.receiptItemsCount(receipt.itemCount)
+                  : l10n.noItemsSaved,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -231,7 +258,7 @@ class ReceiptDetailScreen extends StatelessWidget {
                 return Column(
                   children: <Widget>[
                     if (index > 0) _detailDivider(),
-                    _itemRow(item),
+                    _itemRow(context, item, formatMoney),
                   ],
                 );
               }),
@@ -243,7 +270,7 @@ class ReceiptDetailScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             decoration: _cardDecoration(),
             child: Text(
-              'No line items were saved for this receipt yet.',
+              l10n.noLineItemsSaved,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -255,7 +282,7 @@ class ReceiptDetailScreen extends StatelessWidget {
         if (hasNotes) ...<Widget>[
           const SizedBox(height: SavingorSpacing.lg),
           Text(
-            receipt.notesSectionTitle,
+            ReceiptL10n.notesSectionTitle(context, receipt.source),
             style: const TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w700,
@@ -298,14 +325,15 @@ class ReceiptDetailScreen extends StatelessWidget {
             ),
           ),
           icon: const Icon(Icons.edit_outlined),
-          label: const Text(
-            'Edit receipt',
-            style: TextStyle(fontWeight: FontWeight.w700),
+          label: Text(
+            l10n.editReceipt,
+            style: const TextStyle(fontWeight: FontWeight.w700),
           ),
         ),
         const SizedBox(height: SavingorSpacing.md),
         OutlinedButton.icon(
-          onPressed: () => _confirmDelete(context, store, receipt),
+          onPressed: () =>
+              _confirmDelete(context, store, receipt, formatMoney),
           style: OutlinedButton.styleFrom(
             foregroundColor: const Color(0xFFB91C1C),
             side: const BorderSide(color: Color(0xFFE5A8A8)),
@@ -315,16 +343,26 @@ class ReceiptDetailScreen extends StatelessWidget {
             ),
           ),
           icon: const Icon(Icons.delete_outline_rounded),
-          label: const Text(
-            'Delete receipt',
-            style: TextStyle(fontWeight: FontWeight.w700),
+          label: Text(
+            l10n.deleteReceipt,
+            style: const TextStyle(fontWeight: FontWeight.w700),
           ),
         ),
       ],
     );
   }
 
-  Widget _itemRow(ReceiptItem item) {
+  Widget _itemRow(
+    BuildContext context,
+    ReceiptItem item,
+    String Function(double amount) formatMoney,
+  ) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final String displayName = ProductDisplayL10n.localizedProductName(
+      context,
+      item.normalizedName ?? item.name,
+    );
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -335,7 +373,7 @@ class ReceiptDetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  item.name,
+                  displayName,
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
@@ -344,7 +382,7 @@ class ReceiptDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Qty ${item.displayQuantity}'
+                  '${l10n.qtyWithValue(item.displayQuantity)}'
                       '${item.category != null ? ' · ${item.category}' : ''}',
                   style: TextStyle(
                     fontSize: 12,
@@ -356,7 +394,7 @@ class ReceiptDetailScreen extends StatelessWidget {
             ),
           ),
           Text(
-            item.formattedTotalPrice,
+            formatMoney(item.totalPrice),
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
@@ -379,25 +417,30 @@ class ReceiptDetailScreen extends StatelessWidget {
     BuildContext context,
     ReceiptStore store,
     Receipt receipt,
+    String Function(double amount) formatMoney,
   ) async {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) {
+        final AppLocalizations l10n = AppLocalizations.of(context);
         return AlertDialog(
-          title: const Text('Delete receipt?'),
+          title: Text(l10n.deleteReceiptQuestion),
           content: Text(
-            '${receipt.storeName} (${receipt.formattedTotal}) will be permanently removed.',
+            l10n.deleteReceiptConfirmMessage(
+              receipt.storeName,
+              formatMoney(receipt.total),
+            ),
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text(
-                'Delete',
-                style: TextStyle(color: Color(0xFFB91C1C)),
+              child: Text(
+                l10n.delete,
+                style: const TextStyle(color: Color(0xFFB91C1C)),
               ),
             ),
           ],
@@ -420,7 +463,10 @@ class ReceiptDetailScreen extends StatelessWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          error ?? 'Could not delete the receipt. Please try again.',
+          ReceiptL10n.localizeError(
+            context,
+            error ?? AppLocalizations.of(context).couldNotDeleteReceipt,
+          ),
         ),
       ),
     );

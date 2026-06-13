@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:savingor_app/core/i18n/product_display_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/price_memory/domain/models/basket_price_recommendation.dart';
 import 'package:savingor_app/features/price_memory/domain/price_memory_formatters.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class BasketRecommendationCard extends StatelessWidget {
   const BasketRecommendationCard({
@@ -14,8 +16,22 @@ class BasketRecommendationCard extends StatelessWidget {
 
   static const Color _airyBorder = Color(0xFFF3F4F3);
 
+  String _itemDisplayName(BuildContext context) {
+    final String localized = ProductDisplayL10n.localizedProductName(
+      context,
+      recommendation.normalizedProductName,
+    );
+    if (localized != recommendation.normalizedProductName) {
+      return localized;
+    }
+    return recommendation.shoppingItemName;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final String itemName = _itemDisplayName(context);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -38,7 +54,7 @@ class BasketRecommendationCard extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  recommendation.shoppingItemName,
+                  itemName,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
@@ -60,21 +76,43 @@ class BasketRecommendationCard extends StatelessWidget {
           const SizedBox(height: 10),
           if (recommendation.hasPriceData) ...<Widget>[
             _DetailLine(
-              label: 'Best known',
-              value:
-                  '${PriceMemoryFormatters.formatPrice(recommendation.bestKnownPrice!, currency: recommendation.currency)} at ${recommendation.bestStoreName}',
+              label: l10n.bestKnownLabel,
+              value: l10n.priceAtStore(
+                PriceMemoryFormatters.formatPrice(
+                  recommendation.bestKnownPrice!,
+                  currency: recommendation.currency,
+                ),
+                recommendation.bestStoreName ?? '',
+              ),
             ),
             const SizedBox(height: 6),
             _DetailLine(
-              label: 'Latest seen',
-              value:
-                  '${PriceMemoryFormatters.formatPrice(recommendation.latestKnownPrice!, currency: recommendation.currency)} at ${recommendation.latestStoreName}',
+              label: l10n.latestSeen,
+              value: l10n.priceAtStore(
+                PriceMemoryFormatters.formatPrice(
+                  recommendation.latestKnownPrice!,
+                  currency: recommendation.currency,
+                ),
+                recommendation.latestStoreName ?? '',
+              ),
             ),
             if (recommendation.potentialSavingPerItem > 0) ...<Widget>[
               const SizedBox(height: 10),
               Text(
-                'Save up to ${PriceMemoryFormatters.formatPrice(recommendation.potentialSavingPerItem, currency: recommendation.currency)}'
-                '${recommendation.shoppingQuantity > 1 ? ' total' : ''}',
+                recommendation.shoppingQuantity > 1
+                    ? l10n.saveUpToTotal(
+                        PriceMemoryFormatters.formatPrice(
+                          recommendation.potentialSavingPerItem *
+                              recommendation.shoppingQuantity,
+                          currency: recommendation.currency,
+                        ),
+                      )
+                    : l10n.saveUpToAmount(
+                        PriceMemoryFormatters.formatPrice(
+                          recommendation.potentialSavingPerItem,
+                          currency: recommendation.currency,
+                        ),
+                      ),
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
@@ -83,9 +121,9 @@ class BasketRecommendationCard extends StatelessWidget {
               ),
             ],
           ] else ...<Widget>[
-            const Text(
-              'No price history yet',
-              style: TextStyle(
+            Text(
+              l10n.noPriceHistoryYet,
+              style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: SavingorColors.darkGreen,
@@ -93,8 +131,7 @@ class BasketRecommendationCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              recommendation.message ??
-                  'Add receipts with this item to unlock recommendations.',
+              recommendation.message ?? l10n.addReceiptsForItemRecommendations,
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,

@@ -8,6 +8,7 @@ import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/features/analytics/domain/expense_analytics_calculator.dart';
 import 'package:savingor_app/features/expenses/data/expenses_store.dart';
 import 'package:savingor_app/features/scanner/data/receipt_store.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class MonthlyGoalBudgetScreen extends StatefulWidget {
   const MonthlyGoalBudgetScreen({super.key});
@@ -35,21 +36,8 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
     super.dispose();
   }
 
-  String _formatCurrency(double amount) {
-    final String fixed = amount.abs().toStringAsFixed(2);
-    final List<String> parts = fixed.split('.');
-    final String intPart = parts[0];
-    final String decPart = parts.length > 1 ? parts[1] : '00';
-    final StringBuffer grouped = StringBuffer();
-    for (int i = 0; i < intPart.length; i++) {
-      if (i > 0 && (intPart.length - i) % 3 == 0) {
-        grouped.write(',');
-      }
-      grouped.write(intPart[i]);
-    }
-    final String sign = amount < 0 ? '-' : '';
-    return '$sign\$$grouped.$decPart';
-  }
+  String _formatCurrency(AppState appState, double amount) =>
+      appState.formatMoney(amount);
 
   BoxDecoration _cardDecoration() {
     return BoxDecoration(
@@ -85,20 +73,21 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
     }
 
     setState(() => _isSaving = true);
-    appState.setMonthlyGroceryBudget(parsed);
+    appState.setMonthlyGroceryBudget(parsed, currency: appState.currency);
     if (!mounted) {
       return;
     }
     setState(() => _isSaving = false);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Monthly budget updated')),
+      SnackBar(content: Text(AppLocalizations.of(context).budgetSaved)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final AppState appState = AppStateProvider.of(context);
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final ExpensesStore expensesStore = ExpensesProvider.of(context);
     final ReceiptStore receiptStore = ReceiptProvider.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
@@ -106,7 +95,7 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
     return ListenableBuilder(
       listenable: appState,
       builder: (BuildContext context, Widget? _) {
-        _syncBudgetField(appState.monthlyGroceryBudget);
+        _syncBudgetField(appState.displayMonthlyBudget);
 
         return AnimatedBuilder(
           animation: expensesStore,
@@ -118,8 +107,9 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                     ExpenseAnalyticsCalculator.compute(
                   expensesStore.expenses,
                   receipts: receiptStore.receipts,
+                  convertToDisplay: appState.toDisplayConverter,
                 );
-                final double budget = appState.monthlyGroceryBudget;
+                final double budget = appState.displayMonthlyBudget;
                 final double spentThisMonth = summary.totalThisMonth;
                 final bool isOverBudget = spentThisMonth > budget;
                 final double difference = (budget - spentThisMonth).abs();
@@ -131,8 +121,8 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                 return Scaffold(
                   backgroundColor: _pageWhite,
                   appBar: AppBar(
-                    title: const Text(
-                      'Monthly goal / Budget',
+                    title: Text(
+                      l10n.monthlyGoalBudget,
                       style: SavingorAppTextStyles.screenTitle,
                     ),
                     elevation: 0,
@@ -154,7 +144,7 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          'Track your monthly grocery spending against your budget.',
+                          l10n.trackMonthlyGrocerySpending,
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
@@ -171,20 +161,20 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               _summaryRow(
-                                label: 'Monthly grocery budget',
-                                value: _formatCurrency(budget),
+                                label: l10n.monthlyGroceryBudget,
+                                value: _formatCurrency(appState, budget),
                               ),
                               const SizedBox(height: 14),
                               _summaryRow(
-                                label: 'Spent this month',
-                                value: _formatCurrency(spentThisMonth),
+                                label: l10n.spentThisMonth,
+                                value: _formatCurrency(appState, spentThisMonth),
                               ),
                               const SizedBox(height: 14),
                               _summaryRow(
                                 label: isOverBudget
-                                    ? 'Over budget'
-                                    : 'Remaining',
-                                value: _formatCurrency(difference),
+                                    ? l10n.overBudget
+                                    : l10n.remaining,
+                                value: _formatCurrency(appState, difference),
                                 valueColor: isOverBudget
                                     ? _overBudgetColor
                                     : SavingorColors.primaryStroke,
@@ -193,7 +183,7 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                               Row(
                                 children: <Widget>[
                                   Text(
-                                    '${_formatCurrency(spentThisMonth)} / ${_formatCurrency(budget)}',
+                                    '${_formatCurrency(appState, spentThisMonth)} / ${_formatCurrency(appState, budget)}',
                                     style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w800,
@@ -240,13 +230,13 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: <Widget>[
-                                const Text(
-                                  'Update monthly budget',
+                                Text(
+                                  l10n.updateMonthlyBudget,
                                   style: SavingorAppTextStyles.cardTitle,
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  'Set the grocery spending limit you want to track each month.',
+                                  l10n.setMonthlyBudgetDescription,
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w500,
@@ -268,8 +258,8 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                                     ),
                                   ],
                                   decoration: InputDecoration(
-                                    labelText: 'Monthly budget amount',
-                                    prefixText: '\$ ',
+                                    labelText: l10n.monthlyBudgetAmount,
+                                    prefixText: '${appState.currency} \$ ',
                                     filled: true,
                                     fillColor: Colors.white,
                                     border: OutlineInputBorder(
@@ -295,12 +285,12 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                                   validator: (String? value) {
                                     final String trimmed = value?.trim() ?? '';
                                     if (trimmed.isEmpty) {
-                                      return 'Enter a budget amount';
+                                      return l10n.enterBudgetAmount;
                                     }
                                     final double? parsed =
                                         double.tryParse(trimmed);
                                     if (parsed == null || parsed <= 0) {
-                                      return 'Enter an amount greater than zero';
+                                      return l10n.enterAmountGreaterThanZero;
                                     }
                                     return null;
                                   },
@@ -326,9 +316,9 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                                             color: SavingorColors.darkGreen,
                                           ),
                                         )
-                                      : const Text(
-                                          'Save budget',
-                                          style: TextStyle(
+                                      : Text(
+                                          l10n.saveBudget,
+                                          style: const TextStyle(
                                             fontSize: 15,
                                             fontWeight: FontWeight.w800,
                                           ),

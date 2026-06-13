@@ -15,6 +15,16 @@ class SavingsRecommendation {
     this.dataBasisText,
     this.normalizedProductName,
     this.storeName,
+    this.productDisplayName,
+    this.potentialSavingPerItem,
+    this.latestPaidPrice,
+    this.bestKnownPrice,
+    this.latestStoreName,
+    this.trackedProductCount,
+    this.priceRangeLow,
+    this.priceRangeHigh,
+    this.priceDifferenceAmount,
+    this.priceRecordCount,
   });
 
   final SavingsRecommendationType type;
@@ -25,6 +35,18 @@ class SavingsRecommendation {
   final String? dataBasisText;
   final String? normalizedProductName;
   final String? storeName;
+  /// Localized UI: product label for [SavingsRecommendationType.storeSwitch].
+  final String? productDisplayName;
+  /// Localized UI: per-item saving amount for store-switch recommendations.
+  final double? potentialSavingPerItem;
+  final double? latestPaidPrice;
+  final double? bestKnownPrice;
+  final String? latestStoreName;
+  final int? trackedProductCount;
+  final double? priceRangeLow;
+  final double? priceRangeHigh;
+  final double? priceDifferenceAmount;
+  final int? priceRecordCount;
 
   bool get isProductAction =>
       normalizedProductName != null && normalizedProductName!.trim().isNotEmpty;

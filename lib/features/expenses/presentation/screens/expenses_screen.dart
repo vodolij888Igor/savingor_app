@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/app_state.dart';
+import 'package:savingor_app/core/i18n/expense_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/app_screen_states.dart';
 import 'package:savingor_app/features/expenses/data/expenses_store.dart';
 import 'package:savingor_app/features/expenses/domain/models/user_expense.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class ExpensesScreen extends StatelessWidget {
   const ExpensesScreen({super.key});
@@ -19,9 +22,9 @@ class ExpensesScreen extends StatelessWidget {
     }
   }
 
-  static AppBar _buildAppBar(BuildContext context) {
+  static AppBar _buildAppBar(BuildContext context, AppLocalizations l10n) {
     return AppBar(
-      title: const Text('Expenses', style: _titleStyle),
+      title: Text(l10n.expenses, style: _titleStyle),
       centerTitle: false,
       elevation: 0,
       scrolledUnderElevation: 0,
@@ -38,35 +41,42 @@ class ExpensesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ExpensesStore store = ExpensesProvider.of(context);
+    final AppState appState = AppStateProvider.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
+    final AppLocalizations l10n = AppLocalizations.of(context);
 
-    return AnimatedBuilder(
-      animation: store,
-      builder: (BuildContext context, Widget? child) {
-        if (!store.isAuthenticated) {
-          return _buildSignInRequired(context);
-        }
+    return ListenableBuilder(
+      listenable: appState,
+      builder: (BuildContext context, Widget? _) {
+        return AnimatedBuilder(
+          animation: store,
+          builder: (BuildContext context, Widget? child) {
+            if (!store.isAuthenticated) {
+              return _buildSignInRequired(context, l10n);
+            }
 
-        final bool showAddFab = !store.isLoading &&
-            store.loadError == null &&
-            store.expenses.isNotEmpty;
+            final bool showAddFab = !store.isLoading &&
+                store.loadError == null &&
+                store.expenses.isNotEmpty;
 
-        return Scaffold(
-          backgroundColor: _pageBackground,
-          appBar: _buildAppBar(context),
-          body: _buildBody(context, store, bottomInset),
-          floatingActionButton: showAddFab
-              ? FloatingActionButton.extended(
-                  onPressed: () => context.push('/expenses/create'),
-                  backgroundColor: SavingorColors.primaryGreen,
-                  foregroundColor: SavingorColors.darkGreen,
-                  icon: const Icon(Icons.add_rounded),
-                  label: const Text(
-                    'Add expense',
-                    style: TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                )
-              : null,
+            return Scaffold(
+              backgroundColor: _pageBackground,
+              appBar: _buildAppBar(context, l10n),
+              body: _buildBody(context, store, appState, bottomInset, l10n),
+              floatingActionButton: showAddFab
+                  ? FloatingActionButton.extended(
+                      onPressed: () => context.push('/expenses/create'),
+                      backgroundColor: SavingorColors.primaryGreen,
+                      foregroundColor: SavingorColors.darkGreen,
+                      icon: const Icon(Icons.add_rounded),
+                      label: Text(
+                        l10n.addExpense,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                    )
+                  : null,
+            );
+          },
         );
       },
     );
@@ -75,27 +85,29 @@ class ExpensesScreen extends StatelessWidget {
   Widget _buildBody(
     BuildContext context,
     ExpensesStore store,
+    AppState appState,
     double bottomInset,
+    AppLocalizations l10n,
   ) {
     if (store.isLoading) {
-      return const AppLoadingState(message: 'Loading expenses…');
+      return AppLoadingState(message: l10n.loadingExpenses);
     }
 
     if (store.loadError != null) {
       return AppErrorState(
-        title: 'Could not load expenses',
-        message: store.loadError!,
+        title: l10n.couldNotLoadExpenses,
+        message: ExpenseL10n.localizeError(context, store.loadError),
         onRetry: store.retry,
+        actionLabel: l10n.tryAgain,
       );
     }
 
     if (store.expenses.isEmpty) {
       return AppEmptyState(
         icon: Icons.receipt_long_outlined,
-        title: 'No expenses yet',
-        message:
-            'Track grocery purchases and receipts to understand your spending.',
-        actionLabel: 'Add expense',
+        title: l10n.noExpensesYet,
+        message: l10n.noExpensesYetMessage,
+        actionLabel: l10n.addExpense,
         prominentAction: true,
         onAction: () => context.push('/expenses/create'),
       );
@@ -109,19 +121,25 @@ class ExpensesScreen extends StatelessWidget {
         final UserExpense expense = store.expenses[index];
         return _ExpenseCard(
           expense: expense,
-          onDelete: () => _confirmDelete(context, store, expense),
+          amountLabel: appState.formatMoney(
+            expense.totalAmount,
+            originalCurrency: expense.currency,
+          ),
+          onDelete: () => _confirmDelete(context, store, expense, appState, l10n),
         );
       },
     );
   }
 
-  Widget _buildSignInRequired(BuildContext context) {
+  Widget _buildSignInRequired(BuildContext context, AppLocalizations l10n) {
     return Scaffold(
       backgroundColor: _pageBackground,
-      appBar: _buildAppBar(context),
+      appBar: _buildAppBar(context, l10n),
       body: AppSignInRequiredState(
-        message: 'Save and sync your expenses with your Savingor account.',
+        title: l10n.signInRequired,
+        message: l10n.signInToSyncExpenses,
         onSignIn: () => context.push('/auth'),
+        actionLabel: l10n.signIn,
       ),
     );
   }
@@ -130,25 +148,31 @@ class ExpensesScreen extends StatelessWidget {
     BuildContext context,
     ExpensesStore store,
     UserExpense expense,
+    AppState appState,
+    AppLocalizations l10n,
   ) async {
+    final String amountLabel = appState.formatMoney(
+      expense.totalAmount,
+      originalCurrency: expense.currency,
+    );
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Delete expense?'),
+          title: Text(l10n.deleteExpenseQuestion),
           content: Text(
-            '“${expense.storeName}” (\$${expense.totalAmount.toStringAsFixed(2)}) will be permanently removed.',
+            l10n.deleteExpenseConfirmMessage(expense.storeName, amountLabel),
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text(
-                'Delete',
-                style: TextStyle(color: Color(0xFFB91C1C)),
+              child: Text(
+                l10n.delete,
+                style: const TextStyle(color: Color(0xFFB91C1C)),
               ),
             ),
           ],
@@ -161,7 +185,9 @@ class ExpensesScreen extends StatelessWidget {
     if (!context.mounted) return;
     final String? error = store.mutationError;
     if (error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(ExpenseL10n.localizeError(context, error))),
+      );
     }
   }
 
@@ -177,10 +203,12 @@ class ExpensesScreen extends StatelessWidget {
 class _ExpenseCard extends StatelessWidget {
   const _ExpenseCard({
     required this.expense,
+    required this.amountLabel,
     required this.onDelete,
   });
 
   final UserExpense expense;
+  final String amountLabel;
   final VoidCallback onDelete;
 
   @override
@@ -229,7 +257,7 @@ class _ExpenseCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '\$${expense.totalAmount.toStringAsFixed(2)}',
+                    amountLabel,
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,

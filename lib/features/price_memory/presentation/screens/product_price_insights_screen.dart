@@ -6,6 +6,7 @@ import 'package:savingor_app/core/widgets/app_screen_states.dart';
 import 'package:savingor_app/features/price_memory/data/price_memory_store.dart';
 import 'package:savingor_app/features/price_memory/domain/models/product_price_insight.dart';
 import 'package:savingor_app/features/price_memory/presentation/widgets/product_price_insight_card.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class ProductPriceInsightsScreen extends StatelessWidget {
   const ProductPriceInsightsScreen({super.key});
@@ -14,6 +15,7 @@ class ProductPriceInsightsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final PriceMemoryStore store = PriceMemoryProvider.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
@@ -23,9 +25,9 @@ class ProductPriceInsightsScreen extends StatelessWidget {
         return Scaffold(
           backgroundColor: _pageBackground,
           appBar: AppBar(
-            title: const Text(
-              'Product price insights',
-              style: TextStyle(
+            title: Text(
+              l10n.productPriceInsights,
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
                 color: SavingorColors.darkGreen,
@@ -44,7 +46,7 @@ class ProductPriceInsightsScreen extends StatelessWidget {
               onPressed: () => context.pop(),
             ),
           ),
-          body: _buildBody(context, store, bottomInset),
+          body: _buildBody(context, store, bottomInset, l10n),
         );
       },
     );
@@ -54,21 +56,22 @@ class ProductPriceInsightsScreen extends StatelessWidget {
     BuildContext context,
     PriceMemoryStore store,
     double bottomInset,
+    AppLocalizations l10n,
   ) {
     if (!store.isAuthenticated) {
       return AppSignInRequiredState(
-        message: 'Sign in to view your product price memory.',
+        message: l10n.signInForPriceMemory,
         onSignIn: () => context.push('/auth'),
       );
     }
 
     if (store.isLoading) {
-      return const AppLoadingState(message: 'Loading price memory…');
+      return AppLoadingState(message: l10n.loadingPriceMemory);
     }
 
     if (store.loadError != null) {
       return AppErrorState(
-        title: 'Could not load price memory',
+        title: l10n.couldNotLoadPriceMemory,
         message: store.loadError!,
         onRetry: store.retry,
       );
@@ -77,10 +80,9 @@ class ProductPriceInsightsScreen extends StatelessWidget {
     if (!store.hasRecords) {
       return AppEmptyState(
         icon: Icons.price_change_outlined,
-        title: 'No price memory yet',
-        message:
-            'Add receipts with line items to start building your price memory.',
-        actionLabel: 'Add receipt',
+        title: l10n.noPriceMemoryYet,
+        message: l10n.noPriceMemoryMessage,
+        actionLabel: l10n.addReceipt,
         prominentAction: true,
         onAction: () => context.push('/scanner/create'),
       );
@@ -95,7 +97,7 @@ class ProductPriceInsightsScreen extends StatelessWidget {
       itemBuilder: (BuildContext context, int index) {
         if (index == 0) {
           return Text(
-            '${insights.length} ${insights.length == 1 ? 'product' : 'products'} in your price history from receipts',
+            l10n.productsInPriceHistoryFromReceipts(insights.length),
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,

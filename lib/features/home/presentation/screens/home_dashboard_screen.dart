@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/app_state.dart';
+import 'package:savingor_app/core/i18n/app_settings_l10n.dart';
+import 'package:savingor_app/core/i18n/locale_display.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/features/expenses/data/expenses_store.dart';
@@ -15,6 +17,7 @@ import 'package:savingor_app/features/scanner/data/receipt_store.dart';
 import 'package:savingor_app/features/scanner/domain/models/receipt.dart';
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
 import 'package:savingor_app/features/profile/data/user_profile_service.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 /// First-tab Savingor home dashboard at `/deals`.
 class HomeDashboardScreen extends StatelessWidget {
@@ -24,35 +27,22 @@ class HomeDashboardScreen extends StatelessWidget {
   static const Color _nearBlack = Color(0xFF111827);
   static const Color _airyBorder = Color(0xFFF3F4F3);
 
-  static String _formatCurrency(double amount) {
-    final String fixed = amount.abs().toStringAsFixed(2);
-    final List<String> parts = fixed.split('.');
-    final String intPart = parts[0];
-    final String decPart = parts.length > 1 ? parts[1] : '00';
-    final StringBuffer grouped = StringBuffer();
-    for (int i = 0; i < intPart.length; i++) {
-      if (i > 0 && (intPart.length - i) % 3 == 0) {
-        grouped.write(',');
-      }
-      grouped.write(intPart[i]);
-    }
-    final String sign = amount < 0 ? '-' : '';
-    return '$sign\$$grouped.$decPart';
-  }
-
   static _DashboardData _computeDashboardData(
     ExpensesStore expensesStore,
     ShoppingListsStore shoppingListsStore,
     ReceiptStore receiptStore,
+    AppState appState,
   ) {
+    final DisplayAmountConverter convert = appState.toDisplayConverter;
+
     double expensesTotal = 0;
     for (final UserExpense expense in expensesStore.expenses) {
-      expensesTotal += expense.totalAmount;
+      expensesTotal += convert(expense.totalAmount, expense.currency);
     }
 
     double receiptsTotal = 0;
     for (final Receipt receipt in receiptStore.receipts) {
-      receiptsTotal += receipt.total;
+      receiptsTotal += convert(receipt.total, receipt.currency);
     }
 
     final double totalExpenses = expensesTotal + receiptsTotal;
@@ -93,13 +83,8 @@ class HomeDashboardScreen extends StatelessWidget {
     );
   }
 
-  static String _languageBadgeLabel(String? code) {
-    final String normalized = (code ?? 'en').trim().toLowerCase();
-    if (normalized.isEmpty) {
-      return 'EN';
-    }
-    return normalized.toUpperCase();
-  }
+  static String _languageBadgeLabel(String? code) =>
+      LocaleDisplay.languageBadge(code);
 
   static String _formatActivityDate(DateTime date) {
     const List<String> months = <String>[
@@ -244,31 +229,39 @@ class HomeDashboardScreen extends StatelessWidget {
     final PriceMemoryStore priceMemoryStore = PriceMemoryProvider.of(context);
     final AppState appState = AppStateProvider.of(context);
     final String? languageCode = appState.language;
-    final double monthlyBudget = appState.monthlyGroceryBudget;
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return ListenableBuilder(
-      listenable: expensesStore,
+      listenable: appState,
       builder: (BuildContext context, Widget? _) {
+        final double monthlyBudget = appState.displayMonthlyBudget;
+        final String Function(double) formatMoney =
+            (double amount) => appState.formatMoney(amount);
+
         return ListenableBuilder(
-          listenable: shoppingListsStore,
+          listenable: expensesStore,
           builder: (BuildContext context, Widget? __) {
             return ListenableBuilder(
-              listenable: receiptStore,
+              listenable: shoppingListsStore,
               builder: (BuildContext context, Widget? ___) {
                 return ListenableBuilder(
-                  listenable: priceMemoryStore,
+                  listenable: receiptStore,
                   builder: (BuildContext context, Widget? ____) {
+                    return ListenableBuilder(
+                      listenable: priceMemoryStore,
+                      builder: (BuildContext context, Widget? _____) {
                     final _DashboardData data = _computeDashboardData(
                       expensesStore,
                       shoppingListsStore,
                       receiptStore,
+                      appState,
                     );
                     final HomeDashboardSummary summary =
                         HomeDashboardSummaryBuilder.build(
                       expenses: expensesStore.expenses,
                       receipts: receiptStore.receipts,
                       priceRecords: priceMemoryStore.records,
+                      convertToDisplay: appState.toDisplayConverter,
                     );
                     final double heroRingProgress = monthlyBudget <= 0
                         ? 0
@@ -277,6 +270,7 @@ class HomeDashboardScreen extends StatelessWidget {
                         ? 0
                         : (summary.spentThisMonth / monthlyBudget)
                             .clamp(0.0, 1.0);
+                    final AppLocalizations l10n = AppLocalizations.of(context);
 
                     return Scaffold(
                       backgroundColor: _pageWhite,
@@ -293,6 +287,7 @@ class HomeDashboardScreen extends StatelessWidget {
                             children: <Widget>[
                               _buildStatusRow(
                                 context,
+                                appState: appState,
                                 languageCode: languageCode,
                               ),
                               const SizedBox(height: SavingorSpacing.lg + SavingorSpacing.sm),
@@ -303,16 +298,20 @@ class HomeDashboardScreen extends StatelessWidget {
                               ),
                               _buildMetricsRow(
                                 data,
+                                l10n: l10n,
                                 spentThisMonth: summary.spentThisMonth,
+                                formatMoney: formatMoney,
                               ),
                               const SizedBox(height: SavingorSpacing.lg + SavingorSpacing.sm),
                               _buildSavingsHero(
                                 data.totalExpenses,
                                 heroRingProgress,
                                 data.expenseCount,
+                                l10n: l10n,
+                                formatMoney: formatMoney,
                               ),
                               const SizedBox(height: SavingorSpacing.lg + SavingorSpacing.sm),
-                              _buildStartSavingButton(context),
+                              _buildStartSavingButton(context, l10n),
                               const SizedBox(height: SavingorSpacing.lg + SavingorSpacing.sm),
                               DashboardBestActionCard(
                                 recommendation: summary.topRecommendation,
@@ -324,20 +323,29 @@ class HomeDashboardScreen extends StatelessWidget {
                               const SizedBox(height: SavingorSpacing.lg),
                               DashboardSummarySection(
                                 summary: summary,
-                                formatCurrency: _formatCurrency,
+                                formatCurrency: formatMoney,
                               ),
                               const SizedBox(height: SavingorSpacing.lg),
-                              _buildRecentActivity(data),
+                              _buildRecentActivity(
+                                data,
+                                l10n: l10n,
+                                appState: appState,
+                                formatMoney: formatMoney,
+                              ),
                               const SizedBox(height: SavingorSpacing.lg),
                               _buildMonthlyGoal(
                                 summary.spentThisMonth,
                                 monthlyGoalProgress,
                                 monthlyBudget,
+                                l10n: l10n,
+                                formatMoney: formatMoney,
                               ),
                             ],
                           ),
                         ),
                       ),
+                    );
+                      },
                     );
                   },
                 );
@@ -349,8 +357,13 @@ class HomeDashboardScreen extends StatelessWidget {
     );
   }
 
+  static String _regionFlagEmoji(String regionId) {
+    return regionId == 'us' ? '🇺🇸' : '🇨🇦';
+  }
+
   Widget _buildStatusRow(
     BuildContext context, {
+    required AppState appState,
     required String? languageCode,
   }) {
     return Padding(
@@ -359,17 +372,17 @@ class HomeDashboardScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           _statusPill(
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Text(
-                  '🇨🇦',
-                  style: TextStyle(fontSize: 14, height: 1.1),
+                  _regionFlagEmoji(appState.region),
+                  style: const TextStyle(fontSize: 14, height: 1.1),
                 ),
-                SizedBox(width: 6),
+                const SizedBox(width: 6),
                 Text(
-                  'Canada · CAD',
-                  style: TextStyle(
+                  '${AppSettingsL10n.regionLabel(context, appState.region)} · ${appState.currency}',
+                  style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
                     color: SavingorColors.textPrimary,
@@ -413,8 +426,10 @@ class HomeDashboardScreen extends StatelessWidget {
   Widget _buildSavingsHero(
     double totalExpenses,
     double ringProgress,
-    int expenseCount,
-  ) {
+    int expenseCount, {
+    required AppLocalizations l10n,
+    required String Function(double) formatMoney,
+  }) {
     const double ringSize = 220;
 
     return Column(
@@ -459,7 +474,7 @@ class HomeDashboardScreen extends StatelessWidget {
                             fit: BoxFit.scaleDown,
                             alignment: Alignment.center,
                             child: Text(
-                              _formatCurrency(totalExpenses),
+                              formatMoney(totalExpenses),
                               maxLines: 1,
                               softWrap: false,
                               textAlign: TextAlign.center,
@@ -474,24 +489,24 @@ class HomeDashboardScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        const Text(
-                          'Total expenses',
+                        Text(
+                          l10n.totalExpenses,
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: SavingorColors.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 6),
-                        const Text(
-                          'Tracked in Savingor',
+                        Text(
+                          l10n.trackedInSavingor,
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                             color: SavingorColors.primaryStroke,
@@ -511,7 +526,7 @@ class HomeDashboardScreen extends StatelessWidget {
         if (expenseCount > 0) ...<Widget>[
           const SizedBox(height: SavingorSpacing.md),
           Text(
-            '$expenseCount ${expenseCount == 1 ? 'expense' : 'expenses'} tracked',
+            l10n.expensesTracked(expenseCount),
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
@@ -523,11 +538,11 @@ class HomeDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStartSavingButton(BuildContext context) {
+  Widget _buildStartSavingButton(BuildContext context, AppLocalizations l10n) {
     return SavingorInteractivePressable(
       onTap: () => _onStartSaving(context),
       borderRadius: BorderRadius.circular(28),
-      semanticLabel: 'Start saving',
+      semanticLabel: l10n.startSaving,
       builder: (BuildContext context, SavingorInteractionState state) {
         final bool active = state.isInteractive && state.hovered;
 
@@ -561,25 +576,30 @@ class HomeDashboardScreen extends StatelessWidget {
               ),
             ],
           ),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 23),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 23),
             child: Center(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Text(
-                    '✨ START SAVING',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      color: SavingorColors.darkGreen,
-                      height: 1.0,
-                      letterSpacing: 0.4,
+                  Flexible(
+                    child: Text(
+                      l10n.startSavingHero,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: SavingorColors.darkGreen,
+                        height: 1.0,
+                        letterSpacing: 0.4,
+                      ),
                     ),
                   ),
-                  SizedBox(width: 16),
-                  Icon(
+                  const SizedBox(width: 16),
+                  const Icon(
                     Icons.arrow_forward_rounded,
                     size: 20,
                     color: SavingorColors.darkGreen,
@@ -595,7 +615,9 @@ class HomeDashboardScreen extends StatelessWidget {
 
   Widget _buildMetricsRow(
     _DashboardData data, {
+    required AppLocalizations l10n,
     required double spentThisMonth,
+    required String Function(double) formatMoney,
   }) {
     return SizedBox(
       height: 118,
@@ -604,33 +626,33 @@ class HomeDashboardScreen extends StatelessWidget {
         children: <Widget>[
           _metricCard(
             icon: Icons.trending_up_rounded,
-            title: 'This month',
-            value: _formatCurrency(spentThisMonth),
-            suffix: 'spent',
+            title: l10n.thisMonth,
+            value: formatMoney(spentThisMonth),
+            suffix: l10n.spent,
             iconAccent: const Color(0xFFEF4444),
           ),
           const SizedBox(width: 7),
           _metricCard(
             icon: Icons.receipt_long_rounded,
-            title: 'Receipts',
+            title: l10n.receipts,
             value: '${data.receiptCount}',
-            suffix: 'recorded',
+            suffix: l10n.recorded,
             iconAccent: const Color(0xFF64748B),
           ),
           const SizedBox(width: 7),
           _metricCard(
             icon: Icons.checklist_rounded,
-            title: 'Shopping list',
+            title: l10n.shoppingList,
             value: '${data.shoppingListCount}',
-            suffix: 'lists',
+            suffix: l10n.lists,
             iconAccent: const Color(0xFFF97316),
           ),
           const SizedBox(width: 7),
           _metricCard(
             icon: Icons.sell_rounded,
-            title: 'Active deals',
-            value: _formatCurrency(data.estimatedShoppingTotal),
-            suffix: 'estimated',
+            title: l10n.activeDeals,
+            value: formatMoney(data.estimatedShoppingTotal),
+            suffix: l10n.estimated,
             iconAccent: const Color(0xFF9333EA),
           ),
         ],
@@ -641,8 +663,10 @@ class HomeDashboardScreen extends StatelessWidget {
   Widget _buildMonthlyGoal(
     double spentThisMonth,
     double progress,
-    double monthlyBudget,
-  ) {
+    double monthlyBudget, {
+    required AppLocalizations l10n,
+    required String Function(double) formatMoney,
+  }) {
     final int progressPercent = (progress * 100).round();
 
     return Container(
@@ -651,9 +675,9 @@ class HomeDashboardScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text(
-            'Monthly goal',
-            style: TextStyle(
+          Text(
+            l10n.monthlyGoal,
+            style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
               color: SavingorColors.textPrimary,
@@ -663,7 +687,7 @@ class HomeDashboardScreen extends StatelessWidget {
           Row(
             children: <Widget>[
               Text(
-                '${_formatCurrency(spentThisMonth)} / ${_formatCurrency(monthlyBudget)}',
+                '${formatMoney(spentThisMonth)} / ${formatMoney(monthlyBudget)}',
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
@@ -698,7 +722,12 @@ class HomeDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentActivity(_DashboardData data) {
+  Widget _buildRecentActivity(
+    _DashboardData data, {
+    required AppLocalizations l10n,
+    required AppState appState,
+    required String Function(double) formatMoney,
+  }) {
     final UserExpense? latest = data.latestExpense;
 
     return Container(
@@ -725,7 +754,7 @@ class HomeDashboardScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  latest == null ? 'No recent activity' : 'Expense added',
+                  latest == null ? l10n.noRecentActivity : l10n.expenseAdded,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -736,7 +765,7 @@ class HomeDashboardScreen extends StatelessWidget {
                 const SizedBox(height: 5),
                 Text(
                   latest == null
-                      ? 'Add an expense to see it here'
+                      ? l10n.addExpenseToSeeHere
                       : '${latest.storeName} • ${_formatActivityDate(latest.purchaseDate)}',
                   style: const TextStyle(
                     fontSize: 13,
@@ -750,8 +779,11 @@ class HomeDashboardScreen extends StatelessWidget {
           ),
           Text(
             latest == null
-                ? _formatCurrency(0)
-                : _formatCurrency(latest.totalAmount),
+                ? formatMoney(0)
+                : appState.formatMoney(
+                    latest.totalAmount,
+                    originalCurrency: latest.currency,
+                  ),
             style: const TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w800,
@@ -817,26 +849,28 @@ class _DashboardGreetingState extends State<_DashboardGreeting> {
     }
   }
 
-  String get _greetingLine {
+  String _greetingLine(AppLocalizations l10n) {
     final String? firstName = _firstName?.trim();
     if (firstName != null && firstName.isNotEmpty) {
-      return 'Welcome back, $firstName! 👋';
+      return l10n.welcomeBackName(firstName);
     }
-    return 'Welcome back! 👋';
+    return l10n.welcomeBack;
   }
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          _greetingLine,
+          _greetingLine(l10n),
           style: SavingorAppTextStyles.greetingTitle,
         ),
         const SizedBox(height: 6),
         Text(
-          'Ready to save smarter today?',
+          l10n.readyToSaveSmarterToday,
           style: SavingorAppTextStyles.bodySecondary(fontSize: 16),
         ),
       ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/i18n/map_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/deals/data/map_directions_launcher.dart';
 import 'package:savingor_app/features/deals/data/nearby_stores_repository.dart';
@@ -14,6 +15,7 @@ import 'package:savingor_app/features/deals/presentation/widgets/nearby_location
 import 'package:savingor_app/features/deals/presentation/widgets/nearby_stores_map_card.dart';
 import 'package:savingor_app/features/deals/presentation/widgets/nearby_store_card.dart';
 import 'package:savingor_app/features/deals/presentation/widgets/selected_store_bottom_sheet.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 /// Nearby stores map foundation — mock data until Google Maps / Places.
 class DealsMapScreen extends StatefulWidget {
@@ -133,7 +135,9 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
     final String trimmed = input.trim();
     if (trimmed.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a city or area.')),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).mapPleaseEnterCityOrArea),
+        ),
       );
       return;
     }
@@ -142,7 +146,9 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
         ManualLocationResolver.resolve(trimmed);
     if (selection == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a city or area.')),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).mapPleaseEnterCityOrArea),
+        ),
       );
       return;
     }
@@ -168,7 +174,9 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
     if (!mounted) return;
     if (!opened) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open directions.')),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).mapCouldNotOpenDirections),
+        ),
       );
     }
   }
@@ -184,25 +192,26 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
     );
   }
 
-  String _storesFootnote() {
+  String _storesFootnote(AppLocalizations l10n) {
     if (_storeDataSource == NearbyStoreDataSource.places) {
-      return 'Stores are based on your selected location and search radius.';
+      return l10n.mapStoresFootnotePlaces;
     }
     if (_usedPlacesFallback) {
-      return 'Showing grocery stores based on your selected area.';
+      return l10n.mapStoresFootnoteFallback;
     }
-    return 'Explore grocery stores near your chosen location.';
+    return l10n.mapStoresFootnoteDefault;
   }
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
       backgroundColor: _pageWhite,
       appBar: AppBar(
-        title: const Text(
-          'Nearby stores',
+        title: Text(
+          l10n.nearbyStores,
           style: SavingorAppTextStyles.screenTitle,
         ),
         elevation: 0,
@@ -222,7 +231,7 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
-              'Find grocery stores near you and compare savings opportunities.',
+              l10n.nearbyStoresSubtitle,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -252,7 +261,10 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
             NearbyStoresMapCard(
               userLatitude: _displayCoords?.latitude,
               userLongitude: _displayCoords?.longitude,
-              userLocationLabel: _activeLocation?.displayName,
+              userLocationLabel: MapL10n.activeLocationDisplayName(
+                context,
+                _activeLocation,
+              ),
               radiusKm: _selectedRadiusKm,
               stores: _stores,
               onStoreMarkerTap: _onStoreMarkerTap,
@@ -260,14 +272,16 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
             const SizedBox(height: SavingorSpacing.lg),
             Row(
               children: <Widget>[
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Stores nearby',
+                    l10n.storesNearby,
                     style: SavingorAppTextStyles.sectionTitle,
                   ),
                 ),
                 Text(
-                  _isLoadingStores ? '…' : '${_stores.length} found',
+                  _isLoadingStores
+                      ? '…'
+                      : l10n.mapStoresFoundCount(_stores.length),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -278,7 +292,7 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              _storesFootnote(),
+              _storesFootnote(l10n),
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
@@ -297,7 +311,7 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
                 ),
               )
             else if (_stores.isEmpty)
-              _buildEmptyRadiusState()
+              _buildEmptyRadiusState(l10n)
             else
               ..._stores.map(
                 (NearbyStore store) => Padding(
@@ -314,12 +328,12 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
     );
   }
 
-  Widget _buildEmptyRadiusState() {
+  Widget _buildEmptyRadiusState(AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: SavingorSurfaces.premiumCard(radius: 16),
       child: Text(
-        'No stores within ${_selectedRadiusKm.round()} km. Try a larger radius.',
+        l10n.mapNoStoresWithinRadius(_selectedRadiusKm.round()),
         textAlign: TextAlign.center,
         style: SavingorAppTextStyles.bodySecondary(fontSize: 13),
       ),

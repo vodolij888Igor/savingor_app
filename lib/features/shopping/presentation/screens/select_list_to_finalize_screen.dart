@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/i18n/shopping_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/core/widgets/app_screen_states.dart';
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
 import 'package:savingor_app/features/shopping/domain/models/shopping_list.dart';
 import 'package:savingor_app/features/shopping/presentation/widgets/shopping_list_state_panel.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 /// Picker shown from Start Saving before opening [FinalizeShoppingTripScreen].
 class SelectListToFinalizeScreen extends StatelessWidget {
@@ -17,24 +19,23 @@ class SelectListToFinalizeScreen extends StatelessWidget {
   Future<void> _openFinalizeTrip(
     BuildContext context,
     ShoppingList list,
+    AppLocalizations l10n,
   ) async {
     if (list.lastFinalizedReceiptId != null) {
       final bool? confirmed = await showDialog<bool>(
         context: context,
         builder: (BuildContext dialogContext) {
           return AlertDialog(
-            title: const Text('Create another receipt?'),
-            content: const Text(
-              'This list may already have a receipt. Create another receipt from purchased items?',
-            ),
+            title: Text(l10n.createAnotherReceiptQuestion),
+            content: Text(l10n.createAnotherReceiptMessage),
             actions: <Widget>[
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: const Text('Cancel'),
+                child: Text(l10n.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(true),
-                child: const Text('Create receipt'),
+                child: Text(l10n.createReceipt),
               ),
             ],
           );
@@ -48,6 +49,7 @@ class SelectListToFinalizeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final ShoppingListsStore store = ShoppingListsProvider.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
@@ -59,8 +61,10 @@ class SelectListToFinalizeScreen extends StatelessWidget {
             backgroundColor: _pageBackground,
             appBar: _buildAppBar(context),
             body: AppSignInRequiredState(
-              message: 'Sign in to finalize a shopping trip.',
+              title: l10n.signInRequired,
+              message: l10n.signInToFinalizeTrip,
               onSignIn: () => context.push('/auth'),
+              actionLabel: l10n.signIn,
             ),
           );
         }
@@ -68,7 +72,7 @@ class SelectListToFinalizeScreen extends StatelessWidget {
         return Scaffold(
           backgroundColor: _pageBackground,
           appBar: _buildAppBar(context),
-          body: _buildBody(context, store, bottomInset),
+          body: _buildBody(context, store, bottomInset, l10n),
         );
       },
     );
@@ -96,17 +100,18 @@ class SelectListToFinalizeScreen extends StatelessWidget {
     BuildContext context,
     ShoppingListsStore store,
     double bottomInset,
+    AppLocalizations l10n,
   ) {
     if (store.isLoadingLists) {
       return ShoppingListStatePanel.loading(
-        message: 'Loading shopping lists…',
+        message: l10n.loadingShoppingLists,
       );
     }
 
     if (store.listsError != null) {
       return ShoppingListStatePanel.error(
-        title: 'Could not load lists',
-        message: store.listsError!,
+        title: l10n.couldNotLoadLists,
+        message: ShoppingL10n.localizeListsError(context, store.listsError),
         onRetry: store.retryLists,
       );
     }
@@ -118,10 +123,9 @@ class SelectListToFinalizeScreen extends StatelessWidget {
     if (eligibleLists.isEmpty) {
       return ShoppingListStatePanel.empty(
         icon: Icons.task_alt_rounded,
-        title: 'No lists ready to finalize',
-        message:
-            'Mark items as purchased on a shopping list, then return here to create a receipt.',
-        actionLabel: 'Open shopping lists',
+        title: l10n.noListsReadyToFinalize,
+        message: l10n.noListsReadyToFinalizeMessage,
+        actionLabel: l10n.openShoppingLists,
         onAction: () => context.push('/shopping'),
       );
     }
@@ -129,9 +133,9 @@ class SelectListToFinalizeScreen extends StatelessWidget {
     return ListView(
       padding: EdgeInsets.fromLTRB(20, 0, 20, 32 + bottomInset + 88),
       children: <Widget>[
-        const Text(
-          'Select list to finalize',
-          style: TextStyle(
+        Text(
+          l10n.selectListToFinalize,
+          style: const TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.w800,
             color: SavingorColors.darkGreen,
@@ -141,7 +145,7 @@ class SelectListToFinalizeScreen extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Choose a shopping list with purchased items.',
+          l10n.selectListToFinalizeSubtitle,
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -155,7 +159,7 @@ class SelectListToFinalizeScreen extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 12),
             child: _FinalizeListCard(
               list: list,
-              onTap: () => _openFinalizeTrip(context, list),
+              onTap: () => _openFinalizeTrip(context, list, l10n),
             ),
           ),
         ),
@@ -175,6 +179,8 @@ class _FinalizeListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+
     return SavingorInteractiveCard(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
@@ -202,7 +208,10 @@ class _FinalizeListCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        list.title,
+                        ShoppingL10n.localizedShoppingListName(
+                          context,
+                          list.title,
+                        ),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -212,8 +221,12 @@ class _FinalizeListCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${list.completedCount} purchased'
-                        '${list.itemCount > 0 ? ' · ${list.itemCount} items total' : ''}',
+                        list.itemCount > 0
+                            ? l10n.listFinalizeProgressSummary(
+                                list.completedCount,
+                                list.itemCount,
+                              )
+                            : l10n.purchasedSummary(list.completedCount),
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,

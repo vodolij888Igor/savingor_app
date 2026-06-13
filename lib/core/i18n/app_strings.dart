@@ -1,69 +1,53 @@
 import 'package:flutter/widgets.dart';
 
-class AppLocalizations extends InheritedWidget {
-  final Map<String, String> strings;
+import 'package:savingor_app/l10n/app_localizations.dart';
 
-  const AppLocalizations(
-      {super.key, required this.strings, required super.child});
-
-  static AppLocalizations of(BuildContext context) {
-    final loc = context.dependOnInheritedWidgetOfExactType<AppLocalizations>();
-    if (loc == null) throw FlutterError('AppLocalizations not found');
-    return loc;
-  }
-
-  @override
-  bool updateShouldNotify(covariant AppLocalizations oldWidget) =>
-      oldWidget.strings != strings;
-}
-
+/// Back-compat wrapper around generated [AppLocalizations] for screens
+/// not yet migrated to direct l10n access in later phases.
 class AppStrings {
-  final Map<String, String> _s;
+  const AppStrings(this._l10n);
 
-  AppStrings(this._s);
+  final AppLocalizations _l10n;
 
   static AppStrings of(BuildContext context) =>
-      AppStrings(AppLocalizations.of(context).strings);
+      AppStrings(AppLocalizations.of(context));
 
-  String get appName => _s['app_name'] ?? 'Savingor';
-  String get appSubtitle => _s['app_subtitle'] ?? '';
-  String get deals => _s['deals'] ?? 'Deals';
-  String get home => _s['home'] ?? 'Home';
-  String get receipts => _s['receipts'] ?? 'Receipts';
-  String get analytics => _s['analytics'] ?? 'Analytics';
-  String get profile => _s['profile'] ?? 'Profile';
-  String get scanner => _s['scanner'] ?? 'Scanner';
-  String get shopping => _s['shopping'] ?? 'Shopping';
-  String get saved => _s['saved'] ?? 'Saved';
-  String get dealsMap => _s['deals_map'] ?? 'Deals Map';
-  String get receiptScanner => _s['receipt_scanner'] ?? 'Receipt Scanner';
-  String get shoppingList => _s['shopping_list'] ?? 'Shopping List';
-  String get mvp => _s['mvp'] ?? 'MVP v0.1';
-  String get searchHint => _s['search_hint'] ?? 'Search...';
-  String get filter => _s['filter'] ?? 'Filter';
-  String get dealsMapSubtitle =>
-      _s['deals_map_subtitle'] ?? 'Shows nearby deals';
-  String get receiptScannerSubtitle =>
-      _s['receipt_scanner_subtitle'] ?? 'Scan receipt';
-  String get shoppingListSubtitle =>
-      _s['shopping_list_subtitle'] ?? 'Smart list';
-  String dealsCount(int count) =>
-      (_s['deals_count'] ?? '{count} deals').replaceAll('{count}', '$count');
-  String get noDealsFound => _s['no_deals_found'] ?? 'No deals found';
-  String get resetFilters => _s['reset_filters'] ?? 'Reset filters';
-  String get filtersTitle => _s['filters_title'] ?? 'Filters';
-  String get aiAssistant => _s['ai_assistant'] ?? 'AI';
-  String get storesMap => _s['stores_map'] ?? 'Map';
-  String get stores => _s['stores'] ?? 'Stores';
-  String get maxPrice => _s['max_price'] ?? 'Max price';
-  String get sort => _s['sort'] ?? 'Sort';
-  String get none => _s['none'] ?? 'None';
-  String get priceLowHigh => _s['price_low_high'] ?? 'Price low→high';
-  String get priceHighLow => _s['price_high_low'] ?? 'Price high→low';
-  String get dealDetails => _s['deal_details'] ?? 'Deal Details';
-  String get dealNotFound => _s['deal_not_found'] ?? 'Deal not found';
-  String get saveDeal => _s['save_deal'] ?? 'Save deal';
-  String get removeSaved => _s['remove_saved'] ?? 'Remove saved';
-  String get noSavedDeals => _s['no_saved_deals'] ?? 'No saved deals yet';
-  String get savedHint => _s['saved_hint'] ?? 'Saved deals appear here';
+  String get appName => _l10n.appName;
+  String get appSubtitle => _l10n.appSubtitle;
+  String get deals => _l10n.deals;
+  String get home => _l10n.home;
+  String get receipts => _l10n.receipts;
+  String get analytics => _l10n.analytics;
+  String get profile => _l10n.profile;
+  String get scanner => _l10n.scanner;
+  String get shopping => _l10n.shopping;
+  String get saved => _l10n.saved;
+  String get dealsMap => _l10n.dealsMap;
+  String get receiptScanner => _l10n.receiptScanner;
+  String get shoppingList => _l10n.shoppingList;
+  String get mvp => _l10n.mvp;
+  String get searchHint => _l10n.searchHint;
+  String get filter => _l10n.filter;
+  String get dealsMapSubtitle => _l10n.dealsMapSubtitle;
+  String get receiptScannerSubtitle => _l10n.receiptScannerSubtitle;
+  String get shoppingListSubtitle => _l10n.shoppingListSubtitle;
+  String dealsCount(int count) => _l10n.dealsCount(count);
+  String get noDealsFound => _l10n.noDealsFound;
+  String get resetFilters => _l10n.resetFilters;
+  String get filtersTitle => _l10n.filtersTitle;
+  String get aiAssistant => _l10n.aiAssistant;
+  String get storesMap => _l10n.storesMap;
+  String get stores => _l10n.stores;
+  String get maxPrice => _l10n.maxPrice;
+  String get sort => _l10n.sort;
+  String get none => _l10n.none;
+  String get priceLowHigh => _l10n.priceLowHigh;
+  String get priceHighLow => _l10n.priceHighLow;
+  String get dealDetails => _l10n.dealDetails;
+  String get dealNotFound => _l10n.dealNotFound;
+  String get saveDeal => _l10n.saveDeal;
+  String get removeSaved => _l10n.removeSaved;
+  String get noSavedDeals => _l10n.noSavedDeals;
+  String get savedHint => _l10n.savedHint;
+  String get scanReceipt => _l10n.scanReceipt;
 }

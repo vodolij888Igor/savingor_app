@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/savingor_interactive.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class FinalizeShoppingTripEntryCard extends StatelessWidget {
   const FinalizeShoppingTripEntryCard({
@@ -15,6 +16,8 @@ class FinalizeShoppingTripEntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+
     return SavingorInteractiveCard(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
@@ -36,22 +39,22 @@ class FinalizeShoppingTripEntryCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 14),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Finalize shopping trip',
-                  style: TextStyle(
+                  l10n.finalizeShoppingTrip,
+                  style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
                     color: SavingorColors.darkGreen,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  'Create a receipt from purchased items and update your price history',
-                  style: TextStyle(
+                  l10n.finalizeShoppingTripCardSubtitle,
+                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: SavingorColors.textSecondary,

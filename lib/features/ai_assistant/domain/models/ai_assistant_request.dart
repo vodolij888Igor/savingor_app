@@ -5,8 +5,12 @@ class AiAssistantRequest {
   const AiAssistantRequest({
     required this.question,
     required this.context,
+    this.responseLanguageCode = 'en',
   });
 
   final String question;
   final AiSavingsContext context;
+
+  /// BCP-47 language code from the active Savingor app locale (e.g. `uk`, `en`).
+  final String responseLanguageCode;
 }

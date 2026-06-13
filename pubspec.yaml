@@ -30,6 +30,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
   go_router: ^14.0.0
   shared_preferences: ^2.1.1
   flutter_svg: ^2.0.10+1
@@ -77,6 +80,7 @@ dependency_overrides:
 
 # The following section is specific to Flutter packages.
 flutter:
+  generate: true
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

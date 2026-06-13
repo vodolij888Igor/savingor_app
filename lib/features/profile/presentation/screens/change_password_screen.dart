@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/i18n/profile_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/features/profile/data/user_profile_service.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 /// Secure password change: re-authenticates with the current password before
 /// calling FirebaseAuth updatePassword. Passwords are never stored or logged.
@@ -62,21 +64,21 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password updated successfully.')),
+        SnackBar(content: Text(AppLocalizations.of(context).passwordUpdated)),
       );
       Navigator.of(context).pop();
     } on UserProfileException catch (e) {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
+        SnackBar(content: Text(ProfileL10n.localizeException(context, e))),
       );
     } catch (_) {
       if (!mounted) return;
       setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not update your password. Please try again.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).couldNotUpdatePassword),
         ),
       );
     }
@@ -90,18 +92,20 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       await _profileService.sendPasswordResetEmail();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password reset email sent.')),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).passwordResetEmailSent),
+        ),
       );
     } on UserProfileException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message)),
+        SnackBar(content: Text(ProfileL10n.localizeException(context, e))),
       );
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not send the reset email. Please try again.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).couldNotSendResetEmail),
         ),
       );
     } finally {
@@ -122,13 +126,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
       backgroundColor: _pageBackground,
       appBar: AppBar(
-        title: const Text(
-          'Change password',
+        title: Text(
+          l10n.changePassword,
           style: SavingorAppTextStyles.screenTitle,
         ),
         centerTitle: false,
@@ -159,9 +164,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    const Text(
-                      'To change your password inside the app, enter your current password first.',
-                      style: TextStyle(
+                    Text(
+                      l10n.changePasswordIntro,
+                      style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
                         color: SavingorColors.textSecondary,
@@ -169,57 +174,60 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       ),
                     ),
                     const SizedBox(height: 18),
-                    const Text('Current password', style: _fieldLabelStyle),
+                    Text(l10n.currentPassword, style: _fieldLabelStyle),
                     const SizedBox(height: 8),
                     _passwordField(
+                      l10n: l10n,
                       controller: _currentPasswordController,
                       obscure: _obscureCurrent,
                       onToggleObscure: () =>
                           setState(() => _obscureCurrent = !_obscureCurrent),
-                      hint: 'Enter current password',
+                      hint: l10n.enterCurrentPasswordHint,
                       validator: (String? value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Current password is required';
+                          return l10n.currentPasswordRequired;
                         }
                         return null;
                       },
                     ),
                     const SizedBox(height: 16),
-                    const Text('New password', style: _fieldLabelStyle),
+                    Text(l10n.newPassword, style: _fieldLabelStyle),
                     const SizedBox(height: 8),
                     _passwordField(
+                      l10n: l10n,
                       controller: _newPasswordController,
                       obscure: _obscureNew,
                       onToggleObscure: () =>
                           setState(() => _obscureNew = !_obscureNew),
-                      hint: 'At least 6 characters',
+                      hint: l10n.atLeast6CharactersHint,
                       validator: (String? value) {
                         final String trimmed = value?.trim() ?? '';
                         if (trimmed.isEmpty) {
-                          return 'New password is required';
+                          return l10n.newPasswordRequired;
                         }
                         if (trimmed.length < 6) {
-                          return 'New password must be at least 6 characters';
+                          return l10n.newPasswordMinLength;
                         }
                         return null;
                       },
                     ),
                     const SizedBox(height: 16),
-                    const Text('Confirm new password', style: _fieldLabelStyle),
+                    Text(l10n.confirmNewPassword, style: _fieldLabelStyle),
                     const SizedBox(height: 8),
                     _passwordField(
+                      l10n: l10n,
                       controller: _confirmPasswordController,
                       obscure: _obscureConfirm,
                       onToggleObscure: () =>
                           setState(() => _obscureConfirm = !_obscureConfirm),
-                      hint: 'Repeat new password',
+                      hint: l10n.repeatNewPasswordHint,
                       validator: (String? value) {
                         final String trimmed = value?.trim() ?? '';
                         if (trimmed.isEmpty) {
-                          return 'Please confirm your new password';
+                          return l10n.confirmNewPasswordRequired;
                         }
                         if (trimmed != _newPasswordController.text.trim()) {
-                          return 'Passwords do not match';
+                          return l10n.passwordsDoNotMatch;
                         }
                         return null;
                       },
@@ -241,7 +249,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           color: SavingorColors.darkGreen,
                         ),
                       )
-                    : const Text('Update password'),
+                    : Text(l10n.updatePassword),
               ),
               const SizedBox(height: SavingorSpacing.xl),
               Container(
@@ -257,9 +265,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    const Text(
-                      'Forgot your current password?',
-                      style: TextStyle(
+                    Text(
+                      l10n.forgotCurrentPassword,
+                      style: const TextStyle(
                         fontSize: 14.5,
                         fontWeight: FontWeight.w700,
                         color: _titleCharcoal,
@@ -267,9 +275,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
-                      'We\u2019ll send a secure reset link to your email so you can create a new password.',
-                      style: TextStyle(
+                    Text(
+                      l10n.passwordResetSecureLink,
+                      style: const TextStyle(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w500,
                         color: SavingorColors.textSecondary,
@@ -278,7 +286,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'If you don\u2019t remember it, use password reset by email.',
+                      l10n.passwordResetByEmailHint,
                       style: TextStyle(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w500,
@@ -301,7 +309,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                             )
                           : const Icon(Icons.mark_email_read_outlined, size: 18),
                       label: Text(
-                        _isSendingReset ? 'Sending...' : 'Send reset email',
+                        _isSendingReset ? l10n.sending : l10n.sendResetEmail,
                       ),
                     ),
                   ],
@@ -315,6 +323,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   }
 
   Widget _passwordField({
+    required AppLocalizations l10n,
     required TextEditingController controller,
     required bool obscure,
     required VoidCallback onToggleObscure,
@@ -335,7 +344,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       decoration: _fieldDecoration(hint: hint).copyWith(
         suffixIcon: IconButton(
           onPressed: onToggleObscure,
-          tooltip: obscure ? 'Show password' : 'Hide password',
+          tooltip: obscure ? l10n.showPassword : l10n.hidePassword,
           icon: Icon(
             obscure
                 ? Icons.visibility_outlined

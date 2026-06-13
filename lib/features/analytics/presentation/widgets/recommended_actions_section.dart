@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/app_state.dart';
+import 'package:savingor_app/core/i18n/savings_recommendation_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/features/analytics/domain/models/savings_recommendation.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class RecommendedActionsSection extends StatelessWidget {
   const RecommendedActionsSection({
@@ -30,18 +33,19 @@ class RecommendedActionsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final List<SavingsRecommendation> displayed = _displayRecommendations;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const Text(
-          'Recommended actions',
+        Text(
+          l10n.recommendedActions,
           style: SavingorAppTextStyles.sectionTitle,
         ),
         const SizedBox(height: SavingorSpacing.md),
         if (displayed.isEmpty)
-          _buildEmptyState()
+          _buildEmptyState(l10n)
         else
           ...displayed.map(
             (SavingsRecommendation recommendation) => Padding(
@@ -53,7 +57,7 @@ class RecommendedActionsSection extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(AppLocalizations l10n) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -62,18 +66,18 @@ class RecommendedActionsSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: const Color(0xFFF3F4F3).withOpacity(0.6)),
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Icon(
+          const Icon(
             Icons.lightbulb_outline_rounded,
             color: SavingorColors.primaryStroke,
             size: 28,
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
-            'Add more receipts to unlock personalized savings recommendations.',
-            style: TextStyle(
+            l10n.addMoreReceiptsForSavings,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: SavingorColors.textSecondary,
@@ -97,8 +101,18 @@ class _RecommendationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppState appState = AppStateProvider.of(context);
     final bool isTappable = recommendation.isProductAction;
-    final Widget content = _buildContent(showChevron: isTappable);
+    final String title =
+        SavingsRecommendationL10n.title(context, recommendation);
+    final String reason =
+        SavingsRecommendationL10n.reason(context, recommendation, appState);
+    final String impact =
+        SavingsRecommendationL10n.impactText(context, recommendation, appState);
+    final String? dataBasis =
+        SavingsRecommendationL10n.dataBasisText(context, recommendation);
+    final Widget content =
+        _buildContent(showChevron: isTappable, title: title, reason: reason, impact: impact, dataBasis: dataBasis);
 
     if (!isTappable) {
       return Container(
@@ -146,7 +160,13 @@ class _RecommendationCard extends StatelessWidget {
     );
   }
 
-  Widget _buildContent({required bool showChevron}) {
+  Widget _buildContent({
+    required bool showChevron,
+    required String title,
+    required String reason,
+    required String impact,
+    required String? dataBasis,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -161,7 +181,7 @@ class _RecommendationCard extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                recommendation.title,
+                title,
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
@@ -182,7 +202,7 @@ class _RecommendationCard extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Text(
-          recommendation.reason,
+          reason,
           style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
@@ -192,7 +212,7 @@ class _RecommendationCard extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Text(
-          recommendation.impactText,
+          impact,
           style: const TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
@@ -200,10 +220,10 @@ class _RecommendationCard extends StatelessWidget {
             height: 1.3,
           ),
         ),
-        if (recommendation.dataBasisText != null) ...<Widget>[
+        if (dataBasis != null) ...<Widget>[
           const SizedBox(height: 8),
           Text(
-            recommendation.dataBasisText!,
+            dataBasis,
             style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w500,

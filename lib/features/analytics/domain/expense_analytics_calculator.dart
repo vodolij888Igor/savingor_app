@@ -1,3 +1,4 @@
+import 'package:savingor_app/core/app_state.dart';
 import 'package:savingor_app/features/expenses/domain/models/user_expense.dart';
 import 'package:savingor_app/features/scanner/domain/models/receipt.dart';
 
@@ -62,6 +63,8 @@ class AnalyticsActivityEntry {
     required this.date,
     required this.amount,
     required this.typeLabel,
+    this.receiptSourceValue,
+    this.receiptItemCount,
   });
 
   final String title;
@@ -69,6 +72,8 @@ class AnalyticsActivityEntry {
   final DateTime date;
   final double amount;
   final String typeLabel;
+  final String? receiptSourceValue;
+  final int? receiptItemCount;
 }
 
 /// Pure calculator — no Firestore or UI dependencies.
@@ -77,7 +82,11 @@ abstract final class ExpenseAnalyticsCalculator {
     List<UserExpense> expenses, {
     List<Receipt> receipts = const <Receipt>[],
     DateTime? referenceDate,
+    DisplayAmountConverter? convertToDisplay,
   }) {
+    double toDisplay(double amount, String originalCurrency) {
+      return convertToDisplay?.call(amount, originalCurrency) ?? amount;
+    }
     final DateTime now = referenceDate ?? DateTime.now();
     final int currentMonth = now.month;
     final int currentYear = now.year;
@@ -97,6 +106,8 @@ abstract final class ExpenseAnalyticsCalculator {
       required double amount,
       required String subtitle,
       required String typeLabel,
+      String? receiptSourceValue,
+      int? receiptItemCount,
     }) {
       totalAll += amount;
 
@@ -122,36 +133,39 @@ abstract final class ExpenseAnalyticsCalculator {
           date: date,
           amount: amount,
           typeLabel: typeLabel,
+          receiptSourceValue: receiptSourceValue,
+          receiptItemCount: receiptItemCount,
         ),
       );
     }
 
     for (final UserExpense expense in expenses) {
+      final double displayAmount =
+          toDisplay(expense.totalAmount, expense.currency);
       addAmount(
         storeName: expense.storeName,
         date: expense.purchaseDate,
-        amount: expense.totalAmount,
+        amount: displayAmount,
         subtitle: 'Manual expense',
         typeLabel: 'expense',
       );
     }
 
     for (final Receipt receipt in receipts) {
-      receiptsTotal += receipt.total;
-      if (receipt.total > highestReceiptAmount) {
-        highestReceiptAmount = receipt.total;
+      final double displayTotal = toDisplay(receipt.total, receipt.currency);
+      receiptsTotal += displayTotal;
+      if (displayTotal > highestReceiptAmount) {
+        highestReceiptAmount = displayTotal;
       }
-
-      final String subtitle = receipt.hasItems
-          ? '${receipt.source.label} · ${receipt.itemCount} items'
-          : receipt.source.label;
 
       addAmount(
         storeName: receipt.storeName,
         date: receipt.purchaseDate,
-        amount: receipt.total,
-        subtitle: subtitle,
+        amount: displayTotal,
+        subtitle: receipt.source.label,
         typeLabel: 'receipt',
+        receiptSourceValue: receipt.source.value,
+        receiptItemCount: receipt.hasItems ? receipt.itemCount : null,
       );
     }
 

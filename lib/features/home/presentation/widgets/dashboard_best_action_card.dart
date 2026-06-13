@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/app_state.dart';
+import 'package:savingor_app/core/i18n/savings_recommendation_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/features/analytics/domain/models/savings_recommendation.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class DashboardBestActionCard extends StatelessWidget {
   const DashboardBestActionCard({
@@ -15,16 +18,18 @@ class DashboardBestActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const Text(
-          'Best action now',
+        Text(
+          l10n.bestActionNow,
           style: SavingorAppTextStyles.sectionTitle,
         ),
         const SizedBox(height: SavingorSpacing.xs),
         if (recommendation == null)
-          const _EmptyBestActionCard()
+          _EmptyBestActionCard(message: l10n.addMoreReceiptsForSavings)
         else
           _RecommendationCard(recommendation: recommendation!),
       ],
@@ -33,7 +38,9 @@ class DashboardBestActionCard extends StatelessWidget {
 }
 
 class _EmptyBestActionCard extends StatelessWidget {
-  const _EmptyBestActionCard();
+  const _EmptyBestActionCard({required this.message});
+
+  final String message;
 
   @override
   Widget build(BuildContext context) {
@@ -41,19 +48,19 @@ class _EmptyBestActionCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: SavingorSurfaces.premiumCard(radius: 16),
-      child: const Row(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Icon(
+          const Icon(
             Icons.lightbulb_outline_rounded,
             color: SavingorAccentColors.savings,
             size: 20,
           ),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Add more receipts to unlock personalized savings.',
-              style: TextStyle(
+              message,
+              style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: SavingorColors.textPrimary,
@@ -86,7 +93,12 @@ class _RecommendationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final AppState appState = AppStateProvider.of(context);
     final bool isTappable = recommendation.isProductAction;
+    final String title = SavingsRecommendationL10n.title(context, recommendation);
+    final String impact =
+        SavingsRecommendationL10n.impactText(context, recommendation, appState);
 
     final Widget content = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -99,8 +111,8 @@ class _RecommendationCard extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Text(
-                  recommendation.title,
-                  maxLines: 1,
+                  title,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 14,
@@ -111,8 +123,8 @@ class _RecommendationCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  recommendation.impactText,
-                  maxLines: 1,
+                  impact,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 13,
@@ -122,11 +134,11 @@ class _RecommendationCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 3),
-                const Text(
-                  'Based on receipt history',
-                  maxLines: 1,
+                Text(
+                  l10n.basedOnReceiptHistory,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
                     color: SavingorColors.textSecondary,

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/app_state.dart';
+import 'package:savingor_app/core/i18n/analytics_activity_l10n.dart';
+import 'package:savingor_app/core/i18n/locale_date_format.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/core/widgets/app_screen_states.dart';
@@ -14,6 +17,7 @@ import 'package:savingor_app/features/analytics/presentation/widgets/savings_val
 import 'package:savingor_app/features/expenses/data/expenses_store.dart';
 import 'package:savingor_app/features/scanner/data/receipt_store.dart';
 import 'package:savingor_app/features/price_memory/data/price_memory_store.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class SavingsAnalyticsScreen extends StatelessWidget {
   const SavingsAnalyticsScreen({super.key});
@@ -28,28 +32,6 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     } else {
       context.go('/deals');
     }
-  }
-
-  static String _formatCurrency(double amount) {
-    return '\$${amount.toStringAsFixed(2)}';
-  }
-
-  static String _formatDate(DateTime date) {
-    const List<String> months = <String>[
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 
   static BoxDecoration _cardDecoration() {
@@ -69,29 +51,34 @@ class SavingsAnalyticsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final ExpensesStore expensesStore = ExpensesProvider.of(context);
     final ReceiptStore receiptStore = ReceiptProvider.of(context);
     final PriceMemoryStore priceMemoryStore = PriceMemoryProvider.of(context);
+    final AppState appState = AppStateProvider.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
-    return AnimatedBuilder(
-      animation: expensesStore,
+    return ListenableBuilder(
+      listenable: appState,
       builder: (BuildContext context, Widget? _) {
         return AnimatedBuilder(
-          animation: receiptStore,
+          animation: expensesStore,
           builder: (BuildContext context, Widget? __) {
             return AnimatedBuilder(
-              animation: priceMemoryStore,
+              animation: receiptStore,
               builder: (BuildContext context, Widget? ___) {
+                return AnimatedBuilder(
+                  animation: priceMemoryStore,
+                  builder: (BuildContext context, Widget? ____) {
             if (!expensesStore.isAuthenticated && !receiptStore.isAuthenticated) {
-              return _buildSignInRequired(context);
+              return _buildSignInRequired(context, l10n);
             }
 
             return Scaffold(
               backgroundColor: _pageBackground,
               appBar: AppBar(
-                title: const Text(
-                  'Savings analytics',
+                title: Text(
+                  l10n.savingsAnalytics,
                   style: SavingorAppTextStyles.screenTitle,
                 ),
                 elevation: 0,
@@ -106,12 +93,16 @@ class SavingsAnalyticsScreen extends StatelessWidget {
               ),
               body: _buildBody(
                 context,
+                appState,
                 expensesStore,
                 receiptStore,
                 priceMemoryStore,
                 bottomInset,
+                l10n,
               ),
             );
+                  },
+                );
               },
             );
           },
@@ -122,20 +113,27 @@ class SavingsAnalyticsScreen extends StatelessWidget {
 
   Widget _buildBody(
     BuildContext context,
+    AppState appState,
     ExpensesStore expensesStore,
     ReceiptStore receiptStore,
     PriceMemoryStore priceMemoryStore,
     double bottomInset,
+    AppLocalizations l10n,
   ) {
+    final String Function(double) formatCurrency =
+        (double amount) => appState.formatMoney(amount);
+    final String Function(double) formatPriceMemory =
+        (double amount) =>
+            appState.formatMoney(amount, originalCurrency: 'CAD');
     if (expensesStore.isLoading ||
         receiptStore.isLoading ||
         priceMemoryStore.isLoading) {
-      return const AppLoadingState(message: 'Loading analytics…');
+      return AppLoadingState(message: l10n.loadingAnalytics);
     }
 
     if (expensesStore.loadError != null) {
       return AppErrorState(
-        title: 'Could not load analytics',
+        title: l10n.couldNotLoadAnalytics,
         message: expensesStore.loadError!,
         onRetry: expensesStore.retry,
       );
@@ -143,7 +141,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
 
     if (receiptStore.loadError != null) {
       return AppErrorState(
-        title: 'Could not load analytics',
+        title: l10n.couldNotLoadAnalytics,
         message: receiptStore.loadError!,
         onRetry: receiptStore.retry,
       );
@@ -151,7 +149,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
 
     if (priceMemoryStore.loadError != null) {
       return AppErrorState(
-        title: 'Could not load analytics',
+        title: l10n.couldNotLoadAnalytics,
         message: priceMemoryStore.loadError!,
         onRetry: priceMemoryStore.retry,
       );
@@ -166,17 +164,25 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     final ExpenseAnalyticsSummary summary = ExpenseAnalyticsCalculator.compute(
       expensesStore.expenses,
       receipts: receiptStore.receipts,
+      convertToDisplay: appState.toDisplayConverter,
     );
 
     if (summary.isEmpty) {
       return ListView(
         padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + bottomInset),
         children: <Widget>[
-          _buildOverviewGrid(summary, savingsSummary),
+          _buildOverviewGrid(
+            context,
+            summary,
+            savingsSummary,
+            formatCurrency,
+            formatPriceMemory,
+            l10n,
+          ),
           const SizedBox(height: SavingorSpacing.xl),
           SavingsValueSection(
             summary: savingsSummary,
-            formatCurrency: _formatCurrency,
+            formatCurrency: formatPriceMemory,
             proPaybackOnly: true,
           ),
           const SizedBox(height: SavingorSpacing.xl),
@@ -185,14 +191,13 @@ class SavingsAnalyticsScreen extends StatelessWidget {
             excludeWatchPriceRecommendations: true,
           ),
           const SizedBox(height: SavingorSpacing.xl),
-          ..._buildDetailLinks(context, priceMemoryStore),
+          ..._buildDetailLinks(context, priceMemoryStore, l10n),
           const SizedBox(height: SavingorSpacing.xl),
           AppEmptyState(
             icon: Icons.insights_outlined,
-            title: 'No spending data yet',
-            message:
-                'Add a receipt or expense to see spending totals, store breakdowns, and trends.',
-            actionLabel: 'Add receipt',
+            title: l10n.noSpendingDataYet,
+            message: l10n.noSpendingDataMessage,
+            actionLabel: l10n.addReceipt,
             prominentAction: true,
             onAction: () => context.push('/scanner/create'),
           ),
@@ -203,24 +208,31 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     return ListView(
       padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + bottomInset),
       children: <Widget>[
-        _buildOverviewGrid(summary, savingsSummary),
+        _buildOverviewGrid(
+          context,
+          summary,
+          savingsSummary,
+          formatCurrency,
+          formatPriceMemory,
+          l10n,
+        ),
         const SizedBox(height: SavingorSpacing.xl),
         SavingsValueSection(
           summary: savingsSummary,
-          formatCurrency: _formatCurrency,
+          formatCurrency: formatCurrency,
           proPaybackOnly: true,
         ),
         const SizedBox(height: SavingorSpacing.xl),
-        _buildSpendingByStore(summary),
+        _buildSpendingByStore(context, summary, formatCurrency, l10n),
         const SizedBox(height: SavingorSpacing.xl),
-        _buildRecentActivity(summary),
+        _buildRecentActivity(context, summary, formatCurrency, l10n),
         const SizedBox(height: SavingorSpacing.xl),
         RecommendedActionsSection(
           recommendations: recommendations,
           excludeWatchPriceRecommendations: true,
         ),
         const SizedBox(height: SavingorSpacing.xl),
-        ..._buildDetailLinks(context, priceMemoryStore),
+        ..._buildDetailLinks(context, priceMemoryStore, l10n),
       ],
     );
   }
@@ -228,25 +240,26 @@ class SavingsAnalyticsScreen extends StatelessWidget {
   List<Widget> _buildDetailLinks(
     BuildContext context,
     PriceMemoryStore priceMemoryStore,
+    AppLocalizations l10n,
   ) {
     return <Widget>[
-      const Text(
-        'Explore details',
+      Text(
+        l10n.exploreDetails,
         style: SavingorAppTextStyles.sectionTitle,
       ),
       const SizedBox(height: SavingorSpacing.md),
-      _buildPriceInsightsEntry(context, priceMemoryStore),
+      _buildPriceInsightsEntry(context, priceMemoryStore, l10n),
       const SizedBox(height: 12),
-      _buildSavingsOpportunitiesEntry(context, priceMemoryStore),
+      _buildSavingsOpportunitiesEntry(context, priceMemoryStore, l10n),
     ];
   }
 
-  Widget _buildSignInRequired(BuildContext context) {
+  Widget _buildSignInRequired(BuildContext context, AppLocalizations l10n) {
     return Scaffold(
       backgroundColor: _pageBackground,
       appBar: AppBar(
-        title: const Text(
-          'Savings analytics',
+        title: Text(
+          l10n.savingsAnalytics,
           style: SavingorAppTextStyles.screenTitle,
         ),
         backgroundColor: _pageBackground,
@@ -259,28 +272,32 @@ class SavingsAnalyticsScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
       ),
       body: AppSignInRequiredState(
-        message: 'View spending analytics with your Savingor account.',
+        message: l10n.signInForAnalytics,
         onSignIn: () => context.push('/auth'),
       ),
     );
   }
 
   Widget _buildOverviewGrid(
+    BuildContext context,
     ExpenseAnalyticsSummary summary,
     SavingsSummary savingsSummary,
+    String Function(double) formatCurrency,
+    String Function(double) formatPriceMemory,
+    AppLocalizations l10n,
   ) {
     final String estimatedSaved = savingsSummary.hasCalculableData
-        ? _formatCurrency(savingsSummary.estimatedSavedThisMonth)
+        ? formatPriceMemory(savingsSummary.estimatedSavedThisMonth)
         : '—';
     final String potentialMissed = savingsSummary.hasCalculableData
-        ? _formatCurrency(savingsSummary.potentialMissedThisMonth)
+        ? formatPriceMemory(savingsSummary.potentialMissedThisMonth)
         : '—';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const Text(
-          'Overview',
+        Text(
+          l10n.overview,
           style: SavingorAppTextStyles.sectionTitle,
         ),
         const SizedBox(height: SavingorSpacing.md),
@@ -288,15 +305,15 @@ class SavingsAnalyticsScreen extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: _SummaryCard(
-                label: 'This month',
-                value: _formatCurrency(summary.totalThisMonth),
+                label: l10n.thisMonth,
+                value: formatCurrency(summary.totalThisMonth),
                 icon: Icons.calendar_today_outlined,
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: _SummaryCard(
-                label: 'Receipts',
+                label: l10n.receipts,
                 value: '${summary.receiptCount}',
                 icon: Icons.receipt_long_outlined,
               ),
@@ -308,7 +325,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
           children: <Widget>[
             Expanded(
               child: _SummaryCard(
-                label: 'Estimated saved',
+                label: l10n.estimatedSaved,
                 value: estimatedSaved,
                 icon: Icons.savings_outlined,
               ),
@@ -316,7 +333,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: _SummaryCard(
-                label: 'Potential missed',
+                label: l10n.potentialMissed,
                 value: potentialMissed,
                 icon: Icons.trending_down_outlined,
               ),
@@ -330,11 +347,12 @@ class SavingsAnalyticsScreen extends StatelessWidget {
   Widget _buildPriceInsightsEntry(
     BuildContext context,
     PriceMemoryStore priceMemoryStore,
+    AppLocalizations l10n,
   ) {
     final int productCount = priceMemoryStore.insights.length;
     final String subtitle = productCount > 0
-        ? '$productCount ${productCount == 1 ? 'product' : 'products'} in your price history'
-        : 'Full price memory from your receipt line items';
+        ? l10n.productsInPriceHistoryCount(productCount)
+        : l10n.priceInsightsEmptySubtitle;
 
     return SavingorInteractiveCard(
       onTap: () => context.push('/analytics/product-price-insights'),
@@ -359,8 +377,8 @@ class SavingsAnalyticsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                const Text(
-                  'Product price insights',
+                Text(
+                  l10n.productPriceInsights,
                   style: SavingorAppTextStyles.cardTitle,
                 ),
                 const SizedBox(height: 4),
@@ -388,11 +406,12 @@ class SavingsAnalyticsScreen extends StatelessWidget {
   Widget _buildSavingsOpportunitiesEntry(
     BuildContext context,
     PriceMemoryStore priceMemoryStore,
+    AppLocalizations l10n,
   ) {
     final int opportunityCount = priceMemoryStore.savingsOpportunities.length;
     final String subtitle = opportunityCount > 0
-        ? '$opportunityCount actionable ${opportunityCount == 1 ? 'opportunity' : 'opportunities'} to review'
-        : 'Products where you paid more than the best known price';
+        ? l10n.actionableOpportunitiesCount(opportunityCount)
+        : l10n.savingsOpportunitiesEmptySubtitle;
 
     return SavingorInteractiveCard(
       onTap: () => context.push('/analytics/savings-opportunities'),
@@ -417,8 +436,8 @@ class SavingsAnalyticsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                const Text(
-                  'Savings opportunities',
+                Text(
+                  l10n.savingsOpportunities,
                   style: SavingorAppTextStyles.cardTitle,
                 ),
                 const SizedBox(height: 4),
@@ -443,7 +462,12 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSpendingByStore(ExpenseAnalyticsSummary summary) {
+  Widget _buildSpendingByStore(
+    BuildContext context,
+    ExpenseAnalyticsSummary summary,
+    String Function(double) formatCurrency,
+    AppLocalizations l10n,
+  ) {
     final double maxStoreTotal = summary.spendingByStore.isEmpty
         ? 0
         : summary.spendingByStore.first.totalAmount;
@@ -454,8 +478,8 @@ class SavingsAnalyticsScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text(
-            'Spending by store',
+          Text(
+            l10n.spendingByStore,
             style: SavingorAppTextStyles.sectionTitle,
           ),
           const SizedBox(height: SavingorSpacing.md),
@@ -478,7 +502,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        _formatCurrency(entry.totalAmount),
+                        formatCurrency(entry.totalAmount),
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w800,
@@ -489,7 +513,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${entry.recordCount} ${entry.recordCount == 1 ? 'record' : 'records'}',
+                    l10n.priceRecordCount(entry.recordCount),
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -519,15 +543,20 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentActivity(ExpenseAnalyticsSummary summary) {
+  Widget _buildRecentActivity(
+    BuildContext context,
+    ExpenseAnalyticsSummary summary,
+    String Function(double) formatCurrency,
+    AppLocalizations l10n,
+  ) {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: _cardDecoration(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text(
-            'Recent activity',
+          Text(
+            l10n.recentActivity,
             style: SavingorAppTextStyles.sectionTitle,
           ),
           const SizedBox(height: SavingorSpacing.md),
@@ -569,17 +598,17 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '${_formatDate(entry.date)} · ${entry.typeLabel}',
+                          '${LocaleDateFormat.formatMediumDate(context, entry.date)} · ${AnalyticsActivityL10n.typeLabel(context, entry)}',
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: SavingorColors.textSecondary,
                           ),
                         ),
-                        if (entry.subtitle.isNotEmpty) ...<Widget>[
+                        if (AnalyticsActivityL10n.subtitle(context, entry).isNotEmpty) ...<Widget>[
                           const SizedBox(height: 2),
                           Text(
-                            entry.subtitle,
+                            AnalyticsActivityL10n.subtitle(context, entry),
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
@@ -591,7 +620,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    _formatCurrency(entry.amount),
+                    formatCurrency(entry.amount),
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,

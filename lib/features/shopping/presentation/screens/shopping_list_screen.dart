@@ -1,7 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 import 'package:flutter/material.dart';
-import 'package:savingor_app/core/i18n/app_strings.dart';
 import 'package:savingor_app/features/shopping/data/shopping_list_store.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class ShoppingListScreen extends StatefulWidget {
   const ShoppingListScreen({super.key});
@@ -13,17 +13,17 @@ class ShoppingListScreen extends StatefulWidget {
 class _ShoppingListScreenState extends State<ShoppingListScreen> {
   @override
   Widget build(BuildContext context) {
-    final t = AppStrings.of(context);
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final store = ShoppingListProvider.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(t.shoppingList),
+        title: Text(l10n.shoppingList),
         actions: [
           IconButton(
             onPressed: () => store.clearChecked(),
             icon: const Icon(Icons.delete_sweep),
-            tooltip: 'Clear purchased',
+            tooltip: l10n.clearPurchased,
           )
         ],
       ),
@@ -38,9 +38,12 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('${items.length} items'),
+                    Text(l10n.receiptItemsCount(items.length)),
                     Text(
-                        'Estimated: \$${store.totalEstimate.toStringAsFixed(2)}'),
+                      l10n.estimatedPrefix(
+                        '\$${store.totalEstimate.toStringAsFixed(2)}',
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -53,13 +56,14 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                             const Icon(Icons.shopping_cart,
                                 size: 72, color: Colors.grey),
                             const SizedBox(height: 12),
-                            Text(t.shoppingList,
+                            Text(l10n.shoppingList,
                                 style: const TextStyle(
                                     fontSize: 18, fontWeight: FontWeight.w600)),
                             const SizedBox(height: 8),
-                            const Text(
-                                'Create and manage your smart shopping lists here.',
-                                textAlign: TextAlign.center),
+                            Text(
+                              l10n.shoppingListEmptyMessage,
+                              textAlign: TextAlign.center,
+                            ),
                           ],
                         ),
                       )
@@ -115,13 +119,14 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddDialog(context),
-        label: const Text('Add item'),
+        label: Text(l10n.addItem),
         icon: const Icon(Icons.add),
       ),
     );
   }
 
   void _showAddDialog(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final titleCtrl = TextEditingController();
     final storeCtrl = TextEditingController();
     final priceCtrl = TextEditingController();
@@ -139,15 +144,13 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
           children: [
             TextField(
                 controller: titleCtrl,
-                decoration: const InputDecoration(labelText: 'Title')),
+                decoration: InputDecoration(labelText: l10n.itemName)),
             TextField(
                 controller: storeCtrl,
-                decoration:
-                    const InputDecoration(labelText: 'Store (optional)')),
+                decoration: InputDecoration(labelText: l10n.storeOptional)),
             TextField(
                 controller: priceCtrl,
-                decoration:
-                    const InputDecoration(labelText: 'Price (optional)'),
+                decoration: InputDecoration(labelText: l10n.priceOptional),
                 keyboardType: TextInputType.numberWithOptions(decimal: true)),
             const SizedBox(height: 12),
             Row(
@@ -166,12 +169,12 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
                               price: price);
                           Navigator.of(context).pop();
                         },
-                        child: const Text('Save'))),
+                        child: Text(l10n.save))),
                 const SizedBox(width: 8),
                 Expanded(
                     child: OutlinedButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Cancel'))),
+                        child: Text(l10n.cancel))),
               ],
             ),
             const SizedBox(height: 12),

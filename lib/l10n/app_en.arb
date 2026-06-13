@@ -1,0 +1,1061 @@
+{
+  "@@locale": "en",
+
+  "appName": "Savingor",
+  "appSubtitle": "Local offers and smart savings",
+
+  "home": "Home",
+  "deals": "Deals",
+  "receipts": "Receipts",
+  "analytics": "Analytics",
+  "profile": "Profile",
+  "scanner": "Receipt scanner",
+  "shopping": "Shopping list",
+  "saved": "Saved",
+  "storesMap": "Map",
+  "aiAssistant": "AI",
+  "scanReceipt": "Scan receipt",
+  "dealsMap": "Deals map",
+  "receiptScanner": "Receipt scanner",
+  "shoppingList": "Shopping list",
+  "mvp": "MVP v0.1",
+  "searchHint": "Search deals or stores...",
+  "filter": "Filter",
+  "dealsMapSubtitle": "Shows nearby deals",
+  "receiptScannerSubtitle": "Scan a receipt",
+  "shoppingListSubtitle": "Smart list",
+  "dealsCount": "{count, plural, =1{1 deal} other{{count} deals}}",
+  "@dealsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noDealsFound": "No deals found",
+  "resetFilters": "Reset filters",
+  "filtersTitle": "Filters",
+  "stores": "Stores",
+  "maxPrice": "Max price",
+  "sort": "Sort",
+  "none": "None",
+  "priceLowHigh": "Price: low to high",
+  "priceHighLow": "Price: high to low",
+  "dealDetails": "Deal details",
+  "dealNotFound": "Deal not found",
+  "saveDeal": "Save deal",
+  "removeSaved": "Remove saved",
+  "noSavedDeals": "No saved deals yet",
+  "savedHint": "Saved deals will appear here",
+
+  "cancel": "Cancel",
+  "apply": "Apply",
+  "save": "Save",
+  "back": "Back",
+  "close": "Close",
+  "signOut": "Sign out",
+  "loading": "Loading...",
+  "tryAgain": "Try again",
+  "comingSoon": "Coming soon",
+  "continueButton": "Continue",
+  "edit": "Edit",
+  "ok": "OK",
+
+  "chooseYourLanguage": "Choose your language",
+  "chooseLanguageSubtitle": "Select the language you want Savingor to use.",
+  "langSubtitleOnboarding": "This helps personalize your Savingor experience.",
+  "applyLanguage": "Apply language",
+
+  "welcomeBackName": "Welcome back, {name}! 👋",
+  "@welcomeBackName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "welcomeBack": "Welcome back! 👋",
+  "readyToSaveSmarterToday": "Ready to save smarter today?",
+  "totalExpenses": "Total expenses",
+  "trackedInSavingor": "Tracked in Savingor",
+  "expensesTracked": "{count, plural, =1{1 expense tracked} other{{count} expenses tracked}}",
+  "@expensesTracked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "startSaving": "Start saving",
+  "startSavingHero": "✨ START SAVING",
+  "thisMonth": "This month",
+  "spent": "spent",
+  "recorded": "recorded",
+  "lists": "lists",
+  "activeDeals": "Active deals",
+  "estimated": "estimated",
+  "monthlyGoal": "Monthly goal",
+  "noRecentActivity": "No recent activity",
+  "expenseAdded": "Expense added",
+  "addExpenseToSeeHere": "Add an expense to see it here",
+  "yourSavingsSnapshot": "Your savings snapshot",
+  "thisMonthSpent": "This month spent",
+  "potentialSavingsFound": "Potential savings found",
+  "productsTracked": "Products tracked",
+  "bestActionNow": "Best action now",
+  "addMoreReceiptsForSavings": "Add more receipts to unlock personalized savings.",
+
+  "account": "Account",
+  "yourAccount": "Your account",
+  "planAndSubscription": "Plan & subscription",
+  "appSettings": "App settings",
+  "region": "Region",
+  "language": "Language",
+  "appearance": "Appearance",
+  "currency": "Currency",
+  "notifications": "Notifications",
+  "loadingProfile": "Loading profile...",
+  "noProfileFound": "No profile found for this account yet.",
+  "fullName": "Full name",
+  "email": "Email",
+  "passwordAndSecurity": "Password & security",
+  "managePassword": "Manage password",
+  "currentPlan": "Current plan",
+  "proPlan": "Pro plan",
+  "freePlan": "Free plan",
+  "pro": "Pro",
+  "free": "Free",
+  "status": "Status",
+  "provider": "Provider",
+  "price": "Price",
+  "priceMonthly": "$14.99 / month",
+  "inactive": "Inactive",
+  "freePlanUpgradeMessage": "You are currently on the Free plan. Upgrade to Pro to unlock AI savings insights, receipt analytics, smart alerts, and spending reports.",
+  "manageSubscription": "Manage subscription",
+  "viewPlans": "View plans",
+  "manageSettings": "Manage settings",
+  "signOutQuestion": "Sign out?",
+  "signOutMessage": "You will need to sign in again to access your Savingor account.",
+  "couldNotLoadProfile": "Could not load your profile. Please try again.",
+
+  "personalizeSavingor": "Personalize Savingor",
+  "personalizeSavingorSubtitle": "Choose how the app looks, communicates, and adapts to your location.",
+  "preferences": "Preferences",
+  "appLanguage": "App language",
+  "appearanceHelper": "Choose how Savingor looks",
+  "regionHelper": "Used for nearby stores and local deals",
+  "currencyHelper": "Used for prices, budgets, and reports",
+  "smartSavingsAlerts": "Smart savings alerts",
+  "smartSavingsAlertsDescription": "Get notified about savings opportunities, budget progress, and important recommendations.",
+
+  "regionCanada": "Canada",
+  "regionUnitedStates": "United States",
+  "appearanceLight": "Light",
+  "appearanceDark": "Dark",
+
+  "topSavingOpportunities": "Top saving opportunities",
+  "seeAll": "See all",
+  "bestKnownAtStore": "Best known: {amount} at {store}",
+  "@bestKnownAtStore": {
+    "placeholders": {
+      "amount": {"type": "String"},
+      "store": {"type": "String"}
+    }
+  },
+  "latestPaidAtStore": "Latest paid: {amount} at {store}",
+  "@latestPaidAtStore": {
+    "placeholders": {
+      "amount": {"type": "String"},
+      "store": {"type": "String"}
+    }
+  },
+  "saveUpToAmount": "Save up to {amount}",
+  "@saveUpToAmount": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "basedOnReceiptHistory": "Based on receipt history",
+  "buyProductAtStoreNextTime": "Buy {product} at {store} next time",
+  "@buyProductAtStoreNextTime": {
+    "placeholders": {
+      "product": {"type": "String"},
+      "store": {"type": "String"}
+    }
+  },
+  "potentialSavingPerItem": "Potential saving: {amount} per item",
+  "@potentialSavingPerItem": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+
+  "productBread": "Bread",
+  "productMilk": "Milk",
+
+  "delete": "Delete",
+  "signIn": "Sign in",
+  "signInRequired": "Sign in required",
+  "store": "Store",
+  "date": "Date",
+  "total": "Total",
+  "items": "Items",
+  "notes": "Notes",
+  "amount": "Amount",
+  "category": "Category",
+
+  "scanReceiptSubtitle": "Scan a grocery receipt to track expenses and savings.",
+  "addManually": "Add manually",
+  "recentReceipts": "Recent receipts ({count})",
+  "@recentReceipts": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "noReceiptsYet": "No receipts yet. Scan or add one to start tracking.",
+  "deleteReceiptQuestion": "Delete receipt?",
+  "deleteReceipt": "Delete receipt",
+  "deleteReceiptConfirmMessage": "{store} ({total}) will be permanently removed.",
+  "@deleteReceiptConfirmMessage": {
+    "placeholders": {
+      "store": {"type": "String"},
+      "total": {"type": "String"}
+    }
+  },
+  "loadingReceipts": "Loading receipts...",
+  "couldNotLoadReceipts": "Could not load receipts",
+  "signInToSyncReceipts": "Save and sync your receipts with your Savingor account.",
+
+  "chooseReceiptSource": "Choose how you want to add your receipt.",
+  "takePhoto": "Take a photo",
+  "takePhotoSubtitle": "Use your camera to scan a receipt.",
+  "chooseFromGallery": "Choose from gallery",
+  "chooseFromGallerySubtitle": "Select an existing receipt photo.",
+
+  "scanningReceipt": "Scanning receipt...",
+  "couldNotScanReceipt": "Could not scan this receipt. Try another photo.",
+  "ocrResultPreview": "OCR result preview",
+  "noTextDetected": "No text detected. Try a clearer receipt photo.",
+  "useThisReceipt": "Use this receipt",
+  "noneDetected": "None detected",
+  "rawOcrText": "Raw OCR text",
+  "itemsColon": "Items:",
+
+  "addReceipt": "Add receipt",
+  "editReceipt": "Edit receipt",
+  "saveReceipt": "Save receipt",
+  "updateReceipt": "Update receipt",
+  "storeName": "Store name",
+  "storeAddressOptional": "Store address (optional)",
+  "purchaseDate": "Purchase date",
+  "categorySummary": "Category summary",
+  "grocery": "Grocery",
+  "subtotalOptional": "Subtotal (optional)",
+  "taxOptional": "Tax (optional)",
+  "receiptTotal": "Receipt total",
+  "autoCalculatedFromItems": "Auto-calculated from items unless you edit this field.",
+  "notesOptional": "Notes (optional)",
+  "addItem": "Add item",
+  "addLineItemsHint": "Add line items to build a real receipt record for price tracking later.",
+  "enterStoreName": "Enter a store name",
+  "selectPurchaseDate": "Select a purchase date",
+  "enterTotalAmount": "Enter the total amount",
+  "enterValidAmount": "Enter a valid amount",
+  "enterValidTotalAmount": "Enter a valid total amount.",
+  "receiptNotFound": "Receipt not found.",
+  "item": "Item",
+  "itemName": "Item name",
+  "enterItemName": "Enter an item name",
+  "qty": "Qty",
+  "invalidValue": "Invalid",
+  "removeItem": "Remove item",
+  "categoryOptional": "Category (optional)",
+
+  "receiptDetails": "Receipt details",
+  "subtotalLabel": "Subtotal: {amount}",
+  "@subtotalLabel": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "taxLabel": "Tax: {amount}",
+  "@taxLabel": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "noItemsSaved": "No items saved",
+  "noLineItemsSaved": "No line items were saved for this receipt yet.",
+  "qtyWithValue": "Qty {quantity}",
+  "@qtyWithValue": {
+    "placeholders": {
+      "quantity": {"type": "String"}
+    }
+  },
+  "couldNotDeleteReceipt": "Could not delete the receipt. Please try again.",
+  "saveChanges": "Save changes",
+
+  "receiptSourceManual": "Manual",
+  "receiptSourceScanned": "Scanned",
+  "receiptSourceGallery": "Gallery",
+  "receiptSourceImported": "Imported",
+  "receiptSourceShoppingList": "Shopping list",
+  "receiptSourceUnknown": "Receipt",
+  "scanNotes": "Scan notes",
+  "galleryScanNotes": "Gallery scan notes",
+  "importNotes": "Import notes",
+  "tripNotes": "Trip notes",
+
+  "couldNotLoadYourReceipts": "Could not load your receipts. Please try again.",
+  "signInToSaveReceipts": "Sign in to save receipts.",
+  "couldNotSaveReceipt": "Could not save the receipt. Please try again.",
+  "couldNotUpdateReceipt": "Could not update the receipt. Please try again.",
+  "signInToUpdateReceipts": "Sign in to update receipts.",
+
+  "receiptItemsCount": "{count, plural, =0{0 items} =1{1 item} other{{count} items}}",
+  "@receiptItemsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+
+  "processingReceipt": "Processing receipt",
+  "readingReceipt": "Reading receipt",
+  "recognizingText": "Recognizing text",
+  "receiptScannedSuccessfully": "Receipt scanned successfully",
+  "noTextRecognized": "No text recognized",
+  "couldNotReadReceipt": "Could not read this receipt",
+  "imageTooBlurry": "Image is too blurry",
+  "tryAnotherPhoto": "Please try another photo",
+  "cameraPermissionRequired": "Camera permission is required",
+  "galleryPermissionRequired": "Gallery access is required",
+  "permissionDenied": "Permission denied",
+  "openSettings": "Open settings",
+
+  "chooseSavingAction": "Choose what you want to do",
+  "addGroceryExpense": "Add grocery expense",
+  "addGroceryExpenseSubtitle": "Record a purchase manually",
+  "createShoppingListAction": "Create shopping list",
+  "createShoppingListSubtitle": "Plan what you need before shopping",
+  "optimizeShoppingBasket": "Optimize shopping basket",
+  "optimizeShoppingBasketSubtitle": "Find opportunities to spend less",
+  "finalizeShoppingTrip": "Finalize shopping trip",
+  "finalizeShoppingTripSubtitle": "Complete your shopping activity",
+  "monthlyGoalBudget": "Monthly goal / Budget",
+  "monthlyGoalBudgetSubtitle": "Set or update your monthly target",
+  "savingsAnalytics": "Savings analytics",
+  "savingsAnalyticsSubtitle": "Review your savings and spending",
+  "open": "Open",
+
+  "expenses": "Expenses",
+  "addExpense": "Add expense",
+  "loadingExpenses": "Loading expenses...",
+  "couldNotLoadExpenses": "Could not load expenses",
+  "couldNotLoadYourExpenses": "Could not load your expenses. Please try again.",
+  "noExpensesYet": "No expenses yet",
+  "noExpensesYetMessage": "Track grocery purchases and receipts to understand your spending.",
+  "signInToSyncExpenses": "Save and sync your expenses with your Savingor account.",
+  "deleteExpenseQuestion": "Delete expense?",
+  "deleteExpenseConfirmMessage": "\"{store}\" ({amount}) will be permanently removed.",
+  "@deleteExpenseConfirmMessage": {
+    "placeholders": {
+      "store": {"type": "String"},
+      "amount": {"type": "String"}
+    }
+  },
+  "saveExpense": "Save expense",
+  "totalAmount": "Total amount",
+  "signInToSaveExpenses": "Sign in to save expenses.",
+  "couldNotSaveExpense": "Could not save the expense. Please try again.",
+  "couldNotDeleteExpense": "Could not delete the expense. Please try again.",
+  "expenseSaved": "Expense saved.",
+  "uncategorized": "Uncategorized",
+  "recentExpenses": "Recent expenses",
+  "noExpensesAddedYet": "No expenses added yet.",
+  "pleaseEnterStoreName": "Please enter a store name.",
+  "pleaseEnterItemName": "Please enter an item name.",
+  "pleaseEnterPrice": "Please enter a price.",
+  "pleaseEnterValidPrice": "Please enter a valid price.",
+  "expenseCount": "{count, plural, =0{0 expenses} =1{1 expense} other{{count} expenses}}",
+  "@expenseCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+
+  "newShoppingList": "New shopping list",
+  "newList": "New list",
+  "createList": "Create list",
+  "loadingShoppingLists": "Loading shopping lists...",
+  "couldNotLoadLists": "Could not load lists",
+  "couldNotLoadYourShoppingLists": "Could not load your shopping lists. Please try again.",
+  "noShoppingListsYet": "No shopping lists yet",
+  "noShoppingListsYetMessage": "Create your first list to plan purchases and optimize your basket.",
+  "signInToSyncShoppingLists": "Create and sync shopping lists with your Savingor account.",
+  "deleteListQuestion": "Delete list?",
+  "deleteListConfirmMessage": "\"{title}\" will be permanently removed.",
+  "@deleteListConfirmMessage": {
+    "placeholders": {
+      "title": {"type": "String"}
+    }
+  },
+  "deleteList": "Delete list",
+  "optimizeAllLists": "Optimize all lists",
+  "optimizeAllListsSubtitle": "Find the best known stores across your active shopping lists",
+  "optimizeThisBasket": "Optimize this basket",
+  "optimizeThisBasketSubtitle": "Find the best known stores for this list",
+  "listNotFound": "List not found",
+  "listNotFoundMessage": "This shopping list may have been deleted.",
+  "backToLists": "Back to lists",
+  "noShoppingItemsYet": "No items yet",
+  "noShoppingItemsYetMessage": "Add items to this list to track what you need.",
+  "shoppingListEmptyMessage": "Create and manage your smart shopping lists here.",
+  "purchased": "Purchased",
+  "clearPurchased": "Clear purchased",
+  "estimatedTotalLabel": "Estimated total",
+  "estimatedShort": "Est. {amount}",
+  "@estimatedShort": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "activeCountLabel": "{count} active",
+  "@activeCountLabel": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "purchasedSummary": "{count} purchased",
+  "@purchasedSummary": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "itemsTotalSummary": "{count} items total",
+  "@itemsTotalSummary": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "allItemsPurchased": "All items purchased",
+  "saveItem": "Save item",
+  "listTitle": "List title",
+  "enterListTitle": "Enter a list title",
+  "listName": "List name",
+  "enterListName": "Enter a list name",
+  "newShoppingListHint": "Give your list a name. You can add items after creating it.",
+  "itemsOptional": "Items (optional)",
+  "addAnotherItem": "Add another item",
+  "storeOptional": "Store (optional)",
+  "priceOptional": "Price (optional)",
+  "loadingListItems": "Loading list items...",
+  "loadingShoppingList": "Loading shopping list...",
+  "couldNotLoadItems": "Could not load items",
+  "couldNotLoadListItems": "Could not load list items. Please try again.",
+  "createAnotherReceiptQuestion": "Create another receipt?",
+  "createAnotherReceiptMessage": "This list may already have a receipt. Create another receipt from purchased items?",
+  "createReceipt": "Create receipt",
+  "signInToFinalizeTrip": "Sign in to finalize a shopping trip.",
+  "noListsReadyToFinalize": "No lists ready to finalize",
+  "noListsReadyToFinalizeMessage": "Mark items as purchased on a shopping list, then return here to create a receipt.",
+  "openShoppingLists": "Open shopping lists",
+  "selectListToFinalize": "Select list to finalize",
+  "selectListToFinalizeSubtitle": "Choose a shopping list with purchased items.",
+  "finalizeShoppingTripCardSubtitle": "Create a receipt from purchased items and update your price history",
+  "done": "Done",
+  "optional": "Optional",
+  "somethingWentWrong": "Something went wrong",
+  "saving": "Saving...",
+  "loadingPurchasedItems": "Loading purchased items...",
+  "preparingPurchasedItems": "Preparing purchased items...",
+  "noPurchasedItemsYet": "No purchased items yet",
+  "noPurchasedItemsYetMessage": "Check off items you bought before creating a receipt.",
+  "backToList": "Back to list",
+  "enterStoreNameForTrip": "Enter the store name for this trip",
+  "enterStoreNameForTripSnack": "Enter the store name for this trip.",
+  "creatingReceiptsPerStore": "Creating {count} receipts — one per store.",
+  "@creatingReceiptsPerStore": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "missingStoreOnItems": "Some purchased items are missing a store. Add a store on each item before finalizing.",
+  "missingStore": "Missing store",
+  "receiptSubtotalLabel": "Receipt subtotal: {amount}",
+  "@receiptSubtotalLabel": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "purchasedItems": "Purchased items",
+  "enterReceiptTotal": "Enter the receipt total",
+  "enterValidReceiptTotal": "Enter a valid receipt total",
+  "subtotalFromItemPrices": "Subtotal from item prices: {amount}",
+  "@subtotalFromItemPrices": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "grandTotalAcrossReceipts": "Grand total across receipts: {amount}",
+  "@grandTotalAcrossReceipts": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "saveReceipts": "Save receipts",
+  "addValidPricesForStore": "Add valid prices for purchased items at {store}.",
+  "@addValidPricesForStore": {
+    "placeholders": {
+      "store": {"type": "String"}
+    }
+  },
+  "addStoreToAllItems": "Add a store to every purchased item before finalizing multiple receipts.",
+  "signInToCreateShoppingLists": "Sign in to create shopping lists.",
+  "couldNotCreateList": "Could not create the list. Please try again.",
+  "couldNotDeleteList": "Could not delete the list. Please try again.",
+  "couldNotAddItem": "Could not add the item. Please try again.",
+  "signInToAddShoppingItems": "Sign in to add items to your shopping list.",
+  "itemNameRequired": "Item name is required.",
+  "couldNotUpdateItem": "Could not update the item. Please try again.",
+  "couldNotUpdateQuantity": "Could not update quantity. Please try again.",
+  "couldNotRemoveItem": "Could not remove the item. Please try again.",
+  "couldNotUpdateShoppingList": "Could not update the shopping list. Please try again.",
+  "couldNotCompleteAction": "Could not complete the action. Please try again.",
+  "estimatedPrefix": "Estimated: {amount}",
+  "@estimatedPrefix": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+
+  "shoppingTripFinalized": "{count, plural, =1{Shopping trip finalized. 1 receipt created.} other{Shopping trip finalized. {count} receipts created.}}",
+  "@shoppingTripFinalized": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+
+  "productChicken": "Chicken",
+  "productEggs": "Eggs",
+  "weeklyGroceriesDefault": "Weekly groceries",
+
+  "basketSummary": "Basket summary",
+  "estimatedBestTotal": "Estimated best total",
+  "basketPotentialSaving": "Potential saving",
+  "itemsMatched": "Items matched",
+  "noPriceHistoryLabel": "No price history",
+  "activeListsIncludedLabel": "Active lists included",
+  "itemRecommendations": "Item recommendations",
+  "bestKnownLabel": "Best known",
+  "latestSeen": "Latest seen",
+  "saveUpToTotal": "Save up to {amount} total",
+  "@saveUpToTotal": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "noPriceHistoryYet": "No price history yet",
+  "addReceiptsForItemRecommendations": "Add receipts with this item to unlock recommendations.",
+  "suggestedStorePlan": "Suggested store plan",
+  "estimatedStoreTotalLabel": "Estimated store total: {amount}",
+  "@estimatedStoreTotalLabel": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "storePlanItemLine": "• {itemName}{quantitySuffix} — {unitPrice} {perUnit}",
+  "@storePlanItemLine": {
+    "placeholders": {
+      "itemName": {"type": "String"},
+      "quantitySuffix": {"type": "String"},
+      "unitPrice": {"type": "String"},
+      "perUnit": {"type": "String"}
+    }
+  },
+  "perUnit": "each",
+  "signInToOptimizeAllLists": "Sign in to optimize all your shopping lists from your receipts.",
+  "signInToOptimizeBasket": "Sign in to optimize your basket from your receipts and shopping list.",
+  "loadingAllActiveLists": "Loading all active lists…",
+  "loadingBasketOptimizer": "Loading basket optimizer…",
+  "couldNotLoadShoppingList": "Could not load shopping list",
+  "couldNotLoadPriceHistory": "Could not load price history",
+  "noActiveItemsToOptimize": "No active items to optimize",
+  "noActiveItemsToOptimizeMessage": "Add items to your shopping lists to build a smart store plan.",
+  "backToShopping": "Back to shopping",
+  "addItemsToListForOptimizer": "Add items to your shopping list",
+  "addItemsToListForOptimizerMessage": "Add items to your shopping list to optimize your basket.",
+  "noPriceHistoryForOptimizerMessage": "Add receipts with line items so Savingor can learn your prices and recommend better stores.",
+
+  "listFinalizeProgressSummary": "Purchased: {purchased} · Total items: {total}",
+  "@listFinalizeProgressSummary": {
+    "placeholders": {
+      "purchased": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+
+  "qtyWithCount": "Qty {count}",
+  "@qtyWithCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "unitPrice": "Unit price",
+  "lineTotalWithAmount": "Line total: {amount}",
+  "@lineTotalWithAmount": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "lineTotalEmpty": "Line total: —",
+  "enterPriceForProduct": "Enter a price for {product}",
+  "@enterPriceForProduct": {
+    "placeholders": {
+      "product": {"type": "String"}
+    }
+  },
+  "enterValidPriceForProduct": "Enter a valid price for {product}",
+  "@enterValidPriceForProduct": {
+    "placeholders": {
+      "product": {"type": "String"}
+    }
+  },
+
+  "trackMonthlyGrocerySpending": "Track your monthly grocery spending against your budget.",
+  "monthlyGroceryBudget": "Monthly grocery budget",
+  "spentThisMonth": "Spent this month",
+  "overBudget": "Over budget",
+  "remaining": "Remaining",
+  "updateMonthlyBudget": "Update monthly budget",
+  "setMonthlyBudgetDescription": "Set the grocery spending limit you want to track each month.",
+  "monthlyBudgetAmount": "Monthly budget amount",
+  "saveBudget": "Save budget",
+  "budgetSaved": "Budget saved",
+  "enterBudgetAmount": "Enter a budget amount",
+  "enterAmountGreaterThanZero": "Enter an amount greater than zero",
+
+  "overview": "Overview",
+  "estimatedSaved": "Estimated saved",
+  "potentialMissed": "Potential missed",
+  "savingsValue": "Savings value",
+  "proPayback": "Pro payback",
+  "proPaidForItself": "Pro paid for itself",
+  "amountOfPriceCovered": "{amount} of {price} covered",
+  "@amountOfPriceCovered": {
+    "placeholders": {
+      "amount": {"type": "String"},
+      "price": {"type": "String"}
+    }
+  },
+  "needAmountMoreForPro": "Need {amount} more to cover Pro",
+  "@needAmountMoreForPro": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "amountAfterSubscription": "+{amount} after subscription",
+  "@amountAfterSubscription": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "monthlyReturnMultiplier": "Return: {multiplier}x this month",
+  "@monthlyReturnMultiplier": {
+    "placeholders": {
+      "multiplier": {"type": "String"}
+    }
+  },
+  "spendingByStore": "Spending by store",
+  "priceRecordCount": "{count, plural, =1{1 record} other{{count} records}}",
+  "@priceRecordCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recentActivity": "Recent activity",
+  "activityTypeReceipt": "Receipt",
+  "activityTypeManual": "Manual",
+  "activityManualExpense": "Manual expense",
+  "activityReceiptWithItems": "{source} · {count, plural, =1{1 item} other{{count} items}}",
+  "@activityReceiptWithItems": {
+    "placeholders": {
+      "source": {"type": "String"},
+      "count": {"type": "int"}
+    }
+  },
+  "recommendedActions": "Recommended actions",
+  "exploreDetails": "Explore details",
+  "productsInPriceHistoryCount": "{count, plural, =1{1 product in your price history} other{{count} products in your price history}}",
+  "@productsInPriceHistoryCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "priceInsightsEmptySubtitle": "Full price memory from your receipt line items",
+  "savingsOpportunities": "Savings opportunities",
+  "actionableOpportunitiesCount": "{count, plural, =1{1 actionable opportunity to review} other{{count} actionable opportunities to review}}",
+  "@actionableOpportunitiesCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "savingsOpportunitiesEmptySubtitle": "Products where you paid more than the best known price",
+  "loadingAnalytics": "Loading analytics…",
+  "couldNotLoadAnalytics": "Could not load analytics",
+  "signInForAnalytics": "View spending analytics with your Savingor account.",
+  "noSpendingDataYet": "No spending data yet",
+  "noSpendingDataMessage": "Add a receipt or expense to see spending totals, store breakdowns, and trends.",
+  "addMoreReceiptsForSavingsValue": "Add more receipts to calculate your savings value.",
+
+  "storeHasSeveralBestPrices": "{store} has several of your best known prices",
+  "@storeHasSeveralBestPrices": {
+    "placeholders": {
+      "store": {"type": "String"}
+    }
+  },
+  "trackedProductsLowestAtStore": "{count, plural, =1{1 tracked product currently has its lowest known price at {store}} other{{count} tracked products currently have their lowest known price at {store}}}",
+  "@trackedProductsLowestAtStore": {
+    "placeholders": {
+      "count": {"type": "int"},
+      "store": {"type": "String"}
+    }
+  },
+  "useStoreWhenMatchesRoute": "Use this store when it matches your shopping route",
+  "recentlyPaidLatestBestKnown": "You recently paid {latestPrice} at {latestStore}. Your best known price is {bestPrice} at {bestStore}.",
+  "@recentlyPaidLatestBestKnown": {
+    "placeholders": {
+      "latestPrice": {"type": "String"},
+      "latestStore": {"type": "String"},
+      "bestPrice": {"type": "String"},
+      "bestStore": {"type": "String"}
+    }
+  },
+  "basedOnPriceRecords": "{count, plural, =1{Based on 1 price record} other{Based on {count} price records}}",
+  "@basedOnPriceRecords": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "watchProductPrices": "Watch {product} prices closely",
+  "@watchProductPrices": {
+    "placeholders": {
+      "product": {"type": "String"}
+    }
+  },
+  "knownPricesRangeFromTo": "Your known prices range from {low} to {high}.",
+  "@knownPricesRangeFromTo": {
+    "placeholders": {
+      "low": {"type": "String"},
+      "high": {"type": "String"}
+    }
+  },
+  "priceDifferenceAmount": "Price difference: {amount}",
+  "@priceDifferenceAmount": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+
+  "productPriceInsights": "Product price insights",
+  "productsInPriceHistoryFromReceipts": "{count, plural, =1{1 product in your price history from receipts} other{{count} products in your price history from receipts}}",
+  "@productsInPriceHistoryFromReceipts": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "latestPriceLabel": "Latest",
+  "bestKnownPriceLabel": "Best known",
+  "highestPriceLabel": "Highest",
+  "averagePriceLabel": "Average",
+  "priceAtStore": "{price} at {store}",
+  "@priceAtStore": {
+    "placeholders": {
+      "price": {"type": "String"},
+      "store": {"type": "String"}
+    }
+  },
+  "signInForPriceMemory": "Sign in to view your product price memory.",
+  "loadingPriceMemory": "Loading price memory…",
+  "couldNotLoadPriceMemory": "Could not load price memory",
+  "noPriceMemoryYet": "No price memory yet",
+  "noPriceMemoryMessage": "Add receipts with line items to start building your price memory.",
+
+  "savingsOpportunitiesPaidMoreCount": "{count, plural, =1{1 actionable opportunity where you paid more than the best known price} other{{count} actionable opportunities where you paid more than the best known price}}",
+  "@savingsOpportunitiesPaidMoreCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "saveUpToPerItem": "Save up to {amount} per item",
+  "@saveUpToPerItem": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "youPaidAtStore": "You paid {amount} at {store}",
+  "@youPaidAtStore": {
+    "placeholders": {
+      "amount": {"type": "String"},
+      "store": {"type": "String"}
+    }
+  },
+  "recommendationWatchProductBeforeBuying": "Recommendation: Watch this product before buying again.",
+  "recommendationBuyAtStoreNextTime": "Recommendation: Buy at {store} next time.",
+  "@recommendationBuyAtStoreNextTime": {
+    "placeholders": {
+      "store": {"type": "String"}
+    }
+  },
+  "signInForSavingsOpportunities": "Sign in to see savings opportunities from your receipts.",
+  "loadingSavingsOpportunities": "Loading savings opportunities…",
+  "couldNotLoadSavingsOpportunities": "Could not load savings opportunities",
+  "noSavingsOpportunitiesYet": "No savings opportunities yet",
+  "noSavingsOpportunitiesMessage": "Add more receipts with line items so Savingor can compare prices across stores.",
+
+  "recordsLabel": "Records",
+  "buyingAdvice": "Buying advice",
+  "bestKnownPriceAdviceLabel": "Best known price",
+  "latestPaidAdviceLabel": "Latest paid",
+  "buyItemAtStoreWhenFitsRoute": "Buy this item at {store} when it fits your shopping route.",
+  "@buyItemAtStoreWhenFitsRoute": {
+    "placeholders": {
+      "store": {"type": "String"}
+    }
+  },
+  "buyItemAtBestPriceWhenFitsRoute": "Buy this item where you previously found the best price when it fits your shopping route.",
+  "addToShoppingList": "Add to shopping list",
+  "priceHistory": "Price history",
+  "productHistoryTitle": "Product history",
+  "productNotFound": "Product not found.",
+  "buyingAdviceInsufficientHistory": "Add more receipts with this item to unlock smarter buying advice.",
+  "buyingAdvicePaidBestPrice": "You paid your best known price.",
+  "buyingAdviceNoBetterPriceYet": "No better known price yet.",
+  "quantityLabelWithCount": "Qty {count}",
+  "@quantityLabelWithCount": {
+    "placeholders": {
+      "count": {"type": "String"}
+    }
+  },
+  "addedToShoppingList": "Added to shopping list",
+  "alreadyInShoppingList": "Already in shopping list",
+  "quantityUpdatedSnack": "Quantity updated",
+
+  "nearbyStores": "Nearby stores",
+  "nearbyStoresSubtitle": "Find grocery stores near you and compare savings opportunities.",
+  "storesNearby": "Stores nearby",
+  "mapStoresFoundCount": "{count} found",
+  "@mapStoresFoundCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "mapStoresFootnotePlaces": "Stores are based on your selected location and search radius.",
+  "mapStoresFootnoteFallback": "Showing grocery stores based on your selected area.",
+  "mapStoresFootnoteDefault": "Explore grocery stores near your chosen location.",
+  "mapNoStoresWithinRadius": "No stores within {distance} km. Try a larger radius.",
+  "@mapNoStoresWithinRadius": {
+    "placeholders": {
+      "distance": {"type": "int"}
+    }
+  },
+  "mapPleaseEnterCityOrArea": "Please enter a city or area.",
+  "mapCouldNotOpenDirections": "Could not open directions.",
+  "mapYourLocation": "Your location",
+  "mapFindGroceryStoresNearYou": "Find grocery stores near you",
+  "mapActive": "Active",
+  "mapSearchRadius": "Search radius",
+  "mapCheckingLocation": "Checking location...",
+  "mapLocationSelected": "Location selected",
+  "mapLocationDetected": "Location detected",
+  "mapReadyToSearchNearby": "Ready to search nearby grocery stores.",
+  "mapCouldNotAccessLocation": "Could not access your location.",
+  "mapEnableLocationPrompt": "Enable location to find grocery stores near you.",
+  "mapUseMyLocation": "Use my location",
+  "mapEnterCityManually": "Enter city manually",
+  "mapLocationServicesDisabled": "Location services are turned off.",
+  "mapLocationPermissionDenied": "Location permission denied.",
+  "mapCouldNotDetectLocation": "Could not detect your location. Please try again.",
+  "mapSetYourLocation": "Set your location",
+  "mapSetLocationGpsOrCity": "Use GPS or choose a city to view nearby stores.",
+  "mapCurrentLocation": "Current location",
+  "directions": "Directions",
+  "mapStoreCategoryGrocery": "Grocery",
+  "mapStoreCategorySupermarket": "Supermarket",
+  "mapStoreCategoryWholesale": "Wholesale",
+  "mapNearbyStoreStatus": "Nearby store",
+  "mapListedOnGooglePlaces": "Listed on Google Places",
+  "mapRadiusKm": "{distance} km",
+  "@mapRadiusKm": {
+    "placeholders": {
+      "distance": {"type": "int"}
+    }
+  },
+  "mapSetLocation": "Set location",
+  "mapCityOrArea": "City or area",
+  "mapCityOrAreaExample": "Example: Calgary, Cochrane, Edmonton",
+  "mapMarkerSnippetWithDetail": "{distance} · {detail}",
+  "@mapMarkerSnippetWithDetail": {
+    "placeholders": {
+      "distance": {"type": "String"},
+      "detail": {"type": "String"}
+    }
+  },
+
+  "aiSavingsAssistant": "AI Savings Assistant",
+  "aiSignInPrompt": "Sign in to ask the AI assistant about your receipts and shopping lists.",
+  "aiLoadingYourData": "Loading your data…",
+  "aiCouldNotLoadData": "Could not load your data",
+  "aiEmptyTitle": "Add data to get AI insights",
+  "aiEmptyMessage": "Scan a receipt, add an expense, or create a shopping list. The assistant analyzes your saved data — not live store prices.",
+  "aiHeroTitle": "Your AI savings coach",
+  "aiHeroSubtitleLive": "Ask about spending, receipts, and shopping lists.",
+  "aiHeroSubtitlePreview": "Preview insights from your saved data — connect an API key for live answers.",
+  "aiConfigReadyMessage": "AI assistant is ready. Connect an API key to enable live answers.",
+  "aiDataSnapshot": "Your data snapshot",
+  "aiReceiptCount": "{count, plural, =1{1 receipt} other{{count} receipts}}",
+  "@aiReceiptCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "aiExpenseCount": "{count, plural, =1{1 expense} other{{count} expenses}}",
+  "@aiExpenseCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "aiTotalSpendingLabel": "{amount} total",
+  "@aiTotalSpendingLabel": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "aiListCount": "{count, plural, =1{1 list} other{{count} lists}}",
+  "@aiListCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "aiListEstimateLabel": "{amount} list est.",
+  "@aiListEstimateLabel": {
+    "placeholders": {
+      "amount": {"type": "String"}
+    }
+  },
+  "aiSuggestedQuestions": "Suggested questions",
+  "aiSuggestSaveMoreThisWeek": "How can I save more money this week?",
+  "aiSuggestTopStore": "Which store do I spend the most at?",
+  "aiSuggestAnalyzeSpending": "Analyze my grocery spending.",
+  "aiSuggestShoppingListPriority": "What should I buy first from my shopping list?",
+  "aiAnalyzingYourData": "Analyzing your data…",
+  "aiCouldNotGetAnswer": "Could not get an answer. Please try again.",
+  "aiInsightsDisclaimer": "Insights are based on your saved receipts, expenses, and shopping lists in Savingor — not live store prices or deals.",
+  "aiInputHintLive": "Ask about your spending or shopping list…",
+  "aiInputHintPreview": "Type a question — connect an API key for live answers",
+  "aiRequestFailed": "AI request failed. Please try again.",
+  "aiEmptyResponse": "AI returned an empty response.",
+  "aiSend": "Send",
+
+  "editProfile": "Edit profile",
+  "personalInformation": "Personal information",
+  "editProfileFullNameHint": "Your full name",
+  "emailChangesNotAvailable": "Email changes are not available in this version.",
+  "password": "Password",
+  "passwordNeverShown": "For security, your current password is never shown.",
+  "changePassword": "Change password",
+  "sendPasswordResetEmailInstead": "Send password reset email instead",
+  "sendingResetEmail": "Sending reset email...",
+  "changesSaved": "Changes saved",
+  "couldNotSaveChanges": "Could not save changes",
+  "pleaseEnterFullName": "Please enter your full name",
+  "signInToEditProfile": "Sign in to edit your profile.",
+  "passwordResetEmailSent": "Reset email sent",
+  "changePasswordIntro": "To change your password inside the app, enter your current password first.",
+  "currentPassword": "Current password",
+  "newPassword": "New password",
+  "confirmNewPassword": "Confirm new password",
+  "enterCurrentPasswordHint": "Enter current password",
+  "atLeast6CharactersHint": "At least 6 characters",
+  "repeatNewPasswordHint": "Repeat new password",
+  "currentPasswordRequired": "Current password is required",
+  "newPasswordRequired": "New password is required",
+  "newPasswordMinLength": "New password must be at least 6 characters",
+  "confirmNewPasswordRequired": "Please confirm your new password",
+  "passwordsDoNotMatch": "Passwords do not match",
+  "updatePassword": "Update password",
+  "forgotCurrentPassword": "Forgot your current password?",
+  "passwordResetSecureLink": "We'll send a secure reset link to your email so you can create a new password.",
+  "passwordResetByEmailHint": "If you don't remember it, use password reset by email.",
+  "sendResetEmail": "Send reset email",
+  "sending": "Sending...",
+  "passwordUpdated": "Password updated",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
+  "signInToChangePassword": "You need to be signed in to change your password.",
+  "currentPasswordIncorrect": "Current password is incorrect",
+  "passwordTooWeak": "Password is too weak",
+  "recentLoginRequired": "For security, please sign in again and retry.",
+  "tooManyAttempts": "Too many attempts. Please try again later.",
+  "couldNotUpdatePassword": "Could not update password",
+  "noEmailLinked": "No email is linked to this account.",
+  "couldNotSendResetEmail": "Could not send reset email",
+
+  "plans": "Plans",
+  "freeTodayProWhenReady": "Free today · Pro when ready",
+  "saveSmarterWithAi": "Save smarter with AI",
+  "unlockProFeaturesDescription": "Unlock AI savings insights, receipt analytics, smart alerts, and deeper spending reports.",
+  "bestValue": "Best value",
+  "basicDealsBrowsing": "Basic deals browsing",
+  "manualExpenseTracking": "Manual expense tracking",
+  "aiPoweredToolsDescription": "AI-powered tools for smarter grocery savings.",
+  "receiptAnalytics": "Receipt analytics",
+  "smartSavingsInsights": "Smart savings insights",
+  "spendingReports": "Spending reports",
+  "smartAlerts": "Smart alerts",
+  "startProSubscription": "Start Pro subscription",
+  "restorePurchases": "Restore purchases",
+  "restoring": "Restoring...",
+  "proSubscriptionActivated": "Subscription activated",
+  "proDemoFallbackActivated": "Pro demo activated — no real payment processed.",
+  "couldNotCompletePurchase": "Could not complete the purchase. Please try again.",
+  "couldNotActivateProDemo": "Could not activate Pro demo. Please try again.",
+  "purchaseRestored": "Purchase restored",
+  "noPurchasesFound": "No purchases found",
+  "couldNotRestorePurchases": "Could not restore purchases",
+  "subscriptionSetup": "Subscription setup",
+  "subscriptionSetupPrepared": "Savingor Pro is prepared for real in-app subscription integration.",
+  "subscriptionSetupNotConfigured": "Payment provider keys or store products are not configured in this build.",
+  "activateProDemoForTesting": "Activate Pro demo for testing",
+  "demoFallbackActive": "Demo fallback active — no real payment processed.",
+  "subscriptionPlanLabel": "Plan",
+  "pricePerMonth": "{price} / month",
+  "@pricePerMonth": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "active": "Active",
+  "activeDemo": "Active demo",
+  "cancelled": "Cancelled",
+  "unknown": "Unknown",
+  "demoMode": "Demo mode",
+  "providerNone": "None",
+  "revenueCatLabel": "RevenueCat",
+  "subscriptionManagedByStore": "Your subscription is managed by App Store or Google Play. You can cancel or update it from your store subscription settings.",
+  "manageInAppStoreGooglePlay": "Manage in App Store / Google Play",
+  "cancelProDemo": "Cancel Pro demo",
+  "noActiveSubscription": "No active subscription",
+  "proDemoCancelled": "Pro demo cancelled. You are back on the Free plan.",
+  "couldNotCancelProDemo": "Could not cancel Pro demo. Please try again.",
+  "couldNotOpenSubscriptionManagement": "Could not open the subscription management page.",
+  "managementNotAvailable": "Management not available",
+  "managementUrlUnavailableMessage": "Subscription management URL is not available in this test build. For RevenueCat Test Store purchases, reset the test customer in the RevenueCat dashboard or use a new test user.",
+  "paymentProviderNotConfiguredSnack": "Payment provider is not configured in this local build.",
+  "purchaseCancelled": "Purchase cancelled",
+  "purchaseFailed": "Purchase failed",
+  "productUnavailable": "Product unavailable",
+  "purchaseNotActiveYet": "Purchase completed but Pro is not active yet. Try Restore purchases.",
+  "networkErrorTryAgain": "Check your connection and try again",
+  "signInToManageSubscription": "You need to be signed in to manage your subscription.",
+  "couldNotUpdateSubscription": "Could not update your subscription. Please try again."
+}

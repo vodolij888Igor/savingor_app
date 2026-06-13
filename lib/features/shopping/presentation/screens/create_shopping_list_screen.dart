@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/i18n/shopping_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
 import 'package:savingor_app/features/shopping/presentation/widgets/create_shopping_list_sheet.dart';
 import 'package:savingor_app/features/shopping/domain/models/shopping_list_item.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class CreateShoppingListScreen extends StatefulWidget {
   const CreateShoppingListScreen({super.key});
@@ -25,12 +27,21 @@ class _CreateShoppingListScreenState extends State<CreateShoppingListScreen> {
 
   bool _isSaving = false;
 
+  bool _defaultTitleApplied = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_defaultTitleApplied) {
+      _defaultTitleApplied = true;
+      _titleController.text = CreateShoppingListSheet.defaultTitle(context);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(
-      text: CreateShoppingListSheet.defaultTitle,
-    );
+    _titleController = TextEditingController();
   }
 
   @override
@@ -89,21 +100,22 @@ class _CreateShoppingListScreenState extends State<CreateShoppingListScreen> {
     final String? error = store.mutationError;
     if (error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error)),
+        SnackBar(content: Text(ShoppingL10n.localizeError(context, error))),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
       backgroundColor: CreateShoppingListScreen._pageBackground,
       appBar: AppBar(
-        title: const Text(
-          'New shopping list',
-          style: TextStyle(
+        title: Text(
+          l10n.newShoppingList,
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w800,
             color: SavingorColors.darkGreen,
@@ -131,21 +143,21 @@ class _CreateShoppingListScreenState extends State<CreateShoppingListScreen> {
             children: <Widget>[
             TextFormField(
               controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'List title',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.listTitle,
+                border: const OutlineInputBorder(),
               ),
               validator: (String? value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Enter a list title';
+                  return l10n.enterListTitle;
                 }
                 return null;
               },
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Items (optional)',
-              style: TextStyle(
+            Text(
+              l10n.itemsOptional,
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
                 color: SavingorColors.darkGreen,
@@ -164,7 +176,7 @@ class _CreateShoppingListScreenState extends State<CreateShoppingListScreen> {
               child: TextButton.icon(
                 onPressed: _isSaving ? null : _addRow,
                 icon: const Icon(Icons.add_rounded),
-                label: const Text('Add another item'),
+                label: Text(l10n.addAnotherItem),
               ),
             ),
             const SizedBox(height: 16),
@@ -177,7 +189,7 @@ class _CreateShoppingListScreenState extends State<CreateShoppingListScreen> {
                       height: 22,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Create list'),
+                  : Text(l10n.createList),
             ),
           ],
         ),
@@ -222,6 +234,8 @@ class _ItemRowEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
@@ -233,7 +247,7 @@ class _ItemRowEditor extends StatelessWidget {
                 child: TextFormField(
                   controller: row.nameController,
                   decoration: InputDecoration(
-                    labelText: 'Item name',
+                    labelText: l10n.itemName,
                     border: const OutlineInputBorder(),
                     hintText: 'Item ${index + 1}',
                   ),
@@ -253,9 +267,9 @@ class _ItemRowEditor extends StatelessWidget {
                 child: TextFormField(
                   controller: row.qtyController,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Qty',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.qty,
+                    border: const OutlineInputBorder(),
                   ),
                 ),
               ),
@@ -264,9 +278,9 @@ class _ItemRowEditor extends StatelessWidget {
                 flex: 2,
                 child: TextFormField(
                   controller: row.storeController,
-                  decoration: const InputDecoration(
-                    labelText: 'Store (optional)',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.storeOptional,
+                    border: const OutlineInputBorder(),
                   ),
                 ),
               ),
@@ -276,9 +290,9 @@ class _ItemRowEditor extends StatelessWidget {
           TextFormField(
             controller: row.priceController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              labelText: 'Price (optional)',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.priceOptional,
+              border: const OutlineInputBorder(),
             ),
           ),
         ],

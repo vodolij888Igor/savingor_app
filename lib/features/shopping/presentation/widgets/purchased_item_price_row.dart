@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'package:savingor_app/core/i18n/product_display_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/shopping/domain/models/shopping_list_item.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class PurchasedItemPriceRow extends StatelessWidget {
   const PurchasedItemPriceRow({
@@ -15,8 +17,21 @@ class PurchasedItemPriceRow extends StatelessWidget {
   final TextEditingController unitPriceController;
   final VoidCallback onChanged;
 
+  String _itemDisplayName(BuildContext context) {
+    final String localized = ProductDisplayL10n.localizedProductName(
+      context,
+      item.name,
+    );
+    if (localized != item.name) {
+      return localized;
+    }
+    return item.name;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final String itemName = _itemDisplayName(context);
     final double? unitPrice = double.tryParse(unitPriceController.text.trim());
     final double lineTotal =
         unitPrice != null && unitPrice > 0 ? unitPrice * item.quantity : 0;
@@ -38,7 +53,7 @@ class PurchasedItemPriceRow extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  item.name,
+                  itemName,
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
@@ -47,7 +62,7 @@ class PurchasedItemPriceRow extends StatelessWidget {
                 ),
               ),
               Text(
-                'Qty ${item.quantity}',
+                l10n.qtyWithCount(item.quantity),
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -72,19 +87,19 @@ class PurchasedItemPriceRow extends StatelessWidget {
             controller: unitPriceController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             onChanged: (_) => onChanged(),
-            decoration: const InputDecoration(
-              labelText: 'Unit price',
+            decoration: InputDecoration(
+              labelText: l10n.unitPrice,
               prefixText: '\$ ',
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
               isDense: true,
             ),
             validator: (String? value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Enter a price for ${item.name}';
+                return l10n.enterPriceForProduct(itemName);
               }
               final double? price = double.tryParse(value.trim());
               if (price == null || price <= 0) {
-                return 'Enter a valid price for ${item.name}';
+                return l10n.enterValidPriceForProduct(itemName);
               }
               return null;
             },
@@ -92,8 +107,8 @@ class PurchasedItemPriceRow extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             lineTotal > 0
-                ? 'Line total: \$${lineTotal.toStringAsFixed(2)}'
-                : 'Line total: —',
+                ? l10n.lineTotalWithAmount('\$${lineTotal.toStringAsFixed(2)}')
+                : l10n.lineTotalEmpty,
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,

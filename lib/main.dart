@@ -1,14 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app/router/app_router.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/deals/data/favorites_store.dart';
-import 'package:savingor_app/core/i18n/app_strings.dart';
-import 'package:savingor_app/core/i18n/app_locale_maps.dart';
 import 'package:savingor_app/core/app_state.dart';
 import 'package:savingor_app/features/shopping/data/shopping_list_store.dart';
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
@@ -18,6 +17,7 @@ import 'package:savingor_app/features/scanner/data/receipt_store.dart';
 import 'package:savingor_app/features/price_memory/data/price_memory_store.dart';
 import 'package:savingor_app/features/ai_assistant/data/ai_savings_assistant_provider.dart';
 import 'package:savingor_app/features/subscription/data/subscription_service.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,17 +64,7 @@ Future<void> main() async {
                     notifier: shopping,
                     child: FavoritesProvider(
                       notifier: favorites,
-                      child: Builder(
-                        builder: (context) {
-                          final state = AppStateProvider.of(context);
-                          final strings =
-                              appStringsMapForLocale(state.language);
-                          return AppLocalizations(
-                            strings: strings,
-                            child: MyApp(router: router),
-                          );
-                        },
-                      ),
+                      child: MyApp(router: router),
                     ),
                   ),
                 ),
@@ -92,13 +82,51 @@ class MyApp extends StatelessWidget {
 
   final GoRouter router;
 
+  static const List<Locale> _supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('uk'),
+    Locale('ru'),
+    Locale('fr'),
+    Locale('de'),
+    Locale('es'),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      title: 'Savingor',
-      theme: SavingorTheme.lightTheme,
-      routerConfig: router,
+    final AppState appState = AppStateProvider.of(context);
+
+    return ListenableBuilder(
+      listenable: appState,
+      builder: (BuildContext context, Widget? child) {
+        final String languageCode = appState.language ?? 'en';
+
+        return MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          title: 'Savingor',
+          theme: SavingorTheme.lightTheme,
+          routerConfig: router,
+          locale: Locale(languageCode),
+          supportedLocales: _supportedLocales,
+          localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          localeResolutionCallback:
+              (Locale? locale, Iterable<Locale> supportedLocales) {
+            if (locale == null) {
+              return const Locale('en');
+            }
+            for (final Locale supported in supportedLocales) {
+              if (supported.languageCode == locale.languageCode) {
+                return supported;
+              }
+            }
+            return const Locale('en');
+          },
+        );
+      },
     );
   }
 }

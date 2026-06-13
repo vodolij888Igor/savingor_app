@@ -84,6 +84,7 @@ class ExpensesStore extends ChangeNotifier {
     required String storeName,
     required DateTime purchaseDate,
     required double totalAmount,
+    String currency = 'CAD',
   }) async {
     if (_uid == null) {
       _mutationError = 'Sign in to save expenses.';
@@ -98,6 +99,7 @@ class ExpensesStore extends ChangeNotifier {
         storeName: storeName,
         purchaseDate: purchaseDate,
         totalAmount: totalAmount,
+        currency: currency,
       );
       notifyListeners();
       return expenseId;

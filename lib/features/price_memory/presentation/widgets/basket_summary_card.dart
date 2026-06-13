@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/price_memory/domain/models/basket_optimization_result.dart';
 import 'package:savingor_app/features/price_memory/domain/price_memory_formatters.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class BasketSummaryCard extends StatelessWidget {
   const BasketSummaryCard({
@@ -16,6 +17,8 @@ class BasketSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -26,9 +29,9 @@ class BasketSummaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text(
-            'Basket summary',
-            style: TextStyle(
+          Text(
+            l10n.basketSummary,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
               color: SavingorColors.textSecondary,
@@ -39,7 +42,7 @@ class BasketSummaryCard extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: _Metric(
-                  label: 'Estimated best total',
+                  label: l10n.estimatedBestTotal,
                   value: PriceMemoryFormatters.formatPrice(
                     result.estimatedBestTotal,
                     currency: result.currency,
@@ -48,7 +51,7 @@ class BasketSummaryCard extends StatelessWidget {
               ),
               Expanded(
                 child: _Metric(
-                  label: 'Potential saving',
+                  label: l10n.basketPotentialSaving,
                   value: result.totalPotentialSaving > 0
                       ? PriceMemoryFormatters.formatPrice(
                           result.totalPotentialSaving,
@@ -65,13 +68,13 @@ class BasketSummaryCard extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: _Metric(
-                  label: 'Items matched',
+                  label: l10n.itemsMatched,
                   value: '${result.matchedItemsCount}',
                 ),
               ),
               Expanded(
                 child: _Metric(
-                  label: 'No price history',
+                  label: l10n.noPriceHistoryLabel,
                   value: '${result.unmatchedItemsCount}',
                 ),
               ),
@@ -80,7 +83,7 @@ class BasketSummaryCard extends StatelessWidget {
           if (result.activeListsIncluded != null) ...<Widget>[
             const SizedBox(height: 12),
             _Metric(
-              label: 'Active lists included',
+              label: l10n.activeListsIncludedLabel,
               value: '${result.activeListsIncluded}',
             ),
           ],

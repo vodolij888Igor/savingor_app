@@ -5,6 +5,7 @@ import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/features/analytics/domain/models/product_savings_insight.dart';
 import 'package:savingor_app/features/analytics/domain/models/savings_summary.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class SavingsValueSection extends StatelessWidget {
   const SavingsValueSection({
@@ -20,20 +21,23 @@ class SavingsValueSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const Text(
-          'Savings value',
+        Text(
+          l10n.savingsValue,
           style: SavingorAppTextStyles.sectionTitle,
         ),
         const SizedBox(height: SavingorSpacing.md),
         if (!summary.hasCalculableData)
-          _buildEmptyState()
+          _buildEmptyState(l10n)
         else if (proPaybackOnly)
           _SubscriptionRoiCard(
             summary: summary,
             formatCurrency: formatCurrency,
+            l10n: l10n,
           )
         else ...<Widget>[
           Row(
@@ -61,6 +65,7 @@ class SavingsValueSection extends StatelessWidget {
           _SubscriptionRoiCard(
             summary: summary,
             formatCurrency: formatCurrency,
+            l10n: l10n,
           ),
           const SizedBox(height: 12),
           _SavingsProgressCard(
@@ -72,7 +77,7 @@ class SavingsValueSection extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(AppLocalizations l10n) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -81,18 +86,18 @@ class SavingsValueSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: const Color(0xFFF3F4F3).withOpacity(0.6)),
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Icon(
+          const Icon(
             Icons.insights_outlined,
             color: SavingorColors.primaryStroke,
             size: 28,
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
-            'Add more receipts to calculate your savings value.',
-            style: TextStyle(
+            l10n.addMoreReceiptsForSavingsValue,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: SavingorColors.textSecondary,
@@ -213,10 +218,12 @@ class _SubscriptionRoiCard extends StatelessWidget {
   const _SubscriptionRoiCard({
     required this.summary,
     required this.formatCurrency,
+    required this.l10n,
   });
 
   final SavingsSummary summary;
   final String Function(double amount) formatCurrency;
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
@@ -224,13 +231,22 @@ class _SubscriptionRoiCard extends StatelessWidget {
     final double saved = summary.estimatedSavedThisMonth;
     final bool paidFor = summary.subscriptionIsPaidFor;
 
-    final String title = paidFor ? 'Pro paid for itself' : 'Pro payback';
+    final String title = paidFor ? l10n.proPaidForItself : l10n.proPayback;
     final String mainValue = paidFor
-        ? '+${formatCurrency(summary.monthlyRoiAmount)} after subscription'
-        : '${formatCurrency(saved)} of ${formatCurrency(subscriptionPrice)} covered';
+        ? l10n.amountAfterSubscription(
+            formatCurrency(summary.monthlyRoiAmount),
+          )
+        : l10n.amountOfPriceCovered(
+            formatCurrency(saved),
+            formatCurrency(subscriptionPrice),
+          );
     final String subtitle = paidFor
-        ? 'Return: ${summary.monthlyRoiMultiplier?.toStringAsFixed(1) ?? '1.0'}x this month'
-        : 'Need ${formatCurrency(summary.subscriptionRemainingAmount)} more to cover Pro';
+        ? l10n.monthlyReturnMultiplier(
+            summary.monthlyRoiMultiplier?.toStringAsFixed(1) ?? '1.0',
+          )
+        : l10n.needAmountMoreForPro(
+            formatCurrency(summary.subscriptionRemainingAmount),
+          );
 
     return Container(
       width: double.infinity,

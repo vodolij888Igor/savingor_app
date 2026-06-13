@@ -58,6 +58,7 @@ abstract final class SavingsRecommendationService {
         latestStore: latestStore,
         bestStore: bestStore,
         dataBasis: dataBasis,
+        recordCount: recordCount,
       );
       if (storeSwitch != null) {
         recommendations.add(storeSwitch);
@@ -69,6 +70,7 @@ abstract final class SavingsRecommendationService {
         lowestUnit: lowestUnit,
         highestUnit: highestUnit,
         dataBasis: dataBasis,
+        recordCount: recordCount,
       );
       if (watchPrice != null) {
         recommendations.add(watchPrice);
@@ -94,6 +96,7 @@ abstract final class SavingsRecommendationService {
           impactText: 'Use this store when it matches your shopping route.',
           priorityScore: productCount.toDouble(),
           storeName: storeName,
+          trackedProductCount: productCount,
         ),
       );
     }
@@ -114,6 +117,7 @@ abstract final class SavingsRecommendationService {
     required String? latestStore,
     required String? bestStore,
     required String dataBasis,
+    required int recordCount,
   }) {
     if (bestStore == null || latestStore == null) {
       return null;
@@ -144,6 +148,12 @@ abstract final class SavingsRecommendationService {
       dataBasisText: dataBasis,
       normalizedProductName: normalizedName,
       storeName: bestStore,
+      productDisplayName: displayName,
+      potentialSavingPerItem: perItemSaving,
+      latestPaidPrice: latestUnit,
+      bestKnownPrice: bestUnit,
+      latestStoreName: latestStore,
+      priceRecordCount: recordCount,
     );
   }
 
@@ -153,6 +163,7 @@ abstract final class SavingsRecommendationService {
     required double lowestUnit,
     required double highestUnit,
     required String dataBasis,
+    required int recordCount,
   }) {
     final double priceDifference = highestUnit - lowestUnit;
     if (priceDifference <= 0) {
@@ -177,6 +188,11 @@ abstract final class SavingsRecommendationService {
       priorityScore: priceDifference,
       dataBasisText: dataBasis,
       normalizedProductName: normalizedName,
+      productDisplayName: displayName,
+      priceRangeLow: lowestUnit,
+      priceRangeHigh: highestUnit,
+      priceDifferenceAmount: priceDifference,
+      priceRecordCount: recordCount,
     );
   }
 

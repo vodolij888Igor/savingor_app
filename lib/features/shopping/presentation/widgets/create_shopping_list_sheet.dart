@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 
+import 'package:savingor_app/core/i18n/shopping_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 /// Quick create flow for a new shopping list (name only, real Firestore persistence).
 class CreateShoppingListSheet extends StatefulWidget {
   const CreateShoppingListSheet({super.key});
 
-  static const String defaultTitle = 'Weekly groceries';
+  static String defaultTitle(BuildContext context) =>
+      AppLocalizations.of(context).weeklyGroceriesDefault;
 
   static Future<void> show(BuildContext context) {
     return showModalBottomSheet<void>(
@@ -34,17 +37,29 @@ class _CreateShoppingListSheetState extends State<CreateShoppingListSheet> {
 
   bool _isSaving = false;
 
+  bool _defaultTitleApplied = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_defaultTitleApplied) {
+      _defaultTitleApplied = true;
+      _titleController.text = CreateShoppingListSheet.defaultTitle(context);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _titleController.selection = TextSelection(
+          baseOffset: 0,
+          extentOffset: _titleController.text.length,
+        );
+        _titleFocusNode.requestFocus();
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: CreateShoppingListSheet.defaultTitle);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _titleController.selection = TextSelection(
-        baseOffset: 0,
-        extentOffset: _titleController.text.length,
-      );
-      _titleFocusNode.requestFocus();
-    });
+    _titleController = TextEditingController();
   }
 
   @override
@@ -75,13 +90,14 @@ class _CreateShoppingListSheetState extends State<CreateShoppingListSheet> {
     final String? error = store.mutationError;
     if (error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error)),
+        SnackBar(content: Text(ShoppingL10n.localizeError(context, error))),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final double bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
     return Padding(
@@ -103,18 +119,18 @@ class _CreateShoppingListSheetState extends State<CreateShoppingListSheet> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'New shopping list',
-              style: TextStyle(
+            Text(
+              l10n.newShoppingList,
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
                 color: SavingorColors.darkGreen,
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Give your list a name. You can add items after creating it.',
-              style: TextStyle(
+            Text(
+              l10n.newShoppingListHint,
+              style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
                 color: SavingorColors.textSecondary,
@@ -127,13 +143,13 @@ class _CreateShoppingListSheetState extends State<CreateShoppingListSheet> {
               focusNode: _titleFocusNode,
               textInputAction: TextInputAction.done,
               enabled: !_isSaving,
-              decoration: const InputDecoration(
-                labelText: 'List name',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.listName,
+                border: const OutlineInputBorder(),
               ),
               validator: (String? value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Enter a list name';
+                  return l10n.enterListName;
                 }
                 return null;
               },
@@ -149,7 +165,7 @@ class _CreateShoppingListSheetState extends State<CreateShoppingListSheet> {
                       height: 22,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Create list'),
+                  : Text(l10n.createList),
             ),
           ],
         ),

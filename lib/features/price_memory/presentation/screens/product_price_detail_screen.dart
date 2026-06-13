@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/i18n/locale_date_format.dart';
+import 'package:savingor_app/core/i18n/product_display_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/price_memory/data/price_memory_store.dart';
 import 'package:savingor_app/features/price_memory/domain/models/product_price_insight.dart';
@@ -9,6 +11,7 @@ import 'package:savingor_app/features/price_memory/domain/models/savings_opportu
 import 'package:savingor_app/features/price_memory/domain/price_memory_formatters.dart';
 import 'package:savingor_app/features/price_memory/presentation/widgets/product_buying_advice_card.dart';
 import 'package:savingor_app/features/receipts/presentation/widgets/receipt_source_badge.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class ProductPriceDetailScreen extends StatelessWidget {
   const ProductPriceDetailScreen({
@@ -38,8 +41,20 @@ class ProductPriceDetailScreen extends StatelessWidget {
     );
   }
 
+  String _productDisplayName(BuildContext context, ProductPriceInsight insight) {
+    final String localized = ProductDisplayL10n.localizedProductName(
+      context,
+      insight.normalizedProductName,
+    );
+    if (localized != insight.normalizedProductName) {
+      return localized;
+    }
+    return insight.displayName;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final PriceMemoryStore store = PriceMemoryProvider.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
@@ -53,7 +68,9 @@ class ProductPriceDetailScreen extends StatelessWidget {
           backgroundColor: _pageBackground,
           appBar: AppBar(
             title: Text(
-              insight?.displayName ?? 'Product history',
+              insight != null
+                  ? _productDisplayName(context, insight)
+                  : l10n.productHistoryTitle,
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
@@ -74,10 +91,10 @@ class ProductPriceDetailScreen extends StatelessWidget {
             ),
           ),
           body: insight == null
-              ? const Center(
+              ? Center(
                   child: Text(
-                    'Product not found.',
-                    style: TextStyle(
+                    l10n.productNotFound,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                       color: SavingorColors.textSecondary,
@@ -85,8 +102,10 @@ class ProductPriceDetailScreen extends StatelessWidget {
                   ),
                 )
               : _buildContent(
+                  context,
                   insight,
                   bottomInset,
+                  l10n,
                 ),
         );
       },
@@ -94,9 +113,13 @@ class ProductPriceDetailScreen extends StatelessWidget {
   }
 
   Widget _buildContent(
+    BuildContext context,
     ProductPriceInsight insight,
     double bottomInset,
+    AppLocalizations l10n,
   ) {
+    final String productName = _productDisplayName(context, insight);
+
     return ListView(
       padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + bottomInset),
       children: <Widget>[
@@ -107,7 +130,7 @@ class ProductPriceDetailScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                insight.displayName,
+                productName,
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
@@ -116,17 +139,29 @@ class ProductPriceDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               _summaryLine(
-                'Latest',
-                '${PriceMemoryFormatters.formatPrice(insight.latestPrice, currency: insight.currency)} at ${insight.latestStoreName}',
+                l10n.latestPriceLabel,
+                l10n.priceAtStore(
+                  PriceMemoryFormatters.formatPrice(
+                    insight.latestPrice,
+                    currency: insight.currency,
+                  ),
+                  insight.latestStoreName,
+                ),
               ),
               const SizedBox(height: 6),
               _summaryLine(
-                'Best known',
-                '${PriceMemoryFormatters.formatPrice(insight.lowestPrice, currency: insight.currency)} at ${insight.lowestStoreName}',
+                l10n.bestKnownLabel,
+                l10n.priceAtStore(
+                  PriceMemoryFormatters.formatPrice(
+                    insight.lowestPrice,
+                    currency: insight.currency,
+                  ),
+                  insight.lowestStoreName,
+                ),
               ),
               const SizedBox(height: 6),
               _summaryLine(
-                'Highest',
+                l10n.highestPriceLabel,
                 PriceMemoryFormatters.formatPrice(
                   insight.highestPrice,
                   currency: insight.currency,
@@ -134,14 +169,17 @@ class ProductPriceDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               _summaryLine(
-                'Average',
+                l10n.averagePriceLabel,
                 PriceMemoryFormatters.formatPrice(
                   insight.averagePrice,
                   currency: insight.currency,
                 ),
               ),
               const SizedBox(height: 6),
-              _summaryLine('Records', insight.recordCountLabel),
+              _summaryLine(
+                l10n.recordsLabel,
+                l10n.priceRecordCount(insight.recordCount),
+              ),
             ],
           ),
         ),
@@ -152,9 +190,9 @@ class ProductPriceDetailScreen extends StatelessWidget {
           currency: insight.currency,
         ),
         const SizedBox(height: SavingorSpacing.lg),
-        const Text(
-          'Price history',
-          style: TextStyle(
+        Text(
+          l10n.priceHistory,
+          style: const TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w700,
             color: SavingorColors.darkGreen,
@@ -173,7 +211,7 @@ class ProductPriceDetailScreen extends StatelessWidget {
                       height: 1,
                       color: _airyBorder.withOpacity(0.8),
                     ),
-                  _historyRow(record),
+                  _historyRow(context, record, l10n),
                 ],
               );
             }),
@@ -212,13 +250,17 @@ class ProductPriceDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _historyRow(ProductPriceRecord record) {
+  Widget _historyRow(
+    BuildContext context,
+    ProductPriceRecord record,
+    AppLocalizations l10n,
+  ) {
     final String quantityLabel = record.quantity == record.quantity.roundToDouble()
         ? record.quantity.toInt().toString()
         : record.quantity.toStringAsFixed(2);
 
     final List<String> detailParts = <String>[
-      'Qty $quantityLabel',
+      l10n.quantityLabelWithCount(quantityLabel),
       if (record.unit != null && record.unit!.trim().isNotEmpty) record.unit!.trim(),
       if (record.category != null && record.category!.trim().isNotEmpty)
         record.category!.trim(),
@@ -234,7 +276,7 @@ class ProductPriceDetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  PriceMemoryFormatters.formatDate(record.purchaseDate),
+                  LocaleDateFormat.formatMediumDate(context, record.purchaseDate),
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,

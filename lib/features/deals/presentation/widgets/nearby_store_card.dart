@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:savingor_app/core/i18n/map_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/features/deals/domain/models/nearby_store.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class NearbyStoreCard extends StatelessWidget {
   const NearbyStoreCard({
@@ -16,6 +18,8 @@ class NearbyStoreCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: SavingorSurfaces.premiumCard(radius: 16),
@@ -56,7 +60,7 @@ class NearbyStoreCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      store.category.label,
+                      MapL10n.storeCategoryLabel(context, store.category),
                       style: SavingorAppTextStyles.bodySecondary(fontSize: 12),
                     ),
                     if (store.hasAddress) ...<Widget>[
@@ -94,7 +98,7 @@ class NearbyStoreCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            store.statusText,
+            MapL10n.localizedStoreStatusText(context, store.statusText),
             style: SavingorAppTextStyles.bodySecondary(fontSize: 12),
           ),
           const SizedBox(height: 12),
@@ -106,7 +110,7 @@ class NearbyStoreCard extends StatelessWidget {
               foregroundColor: SavingorColors.primaryStroke,
               borderColor: SavingorAccentColors.map.withOpacity(0.45),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: const Text('Directions'),
+              child: Text(l10n.directions),
             ),
           ),
         ],

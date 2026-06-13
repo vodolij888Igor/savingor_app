@@ -5,8 +5,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
+import 'package:savingor_app/core/i18n/map_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/deals/domain/models/nearby_store.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 /// Interactive Google Map for nearby stores and the active user location.
 class NearbyStoresMapCard extends StatefulWidget {
@@ -124,7 +126,8 @@ class _NearbyStoresMapCardState extends State<NearbyStoresMapCard> {
     );
   }
 
-  Set<Marker> _buildMarkers() {
+  Set<Marker> _buildMarkers(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final Set<Marker> markers = <Marker>{};
     final LatLng? userPosition = _userPosition;
 
@@ -137,7 +140,9 @@ class _NearbyStoresMapCardState extends State<NearbyStoresMapCard> {
             BitmapDescriptor.hueGreen,
           ),
           infoWindow: InfoWindow(
-            title: widget.userLocationLabel ?? 'Your location',
+            title: widget.userLocationLabel?.isNotEmpty == true
+                ? widget.userLocationLabel!
+                : l10n.mapYourLocation,
           ),
         ),
       );
@@ -156,7 +161,7 @@ class _NearbyStoresMapCardState extends State<NearbyStoresMapCard> {
           ),
           infoWindow: InfoWindow(
             title: store.name,
-            snippet: store.mapInfoWindowSnippet,
+            snippet: MapL10n.markerInfoWindowSnippet(context, store),
           ),
           onTap: () => _handleStoreMarkerTap(store),
         ),
@@ -319,10 +324,10 @@ class _NearbyStoresMapCardState extends State<NearbyStoresMapCard> {
       ),
       clipBehavior: Clip.antiAlias,
       child: _userPosition == null
-          ? _buildLocationPrompt()
+          ? _buildLocationPrompt(context)
           : GoogleMap(
               initialCameraPosition: _initialCameraPosition,
-              markers: _buildMarkers(),
+              markers: _buildMarkers(context),
               circles: _buildCircles(),
               gestureRecognizers: _mapGestureRecognizers,
               onMapCreated: (GoogleMapController controller) {
@@ -341,7 +346,9 @@ class _NearbyStoresMapCardState extends State<NearbyStoresMapCard> {
     );
   }
 
-  Widget _buildLocationPrompt() {
+  Widget _buildLocationPrompt(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+
     return Stack(
       fit: StackFit.expand,
       children: <Widget>[
@@ -383,9 +390,9 @@ class _NearbyStoresMapCardState extends State<NearbyStoresMapCard> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'Set your location',
-                  style: TextStyle(
+                Text(
+                  l10n.mapSetYourLocation,
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                     color: SavingorColors.darkGreen,
@@ -393,7 +400,7 @@ class _NearbyStoresMapCardState extends State<NearbyStoresMapCard> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Use GPS or choose a city to view nearby stores.',
+                  l10n.mapSetLocationGpsOrCity,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,

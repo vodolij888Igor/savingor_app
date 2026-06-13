@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'package:savingor_app/core/i18n/product_display_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/features/price_memory/domain/models/savings_opportunity.dart';
 import 'package:savingor_app/features/price_memory/domain/price_memory_formatters.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class SavingsOpportunityCard extends StatelessWidget {
   const SavingsOpportunityCard({
@@ -17,8 +19,41 @@ class SavingsOpportunityCard extends StatelessWidget {
 
   static const Color _airyBorder = Color(0xFFF3F4F3);
 
+  String _productDisplayName(BuildContext context) {
+    final String localized = ProductDisplayL10n.localizedProductName(
+      context,
+      opportunity.normalizedProductName,
+    );
+    if (localized != opportunity.normalizedProductName) {
+      return localized;
+    }
+    return opportunity.displayName;
+  }
+
+  String _recommendationText(BuildContext context, AppLocalizations l10n) {
+    if (opportunity.latestStoreName.trim().toLowerCase() ==
+        opportunity.lowestStoreName.trim().toLowerCase()) {
+      return l10n.recommendationWatchProductBeforeBuying;
+    }
+    return l10n.recommendationBuyAtStoreNextTime(opportunity.lowestStoreName);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final String formattedLatest = PriceMemoryFormatters.formatPrice(
+      opportunity.latestPrice,
+      currency: opportunity.currency,
+    );
+    final String formattedLowest = PriceMemoryFormatters.formatPrice(
+      opportunity.lowestPrice,
+      currency: opportunity.currency,
+    );
+    final String formattedSaving = PriceMemoryFormatters.formatPrice(
+      opportunity.priceDifference,
+      currency: opportunity.currency,
+    );
+
     return SavingorInteractiveCard(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
@@ -32,7 +67,7 @@ class SavingsOpportunityCard extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: Text(
-                  opportunity.displayName,
+                  _productDisplayName(context),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
@@ -48,7 +83,7 @@ class SavingsOpportunityCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            opportunity.savingsMessage,
+            l10n.saveUpToPerItem(formattedSaving),
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,
@@ -58,7 +93,7 @@ class SavingsOpportunityCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'You paid ${PriceMemoryFormatters.formatPrice(opportunity.latestPrice, currency: opportunity.currency)} at ${opportunity.latestStoreName}',
+            l10n.youPaidAtStore(formattedLatest, opportunity.latestStoreName),
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -68,7 +103,7 @@ class SavingsOpportunityCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Best known: ${PriceMemoryFormatters.formatPrice(opportunity.lowestPrice, currency: opportunity.currency)} at ${opportunity.lowestStoreName}',
+            l10n.bestKnownAtStore(formattedLowest, opportunity.lowestStoreName),
             style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
@@ -78,7 +113,7 @@ class SavingsOpportunityCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Recommendation: ${opportunity.recommendation}',
+            _recommendationText(context, l10n),
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,

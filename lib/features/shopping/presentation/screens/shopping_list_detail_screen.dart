@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/i18n/shopping_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
 import 'package:savingor_app/features/shopping/domain/models/shopping_list.dart';
 import 'package:savingor_app/features/shopping/domain/models/shopping_list_item.dart';
@@ -53,7 +55,7 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
     final String? error = store.mutationError;
     if (error != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error)),
+        SnackBar(content: Text(ShoppingL10n.localizeError(context, error))),
       );
       store.clearMutationError();
     }
@@ -98,23 +100,24 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
     BuildContext context,
     ShoppingListsStore store,
     ShoppingList list,
+    AppLocalizations l10n,
   ) async {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Delete list?'),
-          content: Text('“${list.title}” will be permanently removed.'),
+          title: Text(l10n.deleteListQuestion),
+          content: Text(l10n.deleteListConfirmMessage(list.title)),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text(
-                'Delete',
-                style: TextStyle(color: Color(0xFFB91C1C)),
+              child: Text(
+                l10n.delete,
+                style: const TextStyle(color: Color(0xFFB91C1C)),
               ),
             ),
           ],
@@ -137,24 +140,23 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
   Future<void> _openFinalizeTrip(
     BuildContext context,
     ShoppingList list,
+    AppLocalizations l10n,
   ) async {
     if (list.lastFinalizedReceiptId != null) {
       final bool? confirmed = await showDialog<bool>(
         context: context,
         builder: (BuildContext dialogContext) {
           return AlertDialog(
-            title: const Text('Create another receipt?'),
-            content: const Text(
-              'This list may already have a receipt. Create another receipt from purchased items?',
-            ),
+            title: Text(l10n.createAnotherReceiptQuestion),
+            content: Text(l10n.createAnotherReceiptMessage),
             actions: <Widget>[
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: const Text('Cancel'),
+                child: Text(l10n.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(true),
-                child: const Text('Create receipt'),
+                child: Text(l10n.createReceipt),
               ),
             ],
           );
@@ -168,6 +170,7 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final ShoppingListsStore store = ShoppingListsProvider.of(context);
     final ShoppingList? list = _findList(store);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
@@ -179,7 +182,7 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
           backgroundColor: _pageBackground,
           appBar: AppBar(
             title: Text(
-              list?.title ?? 'Shopping list',
+              list?.title ?? l10n.shoppingList,
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
@@ -203,12 +206,12 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
                 IconButton(
                   icon: const Icon(Icons.delete_outline_rounded),
                   color: SavingorColors.textSecondary,
-                  tooltip: 'Delete list',
-                  onPressed: () => _confirmDeleteList(context, store, list),
+                  tooltip: l10n.deleteList,
+                  onPressed: () => _confirmDeleteList(context, store, list, l10n),
                 ),
             ],
           ),
-          body: _buildBody(context, store, list, bottomInset),
+          body: _buildBody(context, store, list, bottomInset, l10n),
           floatingActionButton: _shouldShowAddItemFab(store, list)
               ? FloatingActionButton.extended(
                   onPressed: () => context.push(
@@ -217,9 +220,9 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
                   backgroundColor: SavingorColors.primaryGreen,
                   foregroundColor: SavingorColors.darkGreen,
                   icon: const Icon(Icons.add_rounded),
-                  label: const Text(
-                    'Add item',
-                    style: TextStyle(fontWeight: FontWeight.w700),
+                  label: Text(
+                    l10n.addItem,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                 )
               : null,
@@ -240,11 +243,12 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
     ShoppingListsStore store,
     ShoppingList? list,
     double bottomInset,
+    AppLocalizations l10n,
   ) {
     if (store.listsError != null) {
       return ShoppingListStatePanel.error(
-        title: 'Could not load lists',
-        message: store.listsError!,
+        title: l10n.couldNotLoadLists,
+        message: ShoppingL10n.localizeListsError(context, store.listsError),
         onRetry: store.retryLists,
       );
     }
@@ -252,15 +256,15 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
     if (store.isLoadingLists || store.isLoadingItems) {
       return ShoppingListStatePanel.loading(
         message: store.isLoadingItems
-            ? 'Loading list items…'
-            : 'Loading shopping list…',
+            ? l10n.loadingListItems
+            : l10n.loadingShoppingList,
       );
     }
 
     if (store.itemsError != null) {
       return ShoppingListStatePanel.error(
-        title: 'Could not load items',
-        message: store.itemsError!,
+        title: l10n.couldNotLoadItems,
+        message: ShoppingL10n.localizeItemsError(context, store.itemsError),
         onRetry: () => store.watchListItems(widget.listId),
       );
     }
@@ -268,9 +272,9 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
     if (list == null) {
       return ShoppingListStatePanel.empty(
         icon: Icons.checklist_rounded,
-        title: 'List not found',
-        message: 'This shopping list may have been deleted.',
-        actionLabel: 'Back to lists',
+        title: l10n.listNotFound,
+        message: l10n.listNotFoundMessage,
+        actionLabel: l10n.backToLists,
         onAction: () => context.pop(),
       );
     }
@@ -278,9 +282,9 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
     if (store.items.isEmpty) {
       return ShoppingListStatePanel.empty(
         icon: Icons.shopping_cart_outlined,
-        title: 'No items yet',
-        message: 'Add items to this list to track what you need.',
-        actionLabel: 'Add item',
+        title: l10n.noShoppingItemsYet,
+        message: l10n.noShoppingItemsYetMessage,
+        actionLabel: l10n.addItem,
         prominentAction: true,
         onAction: () =>
             context.push('/shopping/list/${widget.listId}/add-item'),
@@ -305,15 +309,17 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(
-                  '${activeItems.length} active'
-                  '${completedItems.isNotEmpty ? ' · ${completedItems.length} purchased' : ''}',
+                  '${l10n.activeCountLabel(activeItems.length)}'
+                  '${completedItems.isNotEmpty ? ' · ${l10n.purchasedSummary(completedItems.length)}' : ''}',
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                     color: SavingorColors.darkGreen,
                   ),
                 ),
                 Text(
-                  'Est. \$${store.activeListEstimate.toStringAsFixed(2)}',
+                  l10n.estimatedShort(
+                    '\$${store.activeListEstimate.toStringAsFixed(2)}',
+                  ),
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
                     color: SavingorColors.darkGreen,
@@ -324,13 +330,13 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
           ),
         ),
         if (activeItems.isEmpty && completedItems.isNotEmpty)
-          const Padding(
-            padding: EdgeInsets.fromLTRB(20, 0, 20, 12),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'All items purchased',
-                style: TextStyle(
+                l10n.allItemsPurchased,
+                style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: SavingorColors.textSecondary,
@@ -342,8 +348,8 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
             child: BasketOptimizerEntryCard(
-              title: 'Optimize this basket',
-              subtitle: 'Find the best known stores for this list',
+              title: l10n.optimizeThisBasket,
+              subtitle: l10n.optimizeThisBasketSubtitle,
               onTap: () => context.push(
                 '/shopping/basket-optimizer?listId=${widget.listId}',
               ),
@@ -353,7 +359,7 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
             child: FinalizeShoppingTripEntryCard(
-              onTap: () => _openFinalizeTrip(context, list),
+              onTap: () => _openFinalizeTrip(context, list, l10n),
             ),
           ),
         Expanded(
@@ -380,11 +386,11 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
                 ),
               ),
               if (completedItems.isNotEmpty) ...<Widget>[
-                const Padding(
-                  padding: EdgeInsets.only(top: 8, bottom: 12),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8, bottom: 12),
                   child: Text(
-                    'Purchased',
-                    style: TextStyle(
+                    l10n.purchased,
+                    style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
                       color: SavingorColors.textSecondary,

@@ -13,6 +13,7 @@ import 'package:savingor_app/features/price_memory/presentation/widgets/basket_s
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
 import 'package:savingor_app/features/shopping/domain/models/global_shopping_items_snapshot.dart';
 import 'package:savingor_app/features/shopping/domain/models/shopping_list_item.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 /// Smart basket optimizer screen.
 ///
@@ -105,19 +106,20 @@ class _BasketOptimizerScreenState extends State<BasketOptimizerScreen> {
     } catch (_) {
       if (!mounted) return;
       setState(() {
-        _itemsError = 'Could not load shopping list items. Please try again.';
+        _itemsError = AppLocalizations.of(context).couldNotLoadListItems;
         _isLoadingItems = false;
       });
     }
   }
 
-  String get _screenTitle =>
-      widget.isGlobalScope ? 'Optimize all lists' : 'Optimize this basket';
-
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final PriceMemoryStore priceStore = PriceMemoryProvider.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
+    final String screenTitle = widget.isGlobalScope
+        ? l10n.optimizeAllLists
+        : l10n.optimizeThisBasket;
 
     return AnimatedBuilder(
       animation: priceStore,
@@ -126,7 +128,7 @@ class _BasketOptimizerScreenState extends State<BasketOptimizerScreen> {
           backgroundColor: _pageBackground,
           appBar: AppBar(
             title: Text(
-              _screenTitle,
+              screenTitle,
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
@@ -146,7 +148,7 @@ class _BasketOptimizerScreenState extends State<BasketOptimizerScreen> {
               onPressed: () => context.pop(),
             ),
           ),
-          body: _buildBody(context, priceStore, bottomInset),
+          body: _buildBody(context, priceStore, bottomInset, l10n),
         );
       },
     );
@@ -156,12 +158,13 @@ class _BasketOptimizerScreenState extends State<BasketOptimizerScreen> {
     BuildContext context,
     PriceMemoryStore priceStore,
     double bottomInset,
+    AppLocalizations l10n,
   ) {
     if (!priceStore.isAuthenticated) {
       return AppSignInRequiredState(
         message: widget.isGlobalScope
-            ? 'Sign in to optimize all your shopping lists from your receipts.'
-            : 'Sign in to optimize your basket from your receipts and shopping list.',
+            ? l10n.signInToOptimizeAllLists
+            : l10n.signInToOptimizeBasket,
         onSignIn: () => context.push('/auth'),
       );
     }
@@ -169,14 +172,14 @@ class _BasketOptimizerScreenState extends State<BasketOptimizerScreen> {
     if (_isLoadingItems || priceStore.isLoading) {
       return AppLoadingState(
         message: widget.isGlobalScope
-            ? 'Loading all active lists…'
-            : 'Loading basket optimizer…',
+            ? l10n.loadingAllActiveLists
+            : l10n.loadingBasketOptimizer,
       );
     }
 
     if (_itemsError != null) {
       return AppErrorState(
-        title: 'Could not load shopping list',
+        title: l10n.couldNotLoadShoppingList,
         message: _itemsError!,
         onRetry: _loadShoppingItems,
       );
@@ -184,7 +187,7 @@ class _BasketOptimizerScreenState extends State<BasketOptimizerScreen> {
 
     if (priceStore.loadError != null) {
       return AppErrorState(
-        title: 'Could not load price history',
+        title: l10n.couldNotLoadPriceHistory,
         message: priceStore.loadError!,
         onRetry: priceStore.retry,
       );
@@ -197,10 +200,9 @@ class _BasketOptimizerScreenState extends State<BasketOptimizerScreen> {
       if (widget.isGlobalScope) {
         return AppEmptyState(
           icon: Icons.shopping_basket_outlined,
-          title: 'No active items to optimize',
-          message:
-              'Add items to your shopping lists to build a smart store plan.',
-          actionLabel: 'Back to shopping',
+          title: l10n.noActiveItemsToOptimize,
+          message: l10n.noActiveItemsToOptimizeMessage,
+          actionLabel: l10n.backToShopping,
           prominentAction: true,
           onAction: () => context.pop(),
         );
@@ -208,9 +210,9 @@ class _BasketOptimizerScreenState extends State<BasketOptimizerScreen> {
 
       return AppEmptyState(
         icon: Icons.shopping_basket_outlined,
-        title: 'Add items to your shopping list',
-        message: 'Add items to your shopping list to optimize your basket.',
-        actionLabel: 'Back to list',
+        title: l10n.addItemsToListForOptimizer,
+        message: l10n.addItemsToListForOptimizerMessage,
+        actionLabel: l10n.backToList,
         prominentAction: true,
         onAction: () => context.pop(),
       );
@@ -225,10 +227,9 @@ class _BasketOptimizerScreenState extends State<BasketOptimizerScreen> {
     if (!result.hasAnyPriceData) {
       return AppEmptyState(
         icon: Icons.receipt_long_outlined,
-        title: 'No price history yet',
-        message:
-            'Add receipts with line items so Savingor can learn your prices and recommend better stores.',
-        actionLabel: 'Add receipt',
+        title: l10n.noPriceHistoryYet,
+        message: l10n.noPriceHistoryForOptimizerMessage,
+        actionLabel: l10n.addReceipt,
         prominentAction: true,
         onAction: () => context.push('/scanner/create'),
       );
@@ -239,9 +240,9 @@ class _BasketOptimizerScreenState extends State<BasketOptimizerScreen> {
       children: <Widget>[
         BasketSummaryCard(result: result),
         const SizedBox(height: SavingorSpacing.xl),
-        const Text(
-          'Item recommendations',
-          style: TextStyle(
+        Text(
+          l10n.itemRecommendations,
+          style: const TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w700,
             color: SavingorColors.darkGreen,

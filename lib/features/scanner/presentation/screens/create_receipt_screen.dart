@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/app_state.dart';
+import 'package:savingor_app/core/i18n/receipt_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt_item.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt_source.dart';
 import 'package:savingor_app/features/receipts/presentation/widgets/receipt_item_form_row.dart';
 import 'package:savingor_app/features/scanner/data/receipt_store.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class CreateReceiptScreen extends StatefulWidget {
   const CreateReceiptScreen({
@@ -265,7 +268,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
     final double? totalAmount = double.tryParse(_amountController.text.trim());
     if (totalAmount == null || totalAmount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter a valid total amount.')),
+        SnackBar(content: Text(AppLocalizations.of(context).enterValidTotalAmount)),
       );
       return;
     }
@@ -288,7 +291,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
       if (receiptId == null || receiptId.isEmpty) {
         setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Receipt not found.')),
+          SnackBar(content: Text(AppLocalizations.of(context).receiptNotFound)),
         );
         return;
       }
@@ -319,6 +322,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
       return;
     }
 
+    final AppState appState = AppStateProvider.of(context);
     final String? receiptId = await store.createReceipt(
       storeName: _storeController.text.trim(),
       purchaseDate: _selectedDate,
@@ -330,6 +334,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
       notes: notes,
       categorySummary: categorySummary,
       items: items,
+      currency: appState.currency,
     );
 
     if (!mounted) return;
@@ -346,19 +351,20 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
   void _showMutationError(String? error) {
     if (error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error)),
+        SnackBar(content: Text(ReceiptL10n.localizeError(context, error))),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
     final double keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     final String appBarTitle =
-        widget.isEditing ? 'Edit receipt' : 'Add receipt';
+        widget.isEditing ? l10n.editReceipt : l10n.addReceipt;
     final String saveLabel =
-        widget.isEditing ? 'Update receipt' : 'Save receipt';
+        widget.isEditing ? l10n.updateReceipt : l10n.saveReceipt;
 
     return Scaffold(
       backgroundColor: CreateReceiptScreen._pageBackground,
@@ -400,13 +406,13 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
                 controller: _storeController,
                 enabled: !_isSaving,
                 textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
-                  labelText: 'Store name',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.storeName,
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (String? value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Enter a store name';
+                    return l10n.enterStoreName;
                   }
                   return null;
                 },
@@ -416,9 +422,9 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
                 controller: _addressController,
                 enabled: !_isSaving,
                 textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
-                  labelText: 'Store address (optional)',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.storeAddressOptional,
+                  border: const OutlineInputBorder(),
                 ),
               ),
               const SizedBox(height: 16),
@@ -426,14 +432,14 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
                 controller: _dateController,
                 readOnly: true,
                 onTap: _isSaving ? null : _pickDate,
-                decoration: const InputDecoration(
-                  labelText: 'Purchase date',
-                  border: OutlineInputBorder(),
-                  suffixIcon: Icon(Icons.calendar_today_outlined),
+                decoration: InputDecoration(
+                  labelText: l10n.purchaseDate,
+                  border: const OutlineInputBorder(),
+                  suffixIcon: const Icon(Icons.calendar_today_outlined),
                 ),
                 validator: (String? value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Select a purchase date';
+                    return l10n.selectPurchaseDate;
                   }
                   return null;
                 },
@@ -443,10 +449,10 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
                 controller: _categoryController,
                 enabled: !_isSaving,
                 textInputAction: TextInputAction.next,
-                decoration: const InputDecoration(
-                  labelText: 'Category summary',
-                  border: OutlineInputBorder(),
-                  hintText: 'Grocery',
+                decoration: InputDecoration(
+                  labelText: l10n.categorySummary,
+                  border: const OutlineInputBorder(),
+                  hintText: l10n.grocery,
                 ),
               ),
               const SizedBox(height: 16),
@@ -459,10 +465,10 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: const InputDecoration(
-                        labelText: 'Subtotal (optional)',
+                      decoration: InputDecoration(
+                        labelText: l10n.subtotalOptional,
                         prefixText: '\$ ',
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                   ),
@@ -474,10 +480,10 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: const InputDecoration(
-                        labelText: 'Tax (optional)',
+                      decoration: InputDecoration(
+                        labelText: l10n.taxOptional,
                         prefixText: '\$ ',
-                        border: OutlineInputBorder(),
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                   ),
@@ -491,20 +497,20 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
                     const TextInputType.numberWithOptions(decimal: true),
                 onChanged: (_) => _totalManuallyEdited = true,
                 decoration: InputDecoration(
-                  labelText: 'Receipt total',
+                  labelText: l10n.receiptTotal,
                   prefixText: '\$ ',
                   border: const OutlineInputBorder(),
                   helperText: _itemFields.isNotEmpty
-                      ? 'Auto-calculated from items unless you edit this field.'
+                      ? l10n.autoCalculatedFromItems
                       : null,
                 ),
                 validator: (String? value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Enter the total amount';
+                    return l10n.enterTotalAmount;
                   }
                   final double? amount = double.tryParse(value.trim());
                   if (amount == null || amount <= 0) {
-                    return 'Enter a valid amount';
+                    return l10n.enterValidAmount;
                   }
                   return null;
                 },
@@ -512,10 +518,10 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
               const SizedBox(height: 24),
               Row(
                 children: <Widget>[
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Items',
-                      style: TextStyle(
+                      l10n.items,
+                      style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
                         color: SavingorColors.darkGreen,
@@ -525,13 +531,13 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
                   TextButton.icon(
                     onPressed: _isSaving ? null : _addItemRow,
                     icon: const Icon(Icons.add_rounded, size: 18),
-                    label: const Text('Add item'),
+                    label: Text(l10n.addItem),
                   ),
                 ],
               ),
               if (_itemFields.isEmpty)
                 Text(
-                  'Add line items to build a real receipt record for price tracking later.',
+                  l10n.addLineItemsHint,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
@@ -557,9 +563,9 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
                 enabled: !_isSaving,
                 textInputAction: TextInputAction.done,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  labelText: 'Notes (optional)',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.notesOptional,
+                  border: const OutlineInputBorder(),
                   alignLabelWithHint: true,
                 ),
               ),

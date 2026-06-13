@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'package:savingor_app/core/i18n/receipt_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/core/widgets/app_screen_states.dart';
@@ -11,6 +12,8 @@ import 'package:savingor_app/features/scanner/data/receipt_store.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt_source.dart';
 import 'package:savingor_app/features/receipts/presentation/widgets/receipt_source_badge.dart';
+import 'package:savingor_app/features/receipts/presentation/widgets/receipt_source_dialog.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class ReceiptScannerScreen extends StatefulWidget {
   const ReceiptScannerScreen({super.key});
@@ -35,6 +38,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
   final ReceiptOcrParser _ocrParser = ReceiptOcrParser();
 
   bool _isScanning = false;
+  bool _historyExpanded = false;
 
   void _openCreateReceipt() {
     context.push('/scanner/create');
@@ -43,44 +47,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
   Future<void> _onScanReceiptPressed() async {
     if (_isScanning) return;
 
-    final ImageSource? source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      showDragHandle: true,
-      builder: (BuildContext sheetContext) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              ListTile(
-                leading: const Icon(
-                  Icons.camera_alt_outlined,
-                  color: SavingorColors.primaryStroke,
-                ),
-                title: const Text(
-                  'Take photo',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                onTap: () =>
-                    Navigator.of(sheetContext).pop(ImageSource.camera),
-              ),
-              ListTile(
-                leading: const Icon(
-                  Icons.photo_library_outlined,
-                  color: SavingorColors.primaryStroke,
-                ),
-                title: const Text(
-                  'Choose from gallery',
-                  style: TextStyle(fontWeight: FontWeight.w600),
-                ),
-                onTap: () =>
-                    Navigator.of(sheetContext).pop(ImageSource.gallery),
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
-        );
-      },
-    );
+    final ImageSource? source = await ReceiptSourceDialog.show(context);
 
     if (source == null || !mounted) return;
 
@@ -98,7 +65,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
 
       setState(() => _isScanning = true);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Scanning receipt...')),
+        SnackBar(content: Text(AppLocalizations.of(context).scanningReceipt)),
       );
 
       final String text =
@@ -117,8 +84,8 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
       if (!mounted) return;
       setState(() => _isScanning = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not scan this receipt. Try another photo.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).couldNotScanReceipt),
         ),
       );
     }
@@ -129,18 +96,17 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
     ReceiptSource receiptSource,
   ) async {
     if (text.trim().isEmpty) {
+      final AppLocalizations l10n = AppLocalizations.of(context);
       await showDialog<void>(
         context: context,
         builder: (BuildContext dialogContext) {
           return AlertDialog(
-            title: const Text('OCR Result Preview'),
-            content: const Text(
-              'No text detected. Try a clearer receipt photo.',
-            ),
+            title: Text(l10n.ocrResultPreview),
+            content: Text(l10n.noTextDetected),
             actions: <Widget>[
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('Close'),
+                child: Text(l10n.close),
               ),
             ],
           );
@@ -150,12 +116,13 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
     }
 
     final ParsedReceiptData parsed = _ocrParser.parse(text);
+    final AppLocalizations l10n = AppLocalizations.of(context);
 
     await showDialog<void>(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('OCR Result Preview'),
+          title: Text(l10n.ocrResultPreview),
           content: SizedBox(
             width: double.maxFinite,
             child: SingleChildScrollView(
@@ -164,34 +131,34 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   _buildParsedField(
-                    'Store',
+                    l10n.store,
                     parsed.storeName ?? '—',
                   ),
                   _buildParsedField(
-                    'Date',
+                    l10n.date,
                     parsed.date != null
                         ? _formatParsedDate(parsed.date!)
                         : '—',
                   ),
                   _buildParsedField(
-                    'Total',
+                    l10n.total,
                     parsed.total != null
                         ? '\$${parsed.total!.toStringAsFixed(2)}'
                         : '—',
                   ),
                   const SizedBox(height: 12),
-                  const Text(
-                    'Items:',
-                    style: TextStyle(
+                  Text(
+                    l10n.itemsColon,
+                    style: const TextStyle(
                       fontWeight: FontWeight.w700,
                       color: SavingorColors.darkGreen,
                     ),
                   ),
                   const SizedBox(height: 6),
                   if (parsed.items.isEmpty)
-                    const Text(
-                      'None detected',
-                      style: TextStyle(color: SavingorColors.textSecondary),
+                    Text(
+                      l10n.noneDetected,
+                      style: const TextStyle(color: SavingorColors.textSecondary),
                     )
                   else
                     ...parsed.items.map(
@@ -207,9 +174,9 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
                     ),
                     child: ExpansionTile(
                       tilePadding: EdgeInsets.zero,
-                      title: const Text(
-                        'Raw OCR text',
-                        style: TextStyle(
+                      title: Text(
+                        l10n.rawOcrText,
+                        style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           color: SavingorColors.darkGreen,
                         ),
@@ -233,7 +200,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Close'),
+              child: Text(l10n.close),
             ),
             TextButton(
               onPressed: () {
@@ -252,9 +219,9 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
                   },
                 );
               },
-              child: const Text(
-                'Use this receipt',
-                style: TextStyle(fontWeight: FontWeight.w700),
+              child: Text(
+                l10n.useThisReceipt,
+                style: const TextStyle(fontWeight: FontWeight.w700),
               ),
             ),
           ],
@@ -304,18 +271,19 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
   Widget build(BuildContext context) {
     final ReceiptStore store = ReceiptProvider.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
+    final AppLocalizations l10n = AppLocalizations.of(context);
 
     return AnimatedBuilder(
       animation: store,
       builder: (BuildContext context, Widget? child) {
         if (!store.isAuthenticated) {
-          return _buildSignInRequired(context);
+          return _buildSignInRequired(context, l10n);
         }
 
         return Scaffold(
           backgroundColor: _pageBackground,
           appBar: AppBar(
-            title: const Text('Receipts', style: _titleStyle),
+            title: Text(l10n.receipts, style: _titleStyle),
             centerTitle: false,
             elevation: 0,
             scrolledUnderElevation: 0,
@@ -323,7 +291,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
             surfaceTintColor: Colors.transparent,
             automaticallyImplyLeading: false,
           ),
-          body: _buildBody(context, store, bottomInset),
+          body: _buildBody(context, store, bottomInset, l10n),
         );
       },
     );
@@ -333,106 +301,281 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
     BuildContext context,
     ReceiptStore store,
     double bottomInset,
+    AppLocalizations l10n,
   ) {
     if (store.isLoading) {
-      return const AppLoadingState(message: 'Loading receipts...');
+      return AppLoadingState(message: l10n.loadingReceipts);
     }
 
     if (store.loadError != null) {
       return AppErrorState(
-        title: 'Could not load receipts',
-        message: store.loadError!,
+        title: l10n.couldNotLoadReceipts,
+        message: ReceiptL10n.localizeError(context, store.loadError),
         onRetry: store.retry,
+        actionLabel: l10n.tryAgain,
       );
     }
 
-    if (store.receipts.isEmpty) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-            child: _buildReceiptActions(),
-          ),
-          Expanded(
-            child: AppEmptyState(
-              icon: Icons.receipt_long_outlined,
-              title: 'No receipts yet',
-              message:
-                  'Add grocery receipts to track spending and unlock smarter savings insights.',
-              actionLabel: 'Add receipt',
-              prominentAction: true,
-              onAction: _openCreateReceipt,
-            ),
-          ),
-        ],
-      );
-    }
-
-    return ListView.separated(
+    return ListView(
       padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + bottomInset + 72),
-      itemCount: store.receipts.length + 1,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (BuildContext context, int index) {
-        if (index == 0) {
-          return _buildReceiptActions();
-        }
-
-        final Receipt receipt = store.receipts[index - 1];
-        return _ReceiptCard(
-          receipt: receipt,
-          onTap: () => context.push('/scanner/${receipt.id}'),
-          onDelete: () => _confirmDelete(context, store, receipt),
-        );
-      },
-    );
-  }
-
-  Widget _buildReceiptActions() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        OutlinedButton.icon(
-          onPressed: _isScanning ? null : _onScanReceiptPressed,
-          style: OutlinedButton.styleFrom(
-            foregroundColor: SavingorColors.darkGreen,
-            side: const BorderSide(color: SavingorColors.primaryStroke),
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-          ),
-          icon: _isScanning
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.document_scanner_outlined),
-          label: Text(
-            _isScanning ? 'Scanning...' : 'Scan receipt',
-            style: const TextStyle(fontWeight: FontWeight.w700),
-          ),
-        ),
-        const SizedBox(height: 10),
-        FilledButton.icon(
-          onPressed: _isScanning ? null : _openCreateReceipt,
-          style: SavingorButtonStyles.primaryFilled(),
-          icon: const Icon(Icons.add_rounded),
-          label: const Text(
-            'Add manually',
-            style: TextStyle(fontWeight: FontWeight.w700),
-          ),
-        ),
+        _buildScannerHero(l10n),
+        const SizedBox(height: SavingorSpacing.md),
+        _buildAddManuallyButton(l10n),
+        const SizedBox(height: SavingorSpacing.xl),
+        _buildReceiptHistorySection(context, store, l10n),
       ],
     );
   }
 
-  Widget _buildSignInRequired(BuildContext context) {
+  Widget _buildScannerHero(AppLocalizations l10n) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(22, 24, 22, 24),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(22),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            Color(0xFFF2FAF4),
+            Color(0xFFFAFAF5),
+            Color(0xFFF7FCF8),
+          ],
+        ),
+        border: Border.all(
+          color: SavingorColors.primaryStroke.withOpacity(0.14),
+          width: 0.75,
+        ),
+        boxShadow: const <BoxShadow>[
+          BoxShadow(
+            color: Color(0x0F4F9D47),
+            blurRadius: 22,
+            offset: Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Color(0x06000000),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: <Widget>[
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: SavingorColors.primaryStroke.withOpacity(0.2),
+              ),
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                  color: SavingorColors.primaryStroke.withOpacity(0.12),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.document_scanner_rounded,
+              color: SavingorColors.primaryStroke,
+              size: 28,
+            ),
+          ),
+          const SizedBox(height: SavingorSpacing.lg),
+          Text(
+            l10n.scanReceipt,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF1F2937),
+              height: 1.15,
+              letterSpacing: -0.2,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.scanReceiptSubtitle,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: SavingorColors.textSecondary.withOpacity(0.95),
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: SavingorSpacing.xl),
+          SavingorInteractiveFilledButton(
+            onPressed: _isScanning ? null : _onScanReceiptPressed,
+            width: double.infinity,
+            borderRadius: BorderRadius.circular(18),
+            child: _isScanning
+                ? const SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: SavingorColors.darkGreen,
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      const Icon(Icons.camera_alt_outlined, size: 20),
+                      const SizedBox(width: 8),
+                      Text(l10n.scanReceipt),
+                    ],
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAddManuallyButton(AppLocalizations l10n) {
+    return OutlinedButton.icon(
+      onPressed: _isScanning ? null : _openCreateReceipt,
+      style: OutlinedButton.styleFrom(
+        foregroundColor: SavingorColors.darkGreen,
+        backgroundColor: Colors.white,
+        minimumSize: const Size.fromHeight(52),
+        side: BorderSide(
+          color: SavingorColors.primaryStroke.withOpacity(0.45),
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        textStyle: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      icon: const Icon(Icons.edit_note_outlined, size: 20),
+      label: Text(l10n.addManually),
+    );
+  }
+
+  Widget _buildReceiptHistorySection(
+    BuildContext context,
+    ReceiptStore store,
+    AppLocalizations l10n,
+  ) {
+    final int count = store.receipts.length;
+
+    return Container(
+      width: double.infinity,
+      decoration: SavingorSurfaces.premiumCard(radius: 18),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => setState(() => _historyExpanded = !_historyExpanded),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 16,
+                ),
+                child: Row(
+                  children: <Widget>[
+                    const Icon(
+                      Icons.receipt_long_outlined,
+                      size: 20,
+                      color: SavingorColors.primaryStroke,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        l10n.recentReceipts(count),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1A2E24),
+                        ),
+                      ),
+                    ),
+                    AnimatedRotation(
+                      turns: _historyExpanded ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOut,
+                      child: Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        color: SavingorColors.textSecondary.withOpacity(0.85),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          AnimatedCrossFade(
+            firstChild: const SizedBox.shrink(),
+            secondChild: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Divider(
+                  height: 1,
+                  thickness: 1,
+                  color: SavingorColors.border.withOpacity(0.55),
+                ),
+                if (count == 0)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(18, 16, 18, 20),
+                    child: Text(
+                      l10n.noReceiptsYet,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: SavingorColors.textSecondary.withOpacity(0.95),
+                        height: 1.4,
+                      ),
+                    ),
+                  )
+                else
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 12, 12, 16),
+                    child: Column(
+                      children: <Widget>[
+                        for (int i = 0; i < store.receipts.length; i++) ...<Widget>[
+                          if (i > 0) const SizedBox(height: 10),
+                          _ReceiptCard(
+                            receipt: store.receipts[i],
+                            onTap: () =>
+                                context.push('/scanner/${store.receipts[i].id}'),
+                            onDelete: () => _confirmDelete(
+                              context,
+                              store,
+                              store.receipts[i],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+            crossFadeState: _historyExpanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            duration: const Duration(milliseconds: 200),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSignInRequired(BuildContext context, AppLocalizations l10n) {
     return Scaffold(
       backgroundColor: _pageBackground,
       appBar: AppBar(
-        title: const Text('Receipts', style: _titleStyle),
+        title: Text(l10n.receipts, style: _titleStyle),
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -441,9 +584,10 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
         automaticallyImplyLeading: false,
       ),
       body: AppSignInRequiredState(
-        message:
-            'Save and sync your receipts with your Savingor account.',
+        title: l10n.signInRequired,
+        message: l10n.signInToSyncReceipts,
         onSignIn: () => context.push('/auth'),
+        actionLabel: l10n.signIn,
       ),
     );
   }
@@ -459,21 +603,22 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) {
+        final AppLocalizations l10n = AppLocalizations.of(context);
         return AlertDialog(
-          title: const Text('Delete receipt?'),
+          title: Text(l10n.deleteReceiptQuestion),
           content: Text(
-            '${receipt.storeName} ($formattedTotal) will be permanently removed.',
+            l10n.deleteReceiptConfirmMessage(receipt.storeName, formattedTotal),
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text(
-                'Delete',
-                style: TextStyle(color: Color(0xFFB91C1C)),
+              child: Text(
+                l10n.delete,
+                style: const TextStyle(color: Color(0xFFB91C1C)),
               ),
             ),
           ],
@@ -490,7 +635,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
     final String? error = store.mutationError;
     if (error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error)),
+        SnackBar(content: Text(ReceiptL10n.localizeError(context, error))),
       );
     }
   }
@@ -570,7 +715,8 @@ class _ReceiptCard extends StatelessWidget {
                         if (receipt.hasItems) ...<Widget>[
                           const SizedBox(width: 8),
                           Text(
-                            '${receipt.itemCount} items',
+                            AppLocalizations.of(context)
+                                .receiptItemsCount(receipt.itemCount),
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,

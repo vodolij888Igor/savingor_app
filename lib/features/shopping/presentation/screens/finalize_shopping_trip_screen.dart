@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:savingor_app/core/i18n/locale_date_format.dart';
+import 'package:savingor_app/core/i18n/receipt_l10n.dart';
+import 'package:savingor_app/core/i18n/shopping_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/app_screen_states.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt_item.dart';
@@ -12,6 +15,7 @@ import 'package:savingor_app/features/shopping/domain/models/shopping_list_item.
 import 'package:savingor_app/features/shopping/domain/shopping_trip_receipt_builder.dart';
 import 'package:savingor_app/features/shopping/presentation/widgets/purchased_item_price_row.dart';
 import 'package:savingor_app/features/shopping/presentation/widgets/shopping_list_state_panel.dart';
+import 'package:savingor_app/l10n/app_localizations.dart';
 
 class FinalizeShoppingTripScreen extends StatefulWidget {
   const FinalizeShoppingTripScreen({super.key, required this.listId});
@@ -39,18 +43,22 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
   bool _totalManuallyEdited = false;
   bool _fieldsInitialized = false;
   bool _initScheduled = false;
+  bool _dateFieldInitialized = false;
 
   final List<PurchasedItemPriceFields> _itemFields = <PurchasedItemPriceFields>[];
 
   @override
   void initState() {
     super.initState();
-    _dateController.text = _formatDate(_purchaseDate);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (!_dateFieldInitialized) {
+      _dateFieldInitialized = true;
+      _dateController.text = _formatDate(context, _purchaseDate);
+    }
     _listsStore ??= ShoppingListsProvider.of(context);
     if (!_watchStarted) {
       _watchStarted = true;
@@ -128,13 +136,8 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
     _syncTotalFromItems();
   }
 
-  String _formatDate(DateTime date) {
-    const List<String> months = <String>[
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    return '${months[date.month - 1]} ${date.day}, ${date.year}';
-  }
+  String _formatDate(BuildContext context, DateTime date) =>
+      LocaleDateFormat.formatMediumDate(context, date);
 
   Future<void> _pickDate() async {
     final DateTime? picked = await showDatePicker(
@@ -146,7 +149,7 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
     if (picked == null) return;
     setState(() {
       _purchaseDate = picked;
-      _dateController.text = _formatDate(picked);
+      _dateController.text = _formatDate(context, picked);
     });
   }
 
@@ -196,23 +199,21 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
     return prices;
   }
 
-  Future<bool> _confirmDuplicateReceipt() async {
+  Future<bool> _confirmDuplicateReceipt(AppLocalizations l10n) async {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: const Text('Create another receipt?'),
-          content: const Text(
-            'This list may already have a receipt. Create another receipt from these purchased items?',
-          ),
+          title: Text(l10n.createAnotherReceiptQuestion),
+          content: Text(l10n.createAnotherReceiptMessage),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: const Text('Create receipt'),
+              child: Text(l10n.createReceipt),
             ),
           ],
         );
@@ -221,11 +222,15 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
     return confirmed == true;
   }
 
-  Future<void> _save(ShoppingList list, ShoppingTripReceiptDraft draft) async {
+  Future<void> _save(
+    ShoppingList list,
+    ShoppingTripReceiptDraft draft,
+    AppLocalizations l10n,
+  ) async {
     if (!_formKey.currentState!.validate()) return;
 
     if (list.lastFinalizedReceiptId != null) {
-      final bool confirmed = await _confirmDuplicateReceipt();
+      final bool confirmed = await _confirmDuplicateReceipt(l10n);
       if (!confirmed || !mounted) return;
     }
 
@@ -235,11 +240,7 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
 
     if (draft.hasMultipleStores && !draft.allGroupsHaveStoreNames) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Add a store to every purchased item before finalizing multiple receipts.',
-          ),
-        ),
+        SnackBar(content: Text(l10n.addStoreToAllItems)),
       );
       return;
     }
@@ -270,7 +271,7 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
       if (storeName.isEmpty) {
         setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Enter the store name for this trip.')),
+          SnackBar(content: Text(l10n.enterStoreNameForTripSnack)),
         );
         return;
       }
@@ -285,9 +286,7 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
         setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'Add valid prices for purchased items at $storeName.',
-            ),
+            content: Text(l10n.addValidPricesForStore(storeName)),
           ),
         );
         return;
@@ -302,7 +301,7 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
       if (total <= 0) {
         setState(() => _isSaving = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Enter a valid receipt total.')),
+          SnackBar(content: Text(l10n.enterValidReceiptTotal)),
         );
         return;
       }
@@ -326,7 +325,7 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
         final String? error = receiptStore.mutationError;
         if (error != null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(error)),
+            SnackBar(content: Text(ReceiptL10n.localizeError(context, error))),
           );
         }
         return;
@@ -347,7 +346,7 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
       final String? error = shoppingStore.mutationError;
       if (error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error)),
+          SnackBar(content: Text(ShoppingL10n.localizeError(context, error))),
         );
       }
       return;
@@ -364,9 +363,7 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          ShoppingTripReceiptBuilder.finalizeSuccessMessage(
-            createdReceiptIds.length,
-          ),
+          l10n.shoppingTripFinalized(createdReceiptIds.length),
         ),
       ),
     );
@@ -381,6 +378,7 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     final ShoppingListsStore store = ShoppingListsProvider.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
     final double keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
@@ -394,9 +392,9 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
         return Scaffold(
           backgroundColor: FinalizeShoppingTripScreen._pageBackground,
           appBar: AppBar(
-            title: const Text(
-              'Finalize shopping trip',
-              style: TextStyle(
+            title: Text(
+              l10n.finalizeShoppingTrip,
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
                 color: SavingorColors.darkGreen,
@@ -421,6 +419,7 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
             list,
             bottomInset,
             keyboardInset,
+            l10n,
           ),
         );
       },
@@ -433,15 +432,16 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
     ShoppingList? list,
     double bottomInset,
     double keyboardInset,
+    AppLocalizations l10n,
   ) {
     if (store.isLoadingLists || store.isLoadingItems) {
-      return ShoppingListStatePanel.loading(message: 'Loading purchased items…');
+      return ShoppingListStatePanel.loading(message: l10n.loadingPurchasedItems);
     }
 
     if (store.itemsError != null) {
       return ShoppingListStatePanel.error(
-        title: 'Could not load items',
-        message: store.itemsError!,
+        title: l10n.couldNotLoadItems,
+        message: ShoppingL10n.localizeItemsError(context, store.itemsError),
         onRetry: () => store.watchListItems(widget.listId),
       );
     }
@@ -449,9 +449,9 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
     if (list == null) {
       return ShoppingListStatePanel.empty(
         icon: Icons.checklist_rounded,
-        title: 'List not found',
-        message: 'This shopping list may have been deleted.',
-        actionLabel: 'Back to lists',
+        title: l10n.listNotFound,
+        message: l10n.listNotFoundMessage,
+        actionLabel: l10n.backToLists,
         onAction: () => context.pop(),
       );
     }
@@ -463,9 +463,9 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
     if (draft.isEmpty) {
       return AppEmptyState(
         icon: Icons.shopping_bag_outlined,
-        title: 'No purchased items yet',
-        message: 'Check off items you bought before creating a receipt.',
-        actionLabel: 'Back to list',
+        title: l10n.noPurchasedItemsYet,
+        message: l10n.noPurchasedItemsYetMessage,
+        actionLabel: l10n.backToList,
         prominentAction: true,
         onAction: () => context.pop(),
       );
@@ -473,7 +473,7 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
 
     if (!_fieldsInitialized) {
       return ShoppingListStatePanel.loading(
-        message: 'Preparing purchased items…',
+        message: l10n.preparingPurchasedItems,
       );
     }
 
@@ -492,13 +492,13 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
               controller: _storeController,
               enabled: !_isSaving,
               textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
-                labelText: 'Store name',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.storeName,
+                border: const OutlineInputBorder(),
               ),
               validator: (String? value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Enter the store name for this trip';
+                  return l10n.enterStoreNameForTrip;
                 }
                 return null;
               },
@@ -515,7 +515,7 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
                 ),
               ),
               child: Text(
-                'Creating ${draft.receiptCount} receipts — one per store.',
+                l10n.creatingReceiptsPerStore(draft.receiptCount),
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -527,9 +527,9 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
           ],
           if (draft.hasMultipleStores && !draft.allGroupsHaveStoreNames) ...<Widget>[
             const SizedBox(height: 8),
-            const Text(
-              'Some purchased items are missing a store. Add a store on each item before finalizing.',
-              style: TextStyle(
+            Text(
+              l10n.missingStoreOnItems,
+              style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
                 color: SavingorColors.textSecondary,
@@ -542,9 +542,9 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
             controller: _addressController,
             enabled: !_isSaving,
             textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(
-              labelText: 'Store address (optional)',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: l10n.storeAddressOptional,
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 16),
@@ -552,14 +552,14 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
             controller: _dateController,
             readOnly: true,
             onTap: _isSaving ? null : _pickDate,
-            decoration: const InputDecoration(
-              labelText: 'Purchase date',
-              border: OutlineInputBorder(),
-              suffixIcon: Icon(Icons.calendar_today_outlined),
+            decoration: InputDecoration(
+              labelText: l10n.purchaseDate,
+              border: const OutlineInputBorder(),
+              suffixIcon: const Icon(Icons.calendar_today_outlined),
             ),
             validator: (String? value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Select a purchase date';
+                return l10n.selectPurchaseDate;
               }
               return null;
             },
@@ -569,7 +569,7 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
             ...draft.storeGroups.expand(
               (ShoppingTripStoreGroup group) => <Widget>[
                 Text(
-                  group.hasStoreName ? group.storeName : 'Missing store',
+                  group.hasStoreName ? group.storeName : l10n.missingStore,
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
@@ -592,8 +592,9 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Receipt subtotal: '
-                  '\$${_computedGroupSubtotal(group).toStringAsFixed(2)}',
+                  l10n.receiptSubtotalLabel(
+                    '\$${_computedGroupSubtotal(group).toStringAsFixed(2)}',
+                  ),
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -604,9 +605,9 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
               ],
             )
           else ...<Widget>[
-            const Text(
-              'Purchased items',
-              style: TextStyle(
+            Text(
+              l10n.purchasedItems,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
                 color: SavingorColors.darkGreen,
@@ -630,26 +631,27 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
               onChanged: (_) {
                 _totalManuallyEdited = true;
               },
-              decoration: const InputDecoration(
-                labelText: 'Receipt total',
+              decoration: InputDecoration(
+                labelText: l10n.receiptTotal,
                 prefixText: '\$ ',
-                border: OutlineInputBorder(),
+                border: const OutlineInputBorder(),
               ),
               validator: (String? value) {
                 if (value == null || value.trim().isEmpty) {
-                  return 'Enter the receipt total';
+                  return l10n.enterReceiptTotal;
                 }
                 final double? total = double.tryParse(value.trim());
                 if (total == null || total <= 0) {
-                  return 'Enter a valid receipt total';
+                  return l10n.enterValidReceiptTotal;
                 }
                 return null;
               },
             ),
             const SizedBox(height: 8),
             Text(
-              'Subtotal from item prices: '
-              '\$${_computedGrandSubtotal(draft).toStringAsFixed(2)}',
+              l10n.subtotalFromItemPrices(
+                '\$${_computedGrandSubtotal(draft).toStringAsFixed(2)}',
+              ),
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -658,8 +660,9 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
             ),
           ] else ...<Widget>[
             Text(
-              'Grand total across receipts: '
-              '\$${_computedGrandSubtotal(draft).toStringAsFixed(2)}',
+              l10n.grandTotalAcrossReceipts(
+                '\$${_computedGrandSubtotal(draft).toStringAsFixed(2)}',
+              ),
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -669,7 +672,7 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
           ],
           const SizedBox(height: 24),
           FilledButton(
-            onPressed: _isSaving ? null : () => _save(list, draft),
+            onPressed: _isSaving ? null : () => _save(list, draft, l10n),
             style: SavingorButtonStyles.primaryFilled(),
             child: _isSaving
                 ? const SizedBox(
@@ -678,7 +681,7 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : Text(
-                    draft.hasMultipleStores ? 'Save receipts' : 'Save receipt',
+                    draft.hasMultipleStores ? l10n.saveReceipts : l10n.saveReceipt,
                   ),
           ),
         ],
