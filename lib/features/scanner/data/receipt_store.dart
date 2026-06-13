@@ -8,6 +8,13 @@ import 'package:savingor_app/features/receipts/domain/models/receipt.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt_item.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt_source.dart';
 import 'package:savingor_app/features/price_memory/data/price_memory_repository.dart';
+import 'package:savingor_app/features/scanner/domain/models/monthly_receipt_scan_usage.dart';
+import 'package:savingor_app/features/scanner/domain/monthly_receipt_scan_usage_service.dart';
+import 'package:savingor_app/features/subscription/data/subscription_service.dart';
+
+/// Error key returned when a Free user exceeds the monthly scan limit.
+const String kMonthlyReceiptScanLimitReachedError =
+    'monthly_receipt_scan_limit_reached';
 
 /// App-level state for Firestore-backed grocery receipts.
 class ReceiptStore extends ChangeNotifier {
@@ -15,15 +22,22 @@ class ReceiptStore extends ChangeNotifier {
     ReceiptFirestoreService? service,
     PriceMemoryRepository? priceMemoryRepository,
     FirebaseAuth? firebaseAuth,
+    SubscriptionService? subscriptionService,
+    MonthlyReceiptScanUsageService? scanUsageService,
   })  : _service = service ?? ReceiptFirestoreService(),
         _priceMemory = priceMemoryRepository ?? PriceMemoryRepository(),
-        _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance {
+        _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
+        _subscriptionService = subscriptionService ?? SubscriptionService(),
+        _scanUsageService =
+            scanUsageService ?? const MonthlyReceiptScanUsageService() {
     _authSubscription = _firebaseAuth.authStateChanges().listen(_onAuthChanged);
   }
 
   final ReceiptFirestoreService _service;
   final PriceMemoryRepository _priceMemory;
   final FirebaseAuth _firebaseAuth;
+  final SubscriptionService _subscriptionService;
+  final MonthlyReceiptScanUsageService _scanUsageService;
 
   StreamSubscription<User?>? _authSubscription;
   StreamSubscription<List<Receipt>>? _receiptsSubscription;
@@ -95,6 +109,18 @@ class ReceiptStore extends ChangeNotifier {
     return null;
   }
 
+  MonthlyReceiptScanUsageService get scanUsageService => _scanUsageService;
+
+  Future<MonthlyReceiptScanUsage> loadMonthlyScanUsage() async {
+    final SubscriptionStatus status =
+        await _subscriptionService.getCurrentSubscription();
+    return _scanUsageService.computeUsage(
+      receipts: _receipts,
+      isPro: status.hasActiveProAccess,
+      userId: _uid,
+    );
+  }
+
   Future<String?> createReceipt({
     required String storeName,
     required DateTime purchaseDate,
@@ -118,6 +144,26 @@ class ReceiptStore extends ChangeNotifier {
 
     try {
       _mutationError = null;
+
+      if (source.isFromImageCapture) {
+        final SubscriptionStatus status =
+            await _subscriptionService.getCurrentSubscription();
+        final MonthlyReceiptScanUsage usage = _scanUsageService.computeUsage(
+          receipts: _receipts,
+          isPro: status.hasActiveProAccess,
+          userId: _uid,
+        );
+        if (!_scanUsageService.canSaveNewScannedReceipt(
+          source: source,
+          usage: usage,
+          isNewReceipt: true,
+        )) {
+          _mutationError = kMonthlyReceiptScanLimitReachedError;
+          notifyListeners();
+          return null;
+        }
+      }
+
       final DateTime now = DateTime.now();
       final Receipt receipt = Receipt(
         id: '',

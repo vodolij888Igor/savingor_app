@@ -9,6 +9,7 @@ import 'package:savingor_app/features/receipts/domain/models/receipt_item.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt_source.dart';
 import 'package:savingor_app/features/receipts/presentation/widgets/receipt_item_form_row.dart';
 import 'package:savingor_app/features/scanner/data/receipt_store.dart';
+import 'package:savingor_app/features/scanner/presentation/widgets/receipt_scan_limit_sheet.dart';
 import 'package:savingor_app/l10n/app_localizations.dart';
 
 class CreateReceiptScreen extends StatefulWidget {
@@ -341,6 +342,11 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
 
     if (receiptId != null) {
       context.pop();
+      return;
+    }
+
+    if (store.mutationError == kMonthlyReceiptScanLimitReachedError) {
+      await ReceiptScanLimitSheet.show(context);
       return;
     }
 

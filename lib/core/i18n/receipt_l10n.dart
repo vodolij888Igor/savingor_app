@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'package:savingor_app/features/receipts/domain/models/receipt_source.dart';
+import 'package:savingor_app/features/scanner/data/receipt_store.dart';
 import 'package:savingor_app/l10n/app_localizations.dart';
 
 /// Localized display labels for receipt sources and store error messages.
@@ -50,6 +51,7 @@ abstract final class ReceiptL10n {
       'Receipt not found.' => l10n.receiptNotFound,
       'Could not update the receipt. Please try again.' =>
         l10n.couldNotUpdateReceipt,
+      kMonthlyReceiptScanLimitReachedError => l10n.monthlyScanLimitSaveBlocked,
       _ => error,
     };
   }

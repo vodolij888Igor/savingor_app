@@ -122,7 +122,7 @@ class ShoppingListsScreen extends StatelessWidget {
     return ListView(
       padding: EdgeInsets.fromLTRB(20, 8, 20, 96 + bottomInset),
       children: <Widget>[
-        BasketOptimizerEntryCard(
+        BasketOptimizerEntryCardWithProBadge(
           title: l10n.optimizeAllLists,
           subtitle: l10n.optimizeAllListsSubtitle,
           onTap: () => context.push('/shopping/basket-optimizer'),

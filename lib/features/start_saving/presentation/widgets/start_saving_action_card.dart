@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/savingor_interactive.dart';
+import 'package:savingor_app/features/subscription/presentation/widgets/pro_feature_badge.dart';
 
 /// Premium action row for the Start saving menu.
 class StartSavingActionCard extends StatelessWidget {
@@ -12,6 +13,7 @@ class StartSavingActionCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.showProBadge = false,
   });
 
   final IconData icon;
@@ -19,6 +21,7 @@ class StartSavingActionCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+  final bool showProBadge;
 
   static const Color _titleCharcoal = Color(0xFF1F2933);
   static const Color _subtitleGray = Color(0xFF64748B);
@@ -106,17 +109,27 @@ class StartSavingActionCard extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            Text(
-                              title,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                                color: theme.isDark
-                                    ? theme.textPrimary
-                                    : _titleCharcoal,
-                                height: 1.2,
-                                letterSpacing: -0.15,
-                              ),
+                            Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: Text(
+                                    title,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w800,
+                                      color: theme.isDark
+                                          ? theme.textPrimary
+                                          : _titleCharcoal,
+                                      height: 1.2,
+                                      letterSpacing: -0.15,
+                                    ),
+                                  ),
+                                ),
+                                if (showProBadge) ...<Widget>[
+                                  const SizedBox(width: 8),
+                                  const ProFeatureBadge(),
+                                ],
+                              ],
                             ),
                             const SizedBox(height: 4),
                             Text(

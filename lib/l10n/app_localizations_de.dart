@@ -170,12 +170,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get chooseYourLanguage => 'Sprache wählen';
 
   @override
-  String get chooseLanguageSubtitle =>
-      'Wählen Sie die Sprache, die Savingor verwenden soll.';
+  String get chooseLanguageSubtitle => 'Wählen Sie die Sprache, die Savingor verwenden soll.';
 
   @override
-  String get langSubtitleOnboarding =>
-      'Das hilft, Ihr Savingor-Erlebnis zu personalisieren.';
+  String get langSubtitleOnboarding => 'Das hilft, Ihr Savingor-Erlebnis zu personalisieren.';
 
   @override
   String get applyLanguage => 'Sprache anwenden';
@@ -242,8 +240,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get expenseAdded => 'Ausgabe hinzugefügt';
 
   @override
-  String get addExpenseToSeeHere =>
-      'Fügen Sie eine Ausgabe hinzu, um sie hier zu sehen';
+  String get addExpenseToSeeHere => 'Fügen Sie eine Ausgabe hinzu, um sie hier zu sehen';
 
   @override
   String get yourSavingsSnapshot => 'Ihr Sparüberblick';
@@ -261,8 +258,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get bestActionNow => 'Beste Aktion jetzt';
 
   @override
-  String get addMoreReceiptsForSavings =>
-      'Fügen Sie mehr Belege hinzu, um personalisierte Ersparnisse freizuschalten.';
+  String get addMoreReceiptsForSavings => 'Fügen Sie mehr Belege hinzu, um personalisierte Ersparnisse freizuschalten.';
 
   @override
   String get account => 'Konto';
@@ -295,8 +291,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get loadingProfile => 'Profil wird geladen...';
 
   @override
-  String get noProfileFound =>
-      'Für dieses Konto wurde noch kein Profil gefunden.';
+  String get noProfileFound => 'Für dieses Konto wurde noch kein Profil gefunden.';
 
   @override
   String get fullName => 'Vollständiger Name';
@@ -341,8 +336,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get inactive => 'Inaktiv';
 
   @override
-  String get freePlanUpgradeMessage =>
-      'Sie nutzen derzeit den kostenlosen Plan. Upgraden Sie auf Pro für KI-Spartipps, Beleganalysen, smarte Alerts und Ausgabenberichte.';
+  String get freePlanUpgradeMessage => 'Sie nutzen derzeit den kostenlosen Plan. Upgraden Sie auf Pro für KI-Spartipps, Beleganalysen, smarte Alerts und Ausgabenberichte.';
 
   @override
   String get manageSubscription => 'Abo verwalten';
@@ -357,19 +351,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get signOutQuestion => 'Abmelden?';
 
   @override
-  String get signOutMessage =>
-      'Sie müssen sich erneut anmelden, um auf Ihr Savingor-Konto zuzugreifen.';
+  String get signOutMessage => 'Sie müssen sich erneut anmelden, um auf Ihr Savingor-Konto zuzugreifen.';
 
   @override
-  String get couldNotLoadProfile =>
-      'Profil konnte nicht geladen werden. Bitte erneut versuchen.';
+  String get couldNotLoadProfile => 'Profil konnte nicht geladen werden. Bitte erneut versuchen.';
 
   @override
   String get personalizeSavingor => 'Savingor personalisieren';
 
   @override
-  String get personalizeSavingorSubtitle =>
-      'Wählen Sie, wie die App aussieht, kommuniziert und sich an Ihren Standort anpasst.';
+  String get personalizeSavingorSubtitle => 'Wählen Sie, wie die App aussieht, kommuniziert und sich an Ihren Standort anpasst.';
 
   @override
   String get preferences => 'Einstellungen';
@@ -390,8 +381,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get smartSavingsAlerts => 'Smarte Spar-Alerts';
 
   @override
-  String get smartSavingsAlertsDescription =>
-      'Erhalten Sie Benachrichtigungen zu Spar-Chancen, Budgetfortschritt und wichtigen Empfehlungen.';
+  String get smartSavingsAlertsDescription => 'Erhalten Sie Benachrichtigungen zu Spar-Chancen, Budgetfortschritt und wichtigen Empfehlungen.';
 
   @override
   String get regionCanada => 'Kanada';
@@ -476,8 +466,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get category => 'Kategorie';
 
   @override
-  String get scanReceiptSubtitle =>
-      'Scannen Sie einen Lebensmittelbeleg, um Ausgaben und Ersparnisse zu verfolgen.';
+  String get scanReceiptSubtitle => 'Scannen Sie einen Lebensmittelbeleg, um Ausgaben und Ersparnisse zu verfolgen.';
 
   @override
   String get addManually => 'Manuell hinzufügen';
@@ -488,8 +477,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get noReceiptsYet =>
-      'Noch keine Belege. Scannen oder fügen Sie einen Beleg hinzu, um mit der Verfolgung zu beginnen.';
+  String get noReceiptsYet => 'Noch keine Belege. Scannen oder fügen Sie einen Beleg hinzu, um mit der Verfolgung zu beginnen.';
 
   @override
   String get deleteReceiptQuestion => 'Beleg löschen?';
@@ -509,40 +497,71 @@ class AppLocalizationsDe extends AppLocalizations {
   String get couldNotLoadReceipts => 'Belege konnten nicht geladen werden';
 
   @override
-  String get signInToSyncReceipts =>
-      'Speichern und synchronisieren Sie Ihre Belege mit Ihrem Savingor-Konto.';
+  String get signInToSyncReceipts => 'Speichern und synchronisieren Sie Ihre Belege mit Ihrem Savingor-Konto.';
 
   @override
-  String get chooseReceiptSource =>
-      'Wählen Sie, wie Sie Ihren Beleg hinzufügen möchten';
+  String get chooseReceiptSource => 'Wählen Sie, wie Sie Ihren Beleg hinzufügen möchten';
+
+  @override
+  String freeScansUsedThisMonth(int used, int limit) {
+    return '$used von $limit kostenlosen Scans diesen Monat genutzt';
+  }
+
+  @override
+  String freeScansRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count kostenlose Scans verbleibend',
+      one: '1 kostenloser Scan verbleibend',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get noFreeScansRemainingThisMonth => 'Keine kostenlosen Scans mehr in diesem Monat';
+
+  @override
+  String get unlimitedScansWithPro => 'Unbegrenzte Scans mit Pro';
+
+  @override
+  String get loadingScanUsage => 'Scan-Nutzung wird geprüft…';
+
+  @override
+  String get monthlyScanLimitTitle => 'Monatliches Scan-Limit erreicht';
+
+  @override
+  String get monthlyScanLimitDescription => 'Sie haben alle drei kostenlosen Beleg-Scans für diesen Monat genutzt. Upgraden Sie auf Savingor Pro für unbegrenztes Scannen.';
+
+  @override
+  String get unlockUnlimitedScansWithSavingorPro => 'Unbegrenzte Scans mit Savingor Pro freischalten';
+
+  @override
+  String get monthlyScanLimitSaveBlocked => 'Sie haben Ihr kostenloses Scan-Limit für diesen Monat erreicht. Upgraden Sie auf Pro, um weitere gescannte Belege zu speichern.';
 
   @override
   String get takePhoto => 'Foto aufnehmen';
 
   @override
-  String get takePhotoSubtitle =>
-      'Verwenden Sie Ihre Kamera, um einen Beleg zu scannen';
+  String get takePhotoSubtitle => 'Verwenden Sie Ihre Kamera, um einen Beleg zu scannen';
 
   @override
   String get chooseFromGallery => 'Aus Galerie wählen';
 
   @override
-  String get chooseFromGallerySubtitle =>
-      'Wählen Sie ein vorhandenes Belegfoto';
+  String get chooseFromGallerySubtitle => 'Wählen Sie ein vorhandenes Belegfoto';
 
   @override
   String get scanningReceipt => 'Beleg wird gescannt...';
 
   @override
-  String get couldNotScanReceipt =>
-      'Dieser Beleg konnte nicht gescannt werden. Versuchen Sie ein anderes Foto.';
+  String get couldNotScanReceipt => 'Dieser Beleg konnte nicht gescannt werden. Versuchen Sie ein anderes Foto.';
 
   @override
   String get ocrResultPreview => 'OCR-Ergebnisvorschau';
 
   @override
-  String get noTextDetected =>
-      'Kein Text erkannt. Versuchen Sie ein klareres Belegfoto.';
+  String get noTextDetected => 'Kein Text erkannt. Versuchen Sie ein klareres Belegfoto.';
 
   @override
   String get useThisReceipt => 'Diesen Beleg verwenden';
@@ -593,8 +612,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get receiptTotal => 'Belegsumme';
 
   @override
-  String get autoCalculatedFromItems =>
-      'Automatisch aus Artikeln berechnet, sofern Sie dieses Feld nicht bearbeiten.';
+  String get autoCalculatedFromItems => 'Automatisch aus Artikeln berechnet, sofern Sie dieses Feld nicht bearbeiten.';
 
   @override
   String get notesOptional => 'Notizen (optional)';
@@ -603,8 +621,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get addItem => 'Artikel hinzufügen';
 
   @override
-  String get addLineItemsHint =>
-      'Fügen Sie Positionen hinzu, um einen vollständigen Beleg für die spätere Preisverfolgung zu erstellen.';
+  String get addLineItemsHint => 'Fügen Sie Positionen hinzu, um einen vollständigen Beleg für die spätere Preisverfolgung zu erstellen.';
 
   @override
   String get enterStoreName => 'Geben Sie einen Geschäftsnamen ein';
@@ -619,8 +636,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get enterValidAmount => 'Geben Sie einen gültigen Betrag ein';
 
   @override
-  String get enterValidTotalAmount =>
-      'Geben Sie einen gültigen Gesamtbetrag ein.';
+  String get enterValidTotalAmount => 'Geben Sie einen gültigen Gesamtbetrag ein.';
 
   @override
   String get receiptNotFound => 'Beleg nicht gefunden.';
@@ -663,8 +679,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noItemsSaved => 'Keine Artikel gespeichert';
 
   @override
-  String get noLineItemsSaved =>
-      'Für diesen Beleg wurden noch keine Positionen gespeichert.';
+  String get noLineItemsSaved => 'Für diesen Beleg wurden noch keine Positionen gespeichert.';
 
   @override
   String qtyWithValue(String quantity) {
@@ -672,8 +687,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get couldNotDeleteReceipt =>
-      'Beleg konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.';
+  String get couldNotDeleteReceipt => 'Beleg konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.';
 
   @override
   String get saveChanges => 'Änderungen speichern';
@@ -709,24 +723,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get tripNotes => 'Einkaufs-Notizen';
 
   @override
-  String get couldNotLoadYourReceipts =>
-      'Ihre Belege konnten nicht geladen werden. Bitte versuchen Sie es erneut.';
+  String get couldNotLoadYourReceipts => 'Ihre Belege konnten nicht geladen werden. Bitte versuchen Sie es erneut.';
 
   @override
-  String get signInToSaveReceipts =>
-      'Melden Sie sich an, um Belege zu speichern.';
+  String get signInToSaveReceipts => 'Melden Sie sich an, um Belege zu speichern.';
 
   @override
-  String get couldNotSaveReceipt =>
-      'Beleg konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.';
+  String get couldNotSaveReceipt => 'Beleg konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.';
 
   @override
-  String get couldNotUpdateReceipt =>
-      'Beleg konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.';
+  String get couldNotUpdateReceipt => 'Beleg konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.';
 
   @override
-  String get signInToUpdateReceipts =>
-      'Melden Sie sich an, um Belege zu aktualisieren.';
+  String get signInToUpdateReceipts => 'Melden Sie sich an, um Belege zu aktualisieren.';
 
   @override
   String receiptItemsCount(int count) {
@@ -795,29 +804,25 @@ class AppLocalizationsDe extends AppLocalizations {
   String get optimizeShoppingBasket => 'Einkaufswagen optimieren';
 
   @override
-  String get optimizeShoppingBasketSubtitle =>
-      'Finden Sie Möglichkeiten, weniger auszugeben';
+  String get optimizeShoppingBasketSubtitle => 'Finden Sie Möglichkeiten, weniger auszugeben';
 
   @override
   String get finalizeShoppingTrip => 'Einkauf abschließen';
 
   @override
-  String get finalizeShoppingTripSubtitle =>
-      'Schließen Sie Ihren laufenden Einkauf ab';
+  String get finalizeShoppingTripSubtitle => 'Schließen Sie Ihren laufenden Einkauf ab';
 
   @override
   String get monthlyGoalBudget => 'Monatsziel / Budget';
 
   @override
-  String get monthlyGoalBudgetSubtitle =>
-      'Legen Sie Ihr Monatsziel fest oder ändern Sie es';
+  String get monthlyGoalBudgetSubtitle => 'Legen Sie Ihr Monatsziel fest oder ändern Sie es';
 
   @override
   String get savingsAnalytics => 'Sparanalyse';
 
   @override
-  String get savingsAnalyticsSubtitle =>
-      'Überprüfen Sie Ihre Ausgaben und Ersparnisse';
+  String get savingsAnalyticsSubtitle => 'Überprüfen Sie Ihre Ausgaben und Ersparnisse';
 
   @override
   String get open => 'Öffnen';
@@ -835,19 +840,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get couldNotLoadExpenses => 'Ausgaben konnten nicht geladen werden';
 
   @override
-  String get couldNotLoadYourExpenses =>
-      'Ihre Ausgaben konnten nicht geladen werden. Bitte erneut versuchen.';
+  String get couldNotLoadYourExpenses => 'Ihre Ausgaben konnten nicht geladen werden. Bitte erneut versuchen.';
 
   @override
   String get noExpensesYet => 'Noch keine Ausgaben';
 
   @override
-  String get noExpensesYetMessage =>
-      'Verfolgen Sie Lebensmitteleinkäufe und Belege, um Ihre Ausgaben zu verstehen.';
+  String get noExpensesYetMessage => 'Verfolgen Sie Lebensmitteleinkäufe und Belege, um Ihre Ausgaben zu verstehen.';
 
   @override
-  String get signInToSyncExpenses =>
-      'Speichern und synchronisieren Sie Ihre Ausgaben mit Ihrem Savingor-Konto.';
+  String get signInToSyncExpenses => 'Speichern und synchronisieren Sie Ihre Ausgaben mit Ihrem Savingor-Konto.';
 
   @override
   String get deleteExpenseQuestion => 'Ausgabe löschen?';
@@ -864,16 +866,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get totalAmount => 'Gesamtbetrag';
 
   @override
-  String get signInToSaveExpenses =>
-      'Melden Sie sich an, um Ausgaben zu speichern.';
+  String get signInToSaveExpenses => 'Melden Sie sich an, um Ausgaben zu speichern.';
 
   @override
-  String get couldNotSaveExpense =>
-      'Ausgabe konnte nicht gespeichert werden. Bitte erneut versuchen.';
+  String get couldNotSaveExpense => 'Ausgabe konnte nicht gespeichert werden. Bitte erneut versuchen.';
 
   @override
-  String get couldNotDeleteExpense =>
-      'Ausgabe konnte nicht gelöscht werden. Bitte erneut versuchen.';
+  String get couldNotDeleteExpense => 'Ausgabe konnte nicht gelöscht werden. Bitte erneut versuchen.';
 
   @override
   String get expenseSaved => 'Ausgabe gespeichert.';
@@ -888,8 +887,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noExpensesAddedYet => 'Noch keine Ausgaben hinzugefügt.';
 
   @override
-  String get pleaseEnterStoreName =>
-      'Bitte geben Sie einen Geschäftsnamen ein.';
+  String get pleaseEnterStoreName => 'Bitte geben Sie einen Geschäftsnamen ein.';
 
   @override
   String get pleaseEnterItemName => 'Bitte geben Sie einen Artikelnamen ein.';
@@ -898,8 +896,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get pleaseEnterPrice => 'Bitte geben Sie einen Preis ein.';
 
   @override
-  String get pleaseEnterValidPrice =>
-      'Bitte geben Sie einen gültigen Preis ein.';
+  String get pleaseEnterValidPrice => 'Bitte geben Sie einen gültigen Preis ein.';
 
   @override
   String expenseCount(int count) {
@@ -929,19 +926,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get couldNotLoadLists => 'Listen konnten nicht geladen werden';
 
   @override
-  String get couldNotLoadYourShoppingLists =>
-      'Ihre Einkaufslisten konnten nicht geladen werden. Bitte erneut versuchen.';
+  String get couldNotLoadYourShoppingLists => 'Ihre Einkaufslisten konnten nicht geladen werden. Bitte erneut versuchen.';
 
   @override
   String get noShoppingListsYet => 'Noch keine Einkaufslisten';
 
   @override
-  String get noShoppingListsYetMessage =>
-      'Erstellen Sie Ihre erste Liste, um Einkäufe zu planen und Ihren Warenkorb zu optimieren.';
+  String get noShoppingListsYetMessage => 'Erstellen Sie Ihre erste Liste, um Einkäufe zu planen und Ihren Warenkorb zu optimieren.';
 
   @override
-  String get signInToSyncShoppingLists =>
-      'Erstellen und synchronisieren Sie Einkaufslisten mit Ihrem Savingor-Konto.';
+  String get signInToSyncShoppingLists => 'Erstellen und synchronisieren Sie Einkaufslisten mit Ihrem Savingor-Konto.';
 
   @override
   String get deleteListQuestion => 'Liste löschen?';
@@ -958,22 +952,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get optimizeAllLists => 'Alle Listen optimieren';
 
   @override
-  String get optimizeAllListsSubtitle =>
-      'Finden Sie die besten bekannten Geschäfte für Ihre aktiven Einkaufslisten';
+  String get optimizeAllListsSubtitle => 'Finden Sie die besten bekannten Geschäfte für Ihre aktiven Einkaufslisten';
 
   @override
   String get optimizeThisBasket => 'Diesen Warenkorb optimieren';
 
   @override
-  String get optimizeThisBasketSubtitle =>
-      'Finden Sie die besten bekannten Geschäfte für diese Liste';
+  String get optimizeThisBasketSubtitle => 'Finden Sie die besten bekannten Geschäfte für diese Liste';
 
   @override
   String get listNotFound => 'Liste nicht gefunden';
 
   @override
-  String get listNotFoundMessage =>
-      'Diese Einkaufsliste wurde möglicherweise gelöscht.';
+  String get listNotFoundMessage => 'Diese Einkaufsliste wurde möglicherweise gelöscht.';
 
   @override
   String get backToLists => 'Zurück zu den Listen';
@@ -982,12 +973,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noShoppingItemsYet => 'Noch keine Artikel';
 
   @override
-  String get noShoppingItemsYetMessage =>
-      'Fügen Sie Artikel zu dieser Liste hinzu, um Ihre Bedürfnisse zu verfolgen.';
+  String get noShoppingItemsYetMessage => 'Fügen Sie Artikel zu dieser Liste hinzu, um Ihre Bedürfnisse zu verfolgen.';
 
   @override
-  String get shoppingListEmptyMessage =>
-      'Erstellen und verwalten Sie hier Ihre smarten Einkaufslisten.';
+  String get shoppingListEmptyMessage => 'Erstellen und verwalten Sie hier Ihre smarten Einkaufslisten.';
 
   @override
   String get purchased => 'Gekauft';
@@ -1037,8 +1026,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get enterListName => 'Geben Sie einen Listennamen ein';
 
   @override
-  String get newShoppingListHint =>
-      'Geben Sie Ihrer Liste einen Namen. Artikel können Sie nach dem Erstellen hinzufügen.';
+  String get newShoppingListHint => 'Geben Sie Ihrer Liste einen Namen. Artikel können Sie nach dem Erstellen hinzufügen.';
 
   @override
   String get itemsOptional => 'Artikel (optional)';
@@ -1062,29 +1050,25 @@ class AppLocalizationsDe extends AppLocalizations {
   String get couldNotLoadItems => 'Artikel konnten nicht geladen werden';
 
   @override
-  String get couldNotLoadListItems =>
-      'Listenartikel konnten nicht geladen werden. Bitte erneut versuchen.';
+  String get couldNotLoadListItems => 'Listenartikel konnten nicht geladen werden. Bitte erneut versuchen.';
 
   @override
   String get createAnotherReceiptQuestion => 'Weiteren Beleg erstellen?';
 
   @override
-  String get createAnotherReceiptMessage =>
-      'Diese Liste hat möglicherweise bereits einen Beleg. Einen weiteren Beleg aus gekauften Artikeln erstellen?';
+  String get createAnotherReceiptMessage => 'Diese Liste hat möglicherweise bereits einen Beleg. Einen weiteren Beleg aus gekauften Artikeln erstellen?';
 
   @override
   String get createReceipt => 'Beleg erstellen';
 
   @override
-  String get signInToFinalizeTrip =>
-      'Melden Sie sich an, um einen Einkauf abzuschließen.';
+  String get signInToFinalizeTrip => 'Melden Sie sich an, um einen Einkauf abzuschließen.';
 
   @override
   String get noListsReadyToFinalize => 'Keine Listen zum Abschließen bereit';
 
   @override
-  String get noListsReadyToFinalizeMessage =>
-      'Markieren Sie Artikel auf einer Einkaufsliste als gekauft und kehren Sie dann hierher zurück, um einen Beleg zu erstellen.';
+  String get noListsReadyToFinalizeMessage => 'Markieren Sie Artikel auf einer Einkaufsliste als gekauft und kehren Sie dann hierher zurück, um einen Beleg zu erstellen.';
 
   @override
   String get openShoppingLists => 'Einkaufslisten öffnen';
@@ -1093,12 +1077,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get selectListToFinalize => 'Liste zum Abschließen auswählen';
 
   @override
-  String get selectListToFinalizeSubtitle =>
-      'Wählen Sie eine Einkaufsliste mit gekauften Artikeln.';
+  String get selectListToFinalizeSubtitle => 'Wählen Sie eine Einkaufsliste mit gekauften Artikeln.';
 
   @override
-  String get finalizeShoppingTripCardSubtitle =>
-      'Erstellen Sie einen Beleg aus gekauften Artikeln und aktualisieren Sie Ihre Preishistorie';
+  String get finalizeShoppingTripCardSubtitle => 'Erstellen Sie einen Beleg aus gekauften Artikeln und aktualisieren Sie Ihre Preishistorie';
 
   @override
   String get done => 'Fertig';
@@ -1116,26 +1098,22 @@ class AppLocalizationsDe extends AppLocalizations {
   String get loadingPurchasedItems => 'Gekaufte Artikel werden geladen...';
 
   @override
-  String get preparingPurchasedItems =>
-      'Gekaufte Artikel werden vorbereitet...';
+  String get preparingPurchasedItems => 'Gekaufte Artikel werden vorbereitet...';
 
   @override
   String get noPurchasedItemsYet => 'Noch keine gekauften Artikel';
 
   @override
-  String get noPurchasedItemsYetMessage =>
-      'Markieren Sie Artikel als gekauft, bevor Sie einen Beleg erstellen.';
+  String get noPurchasedItemsYetMessage => 'Markieren Sie Artikel als gekauft, bevor Sie einen Beleg erstellen.';
 
   @override
   String get backToList => 'Zurück zur Liste';
 
   @override
-  String get enterStoreNameForTrip =>
-      'Geben Sie den Geschäftsnamen für diesen Einkauf ein';
+  String get enterStoreNameForTrip => 'Geben Sie den Geschäftsnamen für diesen Einkauf ein';
 
   @override
-  String get enterStoreNameForTripSnack =>
-      'Geben Sie den Geschäftsnamen für diesen Einkauf ein.';
+  String get enterStoreNameForTripSnack => 'Geben Sie den Geschäftsnamen für diesen Einkauf ein.';
 
   @override
   String creatingReceiptsPerStore(int count) {
@@ -1143,8 +1121,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get missingStoreOnItems =>
-      'Bei einigen gekauften Artikeln fehlt ein Geschäft. Fügen Sie jedem Artikel ein Geschäft hinzu, bevor Sie abschließen.';
+  String get missingStoreOnItems => 'Bei einigen gekauften Artikeln fehlt ein Geschäft. Fügen Sie jedem Artikel ein Geschäft hinzu, bevor Sie abschließen.';
 
   @override
   String get missingStore => 'Geschäft fehlt';
@@ -1161,8 +1138,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get enterReceiptTotal => 'Geben Sie den Beleggesamtbetrag ein';
 
   @override
-  String get enterValidReceiptTotal =>
-      'Geben Sie einen gültigen Beleggesamtbetrag ein';
+  String get enterValidReceiptTotal => 'Geben Sie einen gültigen Beleggesamtbetrag ein';
 
   @override
   String subtotalFromItemPrices(String amount) {
@@ -1183,51 +1159,40 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get addStoreToAllItems =>
-      'Fügen Sie jedem gekauften Artikel ein Geschäft hinzu, bevor Sie mehrere Belege erstellen.';
+  String get addStoreToAllItems => 'Fügen Sie jedem gekauften Artikel ein Geschäft hinzu, bevor Sie mehrere Belege erstellen.';
 
   @override
-  String get signInToCreateShoppingLists =>
-      'Melden Sie sich an, um Einkaufslisten zu erstellen.';
+  String get signInToCreateShoppingLists => 'Melden Sie sich an, um Einkaufslisten zu erstellen.';
 
   @override
-  String get couldNotCreateList =>
-      'Liste konnte nicht erstellt werden. Bitte erneut versuchen.';
+  String get couldNotCreateList => 'Liste konnte nicht erstellt werden. Bitte erneut versuchen.';
 
   @override
-  String get couldNotDeleteList =>
-      'Liste konnte nicht gelöscht werden. Bitte erneut versuchen.';
+  String get couldNotDeleteList => 'Liste konnte nicht gelöscht werden. Bitte erneut versuchen.';
 
   @override
-  String get couldNotAddItem =>
-      'Artikel konnte nicht hinzugefügt werden. Bitte erneut versuchen.';
+  String get couldNotAddItem => 'Artikel konnte nicht hinzugefügt werden. Bitte erneut versuchen.';
 
   @override
-  String get signInToAddShoppingItems =>
-      'Melden Sie sich an, um Artikel zu Ihrer Einkaufsliste hinzuzufügen.';
+  String get signInToAddShoppingItems => 'Melden Sie sich an, um Artikel zu Ihrer Einkaufsliste hinzuzufügen.';
 
   @override
   String get itemNameRequired => 'Artikelname ist erforderlich.';
 
   @override
-  String get couldNotUpdateItem =>
-      'Artikel konnte nicht aktualisiert werden. Bitte erneut versuchen.';
+  String get couldNotUpdateItem => 'Artikel konnte nicht aktualisiert werden. Bitte erneut versuchen.';
 
   @override
-  String get couldNotUpdateQuantity =>
-      'Menge konnte nicht aktualisiert werden. Bitte erneut versuchen.';
+  String get couldNotUpdateQuantity => 'Menge konnte nicht aktualisiert werden. Bitte erneut versuchen.';
 
   @override
-  String get couldNotRemoveItem =>
-      'Artikel konnte nicht entfernt werden. Bitte erneut versuchen.';
+  String get couldNotRemoveItem => 'Artikel konnte nicht entfernt werden. Bitte erneut versuchen.';
 
   @override
-  String get couldNotUpdateShoppingList =>
-      'Einkaufsliste konnte nicht aktualisiert werden. Bitte erneut versuchen.';
+  String get couldNotUpdateShoppingList => 'Einkaufsliste konnte nicht aktualisiert werden. Bitte erneut versuchen.';
 
   @override
-  String get couldNotCompleteAction =>
-      'Aktion konnte nicht abgeschlossen werden. Bitte erneut versuchen.';
+  String get couldNotCompleteAction => 'Aktion konnte nicht abgeschlossen werden. Bitte erneut versuchen.';
 
   @override
   String estimatedPrefix(String amount) {
@@ -1290,8 +1255,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noPriceHistoryYet => 'Noch keine Preishistorie';
 
   @override
-  String get addReceiptsForItemRecommendations =>
-      'Fügen Sie Belege mit diesem Artikel hinzu, um Empfehlungen freizuschalten';
+  String get addReceiptsForItemRecommendations => 'Fügen Sie Belege mit diesem Artikel hinzu, um Empfehlungen freizuschalten';
 
   @override
   String get suggestedStorePlan => 'Vorgeschlagener Einkaufsplan';
@@ -1302,8 +1266,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String storePlanItemLine(String itemName, String quantitySuffix,
-      String unitPrice, String perUnit) {
+  String storePlanItemLine(String itemName, String quantitySuffix, String unitPrice, String perUnit) {
     return '• $itemName$quantitySuffix — $unitPrice $perUnit';
   }
 
@@ -1311,12 +1274,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get perUnit => 'pro Stück';
 
   @override
-  String get signInToOptimizeAllLists =>
-      'Melden Sie sich an, um alle Ihre Einkaufslisten anhand Ihrer Belege zu optimieren.';
+  String get signInToOptimizeAllLists => 'Melden Sie sich an, um alle Ihre Einkaufslisten anhand Ihrer Belege zu optimieren.';
 
   @override
-  String get signInToOptimizeBasket =>
-      'Melden Sie sich an, um Ihren Warenkorb anhand Ihrer Belege und Einkaufsliste zu optimieren.';
+  String get signInToOptimizeBasket => 'Melden Sie sich an, um Ihren Warenkorb anhand Ihrer Belege und Einkaufsliste zu optimieren.';
 
   @override
   String get loadingAllActiveLists => 'Alle aktiven Listen werden geladen…';
@@ -1325,34 +1286,28 @@ class AppLocalizationsDe extends AppLocalizations {
   String get loadingBasketOptimizer => 'Warenkorb-Optimierer wird geladen…';
 
   @override
-  String get couldNotLoadShoppingList =>
-      'Einkaufsliste konnte nicht geladen werden';
+  String get couldNotLoadShoppingList => 'Einkaufsliste konnte nicht geladen werden';
 
   @override
-  String get couldNotLoadPriceHistory =>
-      'Preishistorie konnte nicht geladen werden';
+  String get couldNotLoadPriceHistory => 'Preishistorie konnte nicht geladen werden';
 
   @override
   String get noActiveItemsToOptimize => 'Keine aktiven Artikel zum Optimieren';
 
   @override
-  String get noActiveItemsToOptimizeMessage =>
-      'Fügen Sie Artikel zu Ihren Einkaufslisten hinzu, um einen smarten Einkaufsplan zu erstellen.';
+  String get noActiveItemsToOptimizeMessage => 'Fügen Sie Artikel zu Ihren Einkaufslisten hinzu, um einen smarten Einkaufsplan zu erstellen.';
 
   @override
   String get backToShopping => 'Zurück zum Einkauf';
 
   @override
-  String get addItemsToListForOptimizer =>
-      'Artikel zur Einkaufsliste hinzufügen';
+  String get addItemsToListForOptimizer => 'Artikel zur Einkaufsliste hinzufügen';
 
   @override
-  String get addItemsToListForOptimizerMessage =>
-      'Fügen Sie Artikel zu Ihrer Einkaufsliste hinzu, um Ihren Warenkorb zu optimieren.';
+  String get addItemsToListForOptimizerMessage => 'Fügen Sie Artikel zu Ihrer Einkaufsliste hinzu, um Ihren Warenkorb zu optimieren.';
 
   @override
-  String get noPriceHistoryForOptimizerMessage =>
-      'Fügen Sie Belege mit Positionen hinzu, damit Savingor Ihre Preise lernt und bessere Geschäfte empfehlen kann.';
+  String get noPriceHistoryForOptimizerMessage => 'Fügen Sie Belege mit Positionen hinzu, damit Savingor Ihre Preise lernt und bessere Geschäfte empfehlen kann.';
 
   @override
   String listFinalizeProgressSummary(int purchased, int total) {
@@ -1386,8 +1341,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get trackMonthlyGrocerySpending =>
-      'Verfolgen Sie Ihre monatlichen Lebensmittelausgaben im Vergleich zu Ihrem Budget.';
+  String get trackMonthlyGrocerySpending => 'Verfolgen Sie Ihre monatlichen Lebensmittelausgaben im Vergleich zu Ihrem Budget.';
 
   @override
   String get monthlyGroceryBudget => 'Monatliches Lebensmittelbudget';
@@ -1405,8 +1359,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get updateMonthlyBudget => 'Monatsbudget aktualisieren';
 
   @override
-  String get setMonthlyBudgetDescription =>
-      'Legen Sie das monatliche Ausgabenlimit für Lebensmittel fest, das Sie verfolgen möchten.';
+  String get setMonthlyBudgetDescription => 'Legen Sie das monatliche Ausgabenlimit für Lebensmittel fest, das Sie verfolgen möchten.';
 
   @override
   String get monthlyBudgetAmount => 'Monatlicher Budgetbetrag';
@@ -1421,8 +1374,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get enterBudgetAmount => 'Geben Sie einen Budgetbetrag ein';
 
   @override
-  String get enterAmountGreaterThanZero =>
-      'Geben Sie einen Betrag größer als null ein';
+  String get enterAmountGreaterThanZero => 'Geben Sie einen Betrag größer als null ein';
 
   @override
   String get overview => 'Überblick';
@@ -1517,8 +1469,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get priceInsightsEmptySubtitle =>
-      'Vollständiger Preisspeicher aus Ihren Belegpositionen';
+  String get priceInsightsEmptySubtitle => 'Vollständiger Preisspeicher aus Ihren Belegpositionen';
 
   @override
   String get savingsOpportunities => 'Spar-Chancen';
@@ -1535,8 +1486,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get savingsOpportunitiesEmptySubtitle =>
-      'Produkte, für die Sie mehr als den besten bekannten Preis gezahlt haben';
+  String get savingsOpportunitiesEmptySubtitle => 'Produkte, für die Sie mehr als den besten bekannten Preis gezahlt haben';
 
   @override
   String get loadingAnalytics => 'Analyse wird geladen…';
@@ -1545,19 +1495,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get couldNotLoadAnalytics => 'Analyse konnte nicht geladen werden';
 
   @override
-  String get signInForAnalytics =>
-      'Sehen Sie Ausgabenanalysen mit Ihrem Savingor-Konto ein.';
+  String get signInForAnalytics => 'Sehen Sie Ausgabenanalysen mit Ihrem Savingor-Konto ein.';
 
   @override
   String get noSpendingDataYet => 'Noch keine Ausgabendaten';
 
   @override
-  String get noSpendingDataMessage =>
-      'Fügen Sie einen Beleg oder eine Ausgabe hinzu, um Ausgabensummen, Aufschlüsselungen nach Geschäft und Trends zu sehen.';
+  String get noSpendingDataMessage => 'Fügen Sie einen Beleg oder eine Ausgabe hinzu, um Ausgabensummen, Aufschlüsselungen nach Geschäft und Trends zu sehen.';
 
   @override
-  String get addMoreReceiptsForSavingsValue =>
-      'Fügen Sie mehr Belege hinzu, um Ihren Sparwert zu berechnen.';
+  String get addMoreReceiptsForSavingsValue => 'Fügen Sie mehr Belege hinzu, um Ihren Sparwert zu berechnen.';
 
   @override
   String storeHasSeveralBestPrices(String store) {
@@ -1569,21 +1516,17 @@ class AppLocalizationsDe extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          '$count verfolgte Produkte haben derzeit ihren niedrigsten bekannten Preis bei $store',
-      one:
-          '1 verfolgtes Produkt hat derzeit seinen niedrigsten bekannten Preis bei $store',
+      other: '$count verfolgte Produkte haben derzeit ihren niedrigsten bekannten Preis bei $store',
+      one: '1 verfolgtes Produkt hat derzeit seinen niedrigsten bekannten Preis bei $store',
     );
     return '$_temp0';
   }
 
   @override
-  String get useStoreWhenMatchesRoute =>
-      'Nutzen Sie dieses Geschäft, wenn es zu Ihrer Einkaufsroute passt';
+  String get useStoreWhenMatchesRoute => 'Nutzen Sie dieses Geschäft, wenn es zu Ihrer Einkaufsroute passt';
 
   @override
-  String recentlyPaidLatestBestKnown(String latestPrice, String latestStore,
-      String bestPrice, String bestStore) {
+  String recentlyPaidLatestBestKnown(String latestPrice, String latestStore, String bestPrice, String bestStore) {
     return 'Sie haben kürzlich $latestPrice bei $latestStore gezahlt. Ihr bester bekannter Preis ist $bestPrice bei $bestStore.';
   }
 
@@ -1645,32 +1588,27 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get signInForPriceMemory =>
-      'Melden Sie sich an, um Ihren Produktpreisspeicher anzusehen.';
+  String get signInForPriceMemory => 'Melden Sie sich an, um Ihren Produktpreisspeicher anzusehen.';
 
   @override
   String get loadingPriceMemory => 'Preisspeicher wird geladen…';
 
   @override
-  String get couldNotLoadPriceMemory =>
-      'Preisspeicher konnte nicht geladen werden';
+  String get couldNotLoadPriceMemory => 'Preisspeicher konnte nicht geladen werden';
 
   @override
   String get noPriceMemoryYet => 'Noch kein Preisspeicher';
 
   @override
-  String get noPriceMemoryMessage =>
-      'Fügen Sie Belege mit Positionen hinzu, um Ihren Preisspeicher aufzubauen.';
+  String get noPriceMemoryMessage => 'Fügen Sie Belege mit Positionen hinzu, um Ihren Preisspeicher aufzubauen.';
 
   @override
   String savingsOpportunitiesPaidMoreCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other:
-          '$count Sparmöglichkeiten, bei denen Sie mehr als den besten bekannten Preis gezahlt haben',
-      one:
-          '1 Sparmöglichkeit, bei der Sie mehr als den besten bekannten Preis gezahlt haben',
+      other: '$count Sparmöglichkeiten, bei denen Sie mehr als den besten bekannten Preis gezahlt haben',
+      one: '1 Sparmöglichkeit, bei der Sie mehr als den besten bekannten Preis gezahlt haben',
     );
     return '$_temp0';
   }
@@ -1686,8 +1624,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get recommendationWatchProductBeforeBuying =>
-      'Empfehlung: Beobachten Sie dieses Produkt vor dem nächsten Kauf.';
+  String get recommendationWatchProductBeforeBuying => 'Empfehlung: Beobachten Sie dieses Produkt vor dem nächsten Kauf.';
 
   @override
   String recommendationBuyAtStoreNextTime(String store) {
@@ -1695,22 +1632,19 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get signInForSavingsOpportunities =>
-      'Melden Sie sich an, um Sparmöglichkeiten aus Ihren Belegen zu sehen.';
+  String get signInForSavingsOpportunities => 'Melden Sie sich an, um Sparmöglichkeiten aus Ihren Belegen zu sehen.';
 
   @override
   String get loadingSavingsOpportunities => 'Sparmöglichkeiten werden geladen…';
 
   @override
-  String get couldNotLoadSavingsOpportunities =>
-      'Sparmöglichkeiten konnten nicht geladen werden';
+  String get couldNotLoadSavingsOpportunities => 'Sparmöglichkeiten konnten nicht geladen werden';
 
   @override
   String get noSavingsOpportunitiesYet => 'Noch keine Sparmöglichkeiten';
 
   @override
-  String get noSavingsOpportunitiesMessage =>
-      'Fügen Sie mehr Belege mit Positionen hinzu, damit Savingor Preise zwischen Geschäften vergleichen kann.';
+  String get noSavingsOpportunitiesMessage => 'Fügen Sie mehr Belege mit Positionen hinzu, damit Savingor Preise zwischen Geschäften vergleichen kann.';
 
   @override
   String get recordsLabel => 'Einträge';
@@ -1730,8 +1664,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get buyItemAtBestPriceWhenFitsRoute =>
-      'Kaufen Sie diesen Artikel dort, wo Sie zuvor den besten Preis gefunden haben, wenn es zu Ihrer Route passt.';
+  String get buyItemAtBestPriceWhenFitsRoute => 'Kaufen Sie diesen Artikel dort, wo Sie zuvor den besten Preis gefunden haben, wenn es zu Ihrer Route passt.';
 
   @override
   String get addToShoppingList => 'Zur Einkaufsliste hinzufügen';
@@ -1746,16 +1679,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get productNotFound => 'Produkt nicht gefunden.';
 
   @override
-  String get buyingAdviceInsufficientHistory =>
-      'Fügen Sie mehr Belege mit diesem Artikel hinzu, um intelligentere Kauftipps freizuschalten.';
+  String get buyingAdviceInsufficientHistory => 'Fügen Sie mehr Belege mit diesem Artikel hinzu, um intelligentere Kauftipps freizuschalten.';
 
   @override
-  String get buyingAdvicePaidBestPrice =>
-      'Sie haben Ihren besten bekannten Preis gezahlt.';
+  String get buyingAdvicePaidBestPrice => 'Sie haben Ihren besten bekannten Preis gezahlt.';
 
   @override
-  String get buyingAdviceNoBetterPriceYet =>
-      'Noch kein besserer bekannter Preis.';
+  String get buyingAdviceNoBetterPriceYet => 'Noch kein besserer bekannter Preis.';
 
   @override
   String quantityLabelWithCount(String count) {
@@ -1775,8 +1705,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get nearbyStores => 'Geschäfte in der Nähe';
 
   @override
-  String get nearbyStoresSubtitle =>
-      'Finden Sie Lebensmittelgeschäfte in Ihrer Nähe und vergleichen Sie Sparmöglichkeiten.';
+  String get nearbyStoresSubtitle => 'Finden Sie Lebensmittelgeschäfte in Ihrer Nähe und vergleichen Sie Sparmöglichkeiten.';
 
   @override
   String get storesNearby => 'Geschäfte in der Nähe';
@@ -1787,16 +1716,13 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get mapStoresFootnotePlaces =>
-      'Geschäfte basieren auf Ihrem gewählten Standort und Suchradius.';
+  String get mapStoresFootnotePlaces => 'Geschäfte basieren auf Ihrem gewählten Standort und Suchradius.';
 
   @override
-  String get mapStoresFootnoteFallback =>
-      'Lebensmittelgeschäfte in Ihrem gewählten Gebiet werden angezeigt.';
+  String get mapStoresFootnoteFallback => 'Lebensmittelgeschäfte in Ihrem gewählten Gebiet werden angezeigt.';
 
   @override
-  String get mapStoresFootnoteDefault =>
-      'Entdecken Sie Lebensmittelgeschäfte in der Nähe Ihres gewählten Standorts.';
+  String get mapStoresFootnoteDefault => 'Entdecken Sie Lebensmittelgeschäfte in der Nähe Ihres gewählten Standorts.';
 
   @override
   String mapNoStoresWithinRadius(int distance) {
@@ -1804,8 +1730,7 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get mapPleaseEnterCityOrArea =>
-      'Bitte geben Sie eine Stadt oder ein Gebiet ein.';
+  String get mapPleaseEnterCityOrArea => 'Bitte geben Sie eine Stadt oder ein Gebiet ein.';
 
   @override
   String get mapCouldNotOpenDirections => 'Route konnte nicht geöffnet werden.';
@@ -1814,8 +1739,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get mapYourLocation => 'Ihr Standort';
 
   @override
-  String get mapFindGroceryStoresNearYou =>
-      'Finden Sie Lebensmittelgeschäfte in Ihrer Nähe';
+  String get mapFindGroceryStoresNearYou => 'Finden Sie Lebensmittelgeschäfte in Ihrer Nähe';
 
   @override
   String get mapActive => 'Aktiv';
@@ -1833,16 +1757,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get mapLocationDetected => 'Standort erkannt';
 
   @override
-  String get mapReadyToSearchNearby =>
-      'Bereit, Lebensmittelgeschäfte in der Nähe zu suchen.';
+  String get mapReadyToSearchNearby => 'Bereit, Lebensmittelgeschäfte in der Nähe zu suchen.';
 
   @override
-  String get mapCouldNotAccessLocation =>
-      'Zugriff auf Ihren Standort nicht möglich.';
+  String get mapCouldNotAccessLocation => 'Zugriff auf Ihren Standort nicht möglich.';
 
   @override
-  String get mapEnableLocationPrompt =>
-      'Aktivieren Sie den Standort, um Lebensmittelgeschäfte in Ihrer Nähe zu finden.';
+  String get mapEnableLocationPrompt => 'Aktivieren Sie den Standort, um Lebensmittelgeschäfte in Ihrer Nähe zu finden.';
 
   @override
   String get mapUseMyLocation => 'Meinen Standort verwenden';
@@ -1857,15 +1778,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get mapLocationPermissionDenied => 'Standortberechtigung verweigert.';
 
   @override
-  String get mapCouldNotDetectLocation =>
-      'Ihr Standort konnte nicht ermittelt werden. Bitte versuchen Sie es erneut.';
+  String get mapCouldNotDetectLocation => 'Ihr Standort konnte nicht ermittelt werden. Bitte versuchen Sie es erneut.';
 
   @override
   String get mapSetYourLocation => 'Standort festlegen';
 
   @override
-  String get mapSetLocationGpsOrCity =>
-      'Verwenden Sie GPS oder wählen Sie eine Stadt, um nahegelegene Geschäfte anzuzeigen.';
+  String get mapSetLocationGpsOrCity => 'Verwenden Sie GPS oder wählen Sie eine Stadt, um nahegelegene Geschäfte anzuzeigen.';
 
   @override
   String get mapCurrentLocation => 'Aktueller Standort';
@@ -1911,8 +1830,28 @@ class AppLocalizationsDe extends AppLocalizations {
   String get aiSavingsAssistant => 'KI-Sparassistent';
 
   @override
-  String get aiSignInPrompt =>
-      'Melden Sie sich an, um den KI-Assistenten zu Belegen und Einkaufslisten zu befragen.';
+  String get aiProPreviewDescription => 'Erhalten Sie personalisierte Spartipps für Lebensmittel basierend auf Ihren Belegen, Einkaufslisten, Ausgabenhistorie und lokalen Geschäften.';
+
+  @override
+  String get aiProBenefitPersonalizedRecommendations => 'Personalisierte Spar-Empfehlungen';
+
+  @override
+  String get aiProBenefitStoreComparisons => 'Intelligentere Vergleiche von Geschäften und Produkten';
+
+  @override
+  String get aiProBenefitSpendingInsights => 'Ausgaben-Einblicke basierend auf Belegverlauf';
+
+  @override
+  String get aiProBenefitBudgetAnswers => 'KI-Antworten zu Ihrem Lebensmittelbudget';
+
+  @override
+  String get unlockWithSavingorPro => 'Mit Savingor Pro freischalten';
+
+  @override
+  String get viewProBenefits => 'Pro-Vorteile ansehen';
+
+  @override
+  String get aiSignInPrompt => 'Melden Sie sich an, um den KI-Assistenten zu Belegen und Einkaufslisten zu befragen.';
 
   @override
   String get aiLoadingYourData => 'Ihre Daten werden geladen…';
@@ -1924,23 +1863,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get aiEmptyTitle => 'Daten hinzufügen für KI-Einblicke';
 
   @override
-  String get aiEmptyMessage =>
-      'Scannen Sie einen Beleg, fügen Sie eine Ausgabe hinzu oder erstellen Sie eine Einkaufsliste. Der Assistent analysiert gespeicherte Daten — keine Live-Preise im Geschäft.';
+  String get aiEmptyMessage => 'Scannen Sie einen Beleg, fügen Sie eine Ausgabe hinzu oder erstellen Sie eine Einkaufsliste. Der Assistent analysiert gespeicherte Daten — keine Live-Preise im Geschäft.';
 
   @override
   String get aiHeroTitle => 'Ihr KI-Sparcoach';
 
   @override
-  String get aiHeroSubtitleLive =>
-      'Fragen Sie zu Ausgaben, Belegen und Einkaufslisten.';
+  String get aiHeroSubtitleLive => 'Fragen Sie zu Ausgaben, Belegen und Einkaufslisten.';
 
   @override
-  String get aiHeroSubtitlePreview =>
-      'Vorschau-Einblicke aus gespeicherten Daten — verbinden Sie einen API-Schlüssel für Live-Antworten.';
+  String get aiHeroSubtitlePreview => 'Vorschau-Einblicke aus gespeicherten Daten — verbinden Sie einen API-Schlüssel für Live-Antworten.';
 
   @override
-  String get aiConfigReadyMessage =>
-      'Der KI-Assistent ist bereit. Verbinden Sie einen API-Schlüssel, um Live-Antworten zu aktivieren.';
+  String get aiConfigReadyMessage => 'Der KI-Assistent ist bereit. Verbinden Sie einen API-Schlüssel, um Live-Antworten zu aktivieren.';
 
   @override
   String get aiDataSnapshot => 'Ihr Datenüberblick';
@@ -1992,43 +1927,34 @@ class AppLocalizationsDe extends AppLocalizations {
   String get aiSuggestedQuestions => 'Vorgeschlagene Fragen';
 
   @override
-  String get aiSuggestSaveMoreThisWeek =>
-      'Wie kann ich diese Woche mehr sparen?';
+  String get aiSuggestSaveMoreThisWeek => 'Wie kann ich diese Woche mehr sparen?';
 
   @override
-  String get aiSuggestTopStore =>
-      'In welchem Geschäft gebe ich am meisten aus?';
+  String get aiSuggestTopStore => 'In welchem Geschäft gebe ich am meisten aus?';
 
   @override
-  String get aiSuggestAnalyzeSpending =>
-      'Analysiere meine Lebensmittelausgaben.';
+  String get aiSuggestAnalyzeSpending => 'Analysiere meine Lebensmittelausgaben.';
 
   @override
-  String get aiSuggestShoppingListPriority =>
-      'Was soll ich zuerst von meiner Einkaufsliste kaufen?';
+  String get aiSuggestShoppingListPriority => 'Was soll ich zuerst von meiner Einkaufsliste kaufen?';
 
   @override
   String get aiAnalyzingYourData => 'Ihre Daten werden analysiert…';
 
   @override
-  String get aiCouldNotGetAnswer =>
-      'Antwort konnte nicht abgerufen werden. Bitte versuchen Sie es erneut.';
+  String get aiCouldNotGetAnswer => 'Antwort konnte nicht abgerufen werden. Bitte versuchen Sie es erneut.';
 
   @override
-  String get aiInsightsDisclaimer =>
-      'Einblicke basieren auf gespeicherten Belegen, Ausgaben und Einkaufslisten in Savingor — nicht auf Live-Preisen oder Angeboten im Geschäft.';
+  String get aiInsightsDisclaimer => 'Einblicke basieren auf gespeicherten Belegen, Ausgaben und Einkaufslisten in Savingor — nicht auf Live-Preisen oder Angeboten im Geschäft.';
 
   @override
-  String get aiInputHintLive =>
-      'Fragen Sie zu Ausgaben oder Ihrer Einkaufsliste…';
+  String get aiInputHintLive => 'Fragen Sie zu Ausgaben oder Ihrer Einkaufsliste…';
 
   @override
-  String get aiInputHintPreview =>
-      'Frage eingeben — API-Schlüssel für Live-Antworten verbinden';
+  String get aiInputHintPreview => 'Frage eingeben — API-Schlüssel für Live-Antworten verbinden';
 
   @override
-  String get aiRequestFailed =>
-      'KI-Anfrage fehlgeschlagen. Bitte versuchen Sie es erneut.';
+  String get aiRequestFailed => 'KI-Anfrage fehlgeschlagen. Bitte versuchen Sie es erneut.';
 
   @override
   String get aiEmptyResponse => 'Die KI hat eine leere Antwort zurückgegeben.';
@@ -2046,22 +1972,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get editProfileFullNameHint => 'Ihr vollständiger Name';
 
   @override
-  String get emailChangesNotAvailable =>
-      'E-Mail-Änderungen sind in dieser Version nicht verfügbar.';
+  String get emailChangesNotAvailable => 'E-Mail-Änderungen sind in dieser Version nicht verfügbar.';
 
   @override
   String get password => 'Passwort';
 
   @override
-  String get passwordNeverShown =>
-      'Aus Sicherheitsgründen wird Ihr aktuelles Passwort nie angezeigt.';
+  String get passwordNeverShown => 'Aus Sicherheitsgründen wird Ihr aktuelles Passwort nie angezeigt.';
 
   @override
   String get changePassword => 'Passwort ändern';
 
   @override
-  String get sendPasswordResetEmailInstead =>
-      'Passwort-Zurücksetzungs-E-Mail senden';
+  String get sendPasswordResetEmailInstead => 'Passwort-Zurücksetzungs-E-Mail senden';
 
   @override
   String get sendingResetEmail => 'E-Mail wird gesendet...';
@@ -2070,23 +1993,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get changesSaved => 'Änderungen gespeichert';
 
   @override
-  String get couldNotSaveChanges =>
-      'Änderungen konnten nicht gespeichert werden';
+  String get couldNotSaveChanges => 'Änderungen konnten nicht gespeichert werden';
 
   @override
-  String get pleaseEnterFullName =>
-      'Bitte geben Sie Ihren vollständigen Namen ein';
+  String get pleaseEnterFullName => 'Bitte geben Sie Ihren vollständigen Namen ein';
 
   @override
-  String get signInToEditProfile =>
-      'Melden Sie sich an, um Ihr Profil zu bearbeiten.';
+  String get signInToEditProfile => 'Melden Sie sich an, um Ihr Profil zu bearbeiten.';
 
   @override
   String get passwordResetEmailSent => 'Zurücksetzungs-E-Mail gesendet';
 
   @override
-  String get changePasswordIntro =>
-      'Um Ihr Passwort in der App zu ändern, geben Sie zuerst Ihr aktuelles Passwort ein.';
+  String get changePasswordIntro => 'Um Ihr Passwort in der App zu ändern, geben Sie zuerst Ihr aktuelles Passwort ein.';
 
   @override
   String get currentPassword => 'Aktuelles Passwort';
@@ -2113,12 +2032,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get newPasswordRequired => 'Neues Passwort ist erforderlich';
 
   @override
-  String get newPasswordMinLength =>
-      'Das neue Passwort muss mindestens 6 Zeichen haben';
+  String get newPasswordMinLength => 'Das neue Passwort muss mindestens 6 Zeichen haben';
 
   @override
-  String get confirmNewPasswordRequired =>
-      'Bitte bestätigen Sie Ihr neues Passwort';
+  String get confirmNewPasswordRequired => 'Bitte bestätigen Sie Ihr neues Passwort';
 
   @override
   String get passwordsDoNotMatch => 'Passwörter stimmen nicht überein';
@@ -2130,12 +2047,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get forgotCurrentPassword => 'Aktuelles Passwort vergessen?';
 
   @override
-  String get passwordResetSecureLink =>
-      'Wir senden einen sicheren Link an Ihre E-Mail, damit Sie ein neues Passwort erstellen können.';
+  String get passwordResetSecureLink => 'Wir senden einen sicheren Link an Ihre E-Mail, damit Sie ein neues Passwort erstellen können.';
 
   @override
-  String get passwordResetByEmailHint =>
-      'Wenn Sie es nicht wissen, nutzen Sie die Passwort-Zurücksetzung per E-Mail.';
+  String get passwordResetByEmailHint => 'Wenn Sie es nicht wissen, nutzen Sie die Passwort-Zurücksetzung per E-Mail.';
 
   @override
   String get sendResetEmail => 'Zurücksetzungs-E-Mail senden';
@@ -2153,8 +2068,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get hidePassword => 'Passwort ausblenden';
 
   @override
-  String get signInToChangePassword =>
-      'Melden Sie sich an, um Ihr Passwort zu ändern.';
+  String get signInToChangePassword => 'Melden Sie sich an, um Ihr Passwort zu ändern.';
 
   @override
   String get currentPasswordIncorrect => 'Aktuelles Passwort ist falsch';
@@ -2163,16 +2077,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get passwordTooWeak => 'Passwort ist zu schwach';
 
   @override
-  String get recentLoginRequired =>
-      'Aus Sicherheitsgründen melden Sie sich erneut an und versuchen Sie es noch einmal.';
+  String get recentLoginRequired => 'Aus Sicherheitsgründen melden Sie sich erneut an und versuchen Sie es noch einmal.';
 
   @override
-  String get tooManyAttempts =>
-      'Zu viele Versuche. Bitte versuchen Sie es später erneut.';
+  String get tooManyAttempts => 'Zu viele Versuche. Bitte versuchen Sie es später erneut.';
 
   @override
-  String get couldNotUpdatePassword =>
-      'Passwort konnte nicht aktualisiert werden';
+  String get couldNotUpdatePassword => 'Passwort konnte nicht aktualisiert werden';
 
   @override
   String get noEmailLinked => 'Mit diesem Konto ist keine E-Mail verknüpft.';
@@ -2190,8 +2101,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get saveSmarterWithAi => 'Sparen Sie smarter mit KI';
 
   @override
-  String get unlockProFeaturesDescription =>
-      'Schalten Sie KI-Spartipps, Beleganalysen, smarte Benachrichtigungen und detaillierte Ausgabenberichte frei.';
+  String get unlockProFeaturesDescription => 'Schalten Sie KI-Spartipps, Beleganalysen, smarte Benachrichtigungen und detaillierte Ausgabenberichte frei.';
 
   @override
   String get bestValue => 'Bestes Angebot';
@@ -2203,8 +2113,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get manualExpenseTracking => 'Manuelle Ausgabenverfolgung';
 
   @override
-  String get aiPoweredToolsDescription =>
-      'KI-gestützte Tools für smartere Lebensmittelersparnisse.';
+  String get aiPoweredToolsDescription => 'KI-gestützte Tools für smartere Lebensmittelersparnisse.';
 
   @override
   String get receiptAnalytics => 'Beleganalyse';
@@ -2231,16 +2140,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get proSubscriptionActivated => 'Abonnement aktiviert';
 
   @override
-  String get proDemoFallbackActivated =>
-      'Pro-Demo aktiviert — keine echte Zahlung verarbeitet.';
+  String get proDemoFallbackActivated => 'Pro-Demo aktiviert — keine echte Zahlung verarbeitet.';
 
   @override
-  String get couldNotCompletePurchase =>
-      'Kauf konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.';
+  String get couldNotCompletePurchase => 'Kauf konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.';
 
   @override
-  String get couldNotActivateProDemo =>
-      'Pro-Demo konnte nicht aktiviert werden. Bitte versuchen Sie es erneut.';
+  String get couldNotActivateProDemo => 'Pro-Demo konnte nicht aktiviert werden. Bitte versuchen Sie es erneut.';
 
   @override
   String get purchaseRestored => 'Kauf wiederhergestellt';
@@ -2249,26 +2155,22 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noPurchasesFound => 'Keine Käufe gefunden';
 
   @override
-  String get couldNotRestorePurchases =>
-      'Käufe konnten nicht wiederhergestellt werden';
+  String get couldNotRestorePurchases => 'Käufe konnten nicht wiederhergestellt werden';
 
   @override
   String get subscriptionSetup => 'Abonnement-Einrichtung';
 
   @override
-  String get subscriptionSetupPrepared =>
-      'Savingor Pro ist für die echte In-App-Abonnement-Integration vorbereitet.';
+  String get subscriptionSetupPrepared => 'Savingor Pro ist für die echte In-App-Abonnement-Integration vorbereitet.';
 
   @override
-  String get subscriptionSetupNotConfigured =>
-      'Zahlungsanbieter-Schlüssel oder Store-Produkte sind in dieser Version nicht konfiguriert.';
+  String get subscriptionSetupNotConfigured => 'Zahlungsanbieter-Schlüssel oder Store-Produkte sind in dieser Version nicht konfiguriert.';
 
   @override
   String get activateProDemoForTesting => 'Pro-Demo zum Testen aktivieren';
 
   @override
-  String get demoFallbackActive =>
-      'Demo aktiv — keine echte Zahlung verarbeitet.';
+  String get demoFallbackActive => 'Demo aktiv — keine echte Zahlung verarbeitet.';
 
   @override
   String get subscriptionPlanLabel => 'Tarif';
@@ -2300,12 +2202,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get revenueCatLabel => 'RevenueCat';
 
   @override
-  String get subscriptionManagedByStore =>
-      'Ihr Abonnement wird vom App Store oder Google Play verwaltet. Sie können es in den Abonnementeinstellungen des Stores kündigen oder ändern.';
+  String get subscriptionManagedByStore => 'Ihr Abonnement wird vom App Store oder Google Play verwaltet. Sie können es in den Abonnementeinstellungen des Stores kündigen oder ändern.';
 
   @override
-  String get manageInAppStoreGooglePlay =>
-      'Im App Store / Google Play verwalten';
+  String get manageInAppStoreGooglePlay => 'Im App Store / Google Play verwalten';
 
   @override
   String get cancelProDemo => 'Pro-Demo kündigen';
@@ -2314,27 +2214,22 @@ class AppLocalizationsDe extends AppLocalizations {
   String get noActiveSubscription => 'Kein aktives Abonnement';
 
   @override
-  String get proDemoCancelled =>
-      'Pro-Demo gekündigt. Sie sind wieder im Free-Tarif.';
+  String get proDemoCancelled => 'Pro-Demo gekündigt. Sie sind wieder im Free-Tarif.';
 
   @override
-  String get couldNotCancelProDemo =>
-      'Pro-Demo konnte nicht gekündigt werden. Bitte versuchen Sie es erneut.';
+  String get couldNotCancelProDemo => 'Pro-Demo konnte nicht gekündigt werden. Bitte versuchen Sie es erneut.';
 
   @override
-  String get couldNotOpenSubscriptionManagement =>
-      'Abonnement-Verwaltungsseite konnte nicht geöffnet werden.';
+  String get couldNotOpenSubscriptionManagement => 'Abonnement-Verwaltungsseite konnte nicht geöffnet werden.';
 
   @override
   String get managementNotAvailable => 'Verwaltung nicht verfügbar';
 
   @override
-  String get managementUrlUnavailableMessage =>
-      'Die Abonnement-Verwaltungs-URL ist in dieser Testversion nicht verfügbar. Setzen Sie für RevenueCat Test Store-Käufe den Testkunden im RevenueCat-Dashboard zurück oder verwenden Sie ein neues Testkonto.';
+  String get managementUrlUnavailableMessage => 'Die Abonnement-Verwaltungs-URL ist in dieser Testversion nicht verfügbar. Setzen Sie für RevenueCat Test Store-Käufe den Testkunden im RevenueCat-Dashboard zurück oder verwenden Sie ein neues Testkonto.';
 
   @override
-  String get paymentProviderNotConfiguredSnack =>
-      'Zahlungsanbieter ist in dieser lokalen Version nicht konfiguriert.';
+  String get paymentProviderNotConfiguredSnack => 'Zahlungsanbieter ist in dieser lokalen Version nicht konfiguriert.';
 
   @override
   String get purchaseCancelled => 'Kauf abgebrochen';
@@ -2346,18 +2241,200 @@ class AppLocalizationsDe extends AppLocalizations {
   String get productUnavailable => 'Produkt nicht verfügbar';
 
   @override
-  String get purchaseNotActiveYet =>
-      'Kauf abgeschlossen, aber Pro ist noch nicht aktiv. Versuchen Sie Käufe wiederherstellen.';
+  String get purchaseNotActiveYet => 'Kauf abgeschlossen, aber Pro ist noch nicht aktiv. Versuchen Sie Käufe wiederherstellen.';
 
   @override
-  String get networkErrorTryAgain =>
-      'Überprüfen Sie Ihre Verbindung und versuchen Sie es erneut';
+  String get networkErrorTryAgain => 'Überprüfen Sie Ihre Verbindung und versuchen Sie es erneut';
 
   @override
-  String get signInToManageSubscription =>
-      'Melden Sie sich an, um Ihr Abonnement zu verwalten.';
+  String get signInToManageSubscription => 'Melden Sie sich an, um Ihr Abonnement zu verwalten.';
 
   @override
-  String get couldNotUpdateSubscription =>
-      'Abonnement konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.';
+  String get couldNotUpdateSubscription => 'Abonnement konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.';
+
+  @override
+  String get debugSubscriptionTestingTitle => 'Entwickler-Abonnementtest';
+
+  @override
+  String get debugSubscriptionTestingDescription => 'Savingor vorübergehend als Free- oder Pro-Nutzer ansehen. Dies ändert das echte Abonnement nicht.';
+
+  @override
+  String get debugSubscriptionUseReal => 'Echtes Abonnement verwenden';
+
+  @override
+  String get debugSubscriptionTestAsFree => 'Als Free testen';
+
+  @override
+  String get debugSubscriptionTestAsPro => 'Als Pro testen';
+
+  @override
+  String get debugSubscriptionOverrideFree => 'Entwickler-Planüberschreibung: Free';
+
+  @override
+  String get debugSubscriptionOverridePro => 'Entwickler-Planüberschreibung: Pro';
+
+  @override
+  String get proFeatureBasketOptimizerDescription => 'Vergleichen Sie Ihren Einkaufskorb über Geschäfte hinweg und finden Sie intelligentere Wege, weniger auszugeben.';
+
+  @override
+  String get proFeatureBasketBenefitOptimizeAcrossStores => 'Optimieren Sie den Einkaufskorb in nahegelegenen Geschäften';
+
+  @override
+  String get proFeatureBasketBenefitCompareTotals => 'Vergleichen Sie geschätzte Korbsummen';
+
+  @override
+  String get proFeatureBasketBenefitEconomicalCombination => 'Finden Sie eine wirtschaftlichere Geschäftskombination';
+
+  @override
+  String get proFeatureBasketBenefitReduceSpending => 'Reduzieren Sie unnötige Lebensmittelausgaben';
+
+  @override
+  String get proFeatureSavingsAnalyticsDescription => 'Verstehen Sie Spar-Trends, Ausgabenmuster und personalisierte Empfehlungen.';
+
+  @override
+  String get proFeatureAnalyticsBenefitDeeperTrends => 'Tiefere Spar-Trends ansehen';
+
+  @override
+  String get proFeatureAnalyticsBenefitComparePeriods => 'Ausgabenperioden vergleichen';
+
+  @override
+  String get proFeatureAnalyticsBenefitTrackSavings => 'Geschätzte Ersparnisse verfolgen';
+
+  @override
+  String get proFeatureAnalyticsBenefitAdvancedRecommendations => 'Erweiterte Empfehlungen erhalten';
+
+  @override
+  String get proFeatureProductPriceInsightsDescription => 'Verfolgen Sie Produktpreisverläufe und erhalten Sie intelligentere Kaufberatung aus Ihren Belegen.';
+
+  @override
+  String get proFeaturePriceInsightsBenefitHistory => 'Produktpreisverlauf ansehen';
+
+  @override
+  String get proFeaturePriceInsightsBenefitCompareStores => 'Aktuelle Geschäftspreise vergleichen';
+
+  @override
+  String get proFeaturePriceInsightsBenefitBuyingAdvice => 'Kaufberatung erhalten';
+
+  @override
+  String get proFeaturePriceInsightsBenefitPurchaseTiming => 'Günstigen Kaufzeitpunkt erkennen';
+
+  @override
+  String get proFeatureSavingsOpportunitiesDescription => 'Entdecken Sie personalisierte Sparaktionen basierend auf Einkaufs- und Belegverlauf.';
+
+  @override
+  String get proFeatureOpportunitiesBenefitPersonalized => 'Personalisierte Sparwege finden';
+
+  @override
+  String get proFeatureOpportunitiesBenefitPrioritize => 'Hochwertige Aktionen priorisieren';
+
+  @override
+  String get proFeatureOpportunitiesBenefitReceiptHistory => 'Beleg- und Einkaufshistorie nutzen';
+
+  @override
+  String get proFeatureOpportunitiesBenefitBetterChoices => 'Bessere Geschäfte und Produkte entdecken';
+
+  @override
+  String get savingorPro => 'Savingor Pro';
+
+  @override
+  String get plansHeroTitle => 'Wählen Sie Ihren Savingor-Plan';
+
+  @override
+  String get plansHeroSubtitle => 'Starten Sie kostenlos mit wichtigen Lebensmittel-Tools. Upgraden Sie auf Pro, wenn Sie erweiterte Spar-Intelligenz wünschen.';
+
+  @override
+  String get planFreeSubtitle => 'Wichtige Tools zum Verfolgen von Lebensmittelausgaben und zum Sparen.';
+
+  @override
+  String get planProSubtitle => 'Erweiterte Automatisierung und personalisierte Spar-Intelligenz.';
+
+  @override
+  String get planFreePrice => 'CAD \$0';
+
+  @override
+  String get planProPricePerMonth => 'CAD \$14.99 / Monat';
+
+  @override
+  String get upgradeToSavingorPro => 'Auf Savingor Pro upgraden';
+
+  @override
+  String get planComparisonTitle => 'Pläne vergleichen';
+
+  @override
+  String get planIncludedFeaturesTitle => 'Enthaltene Funktionen';
+
+  @override
+  String get planProActiveFeaturesTitle => 'Aktive Pro-Funktionen';
+
+  @override
+  String get planProComingSoonFeaturesTitle => 'Zukünftige Pro-Funktionen';
+
+  @override
+  String get planColumnFree => 'Free';
+
+  @override
+  String get planColumnPro => 'Pro';
+
+  @override
+  String get planAvailabilityIncluded => 'Enthalten';
+
+  @override
+  String get planAvailabilityLocked => 'Gesperrt';
+
+  @override
+  String get planAvailabilityUnlimited => 'Unbegrenzt';
+
+  @override
+  String get planAvailabilityThreeScansPerMonth => '3 pro Monat';
+
+  @override
+  String get planFeatureGroceryDashboard => 'Lebensmittel-Ausgaben-Dashboard';
+
+  @override
+  String get planFeatureNearbyStoreMap => 'Karte nahegelegener Geschäfte';
+
+  @override
+  String get planFeatureShoppingLists => 'Einkaufslisten';
+
+  @override
+  String get planFeatureManualExpenseTracking => 'Manuelle Ausgabenverfolgung';
+
+  @override
+  String get planFeatureThreeReceiptScansPerMonth => '3 Beleg-Scans pro Monat';
+
+  @override
+  String get planFeatureBasicReceiptExpenseHistory => 'Basis-Beleg- und Ausgabenverlauf';
+
+  @override
+  String get planFeatureBasicSavingsOpportunities => 'Basis-Spar-Chancen';
+
+  @override
+  String get planFeatureBasicProductPriceInsights => 'Basis-Produktpreis-Insights';
+
+  @override
+  String get planFeatureAppSettings => 'Sprache, Design, Region und Währung';
+
+  @override
+  String get planFeatureUnlimitedReceiptScanning => 'Unbegrenztes Beleg-Scannen';
+
+  @override
+  String get planFeatureBasketOptimizer => 'Warenkorb-Optimierer';
+
+  @override
+  String get planFeatureAdvancedSavingsAnalytics => 'Erweiterte Spar-Analytik';
+
+  @override
+  String get planFeatureSmartPriceDropAlerts => 'Intelligente Preissenkungs-Alerts';
+
+  @override
+  String get planFeatureAdvancedSpendingReports => 'Erweiterte Ausgabenberichte';
+
+  @override
+  String get planCompareReceiptScans => 'Beleg-Scans';
+
+  @override
+  String get planCompareBasicSavingsOpportunities => 'Basis-Spar-Chancen';
+
+  @override
+  String get planCompareBasicProductPriceInsights => 'Basis-Produktpreis-Insights';
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -9,7 +10,9 @@ import 'package:savingor_app/core/i18n/subscription_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/savingor_interactive.dart';
 import 'package:savingor_app/features/profile/data/user_profile_service.dart';
+import 'package:savingor_app/features/subscription/data/debug_subscription_override_store.dart';
 import 'package:savingor_app/features/subscription/data/subscription_service.dart';
+import 'package:savingor_app/features/subscription/presentation/widgets/debug_subscription_testing_section.dart';
 import 'package:savingor_app/l10n/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -27,6 +30,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   UserProfile? _profile;
   bool _profileLoadFailed = false;
   SubscriptionStatus _subscription = SubscriptionStatus.free;
+  SubscriptionStatus _realSubscription = SubscriptionStatus.free;
+  DebugSubscriptionOverrideStore? _debugOverrideStore;
   static const double _heroRadius = 24;
   static const double _cardRadius = 22;
   static const double _buttonRadius = 18;
@@ -55,12 +60,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _loadSubscription();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!kDebugMode) {
+      return;
+    }
+    final DebugSubscriptionOverrideStore? store =
+        DebugSubscriptionOverrideProvider.maybeOf(context);
+    if (store == _debugOverrideStore) {
+      return;
+    }
+    _debugOverrideStore?.removeListener(_onDebugOverrideChanged);
+    _debugOverrideStore = store;
+    _debugOverrideStore?.addListener(_onDebugOverrideChanged);
+  }
+
+  @override
+  void dispose() {
+    _debugOverrideStore?.removeListener(_onDebugOverrideChanged);
+    super.dispose();
+  }
+
+  void _onDebugOverrideChanged() {
+    _loadSubscription();
+  }
+
   Future<void> _loadSubscription() async {
     try {
-      final SubscriptionStatus status =
+      final SubscriptionStatus effective =
           await _subscriptionService.getCurrentSubscription();
+      final SubscriptionStatus real =
+          await _subscriptionService.getRealSubscription();
       if (!mounted) return;
-      setState(() => _subscription = status);
+      setState(() {
+        _subscription = effective;
+        _realSubscription = real;
+      });
     } catch (_) {
       // Keep last known state; the plan block degrades to Free display.
     }
@@ -115,6 +151,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             _buildProfileHero(l10n),
+            const SizedBox(height: SavingorSpacing.md),
+            const DebugSubscriptionOverrideNotice(),
             const SizedBox(height: SavingorSpacing.lg),
             _buildSavingsSnapshotRow(context, appState, l10n),
             const SizedBox(height: SavingorSpacing.lg),
@@ -648,7 +686,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _showManageSubscriptionSheet(BuildContext context) async {
     final AppLocalizations l10n = AppLocalizations.of(context);
-    final bool isPro = _subscription.isPro;
+    final bool isPro = _realSubscription.isPro;
 
     await showModalBottomSheet<void>(
       context: context,
@@ -693,27 +731,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 if (isPro) ...<Widget>[
                   _subscriptionDetailRow(
                     l10n.subscriptionPlanLabel,
-                    SubscriptionL10n.planLabel(context, _subscription.plan),
+                    SubscriptionL10n.planLabel(context, _realSubscription.plan),
                   ),
                   _subscriptionDetailRow(
                     l10n.status,
                     SubscriptionL10n.statusLabelFromL10n(
                       l10n,
-                      _subscription.status,
+                      _realSubscription.status,
                     ),
                   ),
                   _subscriptionDetailRow(
                     l10n.price,
                     SubscriptionL10n.formatPricePerMonth(
-                        context, _subscription),
+                        context, _realSubscription),
                   ),
                   _subscriptionDetailRow(
                     l10n.provider,
                     SubscriptionL10n.providerLabel(
-                        context, _subscription.provider),
+                        context, _realSubscription.provider),
                   ),
                   const SizedBox(height: 18),
-                  if (_subscription.isRevenueCat) ...<Widget>[
+                  if (_realSubscription.isRevenueCat) ...<Widget>[
                     Text(
                       l10n.subscriptionManagedByStore,
                       style: _bodyMutedStyle(context),
@@ -896,7 +934,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final SubscriptionStatus status =
           await _subscriptionService.restorePurchases();
       if (!mounted) return;
-      setState(() => _subscription = status);
+      await _loadSubscription();
       _showSnack(
         status.isPro ? l10n.purchaseRestored : l10n.noPurchasesFound,
       );
@@ -941,7 +979,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await _subscriptionService.cancelProDemoFallback();
       if (!mounted) return;
-      setState(() => _subscription = SubscriptionStatus.free);
+      await _loadSubscription();
       _showSnack(l10n.proDemoCancelled);
     } on SubscriptionException catch (e) {
       if (!mounted) return;

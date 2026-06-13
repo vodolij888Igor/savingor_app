@@ -1,17 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
 import 'package:go_router/go_router.dart';
 
 import 'package:savingor_app/core/app_settings_options.dart';
-
 import 'package:savingor_app/core/app_state.dart';
-
 import 'package:savingor_app/core/i18n/app_settings_l10n.dart';
-
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
-
 import 'package:savingor_app/features/profile/presentation/widgets/app_settings_pickers.dart';
-
+import 'package:savingor_app/features/subscription/presentation/widgets/debug_subscription_testing_section.dart';
 import 'package:savingor_app/l10n/app_localizations.dart';
 
 /// Dedicated App settings screen, pushed from Profile ("Manage settings").
@@ -75,6 +71,10 @@ class AppSettingsScreen extends StatelessWidget {
               _buildPreferencesCard(context, appState, l10n),
               const SizedBox(height: SavingorSpacing.xl),
               _buildNotificationsCard(context, l10n),
+              if (kDebugMode) ...<Widget>[
+                const SizedBox(height: SavingorSpacing.xl),
+                const DebugSubscriptionTestingSection(),
+              ],
             ],
           ),
         ),

@@ -13,13 +13,15 @@ import 'package:savingor_app/features/price_memory/presentation/widgets/basket_s
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
 import 'package:savingor_app/features/shopping/domain/models/global_shopping_items_snapshot.dart';
 import 'package:savingor_app/features/shopping/domain/models/shopping_list_item.dart';
+import 'package:savingor_app/features/subscription/domain/savingor_feature.dart';
+import 'package:savingor_app/features/subscription/presentation/widgets/pro_feature_screen_host.dart';
 import 'package:savingor_app/l10n/app_localizations.dart';
 
 /// Smart basket optimizer screen.
 ///
 /// Pass [listId] for a single-list run; omit it for all active lists.
 /// Resolves items, then delegates to [BasketOptimizer] with items + price records.
-class BasketOptimizerScreen extends StatefulWidget {
+class BasketOptimizerScreen extends StatelessWidget {
   const BasketOptimizerScreen({super.key, this.listId});
 
   final String? listId;
@@ -31,10 +33,38 @@ class BasketOptimizerScreen extends StatefulWidget {
   bool get isGlobalScope => scope == BasketOptimizerScope.allActiveLists;
 
   @override
-  State<BasketOptimizerScreen> createState() => _BasketOptimizerScreenState();
+  Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final String screenTitle =
+        isGlobalScope ? l10n.optimizeAllLists : l10n.optimizeThisBasket;
+
+    return ProFeatureScreenHost(
+      feature: SavingorFeature.basketOptimizer,
+      title: screenTitle,
+      proContentBuilder: (BuildContext context) => _BasketOptimizerProContent(
+        listId: listId,
+        isGlobalScope: isGlobalScope,
+      ),
+    );
+  }
 }
 
-class _BasketOptimizerScreenState extends State<BasketOptimizerScreen> {
+class _BasketOptimizerProContent extends StatefulWidget {
+  const _BasketOptimizerProContent({
+    required this.listId,
+    required this.isGlobalScope,
+  });
+
+  final String? listId;
+  final bool isGlobalScope;
+
+  @override
+  State<_BasketOptimizerProContent> createState() =>
+      _BasketOptimizerProContentState();
+}
+
+class _BasketOptimizerProContentState
+    extends State<_BasketOptimizerProContent> {
   List<ShoppingListItem>? _shoppingItems;
   int? _activeListsIncluded;
   bool _isLoadingItems = true;
@@ -114,34 +144,11 @@ class _BasketOptimizerScreenState extends State<BasketOptimizerScreen> {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final PriceMemoryStore priceStore = PriceMemoryProvider.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
-    final String screenTitle =
-        widget.isGlobalScope ? l10n.optimizeAllLists : l10n.optimizeThisBasket;
 
     return AnimatedBuilder(
       animation: priceStore,
       builder: (BuildContext context, Widget? _) {
-        return Scaffold(
-          backgroundColor: context.savingor.pageBackground,
-          appBar: AppBar(
-            title: Text(
-              screenTitle,
-              style: SavingorAppTextStyles.screenTitle(context),
-            ),
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            backgroundColor: context.savingor.pageBackground,
-            surfaceTintColor: Colors.transparent,
-            leading: IconButton(
-              icon: Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: SavingorWorkflowTheme.appBarIcon(context),
-                size: 20,
-              ),
-              onPressed: () => context.pop(),
-            ),
-          ),
-          body: _buildBody(context, priceStore, bottomInset, l10n),
-        );
+        return _buildBody(context, priceStore, bottomInset, l10n);
       },
     );
   }

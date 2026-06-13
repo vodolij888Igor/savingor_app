@@ -85,15 +85,38 @@ class ProductPriceDetailScreen extends StatelessWidget {
                     ),
                   ),
                 )
-              : _buildContent(
-                  context,
-                  insight,
-                  bottomInset,
-                  l10n,
+              : _ProductPriceDetailBody(
+                  insight: insight,
+                  bottomInset: bottomInset,
+                  l10n: l10n,
+                  productDisplayName: _productDisplayName,
+                  cardDecoration: _cardDecoration,
                 ),
         );
       },
     );
+  }
+}
+
+class _ProductPriceDetailBody extends StatelessWidget {
+  const _ProductPriceDetailBody({
+    required this.insight,
+    required this.bottomInset,
+    required this.l10n,
+    required this.productDisplayName,
+    required this.cardDecoration,
+  });
+
+  final ProductPriceInsight insight;
+  final double bottomInset;
+  final AppLocalizations l10n;
+  final String Function(BuildContext context, ProductPriceInsight insight)
+      productDisplayName;
+  final BoxDecoration Function(BuildContext context) cardDecoration;
+
+  @override
+  Widget build(BuildContext context) {
+    return _buildContent(context, insight, bottomInset, l10n);
   }
 
   Widget _buildContent(
@@ -102,14 +125,14 @@ class ProductPriceDetailScreen extends StatelessWidget {
     double bottomInset,
     AppLocalizations l10n,
   ) {
-    final String productName = _productDisplayName(context, insight);
+    final String productName = productDisplayName(context, insight);
 
     return ListView(
       padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + bottomInset),
       children: <Widget>[
         Container(
           padding: const EdgeInsets.all(18),
-          decoration: _cardDecoration(context),
+          decoration: cardDecoration(context),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -122,10 +145,9 @@ class ProductPriceDetailScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              _summaryLine(
-                context,
-                l10n.latestPriceLabel,
-                l10n.priceAtStore(
+              _SummaryLine(
+                label: l10n.latestPriceLabel,
+                value: l10n.priceAtStore(
                   PriceMemoryFormatters.formatPrice(
                     insight.latestPrice,
                     currency: insight.currency,
@@ -134,10 +156,9 @@ class ProductPriceDetailScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 6),
-              _summaryLine(
-                context,
-                l10n.bestKnownLabel,
-                l10n.priceAtStore(
+              _SummaryLine(
+                label: l10n.bestKnownLabel,
+                value: l10n.priceAtStore(
                   PriceMemoryFormatters.formatPrice(
                     insight.lowestPrice,
                     currency: insight.currency,
@@ -146,28 +167,25 @@ class ProductPriceDetailScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 6),
-              _summaryLine(
-                context,
-                l10n.highestPriceLabel,
-                PriceMemoryFormatters.formatPrice(
+              _SummaryLine(
+                label: l10n.highestPriceLabel,
+                value: PriceMemoryFormatters.formatPrice(
                   insight.highestPrice,
                   currency: insight.currency,
                 ),
               ),
               const SizedBox(height: 6),
-              _summaryLine(
-                context,
-                l10n.averagePriceLabel,
-                PriceMemoryFormatters.formatPrice(
+              _SummaryLine(
+                label: l10n.averagePriceLabel,
+                value: PriceMemoryFormatters.formatPrice(
                   insight.averagePrice,
                   currency: insight.currency,
                 ),
               ),
               const SizedBox(height: 6),
-              _summaryLine(
-                context,
-                l10n.recordsLabel,
-                l10n.priceRecordCount(insight.recordCount),
+              _SummaryLine(
+                label: l10n.recordsLabel,
+                value: l10n.priceRecordCount(insight.recordCount),
               ),
             ],
           ),
@@ -185,7 +203,7 @@ class ProductPriceDetailScreen extends StatelessWidget {
         ),
         const SizedBox(height: SavingorSpacing.sm),
         Container(
-          decoration: _cardDecoration(context),
+          decoration: cardDecoration(context),
           child: Column(
             children:
                 List<Widget>.generate(insight.records.length, (int index) {
@@ -199,7 +217,7 @@ class ProductPriceDetailScreen extends StatelessWidget {
                           ? context.savingor.divider.withOpacity(0.85)
                           : const Color(0xFFF3F4F3).withOpacity(0.8),
                     ),
-                  _historyRow(context, record, l10n),
+                  _HistoryRow(record: record, l10n: l10n),
                 ],
               );
             }),
@@ -208,8 +226,16 @@ class ProductPriceDetailScreen extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _summaryLine(BuildContext context, String label, String value) {
+class _SummaryLine extends StatelessWidget {
+  const _SummaryLine({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -237,12 +263,16 @@ class ProductPriceDetailScreen extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _historyRow(
-    BuildContext context,
-    ProductPriceRecord record,
-    AppLocalizations l10n,
-  ) {
+class _HistoryRow extends StatelessWidget {
+  const _HistoryRow({required this.record, required this.l10n});
+
+  final ProductPriceRecord record;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
     final String quantityLabel =
         record.quantity == record.quantity.roundToDouble()
             ? record.quantity.toInt().toString()

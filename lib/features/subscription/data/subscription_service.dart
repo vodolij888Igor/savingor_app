@@ -5,6 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 import 'package:savingor_app/core/config/revenuecat_config.dart';
+import 'package:savingor_app/features/subscription/data/debug_subscription_override_store.dart';
+import 'package:savingor_app/features/subscription/domain/debug_subscription_override.dart';
+import 'package:savingor_app/features/subscription/domain/effective_subscription_resolver.dart';
 import 'package:savingor_app/features/subscription/domain/subscription_status.dart';
 
 export 'package:savingor_app/features/subscription/domain/subscription_status.dart';
@@ -40,6 +43,16 @@ class SubscriptionService {
 
   /// Set after a successful [configureRevenueCat] call in this session.
   static bool _revenueCatReady = false;
+
+  static DebugSubscriptionOverrideStore? _debugOverrideStore;
+
+  /// Binds the local debug override store (debug builds only).
+  static void bindDebugOverrideStore(DebugSubscriptionOverrideStore store) {
+    _debugOverrideStore = store;
+  }
+
+  static DebugSubscriptionOverrideStore? get debugOverrideStore =>
+      _debugOverrideStore;
 
   /// True when RevenueCat public keys were supplied at build time.
   bool get isRevenueCatConfigured => RevenueCatConfig.isConfigured;
@@ -94,11 +107,32 @@ class SubscriptionService {
     return null;
   }
 
-  /// Current subscription state.
+  /// Real subscription state from RevenueCat or the Firestore mirror.
   ///
-  /// RevenueCat entitlement is the source of truth when available; otherwise
-  /// the Firestore mirror is used (covers the demo fallback).
+  /// Never applies the local debug override. Use for manage-subscription flows.
+  Future<SubscriptionStatus> getRealSubscription() async {
+    return _fetchRealSubscription();
+  }
+
+  /// Effective subscription state for feature access and plan previews.
+  ///
+  /// Applies the local debug override in debug builds only.
   Future<SubscriptionStatus> getCurrentSubscription() async {
+    final SubscriptionStatus real = await _fetchRealSubscription();
+    return _applyDebugOverride(real);
+  }
+
+  SubscriptionStatus _applyDebugOverride(SubscriptionStatus real) {
+    final DebugSubscriptionOverrideStore? store = _debugOverrideStore;
+    final DebugSubscriptionOverride debugOverride =
+        store?.override ?? DebugSubscriptionOverride.none;
+    return resolveEffectiveSubscription(
+      real: real,
+      debugOverride: debugOverride,
+    );
+  }
+
+  Future<SubscriptionStatus> _fetchRealSubscription() async {
     if (_revenueCatReady) {
       try {
         final CustomerInfo info = await Purchases.getCustomerInfo();
@@ -122,7 +156,8 @@ class SubscriptionService {
     return _readFirestoreMirror();
   }
 
-  Future<bool> isPro() async => (await getCurrentSubscription()).isPro;
+  Future<bool> isPro() async =>
+      (await getCurrentSubscription()).hasActiveProAccess;
 
   /// Purchases the monthly Pro subscription through RevenueCat.
   /// Throws [SubscriptionException] with a clear message when the payment

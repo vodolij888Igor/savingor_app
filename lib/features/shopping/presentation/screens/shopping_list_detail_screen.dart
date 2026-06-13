@@ -346,7 +346,7 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
         if (activeItems.isNotEmpty)
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-            child: BasketOptimizerEntryCard(
+            child: BasketOptimizerEntryCardWithProBadge(
               title: l10n.optimizeThisBasket,
               subtitle: l10n.optimizeThisBasketSubtitle,
               onTap: () => context.push(

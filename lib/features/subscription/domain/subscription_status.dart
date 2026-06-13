@@ -33,6 +33,11 @@ class SubscriptionStatus {
       (status == SubscriptionState.active ||
           status == SubscriptionState.activeDemo);
 
+  /// Whether the user has active Pro entitlement (RevenueCat or demo fallback).
+  ///
+  /// Prefer this name in feature-access code; it delegates to [isPro].
+  bool get hasActiveProAccess => isPro;
+
   bool get isDemo => provider == SubscriptionProvider.demo;
   bool get isRevenueCat => provider == SubscriptionProvider.revenuecat;
 

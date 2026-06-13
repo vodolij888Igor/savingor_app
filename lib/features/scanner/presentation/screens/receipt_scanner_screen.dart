@@ -13,6 +13,9 @@ import 'package:savingor_app/features/receipts/domain/models/receipt.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt_source.dart';
 import 'package:savingor_app/features/receipts/presentation/widgets/receipt_source_badge.dart';
 import 'package:savingor_app/features/receipts/presentation/widgets/receipt_source_dialog.dart';
+import 'package:savingor_app/features/scanner/presentation/widgets/receipt_scan_access_builder.dart';
+import 'package:savingor_app/features/scanner/presentation/widgets/receipt_scan_limit_sheet.dart';
+import 'package:savingor_app/features/scanner/presentation/widgets/receipt_scan_usage_indicator.dart';
 import 'package:savingor_app/l10n/app_localizations.dart';
 
 class ReceiptScannerScreen extends StatefulWidget {
@@ -34,17 +37,32 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
     context.push('/scanner/create');
   }
 
-  Future<void> _onScanReceiptPressed() async {
-    if (_isScanning) return;
+  Future<void> _onScanReceiptPressed(ReceiptScanAccessSnapshot access) async {
+    if (_isScanning || access.isLoading) return;
+
+    if (!access.canStartScan) {
+      if (access.usage.isLimitReached) {
+        await ReceiptScanLimitSheet.show(context);
+      }
+      return;
+    }
 
     final ImageSource? source = await ReceiptSourceDialog.show(context);
 
     if (source == null || !mounted) return;
 
-    await _pickAndScan(source);
+    await _pickAndScan(source, access);
   }
 
-  Future<void> _pickAndScan(ImageSource source) async {
+  Future<void> _pickAndScan(
+    ImageSource source,
+    ReceiptScanAccessSnapshot access,
+  ) async {
+    if (!access.canStartScan || access.usage.isLimitReached) {
+      await ReceiptScanLimitSheet.show(context);
+      return;
+    }
+
     try {
       final XFile? image = await _imagePicker.pickImage(
         source: source,
@@ -268,19 +286,26 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
           return _buildSignInRequired(context, l10n);
         }
 
-        return Scaffold(
-          backgroundColor: context.savingor.pageBackground,
-          appBar: AppBar(
-            title: Text(l10n.receipts,
-                style: SavingorAppTextStyles.screenTitle(context)),
-            centerTitle: false,
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            backgroundColor: context.savingor.pageBackground,
-            surfaceTintColor: Colors.transparent,
-            automaticallyImplyLeading: false,
-          ),
-          body: _buildBody(context, store, bottomInset, l10n),
+        return ReceiptScanAccessBuilder(
+          builder: (
+            BuildContext context,
+            ReceiptScanAccessSnapshot access,
+          ) {
+            return Scaffold(
+              backgroundColor: context.savingor.pageBackground,
+              appBar: AppBar(
+                title: Text(l10n.receipts,
+                    style: SavingorAppTextStyles.screenTitle(context)),
+                centerTitle: false,
+                elevation: 0,
+                scrolledUnderElevation: 0,
+                backgroundColor: context.savingor.pageBackground,
+                surfaceTintColor: Colors.transparent,
+                automaticallyImplyLeading: false,
+              ),
+              body: _buildBody(context, store, bottomInset, l10n, access),
+            );
+          },
         );
       },
     );
@@ -291,9 +316,10 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
     ReceiptStore store,
     double bottomInset,
     AppLocalizations l10n,
+    ReceiptScanAccessSnapshot access,
   ) {
-    if (store.isLoading) {
-      return AppLoadingState(message: l10n.loadingReceipts);
+    if (store.isLoading || access.isLoadingSubscription) {
+      return AppLoadingState(message: l10n.loadingScanUsage);
     }
 
     if (store.loadError != null) {
@@ -308,7 +334,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
     return ListView(
       padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + bottomInset + 72),
       children: <Widget>[
-        _buildScannerHero(l10n),
+        _buildScannerHero(l10n, access),
         const SizedBox(height: SavingorSpacing.md),
         _buildAddManuallyButton(l10n),
         const SizedBox(height: SavingorSpacing.xl),
@@ -317,8 +343,12 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
     );
   }
 
-  Widget _buildScannerHero(AppLocalizations l10n) {
+  Widget _buildScannerHero(
+    AppLocalizations l10n,
+    ReceiptScanAccessSnapshot access,
+  ) {
     final SavingorThemeExtension theme = context.savingor;
+    final bool scanDisabled = _isScanning || access.isLoading;
 
     return Container(
       width: double.infinity,
@@ -386,9 +416,15 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
               height: 1.45,
             ),
           ),
-          const SizedBox(height: SavingorSpacing.xl),
+          if (access.shouldShowUsageIndicator)
+            ReceiptScanUsageIndicator(
+              usage: access.usage,
+              isLoading: access.isLoading,
+            ),
+          const SizedBox(height: SavingorSpacing.lg),
           SavingorInteractiveFilledButton(
-            onPressed: _isScanning ? null : _onScanReceiptPressed,
+            onPressed:
+                scanDisabled ? null : () => _onScanReceiptPressed(access),
             width: double.infinity,
             minHeight: 54,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),

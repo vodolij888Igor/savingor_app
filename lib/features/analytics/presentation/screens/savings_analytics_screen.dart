@@ -17,6 +17,8 @@ import 'package:savingor_app/features/analytics/presentation/widgets/savings_val
 import 'package:savingor_app/features/expenses/data/expenses_store.dart';
 import 'package:savingor_app/features/scanner/data/receipt_store.dart';
 import 'package:savingor_app/features/price_memory/data/price_memory_store.dart';
+import 'package:savingor_app/features/subscription/domain/savingor_feature.dart';
+import 'package:savingor_app/features/subscription/presentation/widgets/pro_feature_screen_host.dart';
 import 'package:savingor_app/l10n/app_localizations.dart';
 
 class SavingsAnalyticsScreen extends StatelessWidget {
@@ -36,67 +38,20 @@ class SavingsAnalyticsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
-    final ExpensesStore expensesStore = ExpensesProvider.of(context);
-    final ReceiptStore receiptStore = ReceiptProvider.of(context);
-    final PriceMemoryStore priceMemoryStore = PriceMemoryProvider.of(context);
-    final AppState appState = AppStateProvider.of(context);
-    final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
-    return ListenableBuilder(
-      listenable: appState,
-      builder: (BuildContext context, Widget? _) {
-        return AnimatedBuilder(
-          animation: expensesStore,
-          builder: (BuildContext context, Widget? __) {
-            return AnimatedBuilder(
-              animation: receiptStore,
-              builder: (BuildContext context, Widget? ___) {
-                return AnimatedBuilder(
-                  animation: priceMemoryStore,
-                  builder: (BuildContext context, Widget? ____) {
-                    if (!expensesStore.isAuthenticated &&
-                        !receiptStore.isAuthenticated) {
-                      return _buildSignInRequired(context, l10n);
-                    }
-
-                    return Scaffold(
-                      backgroundColor: context.savingor.pageBackground,
-                      appBar: AppBar(
-                        title: Text(
-                          l10n.savingsAnalytics,
-                          style: SavingorAppTextStyles.screenTitle(context),
-                        ),
-                        elevation: 0,
-                        scrolledUnderElevation: 0,
-                        backgroundColor: context.savingor.pageBackground,
-                        surfaceTintColor: Colors.transparent,
-                        leading: BackButton(
-                          color: context.savingor.textPrimary,
-                          onPressed: () => _goBack(context),
-                        ),
-                        automaticallyImplyLeading: false,
-                      ),
-                      body: _buildBody(
-                        context,
-                        appState,
-                        expensesStore,
-                        receiptStore,
-                        priceMemoryStore,
-                        bottomInset,
-                        l10n,
-                      ),
-                    );
-                  },
-                );
-              },
-            );
-          },
-        );
-      },
+    return ProFeatureScreenHost(
+      feature: SavingorFeature.savingsAnalytics,
+      title: l10n.savingsAnalytics,
+      leading: BackButton(
+        color: context.savingor.textPrimary,
+        onPressed: () => _goBack(context),
+      ),
+      proContentBuilder: (BuildContext context) =>
+          const _SavingsAnalyticsProContent(),
     );
   }
 
-  Widget _buildBody(
+  static Widget _buildBody(
     BuildContext context,
     AppState appState,
     ExpensesStore expensesStore,
@@ -105,8 +60,8 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     double bottomInset,
     AppLocalizations l10n,
   ) {
-    formatCurrency(double amount) => appState.formatMoney(amount);
-    formatPriceMemory(double amount) =>
+    String formatCurrency(double amount) => appState.formatMoney(amount);
+    String formatPriceMemory(double amount) =>
         appState.formatMoney(amount, originalCurrency: 'CAD');
     if (expensesStore.isLoading ||
         receiptStore.isLoading ||
@@ -220,7 +175,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildDetailLinks(
+  static List<Widget> _buildDetailLinks(
     BuildContext context,
     PriceMemoryStore priceMemoryStore,
     AppLocalizations l10n,
@@ -237,31 +192,17 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     ];
   }
 
-  Widget _buildSignInRequired(BuildContext context, AppLocalizations l10n) {
-    return Scaffold(
-      backgroundColor: context.savingor.pageBackground,
-      appBar: AppBar(
-        title: Text(
-          l10n.savingsAnalytics,
-          style: SavingorAppTextStyles.screenTitle(context),
-        ),
-        backgroundColor: context.savingor.pageBackground,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        leading: BackButton(
-          color: context.savingor.textPrimary,
-          onPressed: () => _goBack(context),
-        ),
-        automaticallyImplyLeading: false,
-      ),
-      body: AppSignInRequiredState(
-        message: l10n.signInForAnalytics,
-        onSignIn: () => context.push('/auth'),
-      ),
+  static Widget _buildSignInRequired(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
+    return AppSignInRequiredState(
+      message: l10n.signInForAnalytics,
+      onSignIn: () => context.push('/auth'),
     );
   }
 
-  Widget _buildOverviewGrid(
+  static Widget _buildOverviewGrid(
     BuildContext context,
     ExpenseAnalyticsSummary summary,
     SavingsSummary savingsSummary,
@@ -327,7 +268,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPriceInsightsEntry(
+  static Widget _buildPriceInsightsEntry(
     BuildContext context,
     PriceMemoryStore priceMemoryStore,
     AppLocalizations l10n,
@@ -386,7 +327,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSavingsOpportunitiesEntry(
+  static Widget _buildSavingsOpportunitiesEntry(
     BuildContext context,
     PriceMemoryStore priceMemoryStore,
     AppLocalizations l10n,
@@ -445,7 +386,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSpendingByStore(
+  static Widget _buildSpendingByStore(
     BuildContext context,
     ExpenseAnalyticsSummary summary,
     String Function(double) formatCurrency,
@@ -530,7 +471,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentActivity(
+  static Widget _buildRecentActivity(
     BuildContext context,
     ExpenseAnalyticsSummary summary,
     String Function(double) formatCurrency,
@@ -621,6 +562,58 @@ class SavingsAnalyticsScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _SavingsAnalyticsProContent extends StatelessWidget {
+  const _SavingsAnalyticsProContent();
+
+  @override
+  Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final ExpensesStore expensesStore = ExpensesProvider.of(context);
+    final ReceiptStore receiptStore = ReceiptProvider.of(context);
+    final PriceMemoryStore priceMemoryStore = PriceMemoryProvider.of(context);
+    final AppState appState = AppStateProvider.of(context);
+    final double bottomInset = MediaQuery.paddingOf(context).bottom;
+
+    return ListenableBuilder(
+      listenable: appState,
+      builder: (BuildContext context, Widget? _) {
+        return AnimatedBuilder(
+          animation: expensesStore,
+          builder: (BuildContext context, Widget? __) {
+            return AnimatedBuilder(
+              animation: receiptStore,
+              builder: (BuildContext context, Widget? ___) {
+                return AnimatedBuilder(
+                  animation: priceMemoryStore,
+                  builder: (BuildContext context, Widget? ____) {
+                    if (!expensesStore.isAuthenticated &&
+                        !receiptStore.isAuthenticated) {
+                      return SavingsAnalyticsScreen._buildSignInRequired(
+                        context,
+                        l10n,
+                      );
+                    }
+
+                    return SavingsAnalyticsScreen._buildBody(
+                      context,
+                      appState,
+                      expensesStore,
+                      receiptStore,
+                      priceMemoryStore,
+                      bottomInset,
+                      l10n,
+                    );
+                  },
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 }

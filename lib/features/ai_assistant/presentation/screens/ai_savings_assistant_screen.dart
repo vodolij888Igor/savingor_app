@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,9 +14,15 @@ import 'package:savingor_app/features/ai_assistant/domain/ai_savings_assistant_s
 import 'package:savingor_app/features/ai_assistant/domain/ai_savings_context.dart';
 import 'package:savingor_app/features/ai_assistant/domain/models/ai_assistant_request.dart';
 import 'package:savingor_app/features/ai_assistant/domain/models/ai_assistant_response.dart';
+import 'package:savingor_app/features/ai_assistant/presentation/widgets/ai_savings_assistant_locked_preview.dart';
 import 'package:savingor_app/features/expenses/data/expenses_store.dart';
 import 'package:savingor_app/features/scanner/data/receipt_store.dart';
 import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
+import 'package:savingor_app/features/subscription/data/subscription_service.dart';
+import 'package:savingor_app/features/subscription/data/debug_subscription_override_store.dart';
+import 'package:savingor_app/features/subscription/domain/feature_access_service.dart';
+import 'package:savingor_app/features/subscription/domain/savingor_feature.dart';
+import 'package:savingor_app/features/subscription/presentation/widgets/feature_access_gate.dart';
 import 'package:savingor_app/l10n/app_localizations.dart';
 
 class AiSavingsAssistantScreen extends StatefulWidget {
@@ -78,13 +85,44 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
   final TextEditingController _questionController = TextEditingController();
   final FocusNode _questionFocus = FocusNode();
 
+  final SubscriptionService _subscriptionService = SubscriptionService();
+  static const FeatureAccessService _featureAccessService =
+      FeatureAccessService();
+
+  SubscriptionStatus _subscription = SubscriptionStatus.free;
+  bool _isLoadingSubscription = true;
+  DebugSubscriptionOverrideStore? _debugOverrideStore;
+
   AiAssistantResponse? _lastResponse;
   String? _lastQuestion;
   bool _isAsking = false;
   String? _askError;
 
   @override
+  void initState() {
+    super.initState();
+    _loadSubscription();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!kDebugMode) {
+      return;
+    }
+    final DebugSubscriptionOverrideStore? store =
+        DebugSubscriptionOverrideProvider.maybeOf(context);
+    if (store == _debugOverrideStore) {
+      return;
+    }
+    _debugOverrideStore?.removeListener(_onDebugOverrideChanged);
+    _debugOverrideStore = store;
+    _debugOverrideStore?.addListener(_onDebugOverrideChanged);
+  }
+
+  @override
   void dispose() {
+    _debugOverrideStore?.removeListener(_onDebugOverrideChanged);
     _questionController.dispose();
     _questionFocus.unfocus();
     _questionFocus.dispose();
@@ -96,6 +134,32 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
       context.pop();
     } else {
       context.go('/deals');
+    }
+  }
+
+  void _onDebugOverrideChanged() {
+    _loadSubscription();
+  }
+
+  Future<void> _loadSubscription() async {
+    try {
+      final SubscriptionStatus status =
+          await _subscriptionService.getCurrentSubscription();
+      if (!mounted) return;
+      setState(() {
+        _subscription = status;
+        _isLoadingSubscription = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _isLoadingSubscription = false);
+    }
+  }
+
+  Future<void> _openPlans() async {
+    await context.push('/subscription');
+    if (mounted) {
+      await _loadSubscription();
     }
   }
 
@@ -197,12 +261,84 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
   @override
   Widget build(BuildContext context) {
     final ExpensesStore expensesStore = ExpensesProvider.of(context);
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final double bottomInset = MediaQuery.paddingOf(context).bottom;
+
+    return Scaffold(
+      backgroundColor: context.savingor.pageBackground,
+      appBar: AppBar(
+        title: Text(
+          l10n.aiSavingsAssistant,
+          style: SavingorAppTextStyles.screenTitle(context),
+        ),
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        backgroundColor: context.savingor.pageBackground,
+        surfaceTintColor: Colors.transparent,
+        leading: BackButton(
+          color: context.savingor.brandTitle,
+          onPressed: _goBack,
+        ),
+        automaticallyImplyLeading: false,
+      ),
+      body: _buildScreenBody(
+        l10n: l10n,
+        expensesStore: expensesStore,
+        bottomInset: bottomInset,
+      ),
+    );
+  }
+
+  Widget _buildScreenBody({
+    required AppLocalizations l10n,
+    required ExpensesStore expensesStore,
+    required double bottomInset,
+  }) {
+    if (!expensesStore.isAuthenticated) {
+      return AppSignInRequiredState(
+        title: l10n.signInRequired,
+        message: l10n.aiSignInPrompt,
+        actionLabel: l10n.signIn,
+        onSignIn: () => context.push('/auth'),
+      );
+    }
+
+    if (_isLoadingSubscription) {
+      return const Center(
+        child: CircularProgressIndicator(
+          color: SavingorColors.primaryStroke,
+        ),
+      );
+    }
+
+    return FeatureAccessGate(
+      feature: SavingorFeature.aiSavingsAssistant,
+      isPro: _subscription.hasActiveProAccess,
+      accessService: _featureAccessService,
+      lockedBuilder: (BuildContext context) {
+        return AiSavingsAssistantLockedPreview(
+          bottomInset: bottomInset,
+          onOpenPlans: _openPlans,
+        );
+      },
+      child: _buildProAssistantBody(
+        l10n: l10n,
+        expensesStore: expensesStore,
+        bottomInset: bottomInset,
+      ),
+    );
+  }
+
+  Widget _buildProAssistantBody({
+    required AppLocalizations l10n,
+    required ExpensesStore expensesStore,
+    required double bottomInset,
+  }) {
     final ReceiptStore receiptStore = ReceiptProvider.of(context);
     final ShoppingListsStore shoppingListsStore =
         ShoppingListsProvider.of(context);
     final AiSavingsAssistantService service =
         AiSavingsAssistantProvider.of(context);
-    final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return ListenableBuilder(
       listenable: Listenable.merge(<Listenable>[
@@ -211,33 +347,13 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
         shoppingListsStore,
       ]),
       builder: (BuildContext context, Widget? _) {
-        final AppLocalizations l10n = AppLocalizations.of(context);
-
-        return Scaffold(
-          backgroundColor: context.savingor.pageBackground,
-          appBar: AppBar(
-            title: Text(
-              l10n.aiSavingsAssistant,
-              style: SavingorAppTextStyles.screenTitle(context),
-            ),
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            backgroundColor: context.savingor.pageBackground,
-            surfaceTintColor: Colors.transparent,
-            leading: BackButton(
-              color: context.savingor.brandTitle,
-              onPressed: _goBack,
-            ),
-            automaticallyImplyLeading: false,
-          ),
-          body: _buildBody(
-            l10n: l10n,
-            expensesStore: expensesStore,
-            receiptStore: receiptStore,
-            shoppingListsStore: shoppingListsStore,
-            service: service,
-            bottomInset: bottomInset,
-          ),
+        return _buildBody(
+          l10n: l10n,
+          expensesStore: expensesStore,
+          receiptStore: receiptStore,
+          shoppingListsStore: shoppingListsStore,
+          service: service,
+          bottomInset: bottomInset,
         );
       },
     );

@@ -66,8 +66,7 @@ import 'app_localizations_uk.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -75,8 +74,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -88,8 +86,7 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
@@ -1029,6 +1026,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose how you want to add your receipt.'**
   String get chooseReceiptSource;
+
+  /// No description provided for @freeScansUsedThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'{used} of {limit} free scans used this month'**
+  String freeScansUsedThisMonth(int used, int limit);
+
+  /// No description provided for @freeScansRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 free scan remaining} other{{count} free scans remaining}}'**
+  String freeScansRemaining(int count);
+
+  /// No description provided for @noFreeScansRemainingThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'No free scans remaining this month'**
+  String get noFreeScansRemainingThisMonth;
+
+  /// No description provided for @unlimitedScansWithPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited scans with Pro'**
+  String get unlimitedScansWithPro;
+
+  /// No description provided for @loadingScanUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking scan usage…'**
+  String get loadingScanUsage;
+
+  /// No description provided for @monthlyScanLimitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly scan limit reached'**
+  String get monthlyScanLimitTitle;
+
+  /// No description provided for @monthlyScanLimitDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve used all three free receipt scans for this month. Upgrade to Savingor Pro for unlimited scanning.'**
+  String get monthlyScanLimitDescription;
+
+  /// No description provided for @unlockUnlimitedScansWithSavingorPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock unlimited scans with Savingor Pro'**
+  String get unlockUnlimitedScansWithSavingorPro;
+
+  /// No description provided for @monthlyScanLimitSaveBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached your free scan limit for this month. Upgrade to Pro to save more scanned receipts.'**
+  String get monthlyScanLimitSaveBlocked;
 
   /// No description provided for @takePhoto.
   ///
@@ -2366,8 +2417,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'• {itemName}{quantitySuffix} — {unitPrice} {perUnit}'**
-  String storePlanItemLine(
-      String itemName, String quantitySuffix, String unitPrice, String perUnit);
+  String storePlanItemLine(String itemName, String quantitySuffix, String unitPrice, String perUnit);
 
   /// No description provided for @perUnit.
   ///
@@ -2763,8 +2813,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'You recently paid {latestPrice} at {latestStore}. Your best known price is {bestPrice} at {bestStore}.'**
-  String recentlyPaidLatestBestKnown(String latestPrice, String latestStore,
-      String bestPrice, String bestStore);
+  String recentlyPaidLatestBestKnown(String latestPrice, String latestStore, String bestPrice, String bestStore);
 
   /// No description provided for @basedOnPriceRecords.
   ///
@@ -3263,6 +3312,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'AI Savings Assistant'**
   String get aiSavingsAssistant;
+
+  /// No description provided for @aiProPreviewDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Get personalized grocery-saving recommendations based on your receipts, shopping lists, spending history, and local stores.'**
+  String get aiProPreviewDescription;
+
+  /// No description provided for @aiProBenefitPersonalizedRecommendations.
+  ///
+  /// In en, this message translates to:
+  /// **'Personalized savings recommendations'**
+  String get aiProBenefitPersonalizedRecommendations;
+
+  /// No description provided for @aiProBenefitStoreComparisons.
+  ///
+  /// In en, this message translates to:
+  /// **'Smarter store and product comparisons'**
+  String get aiProBenefitStoreComparisons;
+
+  /// No description provided for @aiProBenefitSpendingInsights.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending insights based on receipt history'**
+  String get aiProBenefitSpendingInsights;
+
+  /// No description provided for @aiProBenefitBudgetAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'AI answers about your grocery budget'**
+  String get aiProBenefitBudgetAnswers;
+
+  /// No description provided for @unlockWithSavingorPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock with Savingor Pro'**
+  String get unlockWithSavingorPro;
+
+  /// No description provided for @viewProBenefits.
+  ///
+  /// In en, this message translates to:
+  /// **'View Pro benefits'**
+  String get viewProBenefits;
 
   /// No description provided for @aiSignInPrompt.
   ///
@@ -4007,10 +4098,381 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not update your subscription. Please try again.'**
   String get couldNotUpdateSubscription;
+
+  /// No description provided for @debugSubscriptionTestingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer subscription testing'**
+  String get debugSubscriptionTestingTitle;
+
+  /// No description provided for @debugSubscriptionTestingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporarily preview Savingor as a Free or Pro user. This does not change the real subscription.'**
+  String get debugSubscriptionTestingDescription;
+
+  /// No description provided for @debugSubscriptionUseReal.
+  ///
+  /// In en, this message translates to:
+  /// **'Use real subscription'**
+  String get debugSubscriptionUseReal;
+
+  /// No description provided for @debugSubscriptionTestAsFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Test as Free'**
+  String get debugSubscriptionTestAsFree;
+
+  /// No description provided for @debugSubscriptionTestAsPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Test as Pro'**
+  String get debugSubscriptionTestAsPro;
+
+  /// No description provided for @debugSubscriptionOverrideFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer plan override: Free'**
+  String get debugSubscriptionOverrideFree;
+
+  /// No description provided for @debugSubscriptionOverridePro.
+  ///
+  /// In en, this message translates to:
+  /// **'Developer plan override: Pro'**
+  String get debugSubscriptionOverridePro;
+
+  /// No description provided for @proFeatureBasketOptimizerDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare your shopping basket across stores and find smarter ways to spend less.'**
+  String get proFeatureBasketOptimizerDescription;
+
+  /// No description provided for @proFeatureBasketBenefitOptimizeAcrossStores.
+  ///
+  /// In en, this message translates to:
+  /// **'Optimize the shopping basket across nearby stores'**
+  String get proFeatureBasketBenefitOptimizeAcrossStores;
+
+  /// No description provided for @proFeatureBasketBenefitCompareTotals.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare estimated basket totals'**
+  String get proFeatureBasketBenefitCompareTotals;
+
+  /// No description provided for @proFeatureBasketBenefitEconomicalCombination.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a more economical store combination'**
+  String get proFeatureBasketBenefitEconomicalCombination;
+
+  /// No description provided for @proFeatureBasketBenefitReduceSpending.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce unnecessary grocery spending'**
+  String get proFeatureBasketBenefitReduceSpending;
+
+  /// No description provided for @proFeatureSavingsAnalyticsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Understand your savings trends, spending patterns, and personalized recommendations.'**
+  String get proFeatureSavingsAnalyticsDescription;
+
+  /// No description provided for @proFeatureAnalyticsBenefitDeeperTrends.
+  ///
+  /// In en, this message translates to:
+  /// **'View deeper savings trends'**
+  String get proFeatureAnalyticsBenefitDeeperTrends;
+
+  /// No description provided for @proFeatureAnalyticsBenefitComparePeriods.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare spending periods'**
+  String get proFeatureAnalyticsBenefitComparePeriods;
+
+  /// No description provided for @proFeatureAnalyticsBenefitTrackSavings.
+  ///
+  /// In en, this message translates to:
+  /// **'Track estimated savings'**
+  String get proFeatureAnalyticsBenefitTrackSavings;
+
+  /// No description provided for @proFeatureAnalyticsBenefitAdvancedRecommendations.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive advanced recommendations'**
+  String get proFeatureAnalyticsBenefitAdvancedRecommendations;
+
+  /// No description provided for @proFeatureProductPriceInsightsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Track product price history and get smarter buying advice from your receipts.'**
+  String get proFeatureProductPriceInsightsDescription;
+
+  /// No description provided for @proFeaturePriceInsightsBenefitHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'View product price history'**
+  String get proFeaturePriceInsightsBenefitHistory;
+
+  /// No description provided for @proFeaturePriceInsightsBenefitCompareStores.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare recent store prices'**
+  String get proFeaturePriceInsightsBenefitCompareStores;
+
+  /// No description provided for @proFeaturePriceInsightsBenefitBuyingAdvice.
+  ///
+  /// In en, this message translates to:
+  /// **'See buying advice'**
+  String get proFeaturePriceInsightsBenefitBuyingAdvice;
+
+  /// No description provided for @proFeaturePriceInsightsBenefitPurchaseTiming.
+  ///
+  /// In en, this message translates to:
+  /// **'Identify favorable purchase timing'**
+  String get proFeaturePriceInsightsBenefitPurchaseTiming;
+
+  /// No description provided for @proFeatureSavingsOpportunitiesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover personalized savings actions based on your shopping and receipt history.'**
+  String get proFeatureSavingsOpportunitiesDescription;
+
+  /// No description provided for @proFeatureOpportunitiesBenefitPersonalized.
+  ///
+  /// In en, this message translates to:
+  /// **'Find personalized ways to save'**
+  String get proFeatureOpportunitiesBenefitPersonalized;
+
+  /// No description provided for @proFeatureOpportunitiesBenefitPrioritize.
+  ///
+  /// In en, this message translates to:
+  /// **'Prioritize high-value actions'**
+  String get proFeatureOpportunitiesBenefitPrioritize;
+
+  /// No description provided for @proFeatureOpportunitiesBenefitReceiptHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Use receipt and shopping-history insights'**
+  String get proFeatureOpportunitiesBenefitReceiptHistory;
+
+  /// No description provided for @proFeatureOpportunitiesBenefitBetterChoices.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover better store and product choices'**
+  String get proFeatureOpportunitiesBenefitBetterChoices;
+
+  /// No description provided for @savingorPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Savingor Pro'**
+  String get savingorPro;
+
+  /// No description provided for @plansHeroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your Savingor plan'**
+  String get plansHeroTitle;
+
+  /// No description provided for @plansHeroSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start free with essential grocery tools. Upgrade when you\'re ready for advanced savings intelligence.'**
+  String get plansHeroSubtitle;
+
+  /// No description provided for @planFreeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Essential tools to track grocery spending and start saving.'**
+  String get planFreeSubtitle;
+
+  /// No description provided for @planProSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced automation and personalized savings intelligence.'**
+  String get planProSubtitle;
+
+  /// No description provided for @planFreePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'CAD \$0'**
+  String get planFreePrice;
+
+  /// No description provided for @planProPricePerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'CAD \$14.99 / month'**
+  String get planProPricePerMonth;
+
+  /// No description provided for @upgradeToSavingorPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Savingor Pro'**
+  String get upgradeToSavingorPro;
+
+  /// No description provided for @planComparisonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare plans'**
+  String get planComparisonTitle;
+
+  /// No description provided for @planIncludedFeaturesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Included features'**
+  String get planIncludedFeaturesTitle;
+
+  /// No description provided for @planProActiveFeaturesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Included active features'**
+  String get planProActiveFeaturesTitle;
+
+  /// No description provided for @planProComingSoonFeaturesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Future Pro features'**
+  String get planProComingSoonFeaturesTitle;
+
+  /// No description provided for @planColumnFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get planColumnFree;
+
+  /// No description provided for @planColumnPro.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro'**
+  String get planColumnPro;
+
+  /// No description provided for @planAvailabilityIncluded.
+  ///
+  /// In en, this message translates to:
+  /// **'Included'**
+  String get planAvailabilityIncluded;
+
+  /// No description provided for @planAvailabilityLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get planAvailabilityLocked;
+
+  /// No description provided for @planAvailabilityUnlimited.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited'**
+  String get planAvailabilityUnlimited;
+
+  /// No description provided for @planAvailabilityThreeScansPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'3 per month'**
+  String get planAvailabilityThreeScansPerMonth;
+
+  /// No description provided for @planFeatureGroceryDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Grocery spending dashboard'**
+  String get planFeatureGroceryDashboard;
+
+  /// No description provided for @planFeatureNearbyStoreMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby store map'**
+  String get planFeatureNearbyStoreMap;
+
+  /// No description provided for @planFeatureShoppingLists.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping lists'**
+  String get planFeatureShoppingLists;
+
+  /// No description provided for @planFeatureManualExpenseTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual expense tracking'**
+  String get planFeatureManualExpenseTracking;
+
+  /// No description provided for @planFeatureThreeReceiptScansPerMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'3 receipt scans per month'**
+  String get planFeatureThreeReceiptScansPerMonth;
+
+  /// No description provided for @planFeatureBasicReceiptExpenseHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic receipt and expense history'**
+  String get planFeatureBasicReceiptExpenseHistory;
+
+  /// No description provided for @planFeatureBasicSavingsOpportunities.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic savings opportunities'**
+  String get planFeatureBasicSavingsOpportunities;
+
+  /// No description provided for @planFeatureBasicProductPriceInsights.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic product price insights'**
+  String get planFeatureBasicProductPriceInsights;
+
+  /// No description provided for @planFeatureAppSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Language, theme, region, and currency settings'**
+  String get planFeatureAppSettings;
+
+  /// No description provided for @planFeatureUnlimitedReceiptScanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited receipt scanning'**
+  String get planFeatureUnlimitedReceiptScanning;
+
+  /// No description provided for @planFeatureBasketOptimizer.
+  ///
+  /// In en, this message translates to:
+  /// **'Basket Optimizer'**
+  String get planFeatureBasketOptimizer;
+
+  /// No description provided for @planFeatureAdvancedSavingsAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced Savings Analytics'**
+  String get planFeatureAdvancedSavingsAnalytics;
+
+  /// No description provided for @planFeatureSmartPriceDropAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'Smart price-drop alerts'**
+  String get planFeatureSmartPriceDropAlerts;
+
+  /// No description provided for @planFeatureAdvancedSpendingReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced spending reports'**
+  String get planFeatureAdvancedSpendingReports;
+
+  /// No description provided for @planCompareReceiptScans.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt scans'**
+  String get planCompareReceiptScans;
+
+  /// No description provided for @planCompareBasicSavingsOpportunities.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Savings Opportunities'**
+  String get planCompareBasicSavingsOpportunities;
+
+  /// No description provided for @planCompareBasicProductPriceInsights.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Product Price Insights'**
+  String get planCompareBasicProductPriceInsights;
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -4019,39 +4481,29 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) => <String>[
-        'de',
-        'en',
-        'es',
-        'fr',
-        'ru',
-        'uk'
-      ].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['de', 'en', 'es', 'fr', 'ru', 'uk'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'de':
-      return AppLocalizationsDe();
-    case 'en':
-      return AppLocalizationsEn();
-    case 'es':
-      return AppLocalizationsEs();
-    case 'fr':
-      return AppLocalizationsFr();
-    case 'ru':
-      return AppLocalizationsRu();
-    case 'uk':
-      return AppLocalizationsUk();
+    case 'de': return AppLocalizationsDe();
+    case 'en': return AppLocalizationsEn();
+    case 'es': return AppLocalizationsEs();
+    case 'fr': return AppLocalizationsFr();
+    case 'ru': return AppLocalizationsRu();
+    case 'uk': return AppLocalizationsUk();
   }
 
   throw FlutterError(
-      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.'
+  );
 }

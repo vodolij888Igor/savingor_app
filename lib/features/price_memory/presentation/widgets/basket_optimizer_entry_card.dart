@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/savingor_interactive.dart';
+import 'package:savingor_app/features/subscription/domain/feature_access_service.dart';
+import 'package:savingor_app/features/subscription/domain/savingor_feature.dart';
+import 'package:savingor_app/features/subscription/presentation/widgets/effective_subscription_builder.dart';
+import 'package:savingor_app/features/subscription/presentation/widgets/pro_feature_badge.dart';
 
 class BasketOptimizerEntryCard extends StatelessWidget {
   const BasketOptimizerEntryCard({
@@ -9,11 +13,13 @@ class BasketOptimizerEntryCard extends StatelessWidget {
     required this.onTap,
     this.title = 'Optimize my basket',
     this.subtitle = 'Find the best known stores from your receipt history',
+    this.showProBadge = false,
   });
 
   final VoidCallback onTap;
   final String title;
   final String subtitle;
+  final bool showProBadge;
 
   static const Color _airyBorder = Color(0xFFF3F4F3);
 
@@ -50,13 +56,23 @@ class BasketOptimizerEntryCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: SavingorWorkflowTheme.primaryText(context),
-                  ),
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: SavingorWorkflowTheme.primaryText(context),
+                        ),
+                      ),
+                    ),
+                    if (showProBadge) ...<Widget>[
+                      const SizedBox(width: 8),
+                      const ProFeatureBadge(),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -77,6 +93,46 @@ class BasketOptimizerEntryCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Entry card that shows a Pro badge automatically for Free users.
+class BasketOptimizerEntryCardWithProBadge extends StatelessWidget {
+  const BasketOptimizerEntryCardWithProBadge({
+    super.key,
+    required this.onTap,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final VoidCallback onTap;
+  final String title;
+  final String subtitle;
+
+  static const FeatureAccessService _accessService = FeatureAccessService();
+
+  @override
+  Widget build(BuildContext context) {
+    return EffectiveSubscriptionBuilder(
+      builder: (
+        BuildContext context,
+        status,
+        bool isLoading,
+      ) {
+        final bool showProBadge = !isLoading &&
+            !_accessService.canAccessForStatus(
+              feature: SavingorFeature.basketOptimizer,
+              status: status,
+            );
+
+        return BasketOptimizerEntryCard(
+          onTap: onTap,
+          title: title,
+          subtitle: subtitle,
+          showProBadge: showProBadge,
+        );
+      },
     );
   }
 }

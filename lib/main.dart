@@ -18,6 +18,7 @@ import 'package:savingor_app/features/scanner/data/receipt_store.dart';
 import 'package:savingor_app/features/price_memory/data/price_memory_store.dart';
 import 'package:savingor_app/features/ai_assistant/data/ai_savings_assistant_provider.dart';
 import 'package:savingor_app/features/subscription/data/subscription_service.dart';
+import 'package:savingor_app/features/subscription/data/debug_subscription_override_store.dart';
 import 'package:savingor_app/l10n/app_localizations.dart';
 
 Future<void> main() async {
@@ -34,6 +35,11 @@ Future<void> main() async {
   final appState = AppState(prefs);
   appState.hydrateFromDisk();
 
+  final DebugSubscriptionOverrideStore debugSubscriptionOverride =
+      DebugSubscriptionOverrideStore(prefs);
+  debugSubscriptionOverride.hydrateFromDisk();
+  SubscriptionService.bindDebugOverrideStore(debugSubscriptionOverride);
+
   final favorites = FavoritesStore();
   await favorites.init();
   final shopping = ShoppingListStore();
@@ -49,23 +55,26 @@ Future<void> main() async {
   runApp(
     AppStateProvider(
       notifier: appState,
-      child: AiSavingsAssistantProvider(
-        service: aiAssistantService,
-        child: ExpensesProvider(
-          notifier: firestoreExpenses,
-          child: ReceiptProvider(
-            notifier: receipts,
-            child: PriceMemoryProvider(
-              notifier: priceMemory,
-              child: ExpenseProvider(
-                notifier: expenses,
-                child: ShoppingListsProvider(
-                  notifier: shoppingLists,
-                  child: ShoppingListProvider(
-                    notifier: shopping,
-                    child: FavoritesProvider(
-                      notifier: favorites,
-                      child: MyApp(router: router),
+      child: DebugSubscriptionOverrideProvider(
+        notifier: debugSubscriptionOverride,
+        child: AiSavingsAssistantProvider(
+          service: aiAssistantService,
+          child: ExpensesProvider(
+            notifier: firestoreExpenses,
+            child: ReceiptProvider(
+              notifier: receipts,
+              child: PriceMemoryProvider(
+                notifier: priceMemory,
+                child: ExpenseProvider(
+                  notifier: expenses,
+                  child: ShoppingListsProvider(
+                    notifier: shoppingLists,
+                    child: ShoppingListProvider(
+                      notifier: shopping,
+                      child: FavoritesProvider(
+                        notifier: favorites,
+                        child: MyApp(router: router),
+                      ),
                     ),
                   ),
                 ),
