@@ -251,8 +251,7 @@ GoRouter createAppRouter({required AppState appState}) {
                 );
               }
 
-              final String normalizedProductName =
-                  extra is String ? extra : '';
+              final String normalizedProductName = extra is String ? extra : '';
               return ProductPriceDetailScreen(
                 normalizedProductName: normalizedProductName,
               );
@@ -277,13 +276,11 @@ GoRouter createAppRouter({required AppState appState}) {
             routes: <RouteBase>[
               GoRoute(
                 path: 'select-list-to-finalize',
-                builder: (context, state) =>
-                    const SelectListToFinalizeScreen(),
+                builder: (context, state) => const SelectListToFinalizeScreen(),
               ),
               GoRoute(
                 path: 'monthly-goal-budget',
-                builder: (context, state) =>
-                    const MonthlyGoalBudgetScreen(),
+                builder: (context, state) => const MonthlyGoalBudgetScreen(),
               ),
             ],
           ),

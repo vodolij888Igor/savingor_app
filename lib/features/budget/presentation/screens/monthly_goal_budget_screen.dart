@@ -19,11 +19,6 @@ class MonthlyGoalBudgetScreen extends StatefulWidget {
 }
 
 class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
-  static const Color _pageWhite = Color(0xFFFFFEFE);
-  static const Color _nearBlack = Color(0xFF111827);
-  static const Color _airyBorder = Color(0xFFF3F4F3);
-  static const Color _overBudgetColor = Color(0xFFEF4444);
-
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _budgetController = TextEditingController();
 
@@ -39,20 +34,8 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
   String _formatCurrency(AppState appState, double amount) =>
       appState.formatMoney(amount);
 
-  BoxDecoration _cardDecoration() {
-    return BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-      border: Border.all(color: _airyBorder.withOpacity(0.6), width: 0.5),
-      boxShadow: <BoxShadow>[
-        BoxShadow(
-          color: Colors.black.withOpacity(0.04),
-          blurRadius: 12,
-          offset: const Offset(0, 2),
-        ),
-      ],
-    );
-  }
+  BoxDecoration _cardDecoration(BuildContext context) =>
+      SavingorWorkflowTheme.card(context);
 
   void _syncBudgetField(double budget) {
     if (_initializedBudgetField) {
@@ -113,33 +96,33 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                 final double spentThisMonth = summary.totalThisMonth;
                 final bool isOverBudget = spentThisMonth > budget;
                 final double difference = (budget - spentThisMonth).abs();
-                final double progress = budget <= 0
-                    ? 0
-                    : (spentThisMonth / budget).clamp(0.0, 1.0);
+                final double progress =
+                    budget <= 0 ? 0 : (spentThisMonth / budget).clamp(0.0, 1.0);
                 final int progressPercent = (progress * 100).round();
 
                 return Scaffold(
-                  backgroundColor: _pageWhite,
+                  backgroundColor: context.savingor.pageBackground,
                   appBar: AppBar(
                     title: Text(
                       l10n.monthlyGoalBudget,
-                      style: SavingorAppTextStyles.screenTitle,
+                      style: SavingorAppTextStyles.screenTitle(context),
                     ),
                     elevation: 0,
                     scrolledUnderElevation: 0,
-                    backgroundColor: _pageWhite,
+                    backgroundColor: context.savingor.pageBackground,
                     surfaceTintColor: Colors.transparent,
                     leading: IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.arrow_back_ios_new_rounded,
-                        color: SavingorColors.textPrimary,
+                        color: context.savingor.textPrimary,
                         size: 20,
                       ),
                       onPressed: () => context.pop(),
                     ),
                   ),
                   body: SingleChildScrollView(
-                    padding: EdgeInsets.fromLTRB(20, 8, 20, 32 + bottomInset + 88),
+                    padding:
+                        EdgeInsets.fromLTRB(20, 8, 20, 32 + bottomInset + 88),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
@@ -148,7 +131,8 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: SavingorColors.textSecondary.withOpacity(0.95),
+                            color: context.savingor.textSecondary
+                                .withOpacity(0.95),
                             height: 1.4,
                           ),
                         ),
@@ -156,7 +140,7 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(18),
-                          decoration: _cardDecoration(),
+                          decoration: _cardDecoration(context),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
@@ -167,7 +151,8 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                               const SizedBox(height: 14),
                               _summaryRow(
                                 label: l10n.spentThisMonth,
-                                value: _formatCurrency(appState, spentThisMonth),
+                                value:
+                                    _formatCurrency(appState, spentThisMonth),
                               ),
                               const SizedBox(height: 14),
                               _summaryRow(
@@ -176,18 +161,20 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                                     : l10n.remaining,
                                 value: _formatCurrency(appState, difference),
                                 valueColor: isOverBudget
-                                    ? _overBudgetColor
-                                    : SavingorColors.primaryStroke,
+                                    ? SavingorWorkflowTheme.overBudget(context)
+                                    : SavingorWorkflowTheme.accentText(context),
                               ),
                               const SizedBox(height: 16),
                               Row(
                                 children: <Widget>[
                                   Text(
                                     '${_formatCurrency(appState, spentThisMonth)} / ${_formatCurrency(appState, budget)}',
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w800,
-                                      color: _nearBlack,
+                                      color: SavingorWorkflowTheme.primaryText(
+                                        context,
+                                      ),
                                     ),
                                   ),
                                   const Spacer(),
@@ -197,8 +184,12 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                                       fontSize: 14,
                                       fontWeight: FontWeight.w700,
                                       color: isOverBudget
-                                          ? _overBudgetColor
-                                          : SavingorColors.primaryStroke,
+                                          ? SavingorWorkflowTheme.overBudget(
+                                              context,
+                                            )
+                                          : SavingorWorkflowTheme.accentText(
+                                              context,
+                                            ),
                                     ),
                                   ),
                                 ],
@@ -209,11 +200,15 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                                 child: LinearProgressIndicator(
                                   value: progress,
                                   minHeight: 8,
-                                  backgroundColor: const Color(0xFFF0F2F1),
+                                  backgroundColor:
+                                      SavingorWorkflowTheme.progressTrack(
+                                    context,
+                                  ),
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    isOverBudget
-                                        ? _overBudgetColor
-                                        : SavingorColors.primaryGreen,
+                                    SavingorWorkflowTheme.progressValue(
+                                      context,
+                                      isOver: isOverBudget,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -224,7 +219,7 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(18),
-                          decoration: _cardDecoration(),
+                          decoration: _cardDecoration(context),
                           child: Form(
                             key: _formKey,
                             child: Column(
@@ -232,7 +227,8 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                               children: <Widget>[
                                 Text(
                                   l10n.updateMonthlyBudget,
-                                  style: SavingorAppTextStyles.cardTitle,
+                                  style:
+                                      SavingorAppTextStyles.cardTitle(context),
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
@@ -240,7 +236,7 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w500,
-                                    color: SavingorColors.textSecondary
+                                    color: context.savingor.textSecondary
                                         .withOpacity(0.95),
                                     height: 1.35,
                                   ),
@@ -257,30 +253,11 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                                       RegExp(r'^\d*\.?\d{0,2}'),
                                     ),
                                   ],
-                                  decoration: InputDecoration(
-                                    labelText: l10n.monthlyBudgetAmount,
+                                  decoration:
+                                      SavingorWorkflowTheme.fieldDecoration(
+                                    context,
+                                    label: l10n.monthlyBudgetAmount,
                                     prefixText: '${appState.currency} \$ ',
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(14),
-                                      borderSide: BorderSide(
-                                        color: _airyBorder.withOpacity(0.85),
-                                      ),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(14),
-                                      borderSide: BorderSide(
-                                        color: _airyBorder.withOpacity(0.85),
-                                      ),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(14),
-                                      borderSide: BorderSide(
-                                        color: SavingorColors.primaryStroke
-                                            .withOpacity(0.55),
-                                      ),
-                                    ),
                                   ),
                                   validator: (String? value) {
                                     final String trimmed = value?.trim() ?? '';
@@ -302,18 +279,18 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
                                       : () => _saveBudget(appState),
                                   width: double.infinity,
                                   minHeight: 48,
-                                  borderRadius:
-                                      BorderRadius.circular(14),
+                                  borderRadius: BorderRadius.circular(14),
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 14,
                                   ),
                                   child: _isSaving
-                                      ? const SizedBox(
+                                      ? SizedBox(
                                           width: 20,
                                           height: 20,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
-                                            color: SavingorColors.darkGreen,
+                                            color: context
+                                                .savingor.buttonLabelOnGreen,
                                           ),
                                         )
                                       : Text(
@@ -351,10 +328,10 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
         Expanded(
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: SavingorColors.textSecondary,
+              color: context.savingor.textSecondary,
               height: 1.35,
             ),
           ),
@@ -364,7 +341,7 @@ class _MonthlyGoalBudgetScreenState extends State<MonthlyGoalBudgetScreen> {
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w800,
-            color: valueColor ?? SavingorColors.textPrimary,
+            color: valueColor ?? context.savingor.textPrimary,
           ),
         ),
       ],

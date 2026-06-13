@@ -7,9 +7,6 @@ import 'package:savingor_app/l10n/app_localizations.dart';
 
 class StartSavingScreen extends StatelessWidget {
   const StartSavingScreen({super.key});
-
-  static const Color _pageWhite = SavingorColors.pageWhite;
-
   static const Color _expenseAccent = Color(0xFFC24E3A);
   static const Color _listAccent = Color(0xFF0F766E);
   static const Color _basketAccent = Color(0xFF3B6FA8);
@@ -31,17 +28,17 @@ class StartSavingScreen extends StatelessWidget {
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: _pageWhite,
+      backgroundColor: context.savingor.pageBackground,
       appBar: AppBar(
         toolbarHeight: 48,
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: _pageWhite,
+        backgroundColor: context.savingor.pageBackground,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: SavingorColors.darkGreen,
+            color: SavingorWorkflowTheme.appBarIcon(context),
             size: 20,
           ),
           onPressed: () => _onBack(context),
@@ -54,12 +51,12 @@ class StartSavingScreen extends StatelessWidget {
           children: <Widget>[
             Text(
               l10n.startSaving,
-              style: SavingorAppTextStyles.pageTitle,
+              style: SavingorAppTextStyles.pageTitle(context),
             ),
             const SizedBox(height: 8),
             Text(
               l10n.chooseSavingAction,
-              style: SavingorAppTextStyles.bodySecondary(fontSize: 16),
+              style: SavingorAppTextStyles.bodySecondary(context, fontSize: 16),
             ),
             const SizedBox(height: SavingorSpacing.xl),
             StartSavingActionCard(

@@ -10,9 +10,6 @@ import 'package:savingor_app/l10n/app_localizations.dart';
 
 class CreateShoppingListScreen extends StatefulWidget {
   const CreateShoppingListScreen({super.key});
-
-  static const Color _pageBackground = Colors.white;
-
   @override
   State<CreateShoppingListScreen> createState() =>
       _CreateShoppingListScreenState();
@@ -111,89 +108,87 @@ class _CreateShoppingListScreenState extends State<CreateShoppingListScreen> {
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: CreateShoppingListScreen._pageBackground,
+      backgroundColor: context.savingor.pageBackground,
       appBar: AppBar(
         title: Text(
           l10n.newShoppingList,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: SavingorColors.darkGreen,
+          style: SavingorAppTextStyles.screenTitle(context).copyWith(
+            color: SavingorWorkflowTheme.primaryText(context),
           ),
         ),
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: CreateShoppingListScreen._pageBackground,
+        backgroundColor: context.savingor.pageBackground,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: SavingorColors.darkGreen,
+            color: SavingorWorkflowTheme.appBarIcon(context),
             size: 20,
           ),
           onPressed: _isSaving ? null : () => context.pop(),
         ),
       ),
       body: ColoredBox(
-        color: CreateShoppingListScreen._pageBackground,
+        color: context.savingor.pageBackground,
         child: Form(
           key: _formKey,
           child: ListView(
             padding: EdgeInsets.fromLTRB(20, 8, 20, 24 + bottomInset),
             children: <Widget>[
-            TextFormField(
-              controller: _titleController,
-              decoration: InputDecoration(
-                labelText: l10n.listTitle,
-                border: const OutlineInputBorder(),
+              TextFormField(
+                controller: _titleController,
+                decoration: SavingorWorkflowTheme.fieldDecoration(
+                  context,
+                  label: l10n.listTitle,
+                ),
+                validator: (String? value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return l10n.enterListTitle;
+                  }
+                  return null;
+                },
               ),
-              validator: (String? value) {
-                if (value == null || value.trim().isEmpty) {
-                  return l10n.enterListTitle;
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 24),
-            Text(
-              l10n.itemsOptional,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: SavingorColors.darkGreen,
+              const SizedBox(height: 24),
+              Text(
+                l10n.itemsOptional,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: SavingorWorkflowTheme.headingText(context),
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            for (int i = 0; i < _itemRows.length; i++)
-              _ItemRowEditor(
-                row: _itemRows[i],
-                index: i,
-                canRemove: _itemRows.length > 1,
-                onRemove: () => _removeRow(i),
+              const SizedBox(height: 12),
+              for (int i = 0; i < _itemRows.length; i++)
+                _ItemRowEditor(
+                  row: _itemRows[i],
+                  index: i,
+                  canRemove: _itemRows.length > 1,
+                  onRemove: () => _removeRow(i),
+                ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: _isSaving ? null : _addRow,
+                  icon: const Icon(Icons.add_rounded),
+                  label: Text(l10n.addAnotherItem),
+                ),
               ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: _isSaving ? null : _addRow,
-                icon: const Icon(Icons.add_rounded),
-                label: Text(l10n.addAnotherItem),
+              const SizedBox(height: 16),
+              FilledButton(
+                onPressed: _isSaving ? null : _save,
+                style: SavingorButtonStyles.primaryFilledFor(context),
+                child: _isSaving
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(l10n.createList),
               ),
-            ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: _isSaving ? null : _save,
-              style: SavingorButtonStyles.primaryFilled(),
-              child: _isSaving
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(l10n.createList),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
@@ -246,11 +241,10 @@ class _ItemRowEditor extends StatelessWidget {
               Expanded(
                 child: TextFormField(
                   controller: row.nameController,
-                  decoration: InputDecoration(
-                    labelText: l10n.itemName,
-                    border: const OutlineInputBorder(),
-                    hintText: 'Item ${index + 1}',
-                  ),
+                  decoration: SavingorWorkflowTheme.fieldDecoration(
+                    context,
+                    label: l10n.itemName,
+                  ).copyWith(hintText: 'Item ${index + 1}'),
                 ),
               ),
               if (canRemove)
@@ -267,9 +261,9 @@ class _ItemRowEditor extends StatelessWidget {
                 child: TextFormField(
                   controller: row.qtyController,
                   keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: l10n.qty,
-                    border: const OutlineInputBorder(),
+                  decoration: SavingorWorkflowTheme.fieldDecoration(
+                    context,
+                    label: l10n.qty,
                   ),
                 ),
               ),
@@ -278,9 +272,9 @@ class _ItemRowEditor extends StatelessWidget {
                 flex: 2,
                 child: TextFormField(
                   controller: row.storeController,
-                  decoration: InputDecoration(
-                    labelText: l10n.storeOptional,
-                    border: const OutlineInputBorder(),
+                  decoration: SavingorWorkflowTheme.fieldDecoration(
+                    context,
+                    label: l10n.storeOptional,
                   ),
                 ),
               ),
@@ -290,9 +284,9 @@ class _ItemRowEditor extends StatelessWidget {
           TextFormField(
             controller: row.priceController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(
-              labelText: l10n.priceOptional,
-              border: const OutlineInputBorder(),
+            decoration: SavingorWorkflowTheme.fieldDecoration(
+              context,
+              label: l10n.priceOptional,
             ),
           ),
         ],

@@ -43,7 +43,8 @@ class ShoppingList {
       status: ShoppingListStatus.fromString(data['status'] as String?),
       source: ShoppingListSource.fromString(data['source'] as String?),
       metadata: Map<String, dynamic>.from(
-        (data['metadata'] as Map<String, dynamic>?) ?? const <String, dynamic>{},
+        (data['metadata'] as Map<String, dynamic>?) ??
+            const <String, dynamic>{},
       ),
       lastFinalizedReceiptId: _nullableString(data['lastFinalizedReceiptId']),
     );

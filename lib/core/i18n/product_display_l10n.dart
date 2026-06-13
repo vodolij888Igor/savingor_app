@@ -4,8 +4,7 @@ import 'package:savingor_app/l10n/app_localizations.dart';
 
 /// Localized display labels for known normalized Savingor product identifiers.
 abstract final class ProductDisplayL10n {
-  static String normalizeProductId(String raw) =>
-      raw.trim().toLowerCase();
+  static String normalizeProductId(String raw) => raw.trim().toLowerCase();
 
   /// Returns a localized label for known normalized IDs (`bread`, `milk`).
   ///

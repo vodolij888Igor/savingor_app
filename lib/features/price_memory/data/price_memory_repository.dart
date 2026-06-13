@@ -40,8 +40,7 @@ class PriceMemoryRepository {
     required String userId,
     required String receiptId,
   }) async {
-    final int deletedCount =
-        await _service.deleteForReceipt(userId, receiptId);
+    final int deletedCount = await _service.deleteForReceipt(userId, receiptId);
     debugPrint(
       'PriceMemory: deleted $deletedCount price records for receiptId=$receiptId',
     );
@@ -53,10 +52,10 @@ class PriceMemoryRepository {
     return receipt.items
         .where((ReceiptItem item) => item.name.trim().isNotEmpty)
         .map((ReceiptItem item) {
-      final String normalizedName = item.normalizedName?.trim().isNotEmpty ==
-              true
-          ? item.normalizedName!.trim()
-          : ProductNameNormalizer.normalize(item.name);
+      final String normalizedName =
+          item.normalizedName?.trim().isNotEmpty == true
+              ? item.normalizedName!.trim()
+              : ProductNameNormalizer.normalize(item.name);
 
       return ProductPriceRecord(
         id: '',

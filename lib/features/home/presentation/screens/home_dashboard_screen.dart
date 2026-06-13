@@ -23,10 +23,6 @@ import 'package:savingor_app/l10n/app_localizations.dart';
 class HomeDashboardScreen extends StatelessWidget {
   const HomeDashboardScreen({super.key});
 
-  static const Color _pageWhite = SavingorColors.pageWhite;
-  static const Color _nearBlack = Color(0xFF111827);
-  static const Color _airyBorder = Color(0xFFF3F4F3);
-
   static _DashboardData _computeDashboardData(
     ExpensesStore expensesStore,
     ShoppingListsStore shoppingListsStore,
@@ -104,18 +100,17 @@ class HomeDashboardScreen extends StatelessWidget {
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 
-  BoxDecoration _airyCardDecoration({double radius = 18}) {
+  BoxDecoration _airyCardDecoration(BuildContext context,
+      {double radius = 18}) {
+    final SavingorThemeExtension t = context.savingor;
     return BoxDecoration(
-      color: Colors.white,
+      color: t.isDark ? t.surfaceElevated : t.surfacePrimary,
       borderRadius: BorderRadius.circular(radius),
-      border: Border.all(color: _airyBorder.withOpacity(0.6), width: 0.5),
-      boxShadow: <BoxShadow>[
-        BoxShadow(
-          color: Colors.black.withOpacity(0.04),
-          blurRadius: 12,
-          offset: const Offset(0, 2),
-        ),
-      ],
+      border: Border.all(
+        color: t.border.withOpacity(t.isDark ? 0.95 : 0.6),
+        width: 0.5,
+      ),
+      boxShadow: t.cardShadow,
     );
   }
 
@@ -127,7 +122,8 @@ class HomeDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _metricCard({
+  Widget _metricCard(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required String value,
@@ -137,7 +133,7 @@ class HomeDashboardScreen extends StatelessWidget {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
-        decoration: _airyCardDecoration(radius: 14),
+        decoration: _airyCardDecoration(context, radius: 14),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -159,7 +155,7 @@ class HomeDashboardScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 9,
                 fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary.withOpacity(0.78),
+                color: context.savingor.textSecondary.withOpacity(0.78),
                 height: 1.1,
               ),
             ),
@@ -174,10 +170,10 @@ class HomeDashboardScreen extends StatelessWidget {
                     value,
                     textAlign: TextAlign.center,
                     maxLines: 1,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
-                      color: _nearBlack,
+                      color: context.savingor.textPrimary,
                       height: 1.05,
                       letterSpacing: -0.3,
                     ),
@@ -194,7 +190,7 @@ class HomeDashboardScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 9,
                 fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary.withOpacity(0.72),
+                color: context.savingor.textSecondary.withOpacity(0.72),
                 height: 1.1,
               ),
             ),
@@ -208,13 +204,18 @@ class HomeDashboardScreen extends StatelessWidget {
     context.push('/start-saving');
   }
 
-  Widget _statusPill({required Widget child}) {
+  Widget _statusPill(BuildContext context, {required Widget child}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.savingor.surfacePrimary,
         borderRadius: BorderRadius.circular(SavingorRadius.pill),
-        border: Border.all(color: _airyBorder.withOpacity(0.5), width: 0.5),
+        border: Border.all(
+          color: context.savingor.border.withOpacity(
+            context.savingor.isDark ? 0.85 : 0.5,
+          ),
+          width: 0.5,
+        ),
       ),
       child: child,
     );
@@ -235,8 +236,7 @@ class HomeDashboardScreen extends StatelessWidget {
       listenable: appState,
       builder: (BuildContext context, Widget? _) {
         final double monthlyBudget = appState.displayMonthlyBudget;
-        final String Function(double) formatMoney =
-            (double amount) => appState.formatMoney(amount);
+        formatMoney(double amount) => appState.formatMoney(amount);
 
         return ListenableBuilder(
           listenable: expensesStore,
@@ -250,101 +250,115 @@ class HomeDashboardScreen extends StatelessWidget {
                     return ListenableBuilder(
                       listenable: priceMemoryStore,
                       builder: (BuildContext context, Widget? _____) {
-                    final _DashboardData data = _computeDashboardData(
-                      expensesStore,
-                      shoppingListsStore,
-                      receiptStore,
-                      appState,
-                    );
-                    final HomeDashboardSummary summary =
-                        HomeDashboardSummaryBuilder.build(
-                      expenses: expensesStore.expenses,
-                      receipts: receiptStore.receipts,
-                      priceRecords: priceMemoryStore.records,
-                      convertToDisplay: appState.toDisplayConverter,
-                    );
-                    final double heroRingProgress = monthlyBudget <= 0
-                        ? 0
-                        : (data.totalExpenses / monthlyBudget).clamp(0.0, 1.0);
-                    final double monthlyGoalProgress = monthlyBudget <= 0
-                        ? 0
-                        : (summary.spentThisMonth / monthlyBudget)
-                            .clamp(0.0, 1.0);
-                    final AppLocalizations l10n = AppLocalizations.of(context);
+                        final _DashboardData data = _computeDashboardData(
+                          expensesStore,
+                          shoppingListsStore,
+                          receiptStore,
+                          appState,
+                        );
+                        final HomeDashboardSummary summary =
+                            HomeDashboardSummaryBuilder.build(
+                          expenses: expensesStore.expenses,
+                          receipts: receiptStore.receipts,
+                          priceRecords: priceMemoryStore.records,
+                          convertToDisplay: appState.toDisplayConverter,
+                        );
+                        final double heroRingProgress = monthlyBudget <= 0
+                            ? 0
+                            : (data.totalExpenses / monthlyBudget)
+                                .clamp(0.0, 1.0);
+                        final double monthlyGoalProgress = monthlyBudget <= 0
+                            ? 0
+                            : (summary.spentThisMonth / monthlyBudget)
+                                .clamp(0.0, 1.0);
+                        final AppLocalizations l10n =
+                            AppLocalizations.of(context);
 
-                    return Scaffold(
-                      backgroundColor: _pageWhite,
-                      body: SafeArea(
-                        child: SingleChildScrollView(
-                          padding: EdgeInsets.fromLTRB(
-                            20,
-                            0,
-                            20,
-                            32 + bottomInset + 72,
+                        return Scaffold(
+                          backgroundColor: context.savingor.pageBackground,
+                          body: SafeArea(
+                            child: SingleChildScrollView(
+                              padding: EdgeInsets.fromLTRB(
+                                20,
+                                0,
+                                20,
+                                32 + bottomInset + 72,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: <Widget>[
+                                  _buildStatusRow(
+                                    context,
+                                    appState: appState,
+                                    languageCode: languageCode,
+                                  ),
+                                  const SizedBox(
+                                      height: SavingorSpacing.lg +
+                                          SavingorSpacing.sm),
+                                  _buildGreeting(),
+                                  const SizedBox(
+                                    height:
+                                        SavingorSpacing.lg + SavingorSpacing.md,
+                                  ),
+                                  _buildMetricsRow(
+                                    context,
+                                    data,
+                                    l10n: l10n,
+                                    spentThisMonth: summary.spentThisMonth,
+                                    formatMoney: formatMoney,
+                                  ),
+                                  const SizedBox(
+                                      height: SavingorSpacing.lg +
+                                          SavingorSpacing.sm),
+                                  _buildSavingsHero(
+                                    context,
+                                    data.totalExpenses,
+                                    heroRingProgress,
+                                    data.expenseCount,
+                                    l10n: l10n,
+                                    formatMoney: formatMoney,
+                                  ),
+                                  const SizedBox(
+                                      height: SavingorSpacing.lg +
+                                          SavingorSpacing.sm),
+                                  _buildStartSavingButton(context, l10n),
+                                  const SizedBox(
+                                      height: SavingorSpacing.lg +
+                                          SavingorSpacing.sm),
+                                  DashboardBestActionCard(
+                                    recommendation: summary.topRecommendation,
+                                  ),
+                                  const SizedBox(height: SavingorSpacing.lg),
+                                  DashboardProductFeatureCardsRow(
+                                    records: priceMemoryStore.records,
+                                  ),
+                                  const SizedBox(height: SavingorSpacing.lg),
+                                  DashboardSummarySection(
+                                    summary: summary,
+                                    formatCurrency: formatMoney,
+                                  ),
+                                  const SizedBox(height: SavingorSpacing.lg),
+                                  _buildRecentActivity(
+                                    context,
+                                    data,
+                                    l10n: l10n,
+                                    appState: appState,
+                                    formatMoney: formatMoney,
+                                  ),
+                                  const SizedBox(height: SavingorSpacing.lg),
+                                  _buildMonthlyGoal(
+                                    context,
+                                    summary.spentThisMonth,
+                                    monthlyGoalProgress,
+                                    monthlyBudget,
+                                    l10n: l10n,
+                                    formatMoney: formatMoney,
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: <Widget>[
-                              _buildStatusRow(
-                                context,
-                                appState: appState,
-                                languageCode: languageCode,
-                              ),
-                              const SizedBox(height: SavingorSpacing.lg + SavingorSpacing.sm),
-                              _buildGreeting(),
-                              const SizedBox(
-                                height:
-                                    SavingorSpacing.lg + SavingorSpacing.md,
-                              ),
-                              _buildMetricsRow(
-                                data,
-                                l10n: l10n,
-                                spentThisMonth: summary.spentThisMonth,
-                                formatMoney: formatMoney,
-                              ),
-                              const SizedBox(height: SavingorSpacing.lg + SavingorSpacing.sm),
-                              _buildSavingsHero(
-                                data.totalExpenses,
-                                heroRingProgress,
-                                data.expenseCount,
-                                l10n: l10n,
-                                formatMoney: formatMoney,
-                              ),
-                              const SizedBox(height: SavingorSpacing.lg + SavingorSpacing.sm),
-                              _buildStartSavingButton(context, l10n),
-                              const SizedBox(height: SavingorSpacing.lg + SavingorSpacing.sm),
-                              DashboardBestActionCard(
-                                recommendation: summary.topRecommendation,
-                              ),
-                              const SizedBox(height: SavingorSpacing.lg),
-                              DashboardProductFeatureCardsRow(
-                                records: priceMemoryStore.records,
-                              ),
-                              const SizedBox(height: SavingorSpacing.lg),
-                              DashboardSummarySection(
-                                summary: summary,
-                                formatCurrency: formatMoney,
-                              ),
-                              const SizedBox(height: SavingorSpacing.lg),
-                              _buildRecentActivity(
-                                data,
-                                l10n: l10n,
-                                appState: appState,
-                                formatMoney: formatMoney,
-                              ),
-                              const SizedBox(height: SavingorSpacing.lg),
-                              _buildMonthlyGoal(
-                                summary.spentThisMonth,
-                                monthlyGoalProgress,
-                                monthlyBudget,
-                                l10n: l10n,
-                                formatMoney: formatMoney,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
+                        );
                       },
                     );
                   },
@@ -372,6 +386,7 @@ class HomeDashboardScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           _statusPill(
+            context,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -382,10 +397,10 @@ class HomeDashboardScreen extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   '${AppSettingsL10n.regionLabel(context, appState.region)} · ${appState.currency}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: SavingorColors.textPrimary,
+                    color: context.savingor.textPrimary,
                     height: 1.1,
                   ),
                 ),
@@ -394,6 +409,7 @@ class HomeDashboardScreen extends StatelessWidget {
           ),
           const Spacer(),
           _statusPill(
+            context,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -404,10 +420,10 @@ class HomeDashboardScreen extends StatelessWidget {
                 const SizedBox(width: 6),
                 Text(
                   _languageBadgeLabel(languageCode),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: SavingorColors.textPrimary,
+                    color: context.savingor.textPrimary,
                     height: 1.1,
                   ),
                 ),
@@ -424,6 +440,7 @@ class HomeDashboardScreen extends StatelessWidget {
   }
 
   Widget _buildSavingsHero(
+    BuildContext context,
     double totalExpenses,
     double ringProgress,
     int expenseCount, {
@@ -431,6 +448,7 @@ class HomeDashboardScreen extends StatelessWidget {
     required String Function(double) formatMoney,
   }) {
     const double ringSize = 220;
+    final SavingorThemeExtension theme = context.savingor;
 
     return Column(
       children: <Widget>[
@@ -449,18 +467,17 @@ class HomeDashboardScreen extends StatelessWidget {
                     value: ringProgress,
                     strokeWidth: 10,
                     strokeCap: StrokeCap.round,
-                    backgroundColor: const Color(0xFFF3F5F4),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      SavingorColors.primaryGreen,
-                    ),
+                    backgroundColor: theme.ringTrack,
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(theme.accentGreen),
                   ),
                 ),
                 Container(
                   width: ringSize - 40,
                   height: ringSize - 40,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.white,
+                    color: theme.surfaceStrong,
                   ),
                   alignment: Alignment.center,
                   child: Padding(
@@ -478,10 +495,10 @@ class HomeDashboardScreen extends StatelessWidget {
                               maxLines: 1,
                               softWrap: false,
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 42,
                                 fontWeight: FontWeight.w800,
-                                color: _nearBlack,
+                                color: theme.textPrimary,
                                 height: 1,
                                 letterSpacing: -1.5,
                               ),
@@ -494,10 +511,10 @@ class HomeDashboardScreen extends StatelessWidget {
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: SavingorColors.textSecondary,
+                            color: context.savingor.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -506,10 +523,10 @@ class HomeDashboardScreen extends StatelessWidget {
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            color: SavingorColors.primaryStroke,
+                            color: theme.brandTitle,
                           ),
                         ),
                       ],
@@ -527,10 +544,10 @@ class HomeDashboardScreen extends StatelessWidget {
           const SizedBox(height: SavingorSpacing.md),
           Text(
             l10n.expensesTracked(expenseCount),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: SavingorColors.primaryStroke,
+              color: theme.brandTitle,
             ),
           ),
         ],
@@ -539,6 +556,8 @@ class HomeDashboardScreen extends StatelessWidget {
   }
 
   Widget _buildStartSavingButton(BuildContext context, AppLocalizations l10n) {
+    final SavingorThemeExtension theme = context.savingor;
+
     return SavingorInteractivePressable(
       onTap: () => _onStartSaving(context),
       borderRadius: BorderRadius.circular(28),
@@ -551,30 +570,27 @@ class HomeDashboardScreen extends StatelessWidget {
           curve: SavingorInteraction.curve,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(28),
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: active
-                  ? const <Color>[
-                      Color(0xFFA3D99C),
-                      Color(0xFF88D07E),
-                      Color(0xFF7BC96E),
-                    ]
-                  : const <Color>[
-                      Color(0xFF96CF8F),
-                      Color(0xFF7BC96E),
-                      Color(0xFF72C067),
-                    ],
-              stops: const <double>[0.0, 0.45, 1.0],
+            color: theme.accentGreen,
+            border: Border.all(
+              color: theme.accentGreen.withOpacity(theme.isDark ? 0.35 : 0.5),
             ),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: SavingorColors.primaryStroke
-                    .withOpacity(active ? 0.28 : 0.22),
-                blurRadius: active ? 18 : 14,
-                offset: Offset(0, active ? 7 : 5),
-              ),
-            ],
+            boxShadow: theme.isDark
+                ? <BoxShadow>[
+                    BoxShadow(
+                      color:
+                          theme.accentGreen.withOpacity(active ? 0.18 : 0.12),
+                      blurRadius: active ? 12 : 8,
+                      offset: Offset(0, active ? 4 : 3),
+                    ),
+                  ]
+                : <BoxShadow>[
+                    BoxShadow(
+                      color: SavingorColors.primaryStroke
+                          .withOpacity(active ? 0.28 : 0.22),
+                      blurRadius: active ? 18 : 14,
+                      offset: Offset(0, active ? 7 : 5),
+                    ),
+                  ],
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 23),
@@ -589,20 +605,20 @@ class HomeDashboardScreen extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
-                        color: SavingorColors.darkGreen,
+                        color: theme.buttonLabelOnGreen,
                         height: 1.0,
                         letterSpacing: 0.4,
                       ),
                     ),
                   ),
                   const SizedBox(width: 16),
-                  const Icon(
+                  Icon(
                     Icons.arrow_forward_rounded,
                     size: 20,
-                    color: SavingorColors.darkGreen,
+                    color: theme.buttonLabelOnGreen,
                   ),
                 ],
               ),
@@ -614,6 +630,7 @@ class HomeDashboardScreen extends StatelessWidget {
   }
 
   Widget _buildMetricsRow(
+    BuildContext context,
     _DashboardData data, {
     required AppLocalizations l10n,
     required double spentThisMonth,
@@ -625,6 +642,7 @@ class HomeDashboardScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           _metricCard(
+            context,
             icon: Icons.trending_up_rounded,
             title: l10n.thisMonth,
             value: formatMoney(spentThisMonth),
@@ -633,6 +651,7 @@ class HomeDashboardScreen extends StatelessWidget {
           ),
           const SizedBox(width: 7),
           _metricCard(
+            context,
             icon: Icons.receipt_long_rounded,
             title: l10n.receipts,
             value: '${data.receiptCount}',
@@ -641,6 +660,7 @@ class HomeDashboardScreen extends StatelessWidget {
           ),
           const SizedBox(width: 7),
           _metricCard(
+            context,
             icon: Icons.checklist_rounded,
             title: l10n.shoppingList,
             value: '${data.shoppingListCount}',
@@ -649,6 +669,7 @@ class HomeDashboardScreen extends StatelessWidget {
           ),
           const SizedBox(width: 7),
           _metricCard(
+            context,
             icon: Icons.sell_rounded,
             title: l10n.activeDeals,
             value: formatMoney(data.estimatedShoppingTotal),
@@ -661,6 +682,7 @@ class HomeDashboardScreen extends StatelessWidget {
   }
 
   Widget _buildMonthlyGoal(
+    BuildContext context,
     double spentThisMonth,
     double progress,
     double monthlyBudget, {
@@ -671,16 +693,16 @@ class HomeDashboardScreen extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-      decoration: _airyCardDecoration(radius: 16),
+      decoration: _airyCardDecoration(context, radius: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
             l10n.monthlyGoal,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: SavingorColors.textPrimary,
+              color: context.savingor.textPrimary,
             ),
           ),
           const SizedBox(height: 10),
@@ -688,19 +710,19 @@ class HomeDashboardScreen extends StatelessWidget {
             children: <Widget>[
               Text(
                 '${formatMoney(spentThisMonth)} / ${formatMoney(monthlyBudget)}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
-                  color: _nearBlack,
+                  color: context.savingor.textPrimary,
                 ),
               ),
               const Spacer(),
               Text(
                 '$progressPercent%',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: SavingorColors.primaryStroke,
+                  color: context.savingor.brandTitle,
                 ),
               ),
             ],
@@ -711,9 +733,9 @@ class HomeDashboardScreen extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 7,
-              backgroundColor: const Color(0xFFF0F2F1),
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                SavingorColors.primaryGreen,
+              backgroundColor: context.savingor.ringTrack,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                context.savingor.accentGreen,
               ),
             ),
           ),
@@ -723,6 +745,7 @@ class HomeDashboardScreen extends StatelessWidget {
   }
 
   Widget _buildRecentActivity(
+    BuildContext context,
     _DashboardData data, {
     required AppLocalizations l10n,
     required AppState appState,
@@ -732,7 +755,7 @@ class HomeDashboardScreen extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-      decoration: _airyCardDecoration(radius: 18),
+      decoration: _airyCardDecoration(context, radius: 18),
       child: Row(
         children: <Widget>[
           Container(
@@ -755,10 +778,10 @@ class HomeDashboardScreen extends StatelessWidget {
               children: <Widget>[
                 Text(
                   latest == null ? l10n.noRecentActivity : l10n.expenseAdded,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
-                    color: SavingorColors.textPrimary,
+                    color: context.savingor.textPrimary,
                     height: 1.2,
                   ),
                 ),
@@ -767,10 +790,10 @@ class HomeDashboardScreen extends StatelessWidget {
                   latest == null
                       ? l10n.addExpenseToSeeHere
                       : '${latest.storeName} • ${_formatActivityDate(latest.purchaseDate)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: SavingorColors.textSecondary,
+                    color: context.savingor.textSecondary,
                     height: 1.3,
                   ),
                 ),
@@ -784,10 +807,10 @@ class HomeDashboardScreen extends StatelessWidget {
                     latest.totalAmount,
                     originalCurrency: latest.currency,
                   ),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w800,
-              color: _nearBlack,
+              color: context.savingor.textPrimary,
               letterSpacing: -0.2,
             ),
           ),
@@ -866,12 +889,12 @@ class _DashboardGreetingState extends State<_DashboardGreeting> {
       children: <Widget>[
         Text(
           _greetingLine(l10n),
-          style: SavingorAppTextStyles.greetingTitle,
+          style: SavingorAppTextStyles.greetingTitle(context),
         ),
         const SizedBox(height: 6),
         Text(
           l10n.readyToSaveSmarterToday,
-          style: SavingorAppTextStyles.bodySecondary(fontSize: 16),
+          style: SavingorAppTextStyles.bodySecondary(context, fontSize: 16),
         ),
       ],
     );

@@ -27,14 +27,6 @@ class AiSavingsAssistantScreen extends StatefulWidget {
 }
 
 class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
-  static const Color _pageBackground = Color(0xFFFAFAF7);
-  static const Color _airyBorder = Color(0xFFE5E7EB);
-  static const Color _titleCharcoal = Color(0xFF1F2937);
-  static const Color _mutedText = Color(0xFF6B7280);
-  static const Color _deepGreen = Color(0xFF166534);
-  static const Color _sendGreen = Color(0xFF7BC96E);
-  static const Color _sendGreenStroke = Color(0xFF4F9D47);
-
   // Tasteful accent families for chips and question cards.
   static const Color _accentSavings = Color(0xFF4F9D47);
   static const Color _accentStore = Color(0xFF0F766E);
@@ -222,18 +214,18 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
         final AppLocalizations l10n = AppLocalizations.of(context);
 
         return Scaffold(
-          backgroundColor: _pageBackground,
+          backgroundColor: context.savingor.pageBackground,
           appBar: AppBar(
             title: Text(
               l10n.aiSavingsAssistant,
-              style: SavingorAppTextStyles.screenTitle,
+              style: SavingorAppTextStyles.screenTitle(context),
             ),
             elevation: 0,
             scrolledUnderElevation: 0,
-            backgroundColor: _pageBackground,
+            backgroundColor: context.savingor.pageBackground,
             surfaceTintColor: Colors.transparent,
             leading: BackButton(
-              color: _deepGreen,
+              color: context.savingor.brandTitle,
               onPressed: _goBack,
             ),
             automaticallyImplyLeading: false,
@@ -321,11 +313,7 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
               const SizedBox(height: SavingorSpacing.xl),
               Text(
                 l10n.aiSuggestedQuestions,
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                  color: _titleCharcoal,
-                ),
+                style: SavingorAppTextStyles.sectionTitle(context),
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -337,7 +325,8 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
                         label: item.question,
                         icon: item.icon,
                         accent: item.accent,
-                        onTap: canSend ? () => _askQuestion(item.question) : null,
+                        onTap:
+                            canSend ? () => _askQuestion(item.question) : null,
                       ),
                     )
                     .toList(),
@@ -364,7 +353,7 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: SavingorColors.textSecondary.withOpacity(0.9),
+                  color: context.savingor.textSecondary.withOpacity(0.9),
                   height: 1.4,
                 ),
               ),
@@ -385,41 +374,51 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
     required AppLocalizations l10n,
     required bool isLive,
   }) {
+    final SavingorThemeExtension theme = context.savingor;
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(22),
       child: Stack(
         children: <Widget>[
           Container(
             padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: <Color>[
-                  Color(0xFFF6FBF8),
-                  Color(0xFFF0F9F4),
-                  Color(0xFFFBF9F4),
-                  Color(0xFFFAFAF7),
-                ],
-                stops: <double>[0.0, 0.42, 0.72, 1.0],
-              ),
-              border: Border.all(
-                color: SavingorColors.primaryStroke.withOpacity(0.14),
-                width: 0.75,
-              ),
-              boxShadow: const <BoxShadow>[
-                BoxShadow(
-                  color: Color(0x0A4F9D47),
-                  blurRadius: 16,
-                  offset: Offset(0, 4),
-                ),
-                BoxShadow(
-                  color: Color(0x06000000),
-                  blurRadius: 8,
-                  offset: Offset(0, 2),
-                ),
-              ],
-            ),
+            decoration: theme.isDark
+                ? BoxDecoration(
+                    color: theme.surfaceStrong,
+                    border: Border.all(color: theme.border, width: 0.75),
+                    boxShadow: theme.cardShadow,
+                  )
+                : const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: <Color>[
+                        Color(0xFFF6FBF8),
+                        Color(0xFFF0F9F4),
+                        Color(0xFFFBF9F4),
+                        Color(0xFFFAFAF7),
+                      ],
+                      stops: <double>[0.0, 0.42, 0.72, 1.0],
+                    ),
+                    border: Border.fromBorderSide(
+                      BorderSide(
+                        color: Color(0x244F9D47),
+                        width: 0.75,
+                      ),
+                    ),
+                    boxShadow: <BoxShadow>[
+                      BoxShadow(
+                        color: Color(0x0A4F9D47),
+                        blurRadius: 16,
+                        offset: Offset(0, 4),
+                      ),
+                      BoxShadow(
+                        color: Color(0x06000000),
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -434,9 +433,10 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
                         height: 58,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.white,
+                          color: context.savingor.surfacePrimary,
                           border: Border.all(
-                            color: SavingorColors.primaryStroke.withOpacity(0.2),
+                            color:
+                                SavingorColors.primaryStroke.withOpacity(0.2),
                             width: 1,
                           ),
                           boxShadow: const <BoxShadow>[
@@ -447,9 +447,9 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
                             ),
                           ],
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.auto_awesome_outlined,
-                          color: SavingorColors.primaryStroke,
+                          color: theme.brandTitle,
                           size: 26,
                         ),
                       ),
@@ -462,7 +462,9 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: _accentList.withOpacity(0.75),
-                            border: Border.all(color: Colors.white, width: 1.5),
+                            border: Border.all(
+                                color: context.savingor.surfacePrimary,
+                                width: 1.5),
                           ),
                         ),
                       ),
@@ -476,10 +478,10 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
                     children: <Widget>[
                       Text(
                         l10n.aiHeroTitle,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w800,
-                          color: _deepGreen,
+                          color: theme.textPrimary,
                           height: 1.2,
                           letterSpacing: -0.2,
                         ),
@@ -489,10 +491,10 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
                         isLive
                             ? l10n.aiHeroSubtitleLive
                             : l10n.aiHeroSubtitlePreview,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: _mutedText,
+                          color: theme.textSecondary,
                           height: 1.4,
                         ),
                       ),
@@ -518,39 +520,35 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
   }
 
   Widget _buildConfigInfoCard(AppLocalizations l10n) {
+    final SavingorThemeExtension theme = context.savingor;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFAF3),
+        color: theme.warningSurface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: _infoAmber.withOpacity(0.28),
+          color: _infoAmber.withOpacity(theme.isDark ? 0.35 : 0.28),
           width: 0.75,
         ),
-        boxShadow: const <BoxShadow>[
-          BoxShadow(
-            color: Color(0x08CA8A04),
-            blurRadius: 10,
-            offset: Offset(0, 2),
-          ),
-        ],
+        boxShadow: theme.cardShadow,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Icon(
+          Icon(
             Icons.lightbulb_outline_rounded,
-            color: _infoAmber,
+            color: theme.warning,
             size: 22,
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               l10n.aiConfigReadyMessage,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: _titleCharcoal,
+                color: theme.textPrimary,
                 height: 1.45,
               ),
             ),
@@ -566,27 +564,16 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
   ) {
     return Container(
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _airyBorder, width: 0.75),
-        boxShadow: const <BoxShadow>[
-          BoxShadow(
-            color: Color(0x10000000),
-            blurRadius: 14,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: SavingorSurfaces.premiumCard(context, radius: 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
             l10n.aiDataSnapshot,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w800,
-              color: _titleCharcoal,
+              color: context.savingor.textPrimary,
             ),
           ),
           const SizedBox(height: 14),
@@ -603,7 +590,8 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
               if (contextSnapshot.hasManualExpenses)
                 _SummaryChip(
                   icon: Icons.payments_outlined,
-                  label: l10n.aiExpenseCount(contextSnapshot.manualExpenseCount),
+                  label:
+                      l10n.aiExpenseCount(contextSnapshot.manualExpenseCount),
                   accent: _chipBlue,
                 ),
               if (contextSnapshot.totalSpending > 0)
@@ -636,25 +624,27 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
   }
 
   Widget _buildErrorCard(String message) {
+    final SavingorThemeExtension theme = context.savingor;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF5F5),
+        color: theme.errorSurface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE8B4B4)),
+        border: Border.all(color: theme.error.withOpacity(0.45)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Icon(Icons.error_outline, color: Color(0xFFC45A5A), size: 22),
+          Icon(Icons.error_outline, color: theme.error, size: 22),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF991B1B),
+                color: theme.textPrimary,
                 height: 1.4,
               ),
             ),
@@ -670,7 +660,7 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
   }) {
     return Container(
       padding: const EdgeInsets.all(18),
-      decoration: SavingorSurfaces.premiumCard(radius: 18),
+      decoration: SavingorSurfaces.premiumCard(context, radius: 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -680,7 +670,7 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: SavingorColors.textSecondary.withOpacity(0.85),
+                color: context.savingor.textSecondary.withOpacity(0.85),
                 height: 1.35,
               ),
             ),
@@ -688,10 +678,10 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
           ],
           Text(
             response.answer,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
-              color: SavingorColors.textPrimary,
+              color: context.savingor.textPrimary,
               height: 1.5,
             ),
           ),
@@ -709,71 +699,68 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
     return Container(
       padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + bottomInset),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: _airyBorder.withOpacity(0.8))),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
-          ),
-        ],
+        color: context.savingor.surfaceElevated,
+        border: Border(
+          top: BorderSide(color: context.savingor.border),
+        ),
+        boxShadow: context.savingor.cardShadow,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
           Expanded(
             child: TextField(
-                controller: _questionController,
-                focusNode: _questionFocus,
-                enabled: canSend,
-                maxLines: 3,
-                minLines: 1,
-                textInputAction: TextInputAction.send,
-                onSubmitted: canSend ? _askQuestion : null,
-                style: const TextStyle(
+              controller: _questionController,
+              focusNode: _questionFocus,
+              enabled: canSend,
+              maxLines: 3,
+              minLines: 1,
+              textInputAction: TextInputAction.send,
+              onSubmitted: canSend ? _askQuestion : null,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: context.savingor.textPrimary,
+              ),
+              decoration: InputDecoration(
+                hintText:
+                    isLive ? l10n.aiInputHintLive : l10n.aiInputHintPreview,
+                hintStyle: TextStyle(
+                  color: context.savingor.textMuted,
                   fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: _titleCharcoal,
                 ),
-                decoration: InputDecoration(
-                  hintText: isLive
-                      ? l10n.aiInputHintLive
-                      : l10n.aiInputHintPreview,
-                  hintStyle: const TextStyle(
-                    color: _mutedText,
-                    fontSize: 14,
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 13,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: const BorderSide(color: _airyBorder),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(
-                      color: _sendGreenStroke.withOpacity(0.45),
-                      width: 1.25,
-                    ),
+                filled: true,
+                fillColor: context.savingor.inputFill,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 13,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(color: context.savingor.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide(
+                    color: context.savingor.accentGreen.withOpacity(0.55),
+                    width: 1.25,
                   ),
                 ),
               ),
+            ),
           ),
           const SizedBox(width: 10),
           Semantics(
             button: true,
             label: l10n.aiSend,
             child: Material(
-              color: canSend ? _sendGreen : _sendGreen.withOpacity(0.45),
+              color: canSend
+                  ? context.savingor.accentGreen
+                  : context.savingor.accentGreen.withOpacity(0.45),
               borderRadius: BorderRadius.circular(14),
               elevation: 0,
               child: InkWell(
@@ -785,18 +772,11 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: _sendGreenStroke.withOpacity(canSend ? 0.32 : 0.18),
+                      color: context.savingor.accentGreen.withOpacity(
+                        canSend ? 0.35 : 0.18,
+                      ),
                       width: 0.75,
                     ),
-                    boxShadow: canSend
-                        ? const <BoxShadow>[
-                            BoxShadow(
-                              color: Color(0x144F9D47),
-                              blurRadius: 8,
-                              offset: Offset(0, 2),
-                            ),
-                          ]
-                        : null,
                   ),
                   child: SizedBox(
                     width: 48,
@@ -804,8 +784,9 @@ class _AiSavingsAssistantScreenState extends State<AiSavingsAssistantScreen> {
                     child: Icon(
                       Icons.send_rounded,
                       color: canSend
-                          ? _deepGreen
-                          : _deepGreen.withOpacity(0.45),
+                          ? context.savingor.buttonLabelOnGreen
+                          : context.savingor.buttonLabelOnGreen
+                              .withOpacity(0.45),
                       size: 22,
                     ),
                   ),
@@ -860,8 +841,10 @@ class _SuggestionChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final double maxChipWidth = MediaQuery.sizeOf(context).width - 48;
 
+    final SavingorThemeExtension theme = context.savingor;
+
     return Material(
-      color: Colors.white,
+      color: theme.surfaceElevated,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -871,18 +854,14 @@ class _SuggestionChip extends StatelessWidget {
         child: Ink(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            color: const Color(0xFFFFFEFE),
+            color: theme.isDark ? theme.surfaceElevated : theme.surfacePrimary,
             border: Border.all(
-              color: _cardBorder.withOpacity(0.9),
+              color: theme.isDark
+                  ? accent.withOpacity(0.35)
+                  : _cardBorder.withOpacity(0.9),
               width: 0.75,
             ),
-            boxShadow: const <BoxShadow>[
-              BoxShadow(
-                color: Color(0x06000000),
-                blurRadius: 6,
-                offset: Offset(0, 2),
-              ),
-            ],
+            boxShadow: theme.cardShadow,
           ),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
           child: SizedBox(
@@ -907,10 +886,10 @@ class _SuggestionChip extends StatelessWidget {
                 Expanded(
                   child: Text(
                     label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF1F2937),
+                      color: context.savingor.textPrimary,
                       height: 1.35,
                     ),
                   ),
@@ -954,10 +933,10 @@ class _SummaryChip extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1F2937),
+              color: context.savingor.textPrimary,
             ),
           ),
         ],

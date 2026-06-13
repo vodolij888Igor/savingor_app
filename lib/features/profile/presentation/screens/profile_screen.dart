@@ -27,9 +27,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   UserProfile? _profile;
   bool _profileLoadFailed = false;
   SubscriptionStatus _subscription = SubscriptionStatus.free;
-
-  static const Color _pageBackground = SavingorColors.pageWhite;
-  static const Color _emailMuted = Color(0xFF64748B);
   static const double _heroRadius = 24;
   static const double _cardRadius = 22;
   static const double _buttonRadius = 18;
@@ -37,15 +34,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
   static const TextStyle _cardHeadingStyle = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.w800,
-    color: SavingorColors.darkGreen,
   );
 
-  static const TextStyle _bodyMutedStyle = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
-    color: SavingorColors.textSecondary,
-    height: 1.45,
-  );
+  TextStyle _cardHeadingStyleFor(BuildContext context) =>
+      _cardHeadingStyle.copyWith(
+        color: context.savingor.brandHeading,
+      );
+
+  TextStyle _bodyMutedStyle(BuildContext context) => TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: context.savingor.textSecondary,
+        height: 1.45,
+      );
 
   @override
   void initState() {
@@ -96,16 +97,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: _pageBackground,
+      backgroundColor: context.savingor.pageBackground,
       appBar: AppBar(
         title: Text(
           l10n.profile,
-          style: SavingorAppTextStyles.screenTitle,
+          style: SavingorAppTextStyles.screenTitle(context),
         ),
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: _pageBackground,
+        backgroundColor: context.savingor.pageBackground,
         surfaceTintColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
@@ -164,45 +165,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         : l10n.yourAccount;
     final String? email =
         _profile != null && _profile!.email.isNotEmpty ? _profile!.email : null;
+    final SavingorThemeExtension theme = context.savingor;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 22, 24, 24),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(_heroRadius),
-        // Symmetrical top-to-bottom gradient — no off-center shapes.
-        gradient: const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: <Color>[
-            Color(0xFFF2FAF4),
-            Color(0xFFFAFAF5),
-          ],
-        ),
-        border: Border.all(
-          color: SavingorColors.primaryStroke.withOpacity(0.14),
-          width: 0.75,
-        ),
-        boxShadow: const <BoxShadow>[
-          BoxShadow(
-            color: Color(0x0F4F9D47),
-            blurRadius: 20,
-            offset: Offset(0, 7),
-          ),
-          BoxShadow(
-            color: Color(0x06000000),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
+      decoration: SavingorSurfaces.tabHeroCard(context, radius: _heroRadius),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.savingor.surfacePrimary,
               borderRadius: BorderRadius.circular(SavingorRadius.pill),
               border: Border.all(
                 color: SavingorColors.primaryStroke.withOpacity(0.28),
@@ -224,15 +199,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ? Icons.workspace_premium_rounded
                       : Icons.workspace_premium_outlined,
                   size: 14,
-                  color: SavingorColors.darkGreen,
+                  color: theme.brandTitle,
                 ),
                 const SizedBox(width: 5),
                 Text(
                   _subscription.isPro ? l10n.proPlan : l10n.freePlan,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: SavingorColors.darkGreen,
+                    color: theme.brandTitle,
                     letterSpacing: 0.15,
                   ),
                 ),
@@ -256,7 +231,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.all(3),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
+                color: context.savingor.surfacePrimary,
                 border: Border.all(
                   color: SavingorColors.primaryStroke.withOpacity(0.18),
                   width: 0.75,
@@ -293,10 +268,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Text(
             displayName,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF1F2937),
+              color: context.savingor.textPrimary,
               height: 1.15,
               letterSpacing: -0.2,
             ),
@@ -306,10 +281,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Text(
               email,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13.5,
                 fontWeight: FontWeight.w500,
-                color: _emailMuted,
+                color: theme.textSecondary,
                 height: 1.35,
               ),
             ),
@@ -318,10 +293,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Text(
             l10n.readyToSaveSmarterToday,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: SavingorColors.primaryStroke,
+              color: theme.brandTitle,
               letterSpacing: 0.2,
               height: 1.3,
             ),
@@ -365,7 +340,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: _snapshotChip(
             icon: Icons.light_mode_rounded,
             label: l10n.appearance,
-            value: AppSettingsL10n.appearanceLabel(context, appState.appearance),
+            value:
+                AppSettingsL10n.appearanceLabel(context, appState.appearance),
             accent: _appearanceAccent,
           ),
         ),
@@ -379,27 +355,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required String value,
     required Color accent,
   }) {
+    final SavingorThemeExtension theme = context.savingor;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.isDark ? theme.surfaceElevated : theme.surfacePrimary,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: const Color(0xFFE3EAE4),
+          color: theme.border,
           width: 0.75,
         ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: accent.withOpacity(0.07),
-            blurRadius: 14,
-            offset: const Offset(0, 5),
-          ),
-          const BoxShadow(
-            color: Color(0x0A000000),
-            blurRadius: 6,
-            offset: Offset(0, 2),
-          ),
-        ],
+        boxShadow: theme.cardShadow,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -413,7 +380,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: SavingorColors.textSecondary.withOpacity(0.92),
+              color: context.savingor.textSecondary.withOpacity(0.92),
               letterSpacing: 0.2,
             ),
           ),
@@ -423,10 +390,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF1F2937),
+              color: context.savingor.textPrimary,
               height: 1.2,
               letterSpacing: -0.1,
             ),
@@ -453,9 +420,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(width: 12),
             Text(
               l10n.loadingProfile,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
-                color: SavingorColors.textSecondary,
+                color: context.savingor.textSecondary,
               ),
             ),
           ],
@@ -488,7 +455,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_profile == null) {
       return Text(
         l10n.noProfileFound,
-        style: _bodyMutedStyle,
+        style: _bodyMutedStyle(context),
       );
     }
 
@@ -532,18 +499,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              const Icon(
+              Icon(
                 Icons.edit_outlined,
                 size: 15,
-                color: SavingorColors.darkGreen,
+                color: context.savingor.brandTitle,
               ),
               const SizedBox(width: 5),
               Text(
                 l10n.edit,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13.5,
                   fontWeight: FontWeight.w700,
-                  color: SavingorColors.darkGreen,
+                  color: context.savingor.brandTitle,
                   letterSpacing: 0.1,
                 ),
               ),
@@ -565,28 +532,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Expanded(
               child: Text(
                 l10n.currentPlan,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
-                  color: SavingorColors.textSecondary,
+                  color: context.savingor.textSecondary,
                 ),
               ),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: SavingorAccentColors.savings.withOpacity(0.1),
+                color: context.savingor.isDark
+                    ? context.savingor.selectedHighlight
+                    : SavingorAccentColors.savings.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(SavingorRadius.pill),
                 border: Border.all(
-                  color: SavingorAccentColors.savings.withOpacity(0.25),
+                  color: context.savingor.isDark
+                      ? context.savingor.accentGreen.withOpacity(0.35)
+                      : SavingorAccentColors.savings.withOpacity(0.25),
                 ),
               ),
               child: Text(
                 isPro ? l10n.pro : l10n.free,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
-                  color: SavingorAccentColors.savings,
+                  color: context.savingor.isDark
+                      ? context.savingor.brandTitle
+                      : SavingorAccentColors.savings,
                 ),
               ),
             ),
@@ -595,10 +568,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: SavingorSpacing.sm),
         Text(
           isPro ? l10n.pro : l10n.free,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.w800,
-            color: SavingorColors.textPrimary,
+            color: context.savingor.textPrimary,
             height: 1.15,
           ),
         ),
@@ -621,7 +594,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 2),
           Text(
             l10n.freePlanUpgradeMessage,
-            style: _bodyMutedStyle,
+            style: _bodyMutedStyle(context),
           ),
         ],
         const SizedBox(height: SavingorSpacing.lg),
@@ -636,7 +609,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               await context.push('/subscription');
               if (mounted) _loadSubscription();
             },
-            foregroundColor: SavingorColors.textSecondary,
+            foregroundColor: context.savingor.textSecondary,
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(
               l10n.viewPlans,
@@ -658,7 +631,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: SavingorSpacing.xs),
           SavingorInteractiveTextButton(
             onPressed: () => _showManageSubscriptionSheet(context),
-            foregroundColor: SavingorColors.textSecondary,
+            foregroundColor: context.savingor.textSecondary,
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Text(
               l10n.manageSubscription,
@@ -679,7 +652,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     await showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: context.savingor.isDark
+          ? context.savingor.surfaceStrong
+          : context.savingor.surfacePrimary,
       isScrollControlled: true,
       useSafeArea: true,
       shape: const RoundedRectangleBorder(
@@ -700,7 +675,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: SavingorColors.border,
+                      color: context.savingor.border,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -708,10 +683,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 16),
                 Text(
                   l10n.manageSubscription,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 19,
                     fontWeight: FontWeight.w800,
-                    color: SavingorColors.darkGreen,
+                    color: context.savingor.brandTitle,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -729,17 +704,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   _subscriptionDetailRow(
                     l10n.price,
-                    SubscriptionL10n.formatPricePerMonth(context, _subscription),
+                    SubscriptionL10n.formatPricePerMonth(
+                        context, _subscription),
                   ),
                   _subscriptionDetailRow(
                     l10n.provider,
-                    SubscriptionL10n.providerLabel(context, _subscription.provider),
+                    SubscriptionL10n.providerLabel(
+                        context, _subscription.provider),
                   ),
                   const SizedBox(height: 18),
                   if (_subscription.isRevenueCat) ...<Widget>[
                     Text(
                       l10n.subscriptionManagedByStore,
-                      style: _bodyMutedStyle,
+                      style: _bodyMutedStyle(context),
                     ),
                     const SizedBox(height: 14),
                     SizedBox(
@@ -750,7 +727,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           await _openStoreSubscriptionManagement(l10n);
                         },
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: SavingorColors.darkGreen,
+                          foregroundColor: context.savingor.brandHeading,
                           side: BorderSide(
                             color:
                                 SavingorColors.primaryStroke.withOpacity(0.45),
@@ -802,7 +779,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: 4),
                   Text(
                     l10n.noActiveSubscription,
-                    style: _bodyMutedStyle,
+                    style: _bodyMutedStyle(context),
                   ),
                   const SizedBox(height: 18),
                   _primaryButton(
@@ -822,7 +799,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       await _restorePurchases(l10n);
                     },
                     style: TextButton.styleFrom(
-                      foregroundColor: SavingorColors.textSecondary,
+                      foregroundColor: context.savingor.textSecondary,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14,
                         vertical: 10,
@@ -874,25 +851,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor: context.savingor.surfacePrimary,
           surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(22),
           ),
           title: Text(
             l10n.managementNotAvailable,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w800,
-              color: SavingorColors.darkGreen,
+              color: context.savingor.brandTitle,
             ),
           ),
           content: Text(
             l10n.managementUrlUnavailableMessage,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: SavingorColors.textSecondary,
+              color: context.savingor.textSecondary,
               height: 1.45,
             ),
           ),
@@ -900,7 +877,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(),
               style: TextButton.styleFrom(
-                foregroundColor: SavingorColors.darkGreen,
+                foregroundColor: context.savingor.brandHeading,
               ),
               child: Text(l10n.ok),
             ),
@@ -940,19 +917,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13.5,
                 fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary,
+                color: context.savingor.textSecondary,
               ),
             ),
           ),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14.5,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1A2E24),
+              color: context.savingor.textPrimary,
             ),
           ),
         ],
@@ -1034,9 +1011,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       onPressed: () => _confirmSignOut(context, appState, l10n),
       style: OutlinedButton.styleFrom(
         foregroundColor: _signOutRed,
-        backgroundColor: Colors.white,
+        backgroundColor: context.savingor.isDark
+            ? context.savingor.surfaceElevated
+            : context.savingor.surfacePrimary,
         minimumSize: const Size.fromHeight(52),
-        side: const BorderSide(color: Color(0xFFE8C7C2)),
+        side: BorderSide(
+          color: context.savingor.isDark
+              ? context.savingor.destructive.withOpacity(0.45)
+              : const Color(0xFFE8C7C2),
+        ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(_buttonRadius),
         ),
@@ -1059,25 +1042,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor: context.savingor.surfacePrimary,
           surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(22),
           ),
           title: Text(
             l10n.signOutQuestion,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w800,
-              color: SavingorColors.darkGreen,
+              color: context.savingor.brandTitle,
             ),
           ),
           content: Text(
             l10n.signOutMessage,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: SavingorColors.textSecondary,
+              color: context.savingor.textSecondary,
               height: 1.45,
             ),
           ),
@@ -1085,7 +1068,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
               style: TextButton.styleFrom(
-                foregroundColor: SavingorColors.textSecondary,
+                foregroundColor: context.savingor.textSecondary,
               ),
               child: Text(l10n.cancel),
             ),
@@ -1121,7 +1104,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Row(
             children: <Widget>[
               Expanded(
-                child: Text(title, style: _cardHeadingStyle),
+                child: Text(title, style: _cardHeadingStyleFor(context)),
               ),
               if (trailing != null) trailing,
             ],
@@ -1137,7 +1120,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-      decoration: SavingorSurfaces.premiumCard(radius: _cardRadius),
+      decoration: SavingorSurfaces.premiumCard(context, radius: _cardRadius),
       child: child,
     );
   }
@@ -1148,7 +1131,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Divider(
         height: 1,
         thickness: 1,
-        color: SavingorColors.border.withOpacity(0.5),
+        color: context.savingor.border.withOpacity(0.5),
       ),
     );
   }
@@ -1185,10 +1168,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: <Widget>[
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: SavingorColors.textSecondary,
+                    color: context.savingor.textSecondary,
                     height: 1.3,
                   ),
                 ),
@@ -1199,8 +1182,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: valueMuted
-                        ? SavingorColors.textSecondary
-                        : const Color(0xFF1A2E24),
+                        ? context.savingor.textSecondary
+                        : context.savingor.textPrimary,
                     height: 1.35,
                     fontStyle: valueMuted ? FontStyle.italic : FontStyle.normal,
                   ),

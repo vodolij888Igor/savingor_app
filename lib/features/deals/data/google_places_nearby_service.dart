@@ -104,8 +104,7 @@ class GooglePlacesNearbyService {
       debugPrint('GooglePlaces: parsed places count=${stores.length}');
 
       stores.sort(
-        (NearbyStore a, NearbyStore b) =>
-            a.distanceKm.compareTo(b.distanceKm),
+        (NearbyStore a, NearbyStore b) => a.distanceKm.compareTo(b.distanceKm),
       );
 
       return stores;

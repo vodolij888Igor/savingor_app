@@ -22,10 +22,6 @@ import 'package:savingor_app/l10n/app_localizations.dart';
 class SavingsAnalyticsScreen extends StatelessWidget {
   const SavingsAnalyticsScreen({super.key});
 
-  static const Color _pageBackground = Colors.white;
-  static const Color _nearBlack = Color(0xFF111827);
-  static const Color _airyBorder = Color(0xFFF3F4F3);
-
   static void _goBack(BuildContext context) {
     if (context.canPop()) {
       context.pop();
@@ -34,20 +30,8 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     }
   }
 
-  static BoxDecoration _cardDecoration() {
-    return BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-      border: Border.all(color: _airyBorder.withOpacity(0.6), width: 0.5),
-      boxShadow: <BoxShadow>[
-        BoxShadow(
-          color: Colors.black.withOpacity(0.04),
-          blurRadius: 12,
-          offset: const Offset(0, 2),
-        ),
-      ],
-    );
-  }
+  static BoxDecoration _cardDecoration(BuildContext context) =>
+      SavingorWorkflowTheme.card(context);
 
   @override
   Widget build(BuildContext context) {
@@ -70,37 +54,38 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                 return AnimatedBuilder(
                   animation: priceMemoryStore,
                   builder: (BuildContext context, Widget? ____) {
-            if (!expensesStore.isAuthenticated && !receiptStore.isAuthenticated) {
-              return _buildSignInRequired(context, l10n);
-            }
+                    if (!expensesStore.isAuthenticated &&
+                        !receiptStore.isAuthenticated) {
+                      return _buildSignInRequired(context, l10n);
+                    }
 
-            return Scaffold(
-              backgroundColor: _pageBackground,
-              appBar: AppBar(
-                title: Text(
-                  l10n.savingsAnalytics,
-                  style: SavingorAppTextStyles.screenTitle,
-                ),
-                elevation: 0,
-                scrolledUnderElevation: 0,
-                backgroundColor: _pageBackground,
-                surfaceTintColor: Colors.transparent,
-                leading: BackButton(
-                  color: SavingorColors.textPrimary,
-                  onPressed: () => _goBack(context),
-                ),
-                automaticallyImplyLeading: false,
-              ),
-              body: _buildBody(
-                context,
-                appState,
-                expensesStore,
-                receiptStore,
-                priceMemoryStore,
-                bottomInset,
-                l10n,
-              ),
-            );
+                    return Scaffold(
+                      backgroundColor: context.savingor.pageBackground,
+                      appBar: AppBar(
+                        title: Text(
+                          l10n.savingsAnalytics,
+                          style: SavingorAppTextStyles.screenTitle(context),
+                        ),
+                        elevation: 0,
+                        scrolledUnderElevation: 0,
+                        backgroundColor: context.savingor.pageBackground,
+                        surfaceTintColor: Colors.transparent,
+                        leading: BackButton(
+                          color: context.savingor.textPrimary,
+                          onPressed: () => _goBack(context),
+                        ),
+                        automaticallyImplyLeading: false,
+                      ),
+                      body: _buildBody(
+                        context,
+                        appState,
+                        expensesStore,
+                        receiptStore,
+                        priceMemoryStore,
+                        bottomInset,
+                        l10n,
+                      ),
+                    );
                   },
                 );
               },
@@ -120,11 +105,9 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     double bottomInset,
     AppLocalizations l10n,
   ) {
-    final String Function(double) formatCurrency =
-        (double amount) => appState.formatMoney(amount);
-    final String Function(double) formatPriceMemory =
-        (double amount) =>
-            appState.formatMoney(amount, originalCurrency: 'CAD');
+    formatCurrency(double amount) => appState.formatMoney(amount);
+    formatPriceMemory(double amount) =>
+        appState.formatMoney(amount, originalCurrency: 'CAD');
     if (expensesStore.isLoading ||
         receiptStore.isLoading ||
         priceMemoryStore.isLoading) {
@@ -245,7 +228,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
     return <Widget>[
       Text(
         l10n.exploreDetails,
-        style: SavingorAppTextStyles.sectionTitle,
+        style: SavingorAppTextStyles.sectionTitle(context),
       ),
       const SizedBox(height: SavingorSpacing.md),
       _buildPriceInsightsEntry(context, priceMemoryStore, l10n),
@@ -256,17 +239,17 @@ class SavingsAnalyticsScreen extends StatelessWidget {
 
   Widget _buildSignInRequired(BuildContext context, AppLocalizations l10n) {
     return Scaffold(
-      backgroundColor: _pageBackground,
+      backgroundColor: context.savingor.pageBackground,
       appBar: AppBar(
         title: Text(
           l10n.savingsAnalytics,
-          style: SavingorAppTextStyles.screenTitle,
+          style: SavingorAppTextStyles.screenTitle(context),
         ),
-        backgroundColor: _pageBackground,
+        backgroundColor: context.savingor.pageBackground,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: BackButton(
-          color: SavingorColors.textPrimary,
+          color: context.savingor.textPrimary,
           onPressed: () => _goBack(context),
         ),
         automaticallyImplyLeading: false,
@@ -298,7 +281,7 @@ class SavingsAnalyticsScreen extends StatelessWidget {
       children: <Widget>[
         Text(
           l10n.overview,
-          style: SavingorAppTextStyles.sectionTitle,
+          style: SavingorAppTextStyles.sectionTitle(context),
         ),
         const SizedBox(height: SavingorSpacing.md),
         Row(
@@ -379,24 +362,24 @@ class SavingsAnalyticsScreen extends StatelessWidget {
               children: <Widget>[
                 Text(
                   l10n.productPriceInsights,
-                  style: SavingorAppTextStyles.cardTitle,
+                  style: SavingorAppTextStyles.cardTitle(context),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: SavingorColors.textSecondary,
+                    color: context.savingor.textSecondary,
                     height: 1.35,
                   ),
                 ),
               ],
             ),
           ),
-          const Icon(
+          Icon(
             Icons.chevron_right_rounded,
-            color: SavingorColors.textSecondary,
+            color: context.savingor.textSecondary,
           ),
         ],
       ),
@@ -438,24 +421,24 @@ class SavingsAnalyticsScreen extends StatelessWidget {
               children: <Widget>[
                 Text(
                   l10n.savingsOpportunities,
-                  style: SavingorAppTextStyles.cardTitle,
+                  style: SavingorAppTextStyles.cardTitle(context),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: SavingorColors.textSecondary,
+                    color: context.savingor.textSecondary,
                     height: 1.35,
                   ),
                 ),
               ],
             ),
           ),
-          const Icon(
+          Icon(
             Icons.chevron_right_rounded,
-            color: SavingorColors.textSecondary,
+            color: context.savingor.textSecondary,
           ),
         ],
       ),
@@ -474,13 +457,13 @@ class SavingsAnalyticsScreen extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(18),
-      decoration: _cardDecoration(),
+      decoration: _cardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
             l10n.spendingByStore,
-            style: SavingorAppTextStyles.sectionTitle,
+            style: SavingorAppTextStyles.sectionTitle(context),
           ),
           const SizedBox(height: SavingorSpacing.md),
           ...summary.spendingByStore.map(
@@ -494,10 +477,10 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                       Expanded(
                         child: Text(
                           entry.storeName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
-                            color: _nearBlack,
+                            color: SavingorWorkflowTheme.primaryText(context),
                           ),
                         ),
                       ),
@@ -514,10 +497,10 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     l10n.priceRecordCount(entry.recordCount),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: SavingorColors.textSecondary,
+                      color: context.savingor.textSecondary,
                     ),
                   ),
                   if (maxStoreTotal > 0) ...<Widget>[
@@ -527,9 +510,13 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                       child: LinearProgressIndicator(
                         value: entry.totalAmount / maxStoreTotal,
                         minHeight: 6,
-                        backgroundColor: const Color(0xFFF0F2F1),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          SavingorColors.primaryGreen,
+                        backgroundColor:
+                            SavingorWorkflowTheme.progressTrack(context),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          SavingorWorkflowTheme.progressValue(
+                            context,
+                            isOver: false,
+                          ),
                         ),
                       ),
                     ),
@@ -551,13 +538,13 @@ class SavingsAnalyticsScreen extends StatelessWidget {
   ) {
     return Container(
       padding: const EdgeInsets.all(18),
-      decoration: _cardDecoration(),
+      decoration: _cardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
             l10n.recentActivity,
-            style: SavingorAppTextStyles.sectionTitle,
+            style: SavingorAppTextStyles.sectionTitle(context),
           ),
           const SizedBox(height: SavingorSpacing.md),
           ...summary.recentActivity.map(
@@ -590,29 +577,30 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                       children: <Widget>[
                         Text(
                           entry.title,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
-                            color: _nearBlack,
+                            color: SavingorWorkflowTheme.primaryText(context),
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           '${LocaleDateFormat.formatMediumDate(context, entry.date)} · ${AnalyticsActivityL10n.typeLabel(context, entry)}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
-                            color: SavingorColors.textSecondary,
+                            color: context.savingor.textSecondary,
                           ),
                         ),
-                        if (AnalyticsActivityL10n.subtitle(context, entry).isNotEmpty) ...<Widget>[
+                        if (AnalyticsActivityL10n.subtitle(context, entry)
+                            .isNotEmpty) ...<Widget>[
                           const SizedBox(height: 2),
                           Text(
                             AnalyticsActivityL10n.subtitle(context, entry),
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
-                              color: SavingorColors.textSecondary,
+                              color: context.savingor.textSecondary,
                             ),
                           ),
                         ],
@@ -621,10 +609,10 @@ class SavingsAnalyticsScreen extends StatelessWidget {
                   ),
                   Text(
                     formatCurrency(entry.amount),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
-                      color: SavingorColors.textPrimary,
+                      color: context.savingor.textPrimary,
                     ),
                   ),
                 ],
@@ -652,27 +640,28 @@ class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: SavingsAnalyticsScreen._cardDecoration(),
+      decoration: SavingsAnalyticsScreen._cardDecoration(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Icon(icon, size: 22, color: SavingorColors.primaryStroke),
+          Icon(icon,
+              size: 22, color: SavingorWorkflowTheme.accentText(context)),
           const SizedBox(height: 10),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: SavingorColors.textSecondary,
+              color: context.savingor.textSecondary,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
-              color: SavingsAnalyticsScreen._nearBlack,
+              color: SavingorWorkflowTheme.primaryText(context),
               letterSpacing: -0.3,
             ),
           ),

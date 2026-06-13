@@ -16,8 +16,6 @@ class BasketStorePlanSection extends StatelessWidget {
   final List<BasketStorePlanEntry> storePlan;
   final String currency;
 
-  static const Color _airyBorder = Color(0xFFF3F4F3);
-
   String _itemDisplayName(BuildContext context, BasketStorePlanItem item) {
     final String localized = ProductDisplayL10n.localizedProductName(
       context,
@@ -42,11 +40,7 @@ class BasketStorePlanSection extends StatelessWidget {
       children: <Widget>[
         Text(
           l10n.suggestedStorePlan,
-          style: const TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: SavingorColors.darkGreen,
-          ),
+          style: SavingorAppTextStyles.sectionTitle(context),
         ),
         const SizedBox(height: 12),
         ...storePlan.map(
@@ -54,27 +48,16 @@ class BasketStorePlanSection extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 12),
             child: Container(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: _airyBorder.withOpacity(0.6), width: 0.5),
-                boxShadow: <BoxShadow>[
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
+              decoration: SavingorWorkflowTheme.card(context),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
                     entry.storeName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
-                      color: SavingorColors.darkGreen,
+                      color: SavingorWorkflowTheme.headingText(context),
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -91,10 +74,10 @@ class BasketStorePlanSection extends StatelessWidget {
                           ),
                           l10n.perUnit,
                         ),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: SavingorColors.textSecondary,
+                          color: context.savingor.textSecondary,
                           height: 1.35,
                         ),
                       ),
@@ -108,10 +91,10 @@ class BasketStorePlanSection extends StatelessWidget {
                         currency: entry.currency,
                       ),
                     ),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
-                      color: SavingorColors.primaryStroke,
+                      color: SavingorWorkflowTheme.accentText(context),
                     ),
                   ),
                 ],

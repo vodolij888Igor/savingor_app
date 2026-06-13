@@ -22,7 +22,7 @@ class NearbyStoreCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: SavingorSurfaces.premiumCard(radius: 16),
+      decoration: SavingorSurfaces.premiumCard(context, radius: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -51,17 +51,18 @@ class NearbyStoreCard extends StatelessWidget {
                       store.name,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: SavingorColors.darkGreen,
+                        color: context.savingor.textPrimary,
                         height: 1.2,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       MapL10n.storeCategoryLabel(context, store.category),
-                      style: SavingorAppTextStyles.bodySecondary(fontSize: 12),
+                      style: SavingorAppTextStyles.bodySecondary(context,
+                          fontSize: 12),
                     ),
                     if (store.hasAddress) ...<Widget>[
                       const SizedBox(height: 4),
@@ -69,7 +70,8 @@ class NearbyStoreCard extends StatelessWidget {
                         store.displayAddress!,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: SavingorAppTextStyles.bodySecondary(fontSize: 12),
+                        style: SavingorAppTextStyles.bodySecondary(context,
+                            fontSize: 12),
                       ),
                     ],
                   ],
@@ -99,7 +101,7 @@ class NearbyStoreCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             MapL10n.localizedStoreStatusText(context, store.statusText),
-            style: SavingorAppTextStyles.bodySecondary(fontSize: 12),
+            style: SavingorAppTextStyles.bodySecondary(context, fontSize: 12),
           ),
           const SizedBox(height: 12),
           Align(

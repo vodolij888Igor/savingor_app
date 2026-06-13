@@ -10,9 +10,6 @@ class AddShoppingListItemScreen extends StatefulWidget {
   const AddShoppingListItemScreen({super.key, required this.listId});
 
   final String listId;
-
-  static const Color _pageBackground = Colors.white;
-
   @override
   State<AddShoppingListItemScreen> createState() =>
       _AddShoppingListItemScreenState();
@@ -70,31 +67,29 @@ class _AddShoppingListItemScreenState extends State<AddShoppingListItemScreen> {
     final double keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: AddShoppingListItemScreen._pageBackground,
+      backgroundColor: context.savingor.pageBackground,
       appBar: AppBar(
         title: Text(
           l10n.addItem,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: SavingorColors.darkGreen,
+          style: SavingorAppTextStyles.screenTitle(context).copyWith(
+            color: SavingorWorkflowTheme.primaryText(context),
           ),
         ),
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: AddShoppingListItemScreen._pageBackground,
+        backgroundColor: context.savingor.pageBackground,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: SavingorColors.darkGreen,
+            color: SavingorWorkflowTheme.appBarIcon(context),
             size: 20,
           ),
           onPressed: _isSaving ? null : () => context.pop(),
         ),
       ),
       body: ColoredBox(
-        color: AddShoppingListItemScreen._pageBackground,
+        color: context.savingor.pageBackground,
         child: Form(
           key: _formKey,
           child: ListView(
@@ -108,9 +103,9 @@ class _AddShoppingListItemScreenState extends State<AddShoppingListItemScreen> {
               TextFormField(
                 controller: _nameController,
                 textInputAction: TextInputAction.next,
-                decoration: InputDecoration(
-                  labelText: l10n.itemName,
-                  border: const OutlineInputBorder(),
+                decoration: SavingorWorkflowTheme.fieldDecoration(
+                  context,
+                  label: l10n.itemName,
                 ),
                 validator: (String? value) {
                   if (value == null || value.trim().isEmpty) {
@@ -123,9 +118,9 @@ class _AddShoppingListItemScreenState extends State<AddShoppingListItemScreen> {
               TextFormField(
                 controller: _storeController,
                 textInputAction: TextInputAction.next,
-                decoration: InputDecoration(
-                  labelText: l10n.storeOptional,
-                  border: const OutlineInputBorder(),
+                decoration: SavingorWorkflowTheme.fieldDecoration(
+                  context,
+                  label: l10n.storeOptional,
                 ),
               ),
               const SizedBox(height: 16),
@@ -134,15 +129,15 @@ class _AddShoppingListItemScreenState extends State<AddShoppingListItemScreen> {
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 textInputAction: TextInputAction.done,
-                decoration: InputDecoration(
-                  labelText: l10n.priceOptional,
-                  border: const OutlineInputBorder(),
+                decoration: SavingorWorkflowTheme.fieldDecoration(
+                  context,
+                  label: l10n.priceOptional,
                 ),
               ),
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: _isSaving ? null : _save,
-                style: SavingorButtonStyles.primaryFilled(),
+                style: SavingorButtonStyles.primaryFilledFor(context),
                 child: _isSaving
                     ? const SizedBox(
                         width: 22,

@@ -30,13 +30,12 @@ abstract final class ProductPriceInsightsGrouper {
 
     final Map<String, List<ProductPriceRecord>> grouped = groupRecords(records);
 
-    final List<ProductPriceInsight> insights = grouped.entries
-        .map(_buildInsight)
-        .toList(growable: false)
-      ..sort(
-        (ProductPriceInsight a, ProductPriceInsight b) =>
-            b.latestPurchaseDate.compareTo(a.latestPurchaseDate),
-      );
+    final List<ProductPriceInsight> insights =
+        grouped.entries.map(_buildInsight).toList(growable: false)
+          ..sort(
+            (ProductPriceInsight a, ProductPriceInsight b) =>
+                b.latestPurchaseDate.compareTo(a.latestPurchaseDate),
+          );
 
     return insights;
   }

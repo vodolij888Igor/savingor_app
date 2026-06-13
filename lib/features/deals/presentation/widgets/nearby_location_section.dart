@@ -50,23 +50,25 @@ class NearbyLocationSection extends StatelessWidget {
       children: <Widget>[
         Container(
           padding: const EdgeInsets.all(18),
-          decoration: SavingorSurfaces.locationCard(),
+          decoration: SavingorSurfaces.locationCard(
+            context,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              _buildLocationHeader(l10n),
+              _buildLocationHeader(context, l10n),
               const SizedBox(height: 12),
               _buildLocationBody(context, l10n),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 14),
-                child: Divider(height: 1, color: SavingorColors.border),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                child: Divider(height: 1, color: context.savingor.border),
               ),
               Text(
                 l10n.mapSearchRadius,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: SavingorColors.darkGreen,
+                  color: context.savingor.textPrimary,
                 ),
               ),
               const SizedBox(height: 10),
@@ -91,9 +93,9 @@ class NearbyLocationSection extends StatelessWidget {
     );
   }
 
-  Widget _buildLocationHeader(AppLocalizations l10n) {
-    final bool isActive = _isManualSelected ||
-        locationStatus == UserLocationAccessStatus.granted;
+  Widget _buildLocationHeader(BuildContext context, AppLocalizations l10n) {
+    final bool isActive =
+        _isManualSelected || locationStatus == UserLocationAccessStatus.granted;
 
     return Row(
       children: <Widget>[
@@ -117,19 +119,19 @@ class NearbyLocationSection extends StatelessWidget {
             children: <Widget>[
               Text(
                 l10n.mapYourLocation,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w800,
-                  color: SavingorColors.darkGreen,
+                  color: context.savingor.textPrimary,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 l10n.mapFindGroceryStoresNearYou,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
-                  color: SavingorColors.textSecondary,
+                  color: context.savingor.textSecondary,
                 ),
               ),
             ],
@@ -170,7 +172,7 @@ class NearbyLocationSection extends StatelessWidget {
           const SizedBox(width: 12),
           Text(
             l10n.mapCheckingLocation,
-            style: SavingorAppTextStyles.bodySecondary(fontSize: 13),
+            style: SavingorAppTextStyles.bodySecondary(context, fontSize: 13),
           ),
         ],
       );
@@ -191,10 +193,10 @@ class NearbyLocationSection extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             manualLocationLabel!,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: SavingorColors.textPrimary,
+              color: context.savingor.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
@@ -218,7 +220,7 @@ class NearbyLocationSection extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             l10n.mapReadyToSearchNearby,
-            style: SavingorAppTextStyles.bodySecondary(fontSize: 13),
+            style: SavingorAppTextStyles.bodySecondary(context, fontSize: 13),
           ),
           const SizedBox(height: 12),
           _buildLocationActions(l10n, showUseMyLocation: true),
@@ -238,7 +240,7 @@ class NearbyLocationSection extends StatelessWidget {
               status: locationStatus,
               fallbackMessage: locationMessage,
             ),
-            style: SavingorAppTextStyles.bodySecondary(fontSize: 13),
+            style: SavingorAppTextStyles.bodySecondary(context, fontSize: 13),
           ),
           const SizedBox(height: 12),
           _buildLocationActions(
@@ -255,7 +257,7 @@ class NearbyLocationSection extends StatelessWidget {
       children: <Widget>[
         Text(
           l10n.mapEnableLocationPrompt,
-          style: SavingorAppTextStyles.bodySecondary(fontSize: 13),
+          style: SavingorAppTextStyles.bodySecondary(context, fontSize: 13),
         ),
         const SizedBox(height: 12),
         _buildLocationActions(l10n, showUseMyLocation: true),
@@ -268,8 +270,7 @@ class NearbyLocationSection extends StatelessWidget {
     required bool showUseMyLocation,
     bool isRetry = false,
   }) {
-    final String primaryLabel =
-        isRetry ? l10n.tryAgain : l10n.mapUseMyLocation;
+    final String primaryLabel = isRetry ? l10n.tryAgain : l10n.mapUseMyLocation;
     final VoidCallback primaryAction =
         isRetry ? onRetryLocation : onUseMyLocation;
 
@@ -282,7 +283,9 @@ class NearbyLocationSection extends StatelessWidget {
           FilledButton.icon(
             onPressed: primaryAction,
             icon: Icon(
-              isRetry ? Icons.refresh_rounded : Icons.location_searching_rounded,
+              isRetry
+                  ? Icons.refresh_rounded
+                  : Icons.location_searching_rounded,
               size: 18,
             ),
             label: Text(primaryLabel),

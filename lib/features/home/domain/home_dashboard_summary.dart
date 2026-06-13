@@ -31,7 +31,8 @@ abstract final class HomeDashboardSummaryBuilder {
     required List<ProductPriceRecord> priceRecords,
     DisplayAmountConverter? convertToDisplay,
   }) {
-    final ExpenseAnalyticsSummary analytics = ExpenseAnalyticsCalculator.compute(
+    final ExpenseAnalyticsSummary analytics =
+        ExpenseAnalyticsCalculator.compute(
       expenses,
       receipts: receipts,
       convertToDisplay: convertToDisplay,

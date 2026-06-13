@@ -170,10 +170,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chooseYourLanguage => 'Choose your language';
 
   @override
-  String get chooseLanguageSubtitle => 'Select the language you want Savingor to use.';
+  String get chooseLanguageSubtitle =>
+      'Select the language you want Savingor to use.';
 
   @override
-  String get langSubtitleOnboarding => 'This helps personalize your Savingor experience.';
+  String get langSubtitleOnboarding =>
+      'This helps personalize your Savingor experience.';
 
   @override
   String get applyLanguage => 'Apply language';
@@ -258,7 +260,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bestActionNow => 'Best action now';
 
   @override
-  String get addMoreReceiptsForSavings => 'Add more receipts to unlock personalized savings.';
+  String get addMoreReceiptsForSavings =>
+      'Add more receipts to unlock personalized savings.';
 
   @override
   String get account => 'Account';
@@ -336,7 +339,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inactive => 'Inactive';
 
   @override
-  String get freePlanUpgradeMessage => 'You are currently on the Free plan. Upgrade to Pro to unlock AI savings insights, receipt analytics, smart alerts, and spending reports.';
+  String get freePlanUpgradeMessage =>
+      'You are currently on the Free plan. Upgrade to Pro to unlock AI savings insights, receipt analytics, smart alerts, and spending reports.';
 
   @override
   String get manageSubscription => 'Manage subscription';
@@ -351,16 +355,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signOutQuestion => 'Sign out?';
 
   @override
-  String get signOutMessage => 'You will need to sign in again to access your Savingor account.';
+  String get signOutMessage =>
+      'You will need to sign in again to access your Savingor account.';
 
   @override
-  String get couldNotLoadProfile => 'Could not load your profile. Please try again.';
+  String get couldNotLoadProfile =>
+      'Could not load your profile. Please try again.';
 
   @override
   String get personalizeSavingor => 'Personalize Savingor';
 
   @override
-  String get personalizeSavingorSubtitle => 'Choose how the app looks, communicates, and adapts to your location.';
+  String get personalizeSavingorSubtitle =>
+      'Choose how the app looks, communicates, and adapts to your location.';
 
   @override
   String get preferences => 'Preferences';
@@ -381,7 +388,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get smartSavingsAlerts => 'Smart savings alerts';
 
   @override
-  String get smartSavingsAlertsDescription => 'Get notified about savings opportunities, budget progress, and important recommendations.';
+  String get smartSavingsAlertsDescription =>
+      'Get notified about savings opportunities, budget progress, and important recommendations.';
 
   @override
   String get regionCanada => 'Canada';
@@ -466,7 +474,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get category => 'Category';
 
   @override
-  String get scanReceiptSubtitle => 'Scan a grocery receipt to track expenses and savings.';
+  String get scanReceiptSubtitle =>
+      'Scan a grocery receipt to track expenses and savings.';
 
   @override
   String get addManually => 'Add manually';
@@ -477,7 +486,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get noReceiptsYet => 'No receipts yet. Scan or add one to start tracking.';
+  String get noReceiptsYet =>
+      'No receipts yet. Scan or add one to start tracking.';
 
   @override
   String get deleteReceiptQuestion => 'Delete receipt?';
@@ -497,7 +507,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get couldNotLoadReceipts => 'Could not load receipts';
 
   @override
-  String get signInToSyncReceipts => 'Save and sync your receipts with your Savingor account.';
+  String get signInToSyncReceipts =>
+      'Save and sync your receipts with your Savingor account.';
 
   @override
   String get chooseReceiptSource => 'Choose how you want to add your receipt.';
@@ -518,7 +529,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanningReceipt => 'Scanning receipt...';
 
   @override
-  String get couldNotScanReceipt => 'Could not scan this receipt. Try another photo.';
+  String get couldNotScanReceipt =>
+      'Could not scan this receipt. Try another photo.';
 
   @override
   String get ocrResultPreview => 'OCR result preview';
@@ -575,7 +587,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get receiptTotal => 'Receipt total';
 
   @override
-  String get autoCalculatedFromItems => 'Auto-calculated from items unless you edit this field.';
+  String get autoCalculatedFromItems =>
+      'Auto-calculated from items unless you edit this field.';
 
   @override
   String get notesOptional => 'Notes (optional)';
@@ -584,7 +597,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addItem => 'Add item';
 
   @override
-  String get addLineItemsHint => 'Add line items to build a real receipt record for price tracking later.';
+  String get addLineItemsHint =>
+      'Add line items to build a real receipt record for price tracking later.';
 
   @override
   String get enterStoreName => 'Enter a store name';
@@ -642,7 +656,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noItemsSaved => 'No items saved';
 
   @override
-  String get noLineItemsSaved => 'No line items were saved for this receipt yet.';
+  String get noLineItemsSaved =>
+      'No line items were saved for this receipt yet.';
 
   @override
   String qtyWithValue(String quantity) {
@@ -650,7 +665,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get couldNotDeleteReceipt => 'Could not delete the receipt. Please try again.';
+  String get couldNotDeleteReceipt =>
+      'Could not delete the receipt. Please try again.';
 
   @override
   String get saveChanges => 'Save changes';
@@ -686,16 +702,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tripNotes => 'Trip notes';
 
   @override
-  String get couldNotLoadYourReceipts => 'Could not load your receipts. Please try again.';
+  String get couldNotLoadYourReceipts =>
+      'Could not load your receipts. Please try again.';
 
   @override
   String get signInToSaveReceipts => 'Sign in to save receipts.';
 
   @override
-  String get couldNotSaveReceipt => 'Could not save the receipt. Please try again.';
+  String get couldNotSaveReceipt =>
+      'Could not save the receipt. Please try again.';
 
   @override
-  String get couldNotUpdateReceipt => 'Could not update the receipt. Please try again.';
+  String get couldNotUpdateReceipt =>
+      'Could not update the receipt. Please try again.';
 
   @override
   String get signInToUpdateReceipts => 'Sign in to update receipts.';
@@ -767,7 +786,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get optimizeShoppingBasket => 'Optimize shopping basket';
 
   @override
-  String get optimizeShoppingBasketSubtitle => 'Find opportunities to spend less';
+  String get optimizeShoppingBasketSubtitle =>
+      'Find opportunities to spend less';
 
   @override
   String get finalizeShoppingTrip => 'Finalize shopping trip';
@@ -803,16 +823,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get couldNotLoadExpenses => 'Could not load expenses';
 
   @override
-  String get couldNotLoadYourExpenses => 'Could not load your expenses. Please try again.';
+  String get couldNotLoadYourExpenses =>
+      'Could not load your expenses. Please try again.';
 
   @override
   String get noExpensesYet => 'No expenses yet';
 
   @override
-  String get noExpensesYetMessage => 'Track grocery purchases and receipts to understand your spending.';
+  String get noExpensesYetMessage =>
+      'Track grocery purchases and receipts to understand your spending.';
 
   @override
-  String get signInToSyncExpenses => 'Save and sync your expenses with your Savingor account.';
+  String get signInToSyncExpenses =>
+      'Save and sync your expenses with your Savingor account.';
 
   @override
   String get deleteExpenseQuestion => 'Delete expense?';
@@ -832,10 +855,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signInToSaveExpenses => 'Sign in to save expenses.';
 
   @override
-  String get couldNotSaveExpense => 'Could not save the expense. Please try again.';
+  String get couldNotSaveExpense =>
+      'Could not save the expense. Please try again.';
 
   @override
-  String get couldNotDeleteExpense => 'Could not delete the expense. Please try again.';
+  String get couldNotDeleteExpense =>
+      'Could not delete the expense. Please try again.';
 
   @override
   String get expenseSaved => 'Expense saved.';
@@ -889,16 +914,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get couldNotLoadLists => 'Could not load lists';
 
   @override
-  String get couldNotLoadYourShoppingLists => 'Could not load your shopping lists. Please try again.';
+  String get couldNotLoadYourShoppingLists =>
+      'Could not load your shopping lists. Please try again.';
 
   @override
   String get noShoppingListsYet => 'No shopping lists yet';
 
   @override
-  String get noShoppingListsYetMessage => 'Create your first list to plan purchases and optimize your basket.';
+  String get noShoppingListsYetMessage =>
+      'Create your first list to plan purchases and optimize your basket.';
 
   @override
-  String get signInToSyncShoppingLists => 'Create and sync shopping lists with your Savingor account.';
+  String get signInToSyncShoppingLists =>
+      'Create and sync shopping lists with your Savingor account.';
 
   @override
   String get deleteListQuestion => 'Delete list?';
@@ -915,13 +943,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get optimizeAllLists => 'Optimize all lists';
 
   @override
-  String get optimizeAllListsSubtitle => 'Find the best known stores across your active shopping lists';
+  String get optimizeAllListsSubtitle =>
+      'Find the best known stores across your active shopping lists';
 
   @override
   String get optimizeThisBasket => 'Optimize this basket';
 
   @override
-  String get optimizeThisBasketSubtitle => 'Find the best known stores for this list';
+  String get optimizeThisBasketSubtitle =>
+      'Find the best known stores for this list';
 
   @override
   String get listNotFound => 'List not found';
@@ -936,10 +966,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noShoppingItemsYet => 'No items yet';
 
   @override
-  String get noShoppingItemsYetMessage => 'Add items to this list to track what you need.';
+  String get noShoppingItemsYetMessage =>
+      'Add items to this list to track what you need.';
 
   @override
-  String get shoppingListEmptyMessage => 'Create and manage your smart shopping lists here.';
+  String get shoppingListEmptyMessage =>
+      'Create and manage your smart shopping lists here.';
 
   @override
   String get purchased => 'Purchased';
@@ -989,7 +1021,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterListName => 'Enter a list name';
 
   @override
-  String get newShoppingListHint => 'Give your list a name. You can add items after creating it.';
+  String get newShoppingListHint =>
+      'Give your list a name. You can add items after creating it.';
 
   @override
   String get itemsOptional => 'Items (optional)';
@@ -1013,13 +1046,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get couldNotLoadItems => 'Could not load items';
 
   @override
-  String get couldNotLoadListItems => 'Could not load list items. Please try again.';
+  String get couldNotLoadListItems =>
+      'Could not load list items. Please try again.';
 
   @override
   String get createAnotherReceiptQuestion => 'Create another receipt?';
 
   @override
-  String get createAnotherReceiptMessage => 'This list may already have a receipt. Create another receipt from purchased items?';
+  String get createAnotherReceiptMessage =>
+      'This list may already have a receipt. Create another receipt from purchased items?';
 
   @override
   String get createReceipt => 'Create receipt';
@@ -1031,7 +1066,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noListsReadyToFinalize => 'No lists ready to finalize';
 
   @override
-  String get noListsReadyToFinalizeMessage => 'Mark items as purchased on a shopping list, then return here to create a receipt.';
+  String get noListsReadyToFinalizeMessage =>
+      'Mark items as purchased on a shopping list, then return here to create a receipt.';
 
   @override
   String get openShoppingLists => 'Open shopping lists';
@@ -1040,10 +1076,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectListToFinalize => 'Select list to finalize';
 
   @override
-  String get selectListToFinalizeSubtitle => 'Choose a shopping list with purchased items.';
+  String get selectListToFinalizeSubtitle =>
+      'Choose a shopping list with purchased items.';
 
   @override
-  String get finalizeShoppingTripCardSubtitle => 'Create a receipt from purchased items and update your price history';
+  String get finalizeShoppingTripCardSubtitle =>
+      'Create a receipt from purchased items and update your price history';
 
   @override
   String get done => 'Done';
@@ -1067,7 +1105,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noPurchasedItemsYet => 'No purchased items yet';
 
   @override
-  String get noPurchasedItemsYetMessage => 'Check off items you bought before creating a receipt.';
+  String get noPurchasedItemsYetMessage =>
+      'Check off items you bought before creating a receipt.';
 
   @override
   String get backToList => 'Back to list';
@@ -1076,7 +1115,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterStoreNameForTrip => 'Enter the store name for this trip';
 
   @override
-  String get enterStoreNameForTripSnack => 'Enter the store name for this trip.';
+  String get enterStoreNameForTripSnack =>
+      'Enter the store name for this trip.';
 
   @override
   String creatingReceiptsPerStore(int count) {
@@ -1084,7 +1124,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get missingStoreOnItems => 'Some purchased items are missing a store. Add a store on each item before finalizing.';
+  String get missingStoreOnItems =>
+      'Some purchased items are missing a store. Add a store on each item before finalizing.';
 
   @override
   String get missingStore => 'Missing store';
@@ -1122,40 +1163,49 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get addStoreToAllItems => 'Add a store to every purchased item before finalizing multiple receipts.';
+  String get addStoreToAllItems =>
+      'Add a store to every purchased item before finalizing multiple receipts.';
 
   @override
   String get signInToCreateShoppingLists => 'Sign in to create shopping lists.';
 
   @override
-  String get couldNotCreateList => 'Could not create the list. Please try again.';
+  String get couldNotCreateList =>
+      'Could not create the list. Please try again.';
 
   @override
-  String get couldNotDeleteList => 'Could not delete the list. Please try again.';
+  String get couldNotDeleteList =>
+      'Could not delete the list. Please try again.';
 
   @override
   String get couldNotAddItem => 'Could not add the item. Please try again.';
 
   @override
-  String get signInToAddShoppingItems => 'Sign in to add items to your shopping list.';
+  String get signInToAddShoppingItems =>
+      'Sign in to add items to your shopping list.';
 
   @override
   String get itemNameRequired => 'Item name is required.';
 
   @override
-  String get couldNotUpdateItem => 'Could not update the item. Please try again.';
+  String get couldNotUpdateItem =>
+      'Could not update the item. Please try again.';
 
   @override
-  String get couldNotUpdateQuantity => 'Could not update quantity. Please try again.';
+  String get couldNotUpdateQuantity =>
+      'Could not update quantity. Please try again.';
 
   @override
-  String get couldNotRemoveItem => 'Could not remove the item. Please try again.';
+  String get couldNotRemoveItem =>
+      'Could not remove the item. Please try again.';
 
   @override
-  String get couldNotUpdateShoppingList => 'Could not update the shopping list. Please try again.';
+  String get couldNotUpdateShoppingList =>
+      'Could not update the shopping list. Please try again.';
 
   @override
-  String get couldNotCompleteAction => 'Could not complete the action. Please try again.';
+  String get couldNotCompleteAction =>
+      'Could not complete the action. Please try again.';
 
   @override
   String estimatedPrefix(String amount) {
@@ -1218,7 +1268,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noPriceHistoryYet => 'No price history yet';
 
   @override
-  String get addReceiptsForItemRecommendations => 'Add receipts with this item to unlock recommendations.';
+  String get addReceiptsForItemRecommendations =>
+      'Add receipts with this item to unlock recommendations.';
 
   @override
   String get suggestedStorePlan => 'Suggested store plan';
@@ -1229,7 +1280,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String storePlanItemLine(String itemName, String quantitySuffix, String unitPrice, String perUnit) {
+  String storePlanItemLine(String itemName, String quantitySuffix,
+      String unitPrice, String perUnit) {
     return '• $itemName$quantitySuffix — $unitPrice $perUnit';
   }
 
@@ -1237,10 +1289,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get perUnit => 'each';
 
   @override
-  String get signInToOptimizeAllLists => 'Sign in to optimize all your shopping lists from your receipts.';
+  String get signInToOptimizeAllLists =>
+      'Sign in to optimize all your shopping lists from your receipts.';
 
   @override
-  String get signInToOptimizeBasket => 'Sign in to optimize your basket from your receipts and shopping list.';
+  String get signInToOptimizeBasket =>
+      'Sign in to optimize your basket from your receipts and shopping list.';
 
   @override
   String get loadingAllActiveLists => 'Loading all active lists…';
@@ -1258,7 +1312,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noActiveItemsToOptimize => 'No active items to optimize';
 
   @override
-  String get noActiveItemsToOptimizeMessage => 'Add items to your shopping lists to build a smart store plan.';
+  String get noActiveItemsToOptimizeMessage =>
+      'Add items to your shopping lists to build a smart store plan.';
 
   @override
   String get backToShopping => 'Back to shopping';
@@ -1267,10 +1322,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addItemsToListForOptimizer => 'Add items to your shopping list';
 
   @override
-  String get addItemsToListForOptimizerMessage => 'Add items to your shopping list to optimize your basket.';
+  String get addItemsToListForOptimizerMessage =>
+      'Add items to your shopping list to optimize your basket.';
 
   @override
-  String get noPriceHistoryForOptimizerMessage => 'Add receipts with line items so Savingor can learn your prices and recommend better stores.';
+  String get noPriceHistoryForOptimizerMessage =>
+      'Add receipts with line items so Savingor can learn your prices and recommend better stores.';
 
   @override
   String listFinalizeProgressSummary(int purchased, int total) {
@@ -1304,7 +1361,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get trackMonthlyGrocerySpending => 'Track your monthly grocery spending against your budget.';
+  String get trackMonthlyGrocerySpending =>
+      'Track your monthly grocery spending against your budget.';
 
   @override
   String get monthlyGroceryBudget => 'Monthly grocery budget';
@@ -1322,7 +1380,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updateMonthlyBudget => 'Update monthly budget';
 
   @override
-  String get setMonthlyBudgetDescription => 'Set the grocery spending limit you want to track each month.';
+  String get setMonthlyBudgetDescription =>
+      'Set the grocery spending limit you want to track each month.';
 
   @override
   String get monthlyBudgetAmount => 'Monthly budget amount';
@@ -1432,7 +1491,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get priceInsightsEmptySubtitle => 'Full price memory from your receipt line items';
+  String get priceInsightsEmptySubtitle =>
+      'Full price memory from your receipt line items';
 
   @override
   String get savingsOpportunities => 'Savings opportunities';
@@ -1449,7 +1509,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get savingsOpportunitiesEmptySubtitle => 'Products where you paid more than the best known price';
+  String get savingsOpportunitiesEmptySubtitle =>
+      'Products where you paid more than the best known price';
 
   @override
   String get loadingAnalytics => 'Loading analytics…';
@@ -1458,16 +1519,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get couldNotLoadAnalytics => 'Could not load analytics';
 
   @override
-  String get signInForAnalytics => 'View spending analytics with your Savingor account.';
+  String get signInForAnalytics =>
+      'View spending analytics with your Savingor account.';
 
   @override
   String get noSpendingDataYet => 'No spending data yet';
 
   @override
-  String get noSpendingDataMessage => 'Add a receipt or expense to see spending totals, store breakdowns, and trends.';
+  String get noSpendingDataMessage =>
+      'Add a receipt or expense to see spending totals, store breakdowns, and trends.';
 
   @override
-  String get addMoreReceiptsForSavingsValue => 'Add more receipts to calculate your savings value.';
+  String get addMoreReceiptsForSavingsValue =>
+      'Add more receipts to calculate your savings value.';
 
   @override
   String storeHasSeveralBestPrices(String store) {
@@ -1479,17 +1543,20 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count tracked products currently have their lowest known price at $store',
+      other:
+          '$count tracked products currently have their lowest known price at $store',
       one: '1 tracked product currently has its lowest known price at $store',
     );
     return '$_temp0';
   }
 
   @override
-  String get useStoreWhenMatchesRoute => 'Use this store when it matches your shopping route';
+  String get useStoreWhenMatchesRoute =>
+      'Use this store when it matches your shopping route';
 
   @override
-  String recentlyPaidLatestBestKnown(String latestPrice, String latestStore, String bestPrice, String bestStore) {
+  String recentlyPaidLatestBestKnown(String latestPrice, String latestStore,
+      String bestPrice, String bestStore) {
     return 'You recently paid $latestPrice at $latestStore. Your best known price is $bestPrice at $bestStore.';
   }
 
@@ -1551,7 +1618,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get signInForPriceMemory => 'Sign in to view your product price memory.';
+  String get signInForPriceMemory =>
+      'Sign in to view your product price memory.';
 
   @override
   String get loadingPriceMemory => 'Loading price memory…';
@@ -1563,15 +1631,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noPriceMemoryYet => 'No price memory yet';
 
   @override
-  String get noPriceMemoryMessage => 'Add receipts with line items to start building your price memory.';
+  String get noPriceMemoryMessage =>
+      'Add receipts with line items to start building your price memory.';
 
   @override
   String savingsOpportunitiesPaidMoreCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count actionable opportunities where you paid more than the best known price',
-      one: '1 actionable opportunity where you paid more than the best known price',
+      other:
+          '$count actionable opportunities where you paid more than the best known price',
+      one:
+          '1 actionable opportunity where you paid more than the best known price',
     );
     return '$_temp0';
   }
@@ -1587,7 +1658,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get recommendationWatchProductBeforeBuying => 'Recommendation: Watch this product before buying again.';
+  String get recommendationWatchProductBeforeBuying =>
+      'Recommendation: Watch this product before buying again.';
 
   @override
   String recommendationBuyAtStoreNextTime(String store) {
@@ -1595,19 +1667,22 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get signInForSavingsOpportunities => 'Sign in to see savings opportunities from your receipts.';
+  String get signInForSavingsOpportunities =>
+      'Sign in to see savings opportunities from your receipts.';
 
   @override
   String get loadingSavingsOpportunities => 'Loading savings opportunities…';
 
   @override
-  String get couldNotLoadSavingsOpportunities => 'Could not load savings opportunities';
+  String get couldNotLoadSavingsOpportunities =>
+      'Could not load savings opportunities';
 
   @override
   String get noSavingsOpportunitiesYet => 'No savings opportunities yet';
 
   @override
-  String get noSavingsOpportunitiesMessage => 'Add more receipts with line items so Savingor can compare prices across stores.';
+  String get noSavingsOpportunitiesMessage =>
+      'Add more receipts with line items so Savingor can compare prices across stores.';
 
   @override
   String get recordsLabel => 'Records';
@@ -1627,7 +1702,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get buyItemAtBestPriceWhenFitsRoute => 'Buy this item where you previously found the best price when it fits your shopping route.';
+  String get buyItemAtBestPriceWhenFitsRoute =>
+      'Buy this item where you previously found the best price when it fits your shopping route.';
 
   @override
   String get addToShoppingList => 'Add to shopping list';
@@ -1642,7 +1718,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productNotFound => 'Product not found.';
 
   @override
-  String get buyingAdviceInsufficientHistory => 'Add more receipts with this item to unlock smarter buying advice.';
+  String get buyingAdviceInsufficientHistory =>
+      'Add more receipts with this item to unlock smarter buying advice.';
 
   @override
   String get buyingAdvicePaidBestPrice => 'You paid your best known price.';
@@ -1668,7 +1745,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nearbyStores => 'Nearby stores';
 
   @override
-  String get nearbyStoresSubtitle => 'Find grocery stores near you and compare savings opportunities.';
+  String get nearbyStoresSubtitle =>
+      'Find grocery stores near you and compare savings opportunities.';
 
   @override
   String get storesNearby => 'Stores nearby';
@@ -1679,13 +1757,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get mapStoresFootnotePlaces => 'Stores are based on your selected location and search radius.';
+  String get mapStoresFootnotePlaces =>
+      'Stores are based on your selected location and search radius.';
 
   @override
-  String get mapStoresFootnoteFallback => 'Showing grocery stores based on your selected area.';
+  String get mapStoresFootnoteFallback =>
+      'Showing grocery stores based on your selected area.';
 
   @override
-  String get mapStoresFootnoteDefault => 'Explore grocery stores near your chosen location.';
+  String get mapStoresFootnoteDefault =>
+      'Explore grocery stores near your chosen location.';
 
   @override
   String mapNoStoresWithinRadius(int distance) {
@@ -1726,7 +1807,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mapCouldNotAccessLocation => 'Could not access your location.';
 
   @override
-  String get mapEnableLocationPrompt => 'Enable location to find grocery stores near you.';
+  String get mapEnableLocationPrompt =>
+      'Enable location to find grocery stores near you.';
 
   @override
   String get mapUseMyLocation => 'Use my location';
@@ -1741,13 +1823,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mapLocationPermissionDenied => 'Location permission denied.';
 
   @override
-  String get mapCouldNotDetectLocation => 'Could not detect your location. Please try again.';
+  String get mapCouldNotDetectLocation =>
+      'Could not detect your location. Please try again.';
 
   @override
   String get mapSetYourLocation => 'Set your location';
 
   @override
-  String get mapSetLocationGpsOrCity => 'Use GPS or choose a city to view nearby stores.';
+  String get mapSetLocationGpsOrCity =>
+      'Use GPS or choose a city to view nearby stores.';
 
   @override
   String get mapCurrentLocation => 'Current location';
@@ -1793,7 +1877,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aiSavingsAssistant => 'AI Savings Assistant';
 
   @override
-  String get aiSignInPrompt => 'Sign in to ask the AI assistant about your receipts and shopping lists.';
+  String get aiSignInPrompt =>
+      'Sign in to ask the AI assistant about your receipts and shopping lists.';
 
   @override
   String get aiLoadingYourData => 'Loading your data…';
@@ -1805,19 +1890,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aiEmptyTitle => 'Add data to get AI insights';
 
   @override
-  String get aiEmptyMessage => 'Scan a receipt, add an expense, or create a shopping list. The assistant analyzes your saved data — not live store prices.';
+  String get aiEmptyMessage =>
+      'Scan a receipt, add an expense, or create a shopping list. The assistant analyzes your saved data — not live store prices.';
 
   @override
   String get aiHeroTitle => 'Your AI savings coach';
 
   @override
-  String get aiHeroSubtitleLive => 'Ask about spending, receipts, and shopping lists.';
+  String get aiHeroSubtitleLive =>
+      'Ask about spending, receipts, and shopping lists.';
 
   @override
-  String get aiHeroSubtitlePreview => 'Preview insights from your saved data — connect an API key for live answers.';
+  String get aiHeroSubtitlePreview =>
+      'Preview insights from your saved data — connect an API key for live answers.';
 
   @override
-  String get aiConfigReadyMessage => 'AI assistant is ready. Connect an API key to enable live answers.';
+  String get aiConfigReadyMessage =>
+      'AI assistant is ready. Connect an API key to enable live answers.';
 
   @override
   String get aiDataSnapshot => 'Your data snapshot';
@@ -1869,7 +1958,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aiSuggestedQuestions => 'Suggested questions';
 
   @override
-  String get aiSuggestSaveMoreThisWeek => 'How can I save more money this week?';
+  String get aiSuggestSaveMoreThisWeek =>
+      'How can I save more money this week?';
 
   @override
   String get aiSuggestTopStore => 'Which store do I spend the most at?';
@@ -1878,22 +1968,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aiSuggestAnalyzeSpending => 'Analyze my grocery spending.';
 
   @override
-  String get aiSuggestShoppingListPriority => 'What should I buy first from my shopping list?';
+  String get aiSuggestShoppingListPriority =>
+      'What should I buy first from my shopping list?';
 
   @override
   String get aiAnalyzingYourData => 'Analyzing your data…';
 
   @override
-  String get aiCouldNotGetAnswer => 'Could not get an answer. Please try again.';
+  String get aiCouldNotGetAnswer =>
+      'Could not get an answer. Please try again.';
 
   @override
-  String get aiInsightsDisclaimer => 'Insights are based on your saved receipts, expenses, and shopping lists in Savingor — not live store prices or deals.';
+  String get aiInsightsDisclaimer =>
+      'Insights are based on your saved receipts, expenses, and shopping lists in Savingor — not live store prices or deals.';
 
   @override
   String get aiInputHintLive => 'Ask about your spending or shopping list…';
 
   @override
-  String get aiInputHintPreview => 'Type a question — connect an API key for live answers';
+  String get aiInputHintPreview =>
+      'Type a question — connect an API key for live answers';
 
   @override
   String get aiRequestFailed => 'AI request failed. Please try again.';
@@ -1914,19 +2008,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editProfileFullNameHint => 'Your full name';
 
   @override
-  String get emailChangesNotAvailable => 'Email changes are not available in this version.';
+  String get emailChangesNotAvailable =>
+      'Email changes are not available in this version.';
 
   @override
   String get password => 'Password';
 
   @override
-  String get passwordNeverShown => 'For security, your current password is never shown.';
+  String get passwordNeverShown =>
+      'For security, your current password is never shown.';
 
   @override
   String get changePassword => 'Change password';
 
   @override
-  String get sendPasswordResetEmailInstead => 'Send password reset email instead';
+  String get sendPasswordResetEmailInstead =>
+      'Send password reset email instead';
 
   @override
   String get sendingResetEmail => 'Sending reset email...';
@@ -1947,7 +2044,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passwordResetEmailSent => 'Reset email sent';
 
   @override
-  String get changePasswordIntro => 'To change your password inside the app, enter your current password first.';
+  String get changePasswordIntro =>
+      'To change your password inside the app, enter your current password first.';
 
   @override
   String get currentPassword => 'Current password';
@@ -1974,7 +2072,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newPasswordRequired => 'New password is required';
 
   @override
-  String get newPasswordMinLength => 'New password must be at least 6 characters';
+  String get newPasswordMinLength =>
+      'New password must be at least 6 characters';
 
   @override
   String get confirmNewPasswordRequired => 'Please confirm your new password';
@@ -1989,10 +2088,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get forgotCurrentPassword => 'Forgot your current password?';
 
   @override
-  String get passwordResetSecureLink => 'We\'ll send a secure reset link to your email so you can create a new password.';
+  String get passwordResetSecureLink =>
+      'We\'ll send a secure reset link to your email so you can create a new password.';
 
   @override
-  String get passwordResetByEmailHint => 'If you don\'t remember it, use password reset by email.';
+  String get passwordResetByEmailHint =>
+      'If you don\'t remember it, use password reset by email.';
 
   @override
   String get sendResetEmail => 'Send reset email';
@@ -2010,7 +2111,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hidePassword => 'Hide password';
 
   @override
-  String get signInToChangePassword => 'You need to be signed in to change your password.';
+  String get signInToChangePassword =>
+      'You need to be signed in to change your password.';
 
   @override
   String get currentPasswordIncorrect => 'Current password is incorrect';
@@ -2019,7 +2121,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passwordTooWeak => 'Password is too weak';
 
   @override
-  String get recentLoginRequired => 'For security, please sign in again and retry.';
+  String get recentLoginRequired =>
+      'For security, please sign in again and retry.';
 
   @override
   String get tooManyAttempts => 'Too many attempts. Please try again later.';
@@ -2043,7 +2146,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveSmarterWithAi => 'Save smarter with AI';
 
   @override
-  String get unlockProFeaturesDescription => 'Unlock AI savings insights, receipt analytics, smart alerts, and deeper spending reports.';
+  String get unlockProFeaturesDescription =>
+      'Unlock AI savings insights, receipt analytics, smart alerts, and deeper spending reports.';
 
   @override
   String get bestValue => 'Best value';
@@ -2055,7 +2159,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manualExpenseTracking => 'Manual expense tracking';
 
   @override
-  String get aiPoweredToolsDescription => 'AI-powered tools for smarter grocery savings.';
+  String get aiPoweredToolsDescription =>
+      'AI-powered tools for smarter grocery savings.';
 
   @override
   String get receiptAnalytics => 'Receipt analytics';
@@ -2082,13 +2187,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proSubscriptionActivated => 'Subscription activated';
 
   @override
-  String get proDemoFallbackActivated => 'Pro demo activated — no real payment processed.';
+  String get proDemoFallbackActivated =>
+      'Pro demo activated — no real payment processed.';
 
   @override
-  String get couldNotCompletePurchase => 'Could not complete the purchase. Please try again.';
+  String get couldNotCompletePurchase =>
+      'Could not complete the purchase. Please try again.';
 
   @override
-  String get couldNotActivateProDemo => 'Could not activate Pro demo. Please try again.';
+  String get couldNotActivateProDemo =>
+      'Could not activate Pro demo. Please try again.';
 
   @override
   String get purchaseRestored => 'Purchase restored';
@@ -2103,16 +2211,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get subscriptionSetup => 'Subscription setup';
 
   @override
-  String get subscriptionSetupPrepared => 'Savingor Pro is prepared for real in-app subscription integration.';
+  String get subscriptionSetupPrepared =>
+      'Savingor Pro is prepared for real in-app subscription integration.';
 
   @override
-  String get subscriptionSetupNotConfigured => 'Payment provider keys or store products are not configured in this build.';
+  String get subscriptionSetupNotConfigured =>
+      'Payment provider keys or store products are not configured in this build.';
 
   @override
   String get activateProDemoForTesting => 'Activate Pro demo for testing';
 
   @override
-  String get demoFallbackActive => 'Demo fallback active — no real payment processed.';
+  String get demoFallbackActive =>
+      'Demo fallback active — no real payment processed.';
 
   @override
   String get subscriptionPlanLabel => 'Plan';
@@ -2144,7 +2255,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get revenueCatLabel => 'RevenueCat';
 
   @override
-  String get subscriptionManagedByStore => 'Your subscription is managed by App Store or Google Play. You can cancel or update it from your store subscription settings.';
+  String get subscriptionManagedByStore =>
+      'Your subscription is managed by App Store or Google Play. You can cancel or update it from your store subscription settings.';
 
   @override
   String get manageInAppStoreGooglePlay => 'Manage in App Store / Google Play';
@@ -2156,22 +2268,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noActiveSubscription => 'No active subscription';
 
   @override
-  String get proDemoCancelled => 'Pro demo cancelled. You are back on the Free plan.';
+  String get proDemoCancelled =>
+      'Pro demo cancelled. You are back on the Free plan.';
 
   @override
-  String get couldNotCancelProDemo => 'Could not cancel Pro demo. Please try again.';
+  String get couldNotCancelProDemo =>
+      'Could not cancel Pro demo. Please try again.';
 
   @override
-  String get couldNotOpenSubscriptionManagement => 'Could not open the subscription management page.';
+  String get couldNotOpenSubscriptionManagement =>
+      'Could not open the subscription management page.';
 
   @override
   String get managementNotAvailable => 'Management not available';
 
   @override
-  String get managementUrlUnavailableMessage => 'Subscription management URL is not available in this test build. For RevenueCat Test Store purchases, reset the test customer in the RevenueCat dashboard or use a new test user.';
+  String get managementUrlUnavailableMessage =>
+      'Subscription management URL is not available in this test build. For RevenueCat Test Store purchases, reset the test customer in the RevenueCat dashboard or use a new test user.';
 
   @override
-  String get paymentProviderNotConfiguredSnack => 'Payment provider is not configured in this local build.';
+  String get paymentProviderNotConfiguredSnack =>
+      'Payment provider is not configured in this local build.';
 
   @override
   String get purchaseCancelled => 'Purchase cancelled';
@@ -2183,14 +2300,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get productUnavailable => 'Product unavailable';
 
   @override
-  String get purchaseNotActiveYet => 'Purchase completed but Pro is not active yet. Try Restore purchases.';
+  String get purchaseNotActiveYet =>
+      'Purchase completed but Pro is not active yet. Try Restore purchases.';
 
   @override
   String get networkErrorTryAgain => 'Check your connection and try again';
 
   @override
-  String get signInToManageSubscription => 'You need to be signed in to manage your subscription.';
+  String get signInToManageSubscription =>
+      'You need to be signed in to manage your subscription.';
 
   @override
-  String get couldNotUpdateSubscription => 'Could not update your subscription. Please try again.';
+  String get couldNotUpdateSubscription =>
+      'Could not update your subscription. Please try again.';
 }

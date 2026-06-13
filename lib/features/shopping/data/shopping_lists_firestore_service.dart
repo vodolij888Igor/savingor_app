@@ -34,9 +34,10 @@ class ShoppingListsFirestoreService {
 
   Stream<List<ShoppingList>> watchLists(String uid) {
     return _listsCollection(uid).snapshots().map(
-          (QuerySnapshot<Map<String, dynamic>> snapshot) =>
-              _sortActiveLists(
-            snapshot.docs.map(ShoppingList.fromFirestore).toList(growable: false),
+          (QuerySnapshot<Map<String, dynamic>> snapshot) => _sortActiveLists(
+            snapshot.docs
+                .map(ShoppingList.fromFirestore)
+                .toList(growable: false),
           ),
         );
   }
@@ -60,10 +61,7 @@ class ShoppingListsFirestoreService {
   }
 
   Stream<List<ShoppingListItem>> watchItems(String uid, String listId) {
-    return _itemsCollection(uid, listId)
-        .orderBy('sortOrder')
-        .snapshots()
-        .map(
+    return _itemsCollection(uid, listId).orderBy('sortOrder').snapshots().map(
           (QuerySnapshot<Map<String, dynamic>> snapshot) => snapshot.docs
               .map(ShoppingListItem.fromFirestore)
               .toList(growable: false),
@@ -112,17 +110,19 @@ class ShoppingListsFirestoreService {
       final NewShoppingListItemInput input = normalizedItems[index];
       final DocumentReference<Map<String, dynamic>> itemRef =
           _itemsCollection(uid, listRef.id).doc();
-      batch.set(itemRef, ShoppingListItem(
-        id: itemRef.id,
-        name: input.name.trim(),
-        quantity: input.quantity.clamp(1, 999),
-        isCompleted: false,
-        store: input.store?.trim(),
-        unitPrice: input.unitPrice,
-        sortOrder: index,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ).toFirestore(isCreate: true));
+      batch.set(
+          itemRef,
+          ShoppingListItem(
+            id: itemRef.id,
+            name: input.name.trim(),
+            quantity: input.quantity.clamp(1, 999),
+            isCompleted: false,
+            store: input.store?.trim(),
+            unitPrice: input.unitPrice,
+            sortOrder: index,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ).toFirestore(isCreate: true));
     }
 
     await batch.commit();

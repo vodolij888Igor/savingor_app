@@ -94,9 +94,8 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 
   Future<void> _submitAuth() async {
-    final String? validationError = _isCreateMode
-        ? _validateCreateAccount()
-        : _validateLogin();
+    final String? validationError =
+        _isCreateMode ? _validateCreateAccount() : _validateLogin();
     if (validationError != null) {
       setState(() => _errorMessage = validationError);
       return;
@@ -162,8 +161,7 @@ class _AuthScreenState extends State<AuthScreen> {
       filled: true,
       fillColor: Colors.white.withOpacity(0.72),
       isDense: true,
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       border: base,
       enabledBorder: base.copyWith(
         borderSide: BorderSide(
@@ -185,8 +183,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   List<Widget> _buildAuthFields(BuildContext context) {
     final String emailHint = StartupFlowStrings.tr(context, 'auth_email');
-    final String passwordHint =
-        StartupFlowStrings.tr(context, 'auth_password');
+    final String passwordHint = StartupFlowStrings.tr(context, 'auth_password');
 
     if (!_isCreateMode) {
       return <Widget>[
@@ -277,8 +274,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final double keyboardBottomInset =
-        MediaQuery.viewInsetsOf(context).bottom;
+    final double keyboardBottomInset = MediaQuery.viewInsetsOf(context).bottom;
     return Scaffold(
       // Cream Savingor background must not show through after the Android
       // keyboard dismisses — that inset glitch leaves a white strip. Transparent
@@ -290,50 +286,47 @@ class _AuthScreenState extends State<AuthScreen> {
           fit: StackFit.expand,
           children: <Widget>[
             Positioned.fill(
-            // `cover` fills the whole screen so there is no white block at the
-            // bottom. Top-aligned so the artwork's Savingor logo / wordmark
-            // band stays anchored up top and any cropping happens at the
-            // bottom (which the auth card sits over anyway).
-            child: Image.asset(
-              _backgroundAsset,
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-              filterQuality: FilterQuality.high,
+              // `cover` fills the whole screen so there is no white block at the
+              // bottom. Top-aligned so the artwork's Savingor logo / wordmark
+              // band stays anchored up top and any cropping happens at the
+              // bottom (which the auth card sits over anyway).
+              child: Image.asset(
+                _backgroundAsset,
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
+                filterQuality: FilterQuality.high,
+              ),
             ),
-          ),
-          SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints:
-                    const BoxConstraints(maxWidth: _maxFormWidth),
-                child: LayoutBuilder(
-                  builder:
-                      (BuildContext _, BoxConstraints constraints) {
-                    // Press the card right up under the artwork's Savingor
-                    // logo / wordmark band. SafeArea already absorbs the
-                    // status bar; this extra gap is now ≈2–10 px so the card
-                    // visually connects to the top branding without ever
-                    // overlapping system UI on smaller devices.
-                    final double topPad =
-                        (constraints.maxHeight * 0.01)
-                            .clamp(2.0, 10.0);
-                    return SingleChildScrollView(
-                      // Extra bottom padding when the keyboard is open so the
-                      // form can scroll above it without resizing the scaffold.
-                      padding: EdgeInsets.fromLTRB(
-                        20,
-                        topPad,
-                        20,
-                        20 + keyboardBottomInset,
-                      ),
-                      child: _buildAuthCard(context),
-                    );
-                  },
+            SafeArea(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: _maxFormWidth),
+                  child: LayoutBuilder(
+                    builder: (BuildContext _, BoxConstraints constraints) {
+                      // Press the card right up under the artwork's Savingor
+                      // logo / wordmark band. SafeArea already absorbs the
+                      // status bar; this extra gap is now ≈2–10 px so the card
+                      // visually connects to the top branding without ever
+                      // overlapping system UI on smaller devices.
+                      final double topPad =
+                          (constraints.maxHeight * 0.01).clamp(2.0, 10.0);
+                      return SingleChildScrollView(
+                        // Extra bottom padding when the keyboard is open so the
+                        // form can scroll above it without resizing the scaffold.
+                        padding: EdgeInsets.fromLTRB(
+                          20,
+                          topPad,
+                          20,
+                          20 + keyboardBottomInset,
+                        ),
+                        child: _buildAuthCard(context),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
         ),
       ),
     );
@@ -343,9 +336,8 @@ class _AuthScreenState extends State<AuthScreen> {
   /// social providers + create-account row. Backdrop blur softens whatever
   /// part of the artwork sits behind the card so the inputs stay readable.
   Widget _buildAuthCard(BuildContext context) {
-    final String title = _isCreateMode
-        ? 'Create your Savingor account'
-        : 'Welcome back';
+    final String title =
+        _isCreateMode ? 'Create your Savingor account' : 'Welcome back';
     final String subtitle = _isCreateMode
         ? 'Save purchases, track spending, and find better deals.'
         : 'Log in to continue saving smarter.';
@@ -638,8 +630,7 @@ class _CreateAccountRow extends StatelessWidget {
             onPressed: onTap,
             style: TextButton.styleFrom(
               foregroundColor: SavingorColors.darkGreen,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               visualDensity: VisualDensity.compact,

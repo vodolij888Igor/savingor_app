@@ -10,13 +10,11 @@ class AddGroceryExpenseScreen extends StatefulWidget {
   const AddGroceryExpenseScreen({super.key});
 
   @override
-  State<AddGroceryExpenseScreen> createState() => _AddGroceryExpenseScreenState();
+  State<AddGroceryExpenseScreen> createState() =>
+      _AddGroceryExpenseScreenState();
 }
 
 class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
-  static const Color _pageWhite = Color(0xFFFFFEFE);
-  static const Color _fieldBorder = Color(0xFFF3F4F3);
-
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _storeController = TextEditingController();
   final TextEditingController _itemController = TextEditingController();
@@ -51,36 +49,7 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
   }
 
   InputDecoration _fieldDecoration(String label) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: TextStyle(
-        color: SavingorColors.textSecondary.withOpacity(0.95),
-        fontWeight: FontWeight.w500,
-      ),
-      filled: true,
-      fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: _fieldBorder.withOpacity(0.9)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: _fieldBorder.withOpacity(0.9)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: SavingorColors.primaryStroke, width: 1.2),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Color(0xFFDC2626)),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Color(0xFFDC2626), width: 1.2),
-      ),
-    );
+    return SavingorWorkflowTheme.fieldDecoration(context, label: label);
   }
 
   Future<void> _pickDate() async {
@@ -92,14 +61,22 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
       firstDate: DateTime(2020),
       lastDate: DateTime.now().add(const Duration(days: 1)),
       builder: (BuildContext context, Widget? child) {
+        final SavingorThemeExtension theme = context.savingor;
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: SavingorColors.primaryGreen,
-              onPrimary: SavingorColors.darkGreen,
-              surface: Colors.white,
-              onSurface: SavingorColors.textPrimary,
-            ),
+            colorScheme: theme.isDark
+                ? ColorScheme.dark(
+                    primary: theme.accentGreen,
+                    onPrimary: theme.buttonLabelOnGreen,
+                    surface: theme.surfacePrimary,
+                    onSurface: theme.textPrimary,
+                  )
+                : ColorScheme.light(
+                    primary: SavingorColors.primaryGreen,
+                    onPrimary: SavingorColors.darkGreen,
+                    surface: theme.surfacePrimary,
+                    onSurface: theme.textPrimary,
+                  ),
           ),
           child: child ?? const SizedBox.shrink(),
         );
@@ -152,25 +129,13 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
   }
 
   Widget _buildExpenseTile(Expense expense, AppLocalizations l10n) {
-    final String categoryLabel = expense.category.isEmpty
-        ? l10n.uncategorized
-        : expense.category;
+    final String categoryLabel =
+        expense.category.isEmpty ? l10n.uncategorized : expense.category;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: _fieldBorder.withOpacity(0.9), width: 0.5),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      decoration: SavingorWorkflowTheme.card(context, radius: 14),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -180,10 +145,10 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
               children: <Widget>[
                 Text(
                   expense.itemName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: SavingorColors.darkGreen,
+                    color: SavingorWorkflowTheme.primaryText(context),
                     height: 1.2,
                   ),
                 ),
@@ -193,7 +158,7 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: SavingorColors.textSecondary.withOpacity(0.95),
+                    color: context.savingor.textSecondary.withOpacity(0.95),
                     height: 1.25,
                   ),
                 ),
@@ -203,7 +168,7 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: SavingorColors.textSecondary.withOpacity(0.85),
+                    color: context.savingor.textSecondary.withOpacity(0.85),
                     height: 1.25,
                   ),
                 ),
@@ -212,10 +177,10 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
           ),
           Text(
             '\$${expense.price.toStringAsFixed(2)}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w800,
-              color: SavingorColors.darkGreen,
+              color: SavingorWorkflowTheme.primaryText(context),
               height: 1.2,
             ),
           ),
@@ -231,12 +196,7 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
         const SizedBox(height: SavingorSpacing.xl),
         Text(
           l10n.recentExpenses,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: SavingorColors.darkGreen,
-            height: 1.2,
-          ),
+          style: SavingorAppTextStyles.sectionTitleLarge(context),
         ),
         const SizedBox(height: 12),
         if (store.expenses.isEmpty)
@@ -245,13 +205,15 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: SavingorColors.textSecondary.withOpacity(0.92),
+              color: context.savingor.textSecondary.withOpacity(0.92),
               height: 1.35,
             ),
           )
         else
           Column(
-            children: store.expenses.map((Expense e) => _buildExpenseTile(e, l10n)).toList(),
+            children: store.expenses
+                .map((Expense e) => _buildExpenseTile(e, l10n))
+                .toList(),
           ),
       ],
     );
@@ -264,27 +226,26 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
     final ExpenseStore expenseStore = _expenseStore!;
 
     return Scaffold(
-      backgroundColor: _pageWhite,
+      backgroundColor: context.savingor.pageBackground,
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         toolbarHeight: 48,
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: _pageWhite,
+        backgroundColor: context.savingor.pageBackground,
         surfaceTintColor: Colors.transparent,
         title: Text(
           l10n.addGroceryExpense,
-          style: const TextStyle(
+          style: SavingorAppTextStyles.screenTitle(context).copyWith(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: SavingorColors.darkGreen,
             letterSpacing: -0.1,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: SavingorColors.darkGreen,
+            color: SavingorWorkflowTheme.appBarIcon(context),
             size: 20,
           ),
           onPressed: () {
@@ -338,7 +299,8 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
                 controller: _priceController,
                 enabled: true,
                 readOnly: false,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
                 textInputAction: TextInputAction.next,
                 decoration: _fieldDecoration(l10n.price),
                 validator: (String? value) {
@@ -370,9 +332,9 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
                 onTap: _pickDate,
                 decoration: _fieldDecoration(l10n.date).copyWith(
                   suffixIcon: IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.calendar_today_rounded,
-                      color: SavingorColors.primaryStroke,
+                      color: SavingorWorkflowTheme.accentText(context),
                       size: 20,
                     ),
                     onPressed: _pickDate,
@@ -382,7 +344,7 @@ class _AddGroceryExpenseScreenState extends State<AddGroceryExpenseScreen> {
               const SizedBox(height: 28),
               FilledButton(
                 onPressed: _saveExpense,
-                style: SavingorButtonStyles.primaryFilled(),
+                style: SavingorButtonStyles.primaryFilledFor(context),
                 child: Text(l10n.saveExpense),
               ),
               ListenableBuilder(

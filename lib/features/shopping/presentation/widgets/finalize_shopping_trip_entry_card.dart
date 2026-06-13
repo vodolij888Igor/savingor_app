@@ -12,8 +12,6 @@ class FinalizeShoppingTripEntryCard extends StatelessWidget {
 
   final VoidCallback onTap;
 
-  static const Color _airyBorder = Color(0xFFF3F4F3);
-
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
@@ -22,20 +20,18 @@ class FinalizeShoppingTripEntryCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
       accentTint: SavingorColors.primaryStroke,
-      borderColor: _airyBorder.withOpacity(0.6),
+      borderColor: SavingorWorkflowTheme.inputBorder(context).withOpacity(0.6),
       padding: const EdgeInsets.all(16),
       child: Row(
         children: <Widget>[
           Container(
             width: 44,
             height: 44,
-            decoration: BoxDecoration(
-              color: SavingorColors.lightGreen,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Icon(
+            decoration:
+                SavingorWorkflowTheme.highlightCard(context, radius: 14),
+            child: Icon(
               Icons.receipt_long_outlined,
-              color: SavingorColors.primaryStroke,
+              color: SavingorWorkflowTheme.accentText(context),
             ),
           ),
           const SizedBox(width: 14),
@@ -45,28 +41,28 @@ class FinalizeShoppingTripEntryCard extends StatelessWidget {
               children: <Widget>[
                 Text(
                   l10n.finalizeShoppingTrip,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
-                    color: SavingorColors.darkGreen,
+                    color: SavingorWorkflowTheme.primaryText(context),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   l10n.finalizeShoppingTripCardSubtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: SavingorColors.textSecondary,
+                    color: context.savingor.textSecondary,
                     height: 1.35,
                   ),
                 ),
               ],
             ),
           ),
-          const Icon(
+          Icon(
             Icons.chevron_right_rounded,
-            color: SavingorColors.textSecondary,
+            color: context.savingor.textSecondary,
           ),
         ],
       ),

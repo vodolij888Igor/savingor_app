@@ -8,8 +8,7 @@ class BasketOptimizerEntryCard extends StatelessWidget {
     super.key,
     required this.onTap,
     this.title = 'Optimize my basket',
-    this.subtitle =
-        'Find the best known stores from your receipt history',
+    this.subtitle = 'Find the best known stores from your receipt history',
   });
 
   final VoidCallback onTap;
@@ -20,11 +19,15 @@ class BasketOptimizerEntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Color borderColor = context.savingor.isDark
+        ? context.savingor.border.withOpacity(0.85)
+        : _airyBorder.withOpacity(0.6);
+
     return SavingorInteractiveCard(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
       accentTint: SavingorColors.primaryStroke,
-      borderColor: _airyBorder.withOpacity(0.6),
+      borderColor: borderColor,
       padding: const EdgeInsets.all(16),
       child: Row(
         children: <Widget>[
@@ -32,12 +35,14 @@ class BasketOptimizerEntryCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: SavingorColors.lightGreen,
+              color: context.savingor.isDark
+                  ? context.savingor.selectedHighlight
+                  : SavingorColors.lightGreen,
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.shopping_basket_outlined,
-              color: SavingorColors.primaryStroke,
+              color: SavingorWorkflowTheme.accentText(context),
             ),
           ),
           const SizedBox(width: 14),
@@ -47,28 +52,28 @@ class BasketOptimizerEntryCard extends StatelessWidget {
               children: <Widget>[
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
-                    color: SavingorColors.darkGreen,
+                    color: SavingorWorkflowTheme.primaryText(context),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: SavingorColors.textSecondary,
+                    color: context.savingor.textSecondary,
                     height: 1.35,
                   ),
                 ),
               ],
             ),
           ),
-          const Icon(
+          Icon(
             Icons.chevron_right_rounded,
-            color: SavingorColors.textSecondary,
+            color: context.savingor.textSecondary,
           ),
         ],
       ),

@@ -51,8 +51,7 @@ class NearbyStoresRepository {
     double? originLongitude,
   }) async {
     final bool hasApiKey = GooglePlacesConfig.hasApiKey;
-    final bool hasOrigin =
-        originLatitude != null && originLongitude != null;
+    final bool hasOrigin = originLatitude != null && originLongitude != null;
     final bool canSearchPlaces = hasApiKey && hasOrigin;
 
     if (canSearchPlaces) {

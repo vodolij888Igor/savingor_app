@@ -61,8 +61,7 @@ class Receipt {
   bool get hasAddress =>
       storeAddress != null && storeAddress!.trim().isNotEmpty;
 
-  String? get displayAddress =>
-      hasAddress ? storeAddress!.trim() : null;
+  String? get displayAddress => hasAddress ? storeAddress!.trim() : null;
 
   String get formattedTotal => '\$${total.toStringAsFixed(2)}';
 

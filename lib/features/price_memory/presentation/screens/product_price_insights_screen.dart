@@ -10,9 +10,6 @@ import 'package:savingor_app/l10n/app_localizations.dart';
 
 class ProductPriceInsightsScreen extends StatelessWidget {
   const ProductPriceInsightsScreen({super.key});
-
-  static const Color _pageBackground = Colors.white;
-
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
@@ -23,24 +20,20 @@ class ProductPriceInsightsScreen extends StatelessWidget {
       animation: store,
       builder: (BuildContext context, Widget? _) {
         return Scaffold(
-          backgroundColor: _pageBackground,
+          backgroundColor: context.savingor.pageBackground,
           appBar: AppBar(
             title: Text(
               l10n.productPriceInsights,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: SavingorColors.darkGreen,
-              ),
+              style: SavingorAppTextStyles.screenTitle(context),
             ),
             elevation: 0,
             scrolledUnderElevation: 0,
-            backgroundColor: _pageBackground,
+            backgroundColor: context.savingor.pageBackground,
             surfaceTintColor: Colors.transparent,
             leading: IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.arrow_back_ios_new_rounded,
-                color: SavingorColors.darkGreen,
+                color: SavingorWorkflowTheme.appBarIcon(context),
                 size: 20,
               ),
               onPressed: () => context.pop(),
@@ -101,7 +94,7 @@ class ProductPriceInsightsScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: SavingorColors.textSecondary.withOpacity(0.95),
+              color: context.savingor.textSecondary.withOpacity(0.95),
               height: 1.4,
             ),
           );

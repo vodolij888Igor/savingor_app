@@ -17,10 +17,7 @@ class ReceiptFirestoreService {
   CollectionReference<Map<String, dynamic>> _userReceiptsCollection(
     String userId,
   ) {
-    return _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('receipts');
+    return _firestore.collection('users').doc(userId).collection('receipts');
   }
 
   CollectionReference<Map<String, dynamic>> get _legacyReceiptsCollection =>
@@ -93,9 +90,7 @@ class ReceiptFirestoreService {
 
   Future<void> updateReceipt(String userId, Receipt receipt) async {
     final Receipt updated = receipt.copyWith(updatedAt: DateTime.now());
-    await _userReceiptsCollection(userId)
-        .doc(updated.id)
-        .set(updated.toMap());
+    await _userReceiptsCollection(userId).doc(updated.id).set(updated.toMap());
   }
 
   Future<void> deleteReceipt(String userId, String receiptId) async {

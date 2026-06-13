@@ -41,6 +41,9 @@ class SavingsOpportunityCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
+    final Color borderColor = context.savingor.isDark
+        ? context.savingor.border.withOpacity(0.85)
+        : _airyBorder.withOpacity(0.6);
     final String formattedLatest = PriceMemoryFormatters.formatPrice(
       opportunity.latestPrice,
       currency: opportunity.currency,
@@ -58,7 +61,7 @@ class SavingsOpportunityCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
       accentTint: SavingorAccentColors.savings,
-      borderColor: _airyBorder.withOpacity(0.6),
+      borderColor: borderColor,
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,26 +71,26 @@ class SavingsOpportunityCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   _productDisplayName(context),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
-                    color: SavingorColors.darkGreen,
+                    color: SavingorWorkflowTheme.headingText(context),
                   ),
                 ),
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                color: SavingorColors.textSecondary.withOpacity(0.55),
+                color: context.savingor.textSecondary.withOpacity(0.55),
               ),
             ],
           ),
           const SizedBox(height: 8),
           Text(
             l10n.saveUpToPerItem(formattedSaving),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,
-              color: SavingorColors.primaryStroke,
+              color: SavingorWorkflowTheme.accentText(context),
               height: 1.3,
             ),
           ),
@@ -97,17 +100,18 @@ class SavingsOpportunityCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: SavingorColors.darkGreen.withOpacity(0.85),
+              color:
+                  SavingorWorkflowTheme.primaryText(context).withOpacity(0.85),
               height: 1.35,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             l10n.bestKnownAtStore(formattedLowest, opportunity.lowestStoreName),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: SavingorColors.textSecondary,
+              color: context.savingor.textSecondary,
               height: 1.35,
             ),
           ),
@@ -117,7 +121,8 @@ class SavingsOpportunityCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: SavingorColors.darkGreen.withOpacity(0.78),
+              color:
+                  SavingorWorkflowTheme.primaryText(context).withOpacity(0.78),
               height: 1.35,
             ),
           ),

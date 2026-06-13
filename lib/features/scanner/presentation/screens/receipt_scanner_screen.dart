@@ -23,16 +23,6 @@ class ReceiptScannerScreen extends StatefulWidget {
 }
 
 class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
-  static const Color _pageBackground = Colors.white;
-
-  static const TextStyle _titleStyle = TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.w800,
-    color: SavingorColors.darkGreen,
-    letterSpacing: 0.2,
-    height: 1.15,
-  );
-
   final ImagePicker _imagePicker = ImagePicker();
   final ReceiptOcrService _ocrService = ReceiptOcrService();
   final ReceiptOcrParser _ocrParser = ReceiptOcrParser();
@@ -136,9 +126,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
                   ),
                   _buildParsedField(
                     l10n.date,
-                    parsed.date != null
-                        ? _formatParsedDate(parsed.date!)
-                        : '—',
+                    parsed.date != null ? _formatParsedDate(parsed.date!) : '—',
                   ),
                   _buildParsedField(
                     l10n.total,
@@ -149,16 +137,16 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
                   const SizedBox(height: 12),
                   Text(
                     l10n.itemsColon,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: SavingorColors.darkGreen,
+                      color: context.savingor.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 6),
                   if (parsed.items.isEmpty)
                     Text(
                       l10n.noneDetected,
-                      style: const TextStyle(color: SavingorColors.textSecondary),
+                      style: TextStyle(color: context.savingor.textSecondary),
                     )
                   else
                     ...parsed.items.map(
@@ -176,17 +164,17 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
                       tilePadding: EdgeInsets.zero,
                       title: Text(
                         l10n.rawOcrText,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: SavingorColors.darkGreen,
+                          color: context.savingor.textPrimary,
                         ),
                       ),
                       children: <Widget>[
                         SelectableText(
                           parsed.rawText,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: SavingorColors.textSecondary,
+                            color: context.savingor.textSecondary,
                             height: 1.35,
                           ),
                         ),
@@ -235,24 +223,24 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
       padding: const EdgeInsets.only(bottom: 8),
       child: RichText(
         text: TextSpan(
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
-            color: SavingorColors.textSecondary,
+            color: context.savingor.textSecondary,
             height: 1.35,
           ),
           children: <TextSpan>[
             TextSpan(
               text: '$label: ',
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w700,
-                color: SavingorColors.darkGreen,
+                color: context.savingor.textPrimary,
               ),
             ),
             TextSpan(
               text: value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w500,
-                color: SavingorColors.darkGreen,
+                color: context.savingor.textSecondary,
               ),
             ),
           ],
@@ -281,13 +269,14 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
         }
 
         return Scaffold(
-          backgroundColor: _pageBackground,
+          backgroundColor: context.savingor.pageBackground,
           appBar: AppBar(
-            title: Text(l10n.receipts, style: _titleStyle),
+            title: Text(l10n.receipts,
+                style: SavingorAppTextStyles.screenTitle(context)),
             centerTitle: false,
             elevation: 0,
             scrolledUnderElevation: 0,
-            backgroundColor: _pageBackground,
+            backgroundColor: context.savingor.pageBackground,
             surfaceTintColor: Colors.transparent,
             automaticallyImplyLeading: false,
           ),
@@ -329,35 +318,18 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
   }
 
   Widget _buildScannerHero(AppLocalizations l10n) {
+    final SavingorThemeExtension theme = context.savingor;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(22, 24, 22, 24),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(22),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            Color(0xFFF2FAF4),
-            Color(0xFFFAFAF5),
-            Color(0xFFF7FCF8),
-          ],
-        ),
-        border: Border.all(
-          color: SavingorColors.primaryStroke.withOpacity(0.14),
-          width: 0.75,
-        ),
-        boxShadow: const <BoxShadow>[
-          BoxShadow(
-            color: Color(0x0F4F9D47),
-            blurRadius: 22,
-            offset: Offset(0, 8),
-          ),
-          BoxShadow(
-            color: Color(0x06000000),
-            blurRadius: 8,
-            offset: Offset(0, 2),
-          ),
+      decoration: SavingorSurfaces.tabHeroCard(
+        context,
+        radius: 22,
+        lightGradientColors: const <Color>[
+          Color(0xFFF2FAF4),
+          Color(0xFFFAFAF5),
+          Color(0xFFF7FCF8),
         ],
       ),
       child: Column(
@@ -366,22 +338,28 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: theme.isDark
+                  ? theme.surfaceElevated
+                  : context.savingor.surfacePrimary,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: SavingorColors.primaryStroke.withOpacity(0.2),
+                color: theme.isDark
+                    ? theme.border.withOpacity(0.85)
+                    : SavingorColors.primaryStroke.withOpacity(0.2),
               ),
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: SavingorColors.primaryStroke.withOpacity(0.12),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              boxShadow: theme.isDark
+                  ? null
+                  : <BoxShadow>[
+                      BoxShadow(
+                        color: SavingorColors.primaryStroke.withOpacity(0.12),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
             ),
-            child: const Icon(
+            child: Icon(
               Icons.document_scanner_rounded,
-              color: SavingorColors.primaryStroke,
+              color: theme.brandTitle,
               size: 28,
             ),
           ),
@@ -389,10 +367,10 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
           Text(
             l10n.scanReceipt,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF1F2937),
+              color: context.savingor.textPrimary,
               height: 1.15,
               letterSpacing: -0.2,
             ),
@@ -404,7 +382,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: SavingorColors.textSecondary.withOpacity(0.95),
+              color: context.savingor.textSecondary.withOpacity(0.95),
               height: 1.45,
             ),
           ),
@@ -412,14 +390,16 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
           SavingorInteractiveFilledButton(
             onPressed: _isScanning ? null : _onScanReceiptPressed,
             width: double.infinity,
+            minHeight: 54,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             borderRadius: BorderRadius.circular(18),
             child: _isScanning
-                ? const SizedBox(
+                ? SizedBox(
                     width: 22,
                     height: 22,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: SavingorColors.darkGreen,
+                      color: theme.buttonLabelOnGreen,
                     ),
                   )
                 : Row(
@@ -438,14 +418,17 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
   }
 
   Widget _buildAddManuallyButton(AppLocalizations l10n) {
+    final SavingorThemeExtension theme = context.savingor;
+    final bool isDark = theme.isDark;
+
     return OutlinedButton.icon(
       onPressed: _isScanning ? null : _openCreateReceipt,
       style: OutlinedButton.styleFrom(
-        foregroundColor: SavingorColors.darkGreen,
-        backgroundColor: Colors.white,
+        foregroundColor: isDark ? theme.textPrimary : theme.brandHeading,
+        backgroundColor: isDark ? theme.surfaceElevated : theme.surfacePrimary,
         minimumSize: const Size.fromHeight(52),
         side: BorderSide(
-          color: SavingorColors.primaryStroke.withOpacity(0.45),
+          color: theme.border.withOpacity(isDark ? 0.9 : 1),
         ),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -455,7 +438,11 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
           fontWeight: FontWeight.w700,
         ),
       ),
-      icon: const Icon(Icons.edit_note_outlined, size: 20),
+      icon: Icon(
+        Icons.edit_note_outlined,
+        size: 20,
+        color: isDark ? theme.textPrimary : null,
+      ),
       label: Text(l10n.addManually),
     );
   }
@@ -469,7 +456,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
 
     return Container(
       width: double.infinity,
-      decoration: SavingorSurfaces.premiumCard(radius: 18),
+      decoration: SavingorSurfaces.premiumCard(context, radius: 18),
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -485,19 +472,19 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
                 ),
                 child: Row(
                   children: <Widget>[
-                    const Icon(
+                    Icon(
                       Icons.receipt_long_outlined,
                       size: 20,
-                      color: SavingorColors.primaryStroke,
+                      color: context.savingor.brandTitle,
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         l10n.recentReceipts(count),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF1A2E24),
+                          color: context.savingor.textPrimary,
                         ),
                       ),
                     ),
@@ -507,7 +494,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
                       curve: Curves.easeOut,
                       child: Icon(
                         Icons.keyboard_arrow_down_rounded,
-                        color: SavingorColors.textSecondary.withOpacity(0.85),
+                        color: context.savingor.textSecondary.withOpacity(0.85),
                       ),
                     ),
                   ],
@@ -523,7 +510,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
                 Divider(
                   height: 1,
                   thickness: 1,
-                  color: SavingorColors.border.withOpacity(0.55),
+                  color: context.savingor.border.withOpacity(0.55),
                 ),
                 if (count == 0)
                   Padding(
@@ -533,7 +520,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: SavingorColors.textSecondary.withOpacity(0.95),
+                        color: context.savingor.textSecondary.withOpacity(0.95),
                         height: 1.4,
                       ),
                     ),
@@ -543,12 +530,14 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
                     padding: const EdgeInsets.fromLTRB(12, 12, 12, 16),
                     child: Column(
                       children: <Widget>[
-                        for (int i = 0; i < store.receipts.length; i++) ...<Widget>[
+                        for (int i = 0;
+                            i < store.receipts.length;
+                            i++) ...<Widget>[
                           if (i > 0) const SizedBox(height: 10),
                           _ReceiptCard(
                             receipt: store.receipts[i],
-                            onTap: () =>
-                                context.push('/scanner/${store.receipts[i].id}'),
+                            onTap: () => context
+                                .push('/scanner/${store.receipts[i].id}'),
                             onDelete: () => _confirmDelete(
                               context,
                               store,
@@ -573,13 +562,14 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
 
   Widget _buildSignInRequired(BuildContext context, AppLocalizations l10n) {
     return Scaffold(
-      backgroundColor: _pageBackground,
+      backgroundColor: context.savingor.pageBackground,
       appBar: AppBar(
-        title: Text(l10n.receipts, style: _titleStyle),
+        title: Text(l10n.receipts,
+            style: SavingorAppTextStyles.screenTitle(context)),
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: _pageBackground,
+        backgroundColor: context.savingor.pageBackground,
         surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
       ),
@@ -597,8 +587,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
     ReceiptStore store,
     Receipt receipt,
   ) async {
-    final String formattedTotal =
-        '\$${receipt.total.toStringAsFixed(2)}';
+    final String formattedTotal = '\$${receipt.total.toStringAsFixed(2)}';
 
     final bool? confirmed = await showDialog<bool>(
       context: context,
@@ -654,89 +643,99 @@ class _ReceiptCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final SavingorThemeExtension theme = context.savingor;
+
     return SavingorInteractiveCard(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
-      accentTint: SavingorColors.primaryStroke,
+      accentTint:
+          theme.isDark ? theme.accentGreen : SavingorColors.primaryStroke,
+      borderColor: theme.isDark ? theme.border.withOpacity(0.85) : null,
+      backgroundColor: theme.isDark ? theme.surfaceElevated : null,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
         child: Row(
           children: <Widget>[
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: SavingorColors.lightGreen,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(
-                  Icons.receipt_long_outlined,
-                  color: SavingorColors.primaryStroke,
-                ),
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: theme.isDark
+                    ? theme.surfaceStrong
+                    : theme.selectedHighlight,
+                borderRadius: BorderRadius.circular(14),
+                border: theme.isDark
+                    ? Border.all(color: theme.border.withOpacity(0.75))
+                    : null,
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      receipt.storeName,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: SavingorColors.darkGreen,
-                      ),
+              child: Icon(
+                Icons.receipt_long_outlined,
+                color: theme.brandTitle,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    receipt.storeName,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: theme.textPrimary,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _formatDate(receipt.date),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: SavingorColors.textSecondary,
-                      ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _formatDate(receipt.date),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: theme.textSecondary.withOpacity(0.96),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      receipt.formattedTotal,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: SavingorColors.darkGreen,
-                      ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    receipt.formattedTotal,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: theme.brandTitle,
                     ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: <Widget>[
-                        ReceiptSourceBadge(
-                          source: receipt.source,
-                          compact: true,
-                        ),
-                        if (receipt.hasItems) ...<Widget>[
-                          const SizedBox(width: 8),
-                          Text(
-                            AppLocalizations.of(context)
-                                .receiptItemsCount(receipt.itemCount),
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: SavingorColors.textSecondary,
-                            ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: <Widget>[
+                      ReceiptSourceBadge(
+                        source: receipt.source,
+                        compact: true,
+                      ),
+                      if (receipt.hasItems) ...<Widget>[
+                        const SizedBox(width: 8),
+                        Text(
+                          AppLocalizations.of(context)
+                              .receiptItemsCount(receipt.itemCount),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: theme.textSecondary.withOpacity(0.94),
                           ),
-                        ],
+                        ),
                       ],
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
               ),
-              IconButton(
-                icon: const Icon(Icons.delete_outline_rounded),
-                color: SavingorColors.textSecondary,
-                onPressed: onDelete,
-              ),
-            ],
-          ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline_rounded),
+              color: theme.textSecondary.withOpacity(0.92),
+              onPressed: onDelete,
+            ),
+          ],
         ),
+      ),
     );
   }
 

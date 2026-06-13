@@ -297,6 +297,7 @@ class _OnboardingCopy extends StatelessWidget {
   final _OnboardingPageData data;
   final List<Shadow> titleShadows;
   final String logoAssetPath;
+
   /// Current [PageView] index — used to tailor non-brand slides without affecting the hero.
   final int pageIndex;
 
@@ -413,7 +414,8 @@ class _OnboardingCopy extends StatelessWidget {
             child: ColoredBox(
               color: Colors.white.withOpacity(0.055),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -616,9 +618,7 @@ class _OnboardingDots extends StatelessWidget {
           width: active ? 26 : 8,
           height: 8,
           decoration: BoxDecoration(
-            color: active
-                ? SavingorColors.onboardingDotActive
-                : _inactive,
+            color: active ? SavingorColors.onboardingDotActive : _inactive,
             borderRadius: BorderRadius.circular(999),
             border: Border.all(
               color: active
@@ -629,8 +629,8 @@ class _OnboardingDots extends StatelessWidget {
             boxShadow: active
                 ? [
                     BoxShadow(
-                      color: SavingorColors.onboardingDotActive
-                          .withOpacity(0.45),
+                      color:
+                          SavingorColors.onboardingDotActive.withOpacity(0.45),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),

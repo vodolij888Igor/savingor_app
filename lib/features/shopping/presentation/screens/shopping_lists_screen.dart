@@ -16,9 +16,6 @@ class ShoppingListsScreen extends StatelessWidget {
   const ShoppingListsScreen({super.key, this.showBackButton = false});
 
   final bool showBackButton;
-
-  static const Color _pageBackground = Colors.white;
-
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
@@ -32,22 +29,23 @@ class ShoppingListsScreen extends StatelessWidget {
           return _buildSignInRequired(context, l10n);
         }
 
-        final bool showNewListFab = !store.isLoadingLists && store.listsError == null;
+        final bool showNewListFab =
+            !store.isLoadingLists && store.listsError == null;
 
         return Scaffold(
-          backgroundColor: _pageBackground,
+          backgroundColor: context.savingor.pageBackground,
           appBar: AppBar(
-            title: Text(l10n.shoppingList, style: _titleStyle),
+            title: Text(l10n.shoppingList, style: _titleStyle(context)),
             centerTitle: false,
             elevation: 0,
             scrolledUnderElevation: 0,
-            backgroundColor: _pageBackground,
+            backgroundColor: context.savingor.pageBackground,
             surfaceTintColor: Colors.transparent,
             leading: showBackButton
                 ? IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back_ios_new_rounded,
-                      color: SavingorColors.darkGreen,
+                      color: SavingorWorkflowTheme.appBarIcon(context),
                       size: 20,
                     ),
                     onPressed: () => context.pop(),
@@ -58,15 +56,15 @@ class ShoppingListsScreen extends StatelessWidget {
               if (showNewListFab)
                 TextButton.icon(
                   onPressed: () => CreateShoppingListSheet.show(context),
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.add_rounded,
-                    color: SavingorColors.darkGreen,
+                    color: SavingorWorkflowTheme.appBarIcon(context),
                   ),
                   label: Text(
                     l10n.newList,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: SavingorColors.darkGreen,
+                      color: SavingorWorkflowTheme.primaryText(context),
                     ),
                   ),
                 ),
@@ -146,18 +144,18 @@ class ShoppingListsScreen extends StatelessWidget {
 
   Widget _buildSignInRequired(BuildContext context, AppLocalizations l10n) {
     return Scaffold(
-      backgroundColor: _pageBackground,
+      backgroundColor: context.savingor.pageBackground,
       appBar: AppBar(
-        title: Text(l10n.shoppingList, style: _titleStyle),
-        backgroundColor: _pageBackground,
+        title: Text(l10n.shoppingList, style: _titleStyle(context)),
+        backgroundColor: context.savingor.pageBackground,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: showBackButton
             ? IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.arrow_back_ios_new_rounded,
-                  color: SavingorColors.darkGreen,
+                  color: SavingorWorkflowTheme.appBarIcon(context),
                   size: 20,
                 ),
                 onPressed: () => context.pop(),
@@ -195,7 +193,8 @@ class ShoppingListsScreen extends StatelessWidget {
               onPressed: () => Navigator.of(dialogContext).pop(true),
               child: Text(
                 l10n.delete,
-                style: const TextStyle(color: Color(0xFFB91C1C)),
+                style:
+                    TextStyle(color: SavingorWorkflowTheme.errorText(context)),
               ),
             ),
           ],
@@ -214,13 +213,13 @@ class ShoppingListsScreen extends StatelessWidget {
     }
   }
 
-  static const TextStyle _titleStyle = TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.w800,
-    color: SavingorColors.darkGreen,
-    letterSpacing: 0.2,
-    height: 1.15,
-  );
+  static TextStyle _titleStyle(BuildContext context) => TextStyle(
+        fontSize: 24,
+        fontWeight: FontWeight.w800,
+        color: SavingorWorkflowTheme.primaryText(context),
+        letterSpacing: 0.2,
+        height: 1.15,
+      );
 }
 
 class _ShoppingListCard extends StatelessWidget {
@@ -246,69 +245,65 @@ class _ShoppingListCard extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 16, 8, 16),
         child: Row(
           children: <Widget>[
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: SavingorColors.lightGreen,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(
-                  Icons.checklist_rounded,
-                  color: SavingorColors.primaryStroke,
-                ),
+            Container(
+              width: 46,
+              height: 46,
+              decoration:
+                  SavingorWorkflowTheme.highlightCard(context, radius: 14),
+              child: Icon(
+                Icons.checklist_rounded,
+                color: SavingorWorkflowTheme.accentText(context),
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      list.title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: SavingorColors.darkGreen,
-                      ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    list.title,
+                    style: SavingorAppTextStyles.cardTitle(context).copyWith(
+                      color: SavingorWorkflowTheme.primaryText(context),
                     ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${l10n.receiptItemsCount(list.itemCount)}'
+                    '${list.completedCount > 0 ? ' · ${l10n.purchasedSummary(list.completedCount)}' : ''}',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: context.savingor.textSecondary,
+                    ),
+                  ),
+                  if (list.estimatedTotal != null) ...<Widget>[
                     const SizedBox(height: 4),
                     Text(
-                      '${l10n.receiptItemsCount(list.itemCount)}'
-                      '${list.completedCount > 0 ? ' · ${l10n.purchasedSummary(list.completedCount)}' : ''}',
-                      style: const TextStyle(
+                      l10n.estimatedShort(
+                        '\$${list.estimatedTotal!.toStringAsFixed(2)}',
+                      ),
+                      style: TextStyle(
                         fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: SavingorColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                        color: SavingorWorkflowTheme.primaryText(context),
                       ),
                     ),
-                    if (list.estimatedTotal != null) ...<Widget>[
-                      const SizedBox(height: 4),
-                      Text(
-                        l10n.estimatedShort(
-                          '\$${list.estimatedTotal!.toStringAsFixed(2)}',
-                        ),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: SavingorColors.darkGreen,
-                        ),
-                      ),
-                    ],
                   ],
-                ),
+                ],
               ),
-              IconButton(
-                icon: const Icon(Icons.delete_outline_rounded),
-                color: SavingorColors.textSecondary,
-                onPressed: onDelete,
-              ),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: SavingorColors.textSecondary,
-              ),
-            ],
-          ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline_rounded),
+              color: context.savingor.textSecondary,
+              onPressed: onDelete,
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: context.savingor.textSecondary,
+            ),
+          ],
         ),
+      ),
     );
   }
 }

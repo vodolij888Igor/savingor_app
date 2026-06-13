@@ -72,7 +72,8 @@ abstract final class ProductBuyingAdviceBuilder {
       final ProductPriceRecord onlyRecord = records.first;
       return ProductBuyingAdvice(
         kind: ProductBuyingAdviceKind.insufficientHistory,
-        currency: onlyRecord.currency.trim().isEmpty ? currency : onlyRecord.currency,
+        currency:
+            onlyRecord.currency.trim().isEmpty ? currency : onlyRecord.currency,
         bestKnownUnitPrice: _effectiveUnitPrice(onlyRecord),
         bestStore: _trimmedStore(onlyRecord.storeName),
         latestPaidUnitPrice: _effectiveUnitPrice(onlyRecord),
@@ -81,8 +82,9 @@ abstract final class ProductBuyingAdviceBuilder {
       );
     }
 
-    final List<ProductPriceRecord> sorted = List<ProductPriceRecord>.from(records)
-      ..sort(_compareRecordsChronologically);
+    final List<ProductPriceRecord> sorted =
+        List<ProductPriceRecord>.from(records)
+          ..sort(_compareRecordsChronologically);
 
     final ProductPriceRecord latest = sorted.last;
     final ProductPriceRecord bestRecord = _bestUnitPriceRecord(sorted);

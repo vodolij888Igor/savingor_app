@@ -87,6 +87,7 @@ abstract final class ExpenseAnalyticsCalculator {
     double toDisplay(double amount, String originalCurrency) {
       return convertToDisplay?.call(amount, originalCurrency) ?? amount;
     }
+
     final DateTime now = referenceDate ?? DateTime.now();
     final int currentMonth = now.month;
     final int currentYear = now.year;

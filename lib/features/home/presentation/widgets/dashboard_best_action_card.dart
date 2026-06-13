@@ -25,7 +25,7 @@ class DashboardBestActionCard extends StatelessWidget {
       children: <Widget>[
         Text(
           l10n.bestActionNow,
-          style: SavingorAppTextStyles.sectionTitle,
+          style: SavingorAppTextStyles.sectionTitle(context),
         ),
         const SizedBox(height: SavingorSpacing.xs),
         if (recommendation == null)
@@ -47,7 +47,7 @@ class _EmptyBestActionCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: SavingorSurfaces.premiumCard(radius: 16),
+      decoration: SavingorSurfaces.premiumCard(context, radius: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -60,10 +60,10 @@ class _EmptyBestActionCard extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: SavingorColors.textPrimary,
+                color: context.savingor.textPrimary,
                 height: 1.25,
               ),
             ),
@@ -96,7 +96,8 @@ class _RecommendationCard extends StatelessWidget {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final AppState appState = AppStateProvider.of(context);
     final bool isTappable = recommendation.isProductAction;
-    final String title = SavingsRecommendationL10n.title(context, recommendation);
+    final String title =
+        SavingsRecommendationL10n.title(context, recommendation);
     final String impact =
         SavingsRecommendationL10n.impactText(context, recommendation, appState);
 
@@ -114,10 +115,10 @@ class _RecommendationCard extends StatelessWidget {
                   title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
-                    color: SavingorColors.textPrimary,
+                    color: context.savingor.textPrimary,
                     height: 1.2,
                   ),
                 ),
@@ -126,10 +127,10 @@ class _RecommendationCard extends StatelessWidget {
                   impact,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
-                    color: SavingorColors.primaryStroke,
+                    color: context.savingor.brandTitle,
                     height: 1.2,
                   ),
                 ),
@@ -138,10 +139,10 @@ class _RecommendationCard extends StatelessWidget {
                   l10n.basedOnReceiptHistory,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
-                    color: SavingorColors.textSecondary,
+                    color: context.savingor.textSecondary,
                     height: 1.15,
                   ),
                 ),
@@ -150,9 +151,9 @@ class _RecommendationCard extends StatelessWidget {
           ),
           if (isTappable) ...<Widget>[
             const SizedBox(width: 8),
-            const Icon(
+            Icon(
               Icons.chevron_right_rounded,
-              color: SavingorColors.textSecondary,
+              color: context.savingor.textSecondary,
               size: 22,
             ),
           ],
@@ -163,7 +164,7 @@ class _RecommendationCard extends StatelessWidget {
     if (!isTappable) {
       return Container(
         width: double.infinity,
-        decoration: SavingorSurfaces.premiumCard(radius: 16),
+        decoration: SavingorSurfaces.premiumCard(context, radius: 16),
         child: content,
       );
     }

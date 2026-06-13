@@ -9,9 +9,6 @@ import 'package:savingor_app/l10n/app_localizations.dart';
 
 class CreateExpenseScreen extends StatefulWidget {
   const CreateExpenseScreen({super.key});
-
-  static const Color _pageBackground = Colors.white;
-
   @override
   State<CreateExpenseScreen> createState() => _CreateExpenseScreenState();
 }
@@ -76,11 +73,11 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final double? totalAmount =
-        double.tryParse(_amountController.text.trim());
+    final double? totalAmount = double.tryParse(_amountController.text.trim());
     if (totalAmount == null || totalAmount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).enterValidTotalAmount)),
+        SnackBar(
+            content: Text(AppLocalizations.of(context).enterValidTotalAmount)),
       );
       return;
     }
@@ -119,7 +116,7 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
     final double keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: CreateExpenseScreen._pageBackground,
+      backgroundColor: context.savingor.pageBackground,
       appBar: AppBar(
         title: Text(
           l10n.addExpense,
@@ -131,7 +128,7 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
         ),
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: CreateExpenseScreen._pageBackground,
+        backgroundColor: context.savingor.pageBackground,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(
@@ -143,7 +140,7 @@ class _CreateExpenseScreenState extends State<CreateExpenseScreen> {
         ),
       ),
       body: ColoredBox(
-        color: CreateExpenseScreen._pageBackground,
+        color: context.savingor.pageBackground,
         child: Form(
           key: _formKey,
           child: ListView(

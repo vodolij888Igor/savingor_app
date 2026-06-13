@@ -20,8 +20,7 @@ class CachedExchangeRate {
   static CachedExchangeRate? fromPrefsJson(String? raw) {
     if (raw == null || raw.isEmpty) return null;
     try {
-      final Map<String, dynamic> map =
-          jsonDecode(raw) as Map<String, dynamic>;
+      final Map<String, dynamic> map = jsonDecode(raw) as Map<String, dynamic>;
       final double? rate = (map['rate'] as num?)?.toDouble();
       final String? fetchedAtRaw = map['fetchedAt'] as String?;
       if (rate == null || fetchedAtRaw == null) return null;
@@ -82,7 +81,8 @@ class ExchangeRateService {
         fetchedAt: DateTime.now(),
       );
     }
-    final String? raw = _prefs.getString('$_cacheKeyPrefix${_pairKey(from, to)}');
+    final String? raw =
+        _prefs.getString('$_cacheKeyPrefix${_pairKey(from, to)}');
     return CachedExchangeRate.fromPrefsJson(raw);
   }
 

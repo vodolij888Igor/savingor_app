@@ -23,7 +23,7 @@ class SelectedStoreBottomSheet extends StatelessWidget {
   }) {
     return showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: context.savingor.surfacePrimary,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -78,7 +78,7 @@ class SelectedStoreBottomSheet extends StatelessWidget {
                   children: <Widget>[
                     Text(
                       store.name,
-                      style: SavingorAppTextStyles.cardTitle.copyWith(
+                      style: SavingorAppTextStyles.cardTitle(context).copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
                       ),
@@ -89,7 +89,7 @@ class SelectedStoreBottomSheet extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: SavingorColors.textSecondary.withOpacity(0.95),
+                        color: context.savingor.textSecondary.withOpacity(0.95),
                       ),
                     ),
                   ],
@@ -127,7 +127,8 @@ class SelectedStoreBottomSheet extends StatelessWidget {
                 Expanded(
                   child: Text(
                     store.displayAddress!,
-                    style: SavingorAppTextStyles.bodySecondary(fontSize: 13),
+                    style: SavingorAppTextStyles.bodySecondary(context,
+                        fontSize: 13),
                   ),
                 ),
               ],
@@ -137,7 +138,7 @@ class SelectedStoreBottomSheet extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               MapL10n.localizedStoreStatusText(context, store.statusText),
-              style: SavingorAppTextStyles.bodySecondary(fontSize: 12),
+              style: SavingorAppTextStyles.bodySecondary(context, fontSize: 12),
             ),
           ],
           const SizedBox(height: 18),

@@ -138,8 +138,8 @@ Rules:
 ''';
 
   String _buildUserPrompt(AiAssistantRequest request, String languageName) {
-    final String contextJson =
-        const JsonEncoder.withIndent('  ').convert(request.context.toPromptMap());
+    final String contextJson = const JsonEncoder.withIndent('  ')
+        .convert(request.context.toPromptMap());
 
     return '''
 User question:

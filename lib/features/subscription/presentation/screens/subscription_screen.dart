@@ -23,9 +23,6 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   SubscriptionStatus _subscription = SubscriptionStatus.free;
   bool _isActivating = false;
   bool _isRestoring = false;
-
-  static const Color _pageBackground = Color(0xFFF3FAF1);
-
   bool get _isPro => _subscription.isPro;
 
   @override
@@ -90,7 +87,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor: context.savingor.surfacePrimary,
           surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(22),
@@ -106,10 +103,10 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
           content: Text(
             '${l10n.subscriptionSetupPrepared}\n\n'
             '${l10n.subscriptionSetupNotConfigured}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: SavingorColors.textSecondary,
+              color: context.savingor.textSecondary,
               height: 1.45,
             ),
           ),
@@ -117,7 +114,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
             TextButton(
               onPressed: () => Navigator.of(dialogContext).pop(false),
               style: TextButton.styleFrom(
-                foregroundColor: SavingorColors.textSecondary,
+                foregroundColor: context.savingor.textSecondary,
               ),
               child: Text(l10n.cancel),
             ),
@@ -201,27 +198,22 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     final double bottomSafe = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: _pageBackground,
+      backgroundColor: context.savingor.pageBackground,
       appBar: AppBar(
         toolbarHeight: 48,
         title: Text(
           l10n.plans,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: SavingorColors.darkGreen,
-            letterSpacing: 0.15,
-          ),
+          style: SavingorAppTextStyles.screenTitle(context),
         ),
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: _pageBackground,
+        backgroundColor: context.savingor.pageBackground,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: SavingorColors.darkGreen,
+            color: SavingorWorkflowTheme.appBarIcon(context),
             size: 20,
           ),
           onPressed: () => context.pop(),
@@ -253,7 +245,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
                     child: TextButton.icon(
                       onPressed: _isRestoring ? null : _onRestorePurchases,
                       style: TextButton.styleFrom(
-                        foregroundColor: SavingorColors.textSecondary,
+                        foregroundColor: context.savingor.textSecondary,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 14,
                           vertical: 10,
@@ -285,53 +277,76 @@ class _ProHeroHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
+    final SavingorThemeExtension theme = context.savingor;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(22, 20, 22, 22),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(26),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            Color(0xFFDAEFD4),
-            Color(0xFFEEF8EB),
-            Color(0xFFFFFFFF),
-          ],
-          stops: <double>[0.0, 0.42, 1.0],
-        ),
-        border: Border.all(
-          color: SavingorColors.primaryStroke.withOpacity(0.28),
-        ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: SavingorColors.darkGreen.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
+      decoration: theme.isDark
+          ? BoxDecoration(
+              borderRadius: BorderRadius.circular(26),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[
+                  theme.heroGradientStart,
+                  theme.heroGradientMid,
+                  theme.heroGradientEnd,
+                ],
+              ),
+              border: Border.all(color: theme.accentGreen.withOpacity(0.22)),
+              boxShadow: theme.cardShadow,
+            )
+          : BoxDecoration(
+              borderRadius: BorderRadius.circular(26),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[
+                  Color(0xFFDAEFD4),
+                  Color(0xFFEEF8EB),
+                  Color(0xFFFFFFFF),
+                ],
+                stops: <double>[0.0, 0.42, 1.0],
+              ),
+              border: Border.all(
+                color: SavingorColors.primaryStroke.withOpacity(0.28),
+              ),
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                  color: SavingorColors.darkGreen.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Row(
             children: <Widget>[
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.88),
+                  color: theme.isDark
+                      ? theme.surfaceElevated
+                      : Colors.white.withOpacity(0.88),
                   borderRadius: BorderRadius.circular(SavingorRadius.pill),
                   border: Border.all(
-                    color: SavingorColors.primaryStroke.withOpacity(0.3),
+                    color: theme.isDark
+                        ? theme.accentGreen.withOpacity(0.35)
+                        : SavingorColors.primaryStroke.withOpacity(0.3),
                   ),
                 ),
                 child: Text(
                   l10n.freeTodayProWhenReady,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: SavingorColors.darkGreen,
+                    color: theme.isDark
+                        ? theme.brandTitle
+                        : SavingorColors.darkGreen,
                     letterSpacing: 0.12,
                   ),
                 ),
@@ -340,17 +355,21 @@ class _ProHeroHeader extends StatelessWidget {
               Icon(
                 Icons.auto_awesome_rounded,
                 size: 22,
-                color: SavingorColors.darkGreen.withOpacity(0.55),
+                color: theme.isDark
+                    ? theme.brandTitle.withOpacity(0.75)
+                    : SavingorColors.darkGreen.withOpacity(0.55),
               ),
             ],
           ),
           const SizedBox(height: SavingorSpacing.md),
-          const Text(
+          Text(
             'Savingor Pro',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: SavingorColors.primaryStroke,
+              color: theme.isDark
+                  ? theme.brandTitle
+                  : SavingorColors.primaryStroke,
               letterSpacing: 1.2,
               height: 1.2,
             ),
@@ -358,10 +377,11 @@ class _ProHeroHeader extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             l10n.saveSmarterWithAi,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,
-              color: SavingorColors.darkGreen,
+              color:
+                  theme.isDark ? theme.textPrimary : SavingorColors.darkGreen,
               height: 1.08,
               letterSpacing: -0.2,
             ),
@@ -372,7 +392,9 @@ class _ProHeroHeader extends StatelessWidget {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
-              color: SavingorColors.darkGreen.withOpacity(0.7),
+              color: theme.isDark
+                  ? theme.textSecondary
+                  : SavingorColors.darkGreen.withOpacity(0.7),
               height: 1.38,
             ),
           ),
@@ -391,16 +413,19 @@ class _PlanSelectorRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
+    final SavingorThemeExtension theme = context.savingor;
 
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.isDark ? theme.surfaceElevated : theme.surfacePrimary,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: SavingorColors.primaryStroke.withOpacity(0.15),
+          color: theme.isDark
+              ? theme.border.withOpacity(0.9)
+              : SavingorColors.primaryStroke.withOpacity(0.15),
         ),
-        boxShadow: SavingorShadows.soft,
+        boxShadow: SavingorShadows.soft(context),
       ),
       child: Row(
         children: <Widget>[
@@ -434,14 +459,20 @@ class _SelectorChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final SavingorThemeExtension theme = context.savingor;
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 11),
       decoration: BoxDecoration(
-        color: selected ? SavingorColors.primaryGreen : Colors.transparent,
+        color: selected
+            ? (theme.isDark ? theme.accentGreen : SavingorColors.primaryGreen)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(12),
         border: selected
             ? Border.all(
-                color: SavingorColors.primaryStroke.withOpacity(0.45),
+                color: theme.isDark
+                    ? theme.accentGreen.withOpacity(0.45)
+                    : SavingorColors.primaryStroke.withOpacity(0.45),
               )
             : null,
       ),
@@ -452,8 +483,10 @@ class _SelectorChip extends StatelessWidget {
           fontSize: 14,
           fontWeight: FontWeight.w700,
           color: selected
-              ? SavingorColors.darkGreen
-              : SavingorColors.textSecondary,
+              ? (theme.isDark
+                  ? theme.buttonLabelOnGreen
+                  : SavingorColors.darkGreen)
+              : theme.textSecondary,
         ),
       ),
     );
@@ -468,6 +501,7 @@ class _FreeCompactCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
+    final SavingorThemeExtension theme = context.savingor;
     final List<String> features = <String>[
       l10n.basicDealsBrowsing,
       l10n.shoppingList,
@@ -478,16 +512,22 @@ class _FreeCompactCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.isDark ? theme.surfaceElevated : theme.surfacePrimary,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE8EEEA)),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: SavingorColors.darkGreen.withOpacity(0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          ),
-        ],
+        border: Border.all(
+          color: theme.isDark
+              ? theme.border.withOpacity(0.9)
+              : const Color(0xFFE8EEEA),
+        ),
+        boxShadow: theme.isDark
+            ? theme.cardShadow
+            : <BoxShadow>[
+                BoxShadow(
+                  color: SavingorColors.darkGreen.withOpacity(0.03),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -497,19 +537,21 @@ class _FreeCompactCard extends StatelessWidget {
             children: <Widget>[
               Text(
                 l10n.free,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
-                  color: SavingorColors.darkGreen,
+                  color: theme.isDark
+                      ? theme.textPrimary
+                      : SavingorColors.darkGreen,
                 ),
               ),
               const SizedBox(width: SavingorSpacing.sm),
-              const Text(
+              Text(
                 '\$0',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
-                  color: SavingorColors.textSecondary,
+                  color: theme.textSecondary,
                 ),
               ),
               const Spacer(),
@@ -518,16 +560,24 @@ class _FreeCompactCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4F6),
+                    color: theme.isDark
+                        ? theme.chipSurface
+                        : const Color(0xFFF3F4F6),
                     borderRadius: BorderRadius.circular(SavingorRadius.pill),
-                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                    border: Border.all(
+                      color: theme.isDark
+                          ? theme.border.withOpacity(0.85)
+                          : const Color(0xFFE5E7EB),
+                    ),
                   ),
                   child: Text(
                     l10n.currentPlan,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: SavingorColors.textSecondary,
+                      color: theme.isDark
+                          ? theme.textSecondary
+                          : theme.textSecondary,
                     ),
                   ),
                 ),
@@ -542,15 +592,17 @@ class _FreeCompactCard extends StatelessWidget {
                   Icon(
                     Icons.check_rounded,
                     size: 14,
-                    color: SavingorColors.primaryStroke.withOpacity(0.8),
+                    color: theme.isDark
+                        ? theme.brandTitle
+                        : SavingorColors.primaryStroke.withOpacity(0.8),
                   ),
                   const SizedBox(width: 6),
                   Text(
                     feature,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: SavingorColors.textSecondary,
+                      color: theme.textSecondary,
                       height: 1.2,
                     ),
                   ),
@@ -580,6 +632,7 @@ class _ProMainCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
+    final SavingorThemeExtension theme = context.savingor;
     final List<String> features = <String>[
       l10n.aiSavingsAssistant,
       l10n.receiptAnalytics,
@@ -592,30 +645,40 @@ class _ProMainCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            Color(0xFFE4F3DE),
-            Color(0xFFF4FBF1),
-            Color(0xFFFFFFFF),
-          ],
-          stops: <double>[0.0, 0.35, 1.0],
-        ),
-        border: Border.all(
-          color: SavingorColors.primaryStroke.withOpacity(0.55),
-          width: 1.75,
-        ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: SavingorColors.darkGreen.withOpacity(0.14),
-            blurRadius: 22,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
+      decoration: theme.isDark
+          ? BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              color: theme.surfaceStrong,
+              border: Border.all(
+                color: theme.accentGreen.withOpacity(0.42),
+                width: 1.75,
+              ),
+              boxShadow: theme.cardShadow,
+            )
+          : BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[
+                  Color(0xFFE4F3DE),
+                  Color(0xFFF4FBF1),
+                  Color(0xFFFFFFFF),
+                ],
+                stops: <double>[0.0, 0.35, 1.0],
+              ),
+              border: Border.all(
+                color: SavingorColors.primaryStroke.withOpacity(0.55),
+                width: 1.75,
+              ),
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                  color: SavingorColors.darkGreen.withOpacity(0.14),
+                  blurRadius: 22,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -625,36 +688,47 @@ class _ProMainCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   l10n.pro,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
-                    color: SavingorColors.darkGreen,
+                    color: theme.isDark
+                        ? theme.textPrimary
+                        : SavingorColors.darkGreen,
                     height: 1.05,
                   ),
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
                 decoration: BoxDecoration(
-                  color: SavingorColors.primaryGreen,
+                  color: theme.isDark
+                      ? theme.accentGreen
+                      : SavingorColors.primaryGreen,
                   borderRadius: BorderRadius.circular(SavingorRadius.pill),
                   border: Border.all(
-                    color: SavingorColors.primaryStroke.withOpacity(0.5),
+                    color: theme.isDark
+                        ? theme.accentGreen.withOpacity(0.45)
+                        : SavingorColors.primaryStroke.withOpacity(0.5),
                   ),
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: SavingorColors.darkGreen.withOpacity(0.08),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
+                  boxShadow: theme.isDark
+                      ? null
+                      : <BoxShadow>[
+                          BoxShadow(
+                            color: SavingorColors.darkGreen.withOpacity(0.08),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
                 ),
                 child: Text(
                   isCurrentPlan ? l10n.currentPlan : l10n.bestValue,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
-                    color: SavingorColors.darkGreen,
+                    color: theme.isDark
+                        ? theme.buttonLabelOnGreen
+                        : SavingorColors.darkGreen,
                     letterSpacing: 0.25,
                   ),
                 ),
@@ -664,20 +738,20 @@ class _ProMainCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             proPriceLabel,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.w800,
-              color: SavingorColors.darkGreen,
+              color: theme.isDark ? theme.brandTitle : SavingorColors.darkGreen,
               height: 1.05,
             ),
           ),
           const SizedBox(height: SavingorSpacing.sm),
           Text(
             l10n.aiPoweredToolsDescription,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: SavingorColors.textSecondary,
+              color: theme.textSecondary,
               height: 1.35,
             ),
           ),
@@ -691,23 +765,29 @@ class _ProMainCard extends StatelessWidget {
                     width: 22,
                     height: 22,
                     decoration: BoxDecoration(
-                      color: SavingorColors.primaryGreen.withOpacity(0.65),
+                      color: theme.isDark
+                          ? theme.accentGreen.withOpacity(0.22)
+                          : SavingorColors.primaryGreen.withOpacity(0.65),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.check_rounded,
                       size: 14,
-                      color: SavingorColors.darkGreen,
+                      color: theme.isDark
+                          ? theme.brandTitle
+                          : SavingorColors.darkGreen,
                     ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       feature,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF1A2E24),
+                        color: theme.isDark
+                            ? theme.textPrimary
+                            : const Color(0xFF1A2E24),
                         height: 1.25,
                       ),
                     ),
@@ -724,10 +804,16 @@ class _ProMainCard extends StatelessWidget {
                 ? OutlinedButton.icon(
                     onPressed: null,
                     style: OutlinedButton.styleFrom(
-                      disabledForegroundColor: SavingorColors.darkGreen,
-                      backgroundColor: Colors.white.withOpacity(0.6),
+                      disabledForegroundColor: theme.isDark
+                          ? theme.brandTitle
+                          : SavingorColors.darkGreen,
+                      backgroundColor: theme.isDark
+                          ? theme.surfaceElevated.withOpacity(0.65)
+                          : theme.surfacePrimary.withOpacity(0.6),
                       side: BorderSide(
-                        color: SavingorColors.primaryStroke.withOpacity(0.5),
+                        color: theme.isDark
+                            ? theme.accentGreen.withOpacity(0.45)
+                            : SavingorColors.primaryStroke.withOpacity(0.5),
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18),
@@ -737,41 +823,67 @@ class _ProMainCard extends StatelessWidget {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.check_circle_rounded,
                       size: 20,
-                      color: SavingorColors.primaryStroke,
+                      color: theme.isDark
+                          ? theme.brandTitle
+                          : SavingorColors.primaryStroke,
                     ),
                     label: Text(l10n.currentPlan),
                   )
                 : ElevatedButton(
                     onPressed: isActivating ? null : onUpgrade,
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      shadowColor: Colors.transparent,
-                      surfaceTintColor: Colors.transparent,
-                      backgroundColor: SavingorColors.primaryGreen,
-                      foregroundColor: SavingorColors.darkGreen,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                        side: const BorderSide(
-                          color: SavingorColors.primaryStroke,
-                          width: 1,
-                        ),
-                      ),
-                      textStyle: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.1,
-                      ),
-                    ),
+                    style: theme.isDark
+                        ? SavingorButtonStyles.primaryFilledFor(context).merge(
+                            ButtonStyle(
+                              minimumSize: const WidgetStatePropertyAll<Size>(
+                                Size.fromHeight(52),
+                              ),
+                              shape: WidgetStatePropertyAll<
+                                  RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                              ),
+                              textStyle:
+                                  const WidgetStatePropertyAll<TextStyle>(
+                                TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.1,
+                                ),
+                              ),
+                            ),
+                          )
+                        : ElevatedButton.styleFrom(
+                            elevation: 0,
+                            shadowColor: Colors.transparent,
+                            surfaceTintColor: Colors.transparent,
+                            backgroundColor: SavingorColors.primaryGreen,
+                            foregroundColor: SavingorColors.darkGreen,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18),
+                              side: const BorderSide(
+                                color: SavingorColors.primaryStroke,
+                                width: 1,
+                              ),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.1,
+                            ),
+                          ),
                     child: isActivating
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: SavingorColors.darkGreen,
+                              color: theme.isDark
+                                  ? theme.buttonLabelOnGreen
+                                  : SavingorColors.darkGreen,
                             ),
                           )
                         : Text(l10n.startProSubscription),
@@ -785,7 +897,7 @@ class _ProMainCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 11.5,
                   fontWeight: FontWeight.w600,
-                  color: SavingorColors.textSecondary.withOpacity(0.9),
+                  color: theme.textSecondary.withOpacity(0.9),
                   letterSpacing: 0.1,
                 ),
               ),

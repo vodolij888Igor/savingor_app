@@ -18,7 +18,8 @@ abstract final class BasketOptimizer {
     required List<ProductPriceRecord> priceRecords,
     int? activeListsIncluded,
   }) {
-    final List<ShoppingListItem> uncheckedItems = ShoppingBasketItemGrouper.groupByProduct(
+    final List<ShoppingListItem> uncheckedItems =
+        ShoppingBasketItemGrouper.groupByProduct(
       shoppingItems,
     );
 
@@ -38,15 +39,14 @@ abstract final class BasketOptimizer {
     final Map<String, List<ProductPriceRecord>> recordsByProduct =
         _indexRecordsByProduct(priceRecords);
 
-    final List<BasketPriceRecommendation> recommendations =
-        uncheckedItems
-            .map(
-              (ShoppingListItem item) => _recommendForItem(
-                item: item,
-                recordsByProduct: recordsByProduct,
-              ),
-            )
-            .toList(growable: false);
+    final List<BasketPriceRecommendation> recommendations = uncheckedItems
+        .map(
+          (ShoppingListItem item) => _recommendForItem(
+            item: item,
+            recordsByProduct: recordsByProduct,
+          ),
+        )
+        .toList(growable: false);
 
     recommendations.sort(_compareRecommendations);
 
@@ -148,7 +148,8 @@ abstract final class BasketOptimizer {
     );
   }
 
-  static ProductPriceRecord _selectBestRecord(List<ProductPriceRecord> records) {
+  static ProductPriceRecord _selectBestRecord(
+      List<ProductPriceRecord> records) {
     return records.reduce(
       (ProductPriceRecord current, ProductPriceRecord candidate) {
         final double currentUnit = _effectiveUnitPrice(current);
@@ -162,7 +163,8 @@ abstract final class BasketOptimizer {
     );
   }
 
-  static ProductPriceRecord _selectLatestRecord(List<ProductPriceRecord> records) {
+  static ProductPriceRecord _selectLatestRecord(
+      List<ProductPriceRecord> records) {
     return records.reduce(
       (ProductPriceRecord current, ProductPriceRecord candidate) =>
           candidate.purchaseDate.isAfter(current.purchaseDate)
@@ -195,7 +197,8 @@ abstract final class BasketOptimizer {
       }
 
       grouped
-          .putIfAbsent(recommendation.bestStoreName!, () => <BasketStorePlanItem>[])
+          .putIfAbsent(
+              recommendation.bestStoreName!, () => <BasketStorePlanItem>[])
           .add(
             BasketStorePlanItem(
               shoppingItemName: recommendation.shoppingItemName,
@@ -205,21 +208,19 @@ abstract final class BasketOptimizer {
           );
     }
 
-    final List<BasketStorePlanEntry> plan = grouped.entries
-        .map(
-          (MapEntry<String, List<BasketStorePlanItem>> entry) {
-            final double storeTotal = entry.value.fold<double>(
-              0,
-              (double sum, BasketStorePlanItem item) => sum + item.lineTotal,
-            );
-            return BasketStorePlanEntry(
-              storeName: entry.key,
-              items: entry.value,
-              estimatedStoreTotal: storeTotal,
-            );
-          },
-        )
-        .toList(growable: false)
+    final List<BasketStorePlanEntry> plan = grouped.entries.map(
+      (MapEntry<String, List<BasketStorePlanItem>> entry) {
+        final double storeTotal = entry.value.fold<double>(
+          0,
+          (double sum, BasketStorePlanItem item) => sum + item.lineTotal,
+        );
+        return BasketStorePlanEntry(
+          storeName: entry.key,
+          items: entry.value,
+          estimatedStoreTotal: storeTotal,
+        );
+      },
+    ).toList(growable: false)
       ..sort(
         (BasketStorePlanEntry a, BasketStorePlanEntry b) =>
             b.estimatedStoreTotal.compareTo(a.estimatedStoreTotal),

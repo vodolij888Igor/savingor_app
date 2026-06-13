@@ -170,9 +170,8 @@ class _SavingorInteractivePressableState
   }
 
   Widget _buildScaledChild() {
-    final double effectiveHoverScale = SavingorInteraction.enableHoverEffects
-        ? widget.hoverScale
-        : 1.0;
+    final double effectiveHoverScale =
+        SavingorInteraction.enableHoverEffects ? widget.hoverScale : 1.0;
     final double scale = SavingorInteraction.scaleFor(
       hovered: _hovered,
       pressed: _pressed,
@@ -243,9 +242,7 @@ class _SavingorInteractivePressableState
   Widget build(BuildContext context) {
     Widget content = MouseRegion(
       hitTestBehavior: HitTestBehavior.opaque,
-      cursor: _isEnabled
-          ? SystemMouseCursors.click
-          : SystemMouseCursors.basic,
+      cursor: _isEnabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
       onEnter: (_) => _setHovered(true),
       onExit: (_) => _handleExit(),
       child: _buildScaledChild(),
@@ -276,9 +273,9 @@ class SavingorInteractiveCard extends StatelessWidget {
     required this.onTap,
     this.borderRadius = const BorderRadius.all(Radius.circular(18)),
     this.padding,
-    this.backgroundColor = Colors.white,
+    this.backgroundColor,
     this.hoverBackgroundColor,
-    this.borderColor = SavingorColors.border,
+    this.borderColor,
     this.hoverBorderColor,
     this.accentTint,
     this.enabled = true,
@@ -294,9 +291,9 @@ class SavingorInteractiveCard extends StatelessWidget {
   final VoidCallback? onTap;
   final BorderRadius borderRadius;
   final EdgeInsetsGeometry? padding;
-  final Color backgroundColor;
+  final Color? backgroundColor;
   final Color? hoverBackgroundColor;
-  final Color borderColor;
+  final Color? borderColor;
   final Color? hoverBorderColor;
   final Color? accentTint;
   final bool enabled;
@@ -305,6 +302,7 @@ class SavingorInteractiveCard extends StatelessWidget {
   final String? semanticLabel;
   final List<BoxShadow>? boxShadow;
   final List<BoxShadow>? hoverBoxShadow;
+
   /// Full-width cards in [Column] layouts only — never use inside [Row]/[Wrap].
   final bool expandWidth;
 
@@ -317,13 +315,14 @@ class SavingorInteractiveCard extends StatelessWidget {
       enableInk: showInk,
       liftOnHover: liftOnHover,
       expandWidth: expandWidth,
-      splashColor: (accentTint ?? SavingorColors.primaryStroke).withOpacity(0.1),
+      splashColor:
+          (accentTint ?? SavingorColors.primaryStroke).withOpacity(0.1),
       highlightColor: SavingorColors.primaryGreen.withOpacity(0.12),
       semanticLabel: semanticLabel,
       builder: (BuildContext context, SavingorInteractionState state) {
         final Color tint = accentTint ?? SavingorColors.primaryStroke;
-        final Color resolvedBorder = _borderColor(state, tint);
-        final Color resolvedBackground = _backgroundColor(state);
+        final Color resolvedBorder = _borderColor(context, state, tint);
+        final Color resolvedBackground = _backgroundColor(context, state);
         final List<BoxShadow> resolvedShadow = _shadows(state, tint);
         final double borderWidth = _borderWidth(state);
 
@@ -343,11 +342,12 @@ class SavingorInteractiveCard extends StatelessWidget {
     );
   }
 
-  Color _backgroundColor(SavingorInteractionState state) {
-    if (!state.isInteractive) return backgroundColor;
+  Color _backgroundColor(BuildContext context, SavingorInteractionState state) {
+    final Color base = backgroundColor ?? context.savingor.surfacePrimary;
+    if (!state.isInteractive) return base;
     if (state.pressed) {
       return Color.lerp(
-            hoverBackgroundColor ?? backgroundColor,
+            hoverBackgroundColor ?? base,
             SavingorInteraction.pressedBackgroundTint,
             0.55,
           ) ??
@@ -355,24 +355,26 @@ class SavingorInteractiveCard extends StatelessWidget {
     }
     if (state.hovered) {
       return Color.lerp(
-            hoverBackgroundColor ?? backgroundColor,
+            hoverBackgroundColor ?? base,
             SavingorInteraction.hoverBackgroundTint,
             0.72,
           ) ??
           SavingorInteraction.hoverBackgroundTint;
     }
-    return backgroundColor;
+    return base;
   }
 
-  Color _borderColor(SavingorInteractionState state, Color tint) {
-    if (!state.isInteractive) return borderColor.withOpacity(0.65);
+  Color _borderColor(
+      BuildContext context, SavingorInteractionState state, Color tint) {
+    final Color base = borderColor ?? context.savingor.border;
+    if (!state.isInteractive) return base.withOpacity(0.65);
     if (state.pressed) {
       return hoverBorderColor ?? SavingorColors.primaryStroke.withOpacity(0.55);
     }
     if (state.hovered) {
       return hoverBorderColor ?? SavingorColors.primaryStroke.withOpacity(0.68);
     }
-    return borderColor.withOpacity(0.65);
+    return base.withOpacity(0.65);
   }
 
   double _borderWidth(SavingorInteractionState state) {
@@ -402,7 +404,8 @@ class SavingorInteractiveFilledButton extends StatelessWidget {
     required this.child,
     this.minHeight = 52,
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-    this.borderRadius = const BorderRadius.all(Radius.circular(SavingorRadius.xl)),
+    this.borderRadius =
+        const BorderRadius.all(Radius.circular(SavingorRadius.xl)),
     this.width,
   });
 
@@ -426,38 +429,76 @@ class SavingorInteractiveFilledButton extends StatelessWidget {
       enabled: enabled,
       expandWidth: width != null,
       builder: (BuildContext context, SavingorInteractionState state) {
-        Color background = SavingorColors.primaryGreen;
-        if (enabled && state.pressed) {
-          background = _pressedGreen;
-        } else if (enabled && state.hovered) {
-          background = _hoverGreen;
-        } else if (!enabled) {
-          background = SavingorColors.primaryGreen.withOpacity(0.55);
-        }
+        final SavingorThemeExtension t = context.savingor;
 
-        final List<BoxShadow> shadows = enabled && state.hovered
-            ? <BoxShadow>[
-                BoxShadow(
-                  color: SavingorColors.primaryStroke.withOpacity(0.32),
-                  blurRadius: 18,
-                  spreadRadius: 0.5,
-                  offset: const Offset(0, 6),
-                ),
-                BoxShadow(
-                  color: SavingorColors.primaryGreen.withOpacity(0.22),
-                  blurRadius: 14,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : enabled
-                ? <BoxShadow>[
-                    BoxShadow(
-                      color: SavingorColors.primaryStroke.withOpacity(0.14),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    ),
-                  ]
-                : const <BoxShadow>[];
+        Color background;
+        Color labelColor;
+        Color iconColor;
+        Color borderColor;
+        List<BoxShadow> shadows;
+
+        if (t.isDark) {
+          background = t.accentGreen;
+          if (enabled && state.pressed) {
+            background = Color.lerp(t.accentGreen, Colors.black, 0.12)!;
+          } else if (enabled && state.hovered) {
+            background = Color.lerp(t.accentGreen, Colors.white, 0.08)!;
+          } else if (!enabled) {
+            background = t.accentGreen.withOpacity(0.45);
+          }
+          labelColor = t.buttonLabelOnGreen;
+          iconColor = t.buttonLabelOnGreen;
+          borderColor = t.accentGreen.withOpacity(
+            enabled ? (state.hovered ? 0.45 : 0.32) : 0.2,
+          );
+          shadows = enabled
+              ? <BoxShadow>[
+                  BoxShadow(
+                    color:
+                        t.accentGreen.withOpacity(state.hovered ? 0.2 : 0.14),
+                    blurRadius: state.hovered ? 12 : 8,
+                    offset: Offset(0, state.hovered ? 4 : 3),
+                  ),
+                ]
+              : const <BoxShadow>[];
+        } else {
+          background = SavingorColors.primaryGreen;
+          if (enabled && state.pressed) {
+            background = _pressedGreen;
+          } else if (enabled && state.hovered) {
+            background = _hoverGreen;
+          } else if (!enabled) {
+            background = SavingorColors.primaryGreen.withOpacity(0.55);
+          }
+          labelColor = SavingorColors.darkGreen;
+          iconColor = SavingorColors.darkGreen;
+          borderColor = SavingorColors.primaryStroke.withOpacity(
+            enabled ? (state.hovered ? 0.55 : 0.35) : 0.2,
+          );
+          shadows = enabled && state.hovered
+              ? <BoxShadow>[
+                  BoxShadow(
+                    color: SavingorColors.primaryStroke.withOpacity(0.32),
+                    blurRadius: 18,
+                    spreadRadius: 0.5,
+                    offset: const Offset(0, 6),
+                  ),
+                  BoxShadow(
+                    color: SavingorColors.primaryGreen.withOpacity(0.22),
+                    blurRadius: 14,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : enabled
+                  ? <BoxShadow>[
+                      BoxShadow(
+                        color: SavingorColors.primaryStroke.withOpacity(0.14),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ]
+                  : const <BoxShadow>[];
+        }
 
         final double borderWidth = state.hovered ? 1.5 : 1;
 
@@ -472,23 +513,21 @@ class SavingorInteractiveFilledButton extends StatelessWidget {
             color: background,
             borderRadius: borderRadius,
             border: Border.all(
-              color: SavingorColors.primaryStroke.withOpacity(
-                enabled ? (state.hovered ? 0.55 : 0.35) : 0.2,
-              ),
+              color: borderColor,
               width: borderWidth,
             ),
             boxShadow: shadows,
           ),
           child: DefaultTextStyle(
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w700,
               fontSize: 16,
-              color: SavingorColors.darkGreen,
+              color: labelColor,
               letterSpacing: 0.1,
             ),
             child: IconTheme(
-              data: const IconThemeData(
-                color: SavingorColors.darkGreen,
+              data: IconThemeData(
+                color: iconColor,
                 size: 20,
               ),
               child: child,
@@ -544,7 +583,7 @@ class SavingorInteractiveOutlinedButton extends StatelessWidget {
                 ? SavingorInteraction.pressedBackgroundTint
                 : state.hovered && enabled
                     ? SavingorInteraction.hoverBackgroundTint
-                    : Colors.white,
+                    : context.savingor.surfacePrimary,
             borderRadius: borderRadius,
             border: Border.all(
               color: state.hovered && enabled
@@ -560,9 +599,8 @@ class SavingorInteractiveOutlinedButton extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: enabled
-                  ? foregroundColor
-                  : foregroundColor.withOpacity(0.5),
+              color:
+                  enabled ? foregroundColor : foregroundColor.withOpacity(0.5),
             ),
             child: child,
           ),

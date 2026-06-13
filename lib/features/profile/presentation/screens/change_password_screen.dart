@@ -32,15 +32,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   bool _isSubmitting = false;
   bool _isSendingReset = false;
-
-  static const Color _pageBackground = SavingorColors.pageWhite;
   static const Color _titleCharcoal = Color(0xFF1F2937);
 
-  static const TextStyle _fieldLabelStyle = TextStyle(
-    fontSize: 12.5,
-    fontWeight: FontWeight.w600,
-    color: SavingorColors.textSecondary,
-  );
+  TextStyle _fieldLabelStyle(BuildContext context) => TextStyle(
+        fontSize: 12.5,
+        fontWeight: FontWeight.w600,
+        color: context.savingor.textSecondary,
+      );
 
   @override
   void dispose() {
@@ -130,16 +128,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: _pageBackground,
+      backgroundColor: context.savingor.pageBackground,
       appBar: AppBar(
         title: Text(
           l10n.changePassword,
-          style: SavingorAppTextStyles.screenTitle,
+          style: SavingorAppTextStyles.screenTitle(context),
         ),
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: _pageBackground,
+        backgroundColor: context.savingor.pageBackground,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(
@@ -160,21 +158,22 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-                decoration: SavingorSurfaces.premiumCard(radius: 22),
+                decoration: SavingorSurfaces.premiumCard(context, radius: 22),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
                       l10n.changePasswordIntro,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: SavingorColors.textSecondary,
+                        color: context.savingor.textSecondary,
                         height: 1.4,
                       ),
                     ),
                     const SizedBox(height: 18),
-                    Text(l10n.currentPassword, style: _fieldLabelStyle),
+                    Text(l10n.currentPassword,
+                        style: _fieldLabelStyle(context)),
                     const SizedBox(height: 8),
                     _passwordField(
                       l10n: l10n,
@@ -191,7 +190,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    Text(l10n.newPassword, style: _fieldLabelStyle),
+                    Text(l10n.newPassword, style: _fieldLabelStyle(context)),
                     const SizedBox(height: 8),
                     _passwordField(
                       l10n: l10n,
@@ -212,7 +211,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    Text(l10n.confirmNewPassword, style: _fieldLabelStyle),
+                    Text(l10n.confirmNewPassword,
+                        style: _fieldLabelStyle(context)),
                     const SizedBox(height: 8),
                     _passwordField(
                       l10n: l10n,
@@ -259,7 +259,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                   color: const Color(0xFFFCFDFC),
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
-                    color: SavingorColors.border.withOpacity(0.8),
+                    color: context.savingor.border.withOpacity(0.8),
                   ),
                 ),
                 child: Column(
@@ -277,10 +277,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     const SizedBox(height: 6),
                     Text(
                       l10n.passwordResetSecureLink,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w500,
-                        color: SavingorColors.textSecondary,
+                        color: context.savingor.textSecondary,
                         height: 1.4,
                       ),
                     ),
@@ -290,14 +290,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       style: TextStyle(
                         fontSize: 12.5,
                         fontWeight: FontWeight.w500,
-                        color: SavingorColors.textSecondary.withOpacity(0.85),
+                        color: context.savingor.textSecondary.withOpacity(0.85),
                         height: 1.4,
                       ),
                     ),
                     const SizedBox(height: 12),
                     OutlinedButton.icon(
                       onPressed: _isSendingReset ? null : _sendPasswordReset,
-                      style: SavingorButtonStyles.secondaryOutlined(),
+                      style: SavingorButtonStyles.secondaryOutlined(context),
                       icon: _isSendingReset
                           ? const SizedBox(
                               width: 15,
@@ -307,7 +307,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 color: SavingorColors.darkGreen,
                               ),
                             )
-                          : const Icon(Icons.mark_email_read_outlined, size: 18),
+                          : const Icon(Icons.mark_email_read_outlined,
+                              size: 18),
                       label: Text(
                         _isSendingReset ? l10n.sending : l10n.sendResetEmail,
                       ),
@@ -346,11 +347,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           onPressed: onToggleObscure,
           tooltip: obscure ? l10n.showPassword : l10n.hidePassword,
           icon: Icon(
-            obscure
-                ? Icons.visibility_outlined
-                : Icons.visibility_off_outlined,
+            obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
             size: 20,
-            color: SavingorColors.textSecondary.withOpacity(0.8),
+            color: context.savingor.textSecondary.withOpacity(0.8),
           ),
         ),
       ),
@@ -364,22 +363,22 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       hintStyle: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: SavingorColors.textSecondary.withOpacity(0.7),
+        color: context.savingor.textSecondary.withOpacity(0.7),
       ),
       filled: true,
       fillColor: Colors.white,
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: SavingorColors.border.withOpacity(0.9)),
+        borderSide: BorderSide(color: context.savingor.border.withOpacity(0.9)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: SavingorColors.border.withOpacity(0.9)),
+        borderSide: BorderSide(color: context.savingor.border.withOpacity(0.9)),
       ),
       disabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: SavingorColors.border.withOpacity(0.6)),
+        borderSide: BorderSide(color: context.savingor.border.withOpacity(0.6)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),

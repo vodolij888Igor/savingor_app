@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/app_screen_states.dart';
 
 /// Shopping-list wrappers around [AppLoadingState], [AppEmptyState], [AppErrorState].
@@ -42,20 +43,7 @@ class ShoppingListStatePanel {
 }
 
 /// Premium card decoration shared across shopping list UI.
-BoxDecoration shoppingListCardDecoration({double radius = 18}) {
-  return BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.circular(radius),
-    border: Border.all(
-      color: const Color(0xFFF3F4F3).withOpacity(0.6),
-      width: 0.5,
-    ),
-    boxShadow: <BoxShadow>[
-      BoxShadow(
-        color: Colors.black.withOpacity(0.04),
-        blurRadius: 12,
-        offset: const Offset(0, 2),
-      ),
-    ],
-  );
+BoxDecoration shoppingListCardDecoration(BuildContext context,
+    {double radius = 18}) {
+  return SavingorWorkflowTheme.card(context, radius: radius);
 }

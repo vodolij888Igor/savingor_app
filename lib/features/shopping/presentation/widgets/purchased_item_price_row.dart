@@ -39,13 +39,7 @@ class PurchasedItemPriceRow extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: SavingorColors.lightGreen.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: SavingorColors.primaryStroke.withOpacity(0.12),
-        ),
-      ),
+      decoration: SavingorWorkflowTheme.highlightCard(context, radius: 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -54,19 +48,19 @@ class PurchasedItemPriceRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   itemName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
-                    color: SavingorColors.darkGreen,
+                    color: SavingorWorkflowTheme.primaryText(context),
                   ),
                 ),
               ),
               Text(
                 l10n.qtyWithCount(item.quantity),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: SavingorColors.textSecondary,
+                  color: context.savingor.textSecondary,
                 ),
               ),
             ],
@@ -75,10 +69,10 @@ class PurchasedItemPriceRow extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               item.store!,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary,
+                color: context.savingor.textSecondary,
               ),
             ),
           ],
@@ -87,12 +81,11 @@ class PurchasedItemPriceRow extends StatelessWidget {
             controller: unitPriceController,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             onChanged: (_) => onChanged(),
-            decoration: InputDecoration(
-              labelText: l10n.unitPrice,
+            decoration: SavingorWorkflowTheme.fieldDecoration(
+              context,
+              label: l10n.unitPrice,
               prefixText: '\$ ',
-              border: const OutlineInputBorder(),
-              isDense: true,
-            ),
+            ).copyWith(isDense: true),
             validator: (String? value) {
               if (value == null || value.trim().isEmpty) {
                 return l10n.enterPriceForProduct(itemName);
@@ -109,10 +102,10 @@ class PurchasedItemPriceRow extends StatelessWidget {
             lineTotal > 0
                 ? l10n.lineTotalWithAmount('\$${lineTotal.toStringAsFixed(2)}')
                 : l10n.lineTotalEmpty,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: SavingorColors.darkGreen,
+              color: SavingorWorkflowTheme.primaryText(context),
             ),
           ),
         ],

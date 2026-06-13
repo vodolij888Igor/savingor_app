@@ -106,8 +106,7 @@ class _LanguageSelectScreenState extends State<LanguageSelectScreen>
     );
   }
 
-  bool get _isSettingsMode =>
-      widget.mode == LanguageSelectMode.settings;
+  bool get _isSettingsMode => widget.mode == LanguageSelectMode.settings;
 
   void _goBack() {
     final NavigatorState navigator = Navigator.of(context);
@@ -169,13 +168,12 @@ class _LanguageSelectScreenState extends State<LanguageSelectScreen>
     final String subtitleText = _isSettingsMode
         ? l10n.chooseLanguageSubtitle
         : l10n.langSubtitleOnboarding;
-    final String primaryButtonLabel = _isSettingsMode
-        ? l10n.applyLanguage
-        : l10n.continueButton;
+    final String primaryButtonLabel =
+        _isSettingsMode ? l10n.applyLanguage : l10n.continueButton;
 
     if (_isSettingsMode) {
       return Scaffold(
-        backgroundColor: SavingorColors.pageWhite,
+        backgroundColor: context.savingor.pageBackground,
         body: Column(
           children: <Widget>[
             SafeArea(
@@ -200,7 +198,8 @@ class _LanguageSelectScreenState extends State<LanguageSelectScreen>
                   SafeArea(
                     top: false,
                     child: LayoutBuilder(
-                      builder: (BuildContext context, BoxConstraints constraints) {
+                      builder:
+                          (BuildContext context, BoxConstraints constraints) {
                         final double safeHeight = constraints.maxHeight;
                         // Logo stays in the background artwork; these offsets place
                         // subtitle and selector as one centered group beneath it.
@@ -359,10 +358,10 @@ class _SettingsLanguageHeader extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: SavingorColors.pageWhite,
+        color: context.savingor.pageBackground,
         border: Border(
           bottom: BorderSide(
-            color: SavingorColors.border.withOpacity(0.65),
+            color: context.savingor.border.withOpacity(0.65),
           ),
         ),
       ),
@@ -381,7 +380,7 @@ class _SettingsLanguageHeader extends StatelessWidget {
             child: Text(
               title,
               textAlign: TextAlign.center,
-              style: SavingorAppTextStyles.screenTitle,
+              style: SavingorAppTextStyles.screenTitle(context),
             ),
           ),
           const SizedBox(width: 48),
@@ -414,8 +413,7 @@ class _InlineLanguageDropdown extends StatelessWidget {
   final VoidCallback onToggle;
   final ValueChanged<String> onSelect;
 
-  static final BorderRadius _radius =
-      BorderRadius.circular(SavingorRadius.xl);
+  static final BorderRadius _radius = BorderRadius.circular(SavingorRadius.xl);
 
   @override
   Widget build(BuildContext context) {
@@ -454,7 +452,7 @@ class _InlineLanguageDropdown extends StatelessWidget {
                                   .titleMedium
                                   ?.copyWith(
                                     fontWeight: FontWeight.w600,
-                                    color: SavingorColors.textPrimary,
+                                    color: context.savingor.textPrimary,
                                   ),
                             ),
                             const SizedBox(height: 4),
@@ -464,7 +462,7 @@ class _InlineLanguageDropdown extends StatelessWidget {
                                   .textTheme
                                   .bodyMedium
                                   ?.copyWith(
-                                    color: SavingorColors.textSecondary,
+                                    color: context.savingor.textSecondary,
                                   ),
                             ),
                           ],
@@ -496,7 +494,7 @@ class _InlineLanguageDropdown extends StatelessWidget {
                         thickness: 1,
                         indent: SavingorSpacing.lg,
                         endIndent: SavingorSpacing.lg,
-                        color: SavingorColors.border.withOpacity(0.55),
+                        color: context.savingor.border.withOpacity(0.55),
                       ),
                       Flexible(
                         child: ListView.builder(
@@ -566,14 +564,14 @@ class _DropdownRow extends StatelessWidget {
                         choice.primaryLabel,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: SavingorColors.textPrimary,
+                              color: context.savingor.textPrimary,
                             ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         choice.secondaryLabel,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: SavingorColors.textSecondary,
+                              color: context.savingor.textSecondary,
                             ),
                       ),
                     ],
@@ -597,7 +595,7 @@ class _DropdownRow extends StatelessWidget {
             thickness: 1,
             indent: SavingorSpacing.lg,
             endIndent: SavingorSpacing.lg,
-            color: SavingorColors.border.withOpacity(0.5),
+            color: context.savingor.border.withOpacity(0.5),
           ),
       ],
     );

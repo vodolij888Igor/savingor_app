@@ -156,8 +156,7 @@ class AiSavingsContext {
               'name': item.name,
               'quantity': item.quantity,
               'isCompleted': item.isCompleted,
-              if (item.unitPrice != null)
-                'unitPrice': _round(item.unitPrice!),
+              if (item.unitPrice != null) 'unitPrice': _round(item.unitPrice!),
               if (item.category != null) 'category': item.category,
             },
           )
@@ -165,6 +164,5 @@ class AiSavingsContext {
     };
   }
 
-  static double _round(double value) =>
-      double.parse(value.toStringAsFixed(2));
+  static double _round(double value) => double.parse(value.toStringAsFixed(2));
 }

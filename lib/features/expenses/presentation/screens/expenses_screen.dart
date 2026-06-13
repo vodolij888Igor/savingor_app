@@ -11,9 +11,6 @@ import 'package:savingor_app/l10n/app_localizations.dart';
 
 class ExpensesScreen extends StatelessWidget {
   const ExpensesScreen({super.key});
-
-  static const Color _pageBackground = Colors.white;
-
   static void _goBack(BuildContext context) {
     if (context.canPop()) {
       context.pop();
@@ -28,7 +25,7 @@ class ExpensesScreen extends StatelessWidget {
       centerTitle: false,
       elevation: 0,
       scrolledUnderElevation: 0,
-      backgroundColor: _pageBackground,
+      backgroundColor: context.savingor.pageBackground,
       surfaceTintColor: Colors.transparent,
       leading: BackButton(
         color: SavingorColors.darkGreen,
@@ -60,7 +57,7 @@ class ExpensesScreen extends StatelessWidget {
                 store.expenses.isNotEmpty;
 
             return Scaffold(
-              backgroundColor: _pageBackground,
+              backgroundColor: context.savingor.pageBackground,
               appBar: _buildAppBar(context, l10n),
               body: _buildBody(context, store, appState, bottomInset, l10n),
               floatingActionButton: showAddFab
@@ -125,7 +122,8 @@ class ExpensesScreen extends StatelessWidget {
             expense.totalAmount,
             originalCurrency: expense.currency,
           ),
-          onDelete: () => _confirmDelete(context, store, expense, appState, l10n),
+          onDelete: () =>
+              _confirmDelete(context, store, expense, appState, l10n),
         );
       },
     );
@@ -133,7 +131,7 @@ class ExpensesScreen extends StatelessWidget {
 
   Widget _buildSignInRequired(BuildContext context, AppLocalizations l10n) {
     return Scaffold(
-      backgroundColor: _pageBackground,
+      backgroundColor: context.savingor.pageBackground,
       appBar: _buildAppBar(context, l10n),
       body: AppSignInRequiredState(
         title: l10n.signInRequired,
@@ -214,7 +212,7 @@ class _ExpenseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: context.savingor.surfacePrimary,
       borderRadius: BorderRadius.circular(18),
       clipBehavior: Clip.antiAlias,
       child: Padding(
@@ -249,10 +247,10 @@ class _ExpenseCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     _formatDate(expense.purchaseDate),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: SavingorColors.textSecondary,
+                      color: context.savingor.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -269,7 +267,7 @@ class _ExpenseCard extends StatelessWidget {
             ),
             IconButton(
               icon: const Icon(Icons.delete_outline_rounded),
-              color: SavingorColors.textSecondary,
+              color: context.savingor.textSecondary,
               onPressed: onDelete,
             ),
           ],

@@ -47,17 +47,16 @@ abstract final class AiContextBuilder {
         )
         .toList(growable: false);
 
-    final List<AiShoppingListSummary> shoppingLists =
-        shoppingListsStore.lists
-            .map(
-              (ShoppingList list) => AiShoppingListSummary(
-                title: list.title,
-                itemCount: list.itemCount,
-                completedCount: list.completedCount,
-                estimatedTotal: list.estimatedTotal,
-              ),
-            )
-            .toList(growable: false);
+    final List<AiShoppingListSummary> shoppingLists = shoppingListsStore.lists
+        .map(
+          (ShoppingList list) => AiShoppingListSummary(
+            title: list.title,
+            itemCount: list.itemCount,
+            completedCount: list.completedCount,
+            estimatedTotal: list.estimatedTotal,
+          ),
+        )
+        .toList(growable: false);
 
     final List<AiShoppingItemSummary> activeItems = shoppingListsStore.items
         .where((ShoppingListItem item) => item.isActive)

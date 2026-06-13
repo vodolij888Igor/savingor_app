@@ -14,8 +14,6 @@ class BasketRecommendationCard extends StatelessWidget {
 
   final BasketPriceRecommendation recommendation;
 
-  static const Color _airyBorder = Color(0xFFF3F4F3);
-
   String _itemDisplayName(BuildContext context) {
     final String localized = ProductDisplayL10n.localizedProductName(
       context,
@@ -34,18 +32,7 @@ class BasketRecommendationCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _airyBorder.withOpacity(0.6), width: 0.5),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      decoration: SavingorWorkflowTheme.card(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -55,20 +42,20 @@ class BasketRecommendationCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   itemName,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
-                    color: SavingorColors.darkGreen,
+                    color: SavingorWorkflowTheme.headingText(context),
                   ),
                 ),
               ),
               if (recommendation.shoppingQuantity > 1)
                 Text(
                   '×${recommendation.shoppingQuantity}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: SavingorColors.textSecondary,
+                    color: context.savingor.textSecondary,
                   ),
                 ),
             ],
@@ -113,29 +100,29 @@ class BasketRecommendationCard extends StatelessWidget {
                           currency: recommendation.currency,
                         ),
                       ),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: SavingorColors.primaryStroke,
+                  color: SavingorWorkflowTheme.accentText(context),
                 ),
               ),
             ],
           ] else ...<Widget>[
             Text(
               l10n.noPriceHistoryYet,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: SavingorColors.darkGreen,
+                color: SavingorWorkflowTheme.primaryText(context),
               ),
             ),
             const SizedBox(height: 4),
             Text(
               recommendation.message ?? l10n.addReceiptsForItemRecommendations,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary,
+                color: context.savingor.textSecondary,
                 height: 1.4,
               ),
             ),
@@ -159,10 +146,10 @@ class _DetailLine extends StatelessWidget {
   Widget build(BuildContext context) {
     return RichText(
       text: TextSpan(
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w500,
-          color: SavingorColors.textSecondary,
+          color: context.savingor.textSecondary,
           height: 1.35,
         ),
         children: <TextSpan>[
@@ -174,7 +161,8 @@ class _DetailLine extends StatelessWidget {
             text: value,
             style: TextStyle(
               fontWeight: FontWeight.w600,
-              color: SavingorColors.darkGreen.withOpacity(0.9),
+              color:
+                  SavingorWorkflowTheme.primaryText(context).withOpacity(0.9),
             ),
           ),
         ],

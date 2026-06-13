@@ -47,7 +47,9 @@ abstract final class ShoppingBasketItemGrouper {
         continue;
       }
 
-      buckets.putIfAbsent(key, () => _ProductBucket()).add(item.name.trim(), item.quantity);
+      buckets
+          .putIfAbsent(key, () => _ProductBucket())
+          .add(item.name.trim(), item.quantity);
     }
 
     final DateTime now = DateTime.now();

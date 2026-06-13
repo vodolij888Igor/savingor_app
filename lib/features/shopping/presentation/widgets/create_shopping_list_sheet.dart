@@ -17,7 +17,7 @@ class CreateShoppingListSheet extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Colors.white,
+      backgroundColor: context.savingor.surfacePrimary,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -113,7 +113,7 @@ class _CreateShoppingListSheetState extends State<CreateShoppingListSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: SavingorColors.textSecondary.withOpacity(0.25),
+                  color: context.savingor.textSecondary.withOpacity(0.25),
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
@@ -121,19 +121,17 @@ class _CreateShoppingListSheetState extends State<CreateShoppingListSheet> {
             const SizedBox(height: 16),
             Text(
               l10n.newShoppingList,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: SavingorColors.darkGreen,
+              style: SavingorAppTextStyles.screenTitle(context).copyWith(
+                color: SavingorWorkflowTheme.primaryText(context),
               ),
             ),
             const SizedBox(height: 6),
             Text(
               l10n.newShoppingListHint,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary,
+                color: context.savingor.textSecondary,
                 height: 1.4,
               ),
             ),
@@ -143,9 +141,9 @@ class _CreateShoppingListSheetState extends State<CreateShoppingListSheet> {
               focusNode: _titleFocusNode,
               textInputAction: TextInputAction.done,
               enabled: !_isSaving,
-              decoration: InputDecoration(
-                labelText: l10n.listName,
-                border: const OutlineInputBorder(),
+              decoration: SavingorWorkflowTheme.fieldDecoration(
+                context,
+                label: l10n.listName,
               ),
               validator: (String? value) {
                 if (value == null || value.trim().isEmpty) {
@@ -158,7 +156,7 @@ class _CreateShoppingListSheetState extends State<CreateShoppingListSheet> {
             const SizedBox(height: 20),
             FilledButton(
               onPressed: _isSaving ? null : _save,
-              style: SavingorButtonStyles.primaryFilled(),
+              style: SavingorButtonStyles.primaryFilledFor(context),
               child: _isSaving
                   ? const SizedBox(
                       width: 22,

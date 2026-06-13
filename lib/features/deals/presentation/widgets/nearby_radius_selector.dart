@@ -32,39 +32,34 @@ class NearbyRadiusSelector extends StatelessWidget {
           liftOnHover: false,
           expandWidth: false,
           builder: (BuildContext context, SavingorInteractionState state) {
+            final SavingorThemeExtension theme = context.savingor;
             return AnimatedContainer(
               duration: SavingorInteraction.duration,
               curve: SavingorInteraction.curve,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               decoration: BoxDecoration(
                 color: selected
-                    ? SavingorColors.lightGreen
+                    ? theme.selectedHighlight
                     : state.pressed
-                        ? SavingorInteraction.pressedBackgroundTint
+                        ? theme.pressedHighlight
                         : state.hovered
-                            ? SavingorInteraction.hoverBackgroundTint
-                            : Colors.white,
+                            ? theme.hoverHighlight
+                            : theme.chipSurface,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: selected
-                      ? SavingorColors.primaryStroke.withOpacity(0.55)
-                      : state.hovered
-                          ? SavingorColors.primaryStroke.withOpacity(0.65)
-                          : SavingorColors.border,
-                  width: state.hovered && !selected ? 1.5 : 1,
+                      ? theme.accentGreen.withOpacity(0.65)
+                      : theme.border,
+                  width: selected ? 1.25 : 1,
                 ),
-                boxShadow: state.hovered && !selected
-                    ? SavingorInteraction.cardShadow(hovered: true)
-                    : null,
+                boxShadow: state.hovered && !selected ? theme.cardShadow : null,
               ),
               child: Text(
                 l10n.mapRadiusKm(radiusKm.round()),
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: selected
-                      ? SavingorColors.primaryStroke
-                      : SavingorColors.textSecondary,
+                  color: selected ? theme.brandTitle : theme.textSecondary,
                 ),
               ),
             );

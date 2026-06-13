@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -99,32 +100,40 @@ class MyApp extends StatelessWidget {
       listenable: appState,
       builder: (BuildContext context, Widget? child) {
         final String languageCode = appState.language ?? 'en';
+        final ThemeMode themeMode =
+            SavingorTheme.themeModeForAppearance(appState.appearance);
+        SavingorTheme.applySystemUiOverlay(themeMode);
 
-        return MaterialApp.router(
-          debugShowCheckedModeBanner: false,
-          title: 'Savingor',
-          theme: SavingorTheme.lightTheme,
-          routerConfig: router,
-          locale: Locale(languageCode),
-          supportedLocales: _supportedLocales,
-          localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          localeResolutionCallback:
-              (Locale? locale, Iterable<Locale> supportedLocales) {
-            if (locale == null) {
-              return const Locale('en');
-            }
-            for (final Locale supported in supportedLocales) {
-              if (supported.languageCode == locale.languageCode) {
-                return supported;
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SavingorTheme.systemUiOverlayStyle(themeMode),
+          child: MaterialApp.router(
+            debugShowCheckedModeBanner: false,
+            title: 'Savingor',
+            theme: SavingorTheme.lightTheme,
+            darkTheme: SavingorTheme.darkTheme,
+            themeMode: themeMode,
+            routerConfig: router,
+            locale: Locale(languageCode),
+            supportedLocales: _supportedLocales,
+            localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            localeResolutionCallback:
+                (Locale? locale, Iterable<Locale> supportedLocales) {
+              if (locale == null) {
+                return const Locale('en');
               }
-            }
-            return const Locale('en');
-          },
+              for (final Locale supported in supportedLocales) {
+                if (supported.languageCode == locale.languageCode) {
+                  return supported;
+                }
+              }
+              return const Locale('en');
+            },
+          ),
         );
       },
     );

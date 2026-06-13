@@ -1,7 +1,6 @@
 /// Runtime AI configuration via `--dart-define` (no secrets in source).
 abstract final class AiAssistantConfig {
-  static const String openAiApiKey =
-      String.fromEnvironment('OPENAI_API_KEY');
+  static const String openAiApiKey = String.fromEnvironment('OPENAI_API_KEY');
 
   static const String openAiApiBase = String.fromEnvironment(
     'OPENAI_API_BASE',

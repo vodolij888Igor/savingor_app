@@ -24,10 +24,9 @@ class BasketOptimizerScreen extends StatefulWidget {
 
   final String? listId;
 
-  BasketOptimizerScope get scope =>
-      listId != null && listId!.isNotEmpty
-          ? BasketOptimizerScope.singleList
-          : BasketOptimizerScope.allActiveLists;
+  BasketOptimizerScope get scope => listId != null && listId!.isNotEmpty
+      ? BasketOptimizerScope.singleList
+      : BasketOptimizerScope.allActiveLists;
 
   bool get isGlobalScope => scope == BasketOptimizerScope.allActiveLists;
 
@@ -36,8 +35,6 @@ class BasketOptimizerScreen extends StatefulWidget {
 }
 
 class _BasketOptimizerScreenState extends State<BasketOptimizerScreen> {
-  static const Color _pageBackground = Colors.white;
-
   List<ShoppingListItem>? _shoppingItems;
   int? _activeListsIncluded;
   bool _isLoadingItems = true;
@@ -117,32 +114,27 @@ class _BasketOptimizerScreenState extends State<BasketOptimizerScreen> {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final PriceMemoryStore priceStore = PriceMemoryProvider.of(context);
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
-    final String screenTitle = widget.isGlobalScope
-        ? l10n.optimizeAllLists
-        : l10n.optimizeThisBasket;
+    final String screenTitle =
+        widget.isGlobalScope ? l10n.optimizeAllLists : l10n.optimizeThisBasket;
 
     return AnimatedBuilder(
       animation: priceStore,
       builder: (BuildContext context, Widget? _) {
         return Scaffold(
-          backgroundColor: _pageBackground,
+          backgroundColor: context.savingor.pageBackground,
           appBar: AppBar(
             title: Text(
               screenTitle,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: SavingorColors.darkGreen,
-              ),
+              style: SavingorAppTextStyles.screenTitle(context),
             ),
             elevation: 0,
             scrolledUnderElevation: 0,
-            backgroundColor: _pageBackground,
+            backgroundColor: context.savingor.pageBackground,
             surfaceTintColor: Colors.transparent,
             leading: IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.arrow_back_ios_new_rounded,
-                color: SavingorColors.darkGreen,
+                color: SavingorWorkflowTheme.appBarIcon(context),
                 size: 20,
               ),
               onPressed: () => context.pop(),
@@ -242,11 +234,7 @@ class _BasketOptimizerScreenState extends State<BasketOptimizerScreen> {
         const SizedBox(height: SavingorSpacing.xl),
         Text(
           l10n.itemRecommendations,
-          style: const TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: SavingorColors.darkGreen,
-          ),
+          style: SavingorAppTextStyles.sectionTitle(context),
         ),
         const SizedBox(height: 12),
         ...result.recommendations.map(

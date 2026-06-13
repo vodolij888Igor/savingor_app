@@ -38,8 +38,8 @@ class ReceiptItem {
     double? confidence,
     String? notes,
   }) {
-    final double resolvedTotal = totalPrice ??
-        ((unitPrice != null) ? unitPrice * quantity : 0);
+    final double resolvedTotal =
+        totalPrice ?? ((unitPrice != null) ? unitPrice * quantity : 0);
     return ReceiptItem(
       id: _newItemId(),
       name: name.trim(),

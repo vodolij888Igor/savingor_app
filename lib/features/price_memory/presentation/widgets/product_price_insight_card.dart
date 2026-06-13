@@ -33,12 +33,15 @@ class ProductPriceInsightCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
+    final Color borderColor = context.savingor.isDark
+        ? context.savingor.border.withOpacity(0.85)
+        : _airyBorder.withOpacity(0.6);
 
     return SavingorInteractiveCard(
       onTap: onTap,
       borderRadius: BorderRadius.circular(18),
       accentTint: SavingorAccentColors.priceMemory,
-      borderColor: _airyBorder.withOpacity(0.6),
+      borderColor: borderColor,
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,16 +51,16 @@ class ProductPriceInsightCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   _displayName(context),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
-                    color: SavingorColors.darkGreen,
+                    color: SavingorWorkflowTheme.headingText(context),
                   ),
                 ),
               ),
               Icon(
                 Icons.chevron_right_rounded,
-                color: SavingorColors.textSecondary.withOpacity(0.55),
+                color: context.savingor.textSecondary.withOpacity(0.55),
               ),
             ],
           ),
@@ -65,7 +68,8 @@ class ProductPriceInsightCard extends StatelessWidget {
           _historyLine(
             context,
             '${l10n.latestPriceLabel}: ${l10n.priceAtStore(
-              PriceMemoryFormatters.formatPrice(insight.latestPrice, currency: insight.currency),
+              PriceMemoryFormatters.formatPrice(insight.latestPrice,
+                  currency: insight.currency),
               insight.latestStoreName,
             )}',
             emphasized: true,
@@ -74,7 +78,8 @@ class ProductPriceInsightCard extends StatelessWidget {
           _historyLine(
             context,
             '${l10n.bestKnownPriceLabel}: ${l10n.priceAtStore(
-              PriceMemoryFormatters.formatPrice(insight.lowestPrice, currency: insight.currency),
+              PriceMemoryFormatters.formatPrice(insight.lowestPrice,
+                  currency: insight.currency),
               insight.lowestStoreName,
             )}',
           ),
@@ -94,7 +99,7 @@ class ProductPriceInsightCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: SavingorColors.textSecondary.withOpacity(0.95),
+              color: context.savingor.textSecondary.withOpacity(0.95),
             ),
           ),
         ],
@@ -102,15 +107,16 @@ class ProductPriceInsightCard extends StatelessWidget {
     );
   }
 
-  Widget _historyLine(BuildContext context, String text, {bool emphasized = false}) {
+  Widget _historyLine(BuildContext context, String text,
+      {bool emphasized = false}) {
     return Text(
       text,
       style: TextStyle(
         fontSize: 13,
         fontWeight: emphasized ? FontWeight.w600 : FontWeight.w500,
         color: emphasized
-            ? SavingorColors.darkGreen.withOpacity(0.85)
-            : SavingorColors.textSecondary,
+            ? SavingorWorkflowTheme.primaryText(context).withOpacity(0.85)
+            : context.savingor.textSecondary,
         height: 1.35,
       ),
     );

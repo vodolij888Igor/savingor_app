@@ -3,10 +3,8 @@ import 'package:savingor_app/core/theme/savingor_design_system.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
-  static const Color _pageBackground = Color(0xFFF3FAF1);
-
-  Widget _cardShell({
+  Widget _cardShell(
+    BuildContext context, {
     required Widget child,
     bool highlighted = false,
     EdgeInsetsGeometry padding = const EdgeInsets.all(20),
@@ -15,10 +13,13 @@ class HomeScreen extends StatelessWidget {
       width: double.infinity,
       padding: padding,
       decoration: BoxDecoration(
-        color: highlighted ? const Color(0xFFF4FBF2) : Colors.white,
+        color: highlighted
+            ? const Color(0xFFF4FBF2)
+            : context.savingor.surfacePrimary,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: SavingorColors.primaryStroke.withOpacity(highlighted ? 0.26 : 0.12),
+          color: SavingorColors.primaryStroke
+              .withOpacity(highlighted ? 0.26 : 0.12),
         ),
         boxShadow: <BoxShadow>[
           BoxShadow(
@@ -32,23 +33,26 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _metricCard({
+  Widget _metricCard(
+    BuildContext context, {
     required IconData icon,
     required String label,
     required String value,
   }) {
     return _cardShell(
+      context,
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Icon(icon, size: 18, color: SavingorColors.darkGreen.withOpacity(0.8)),
+          Icon(icon,
+              size: 18, color: SavingorColors.darkGreen.withOpacity(0.8)),
           const SizedBox(height: 10),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
-              color: SavingorColors.textSecondary,
+              color: context.savingor.textSecondary,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -75,7 +79,7 @@ class HomeScreen extends StatelessWidget {
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: _pageBackground,
+      backgroundColor: context.savingor.pageBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.fromLTRB(20, 14, 20, 20 + bottomInset + 68),
@@ -83,15 +87,18 @@ class HomeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               _cardShell(
+                context,
                 highlighted: true,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(SavingorRadius.pill),
+                        borderRadius:
+                            BorderRadius.circular(SavingorRadius.pill),
                         border: Border.all(
                           color: SavingorColors.primaryStroke.withOpacity(0.24),
                         ),
@@ -130,8 +137,9 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: SavingorSpacing.lg),
               _cardShell(
+                context,
                 highlighted: true,
-                child: const Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
@@ -139,11 +147,11 @@ class HomeScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: SavingorColors.textSecondary,
+                        color: context.savingor.textSecondary,
                       ),
                     ),
-                    SizedBox(height: 6),
-                    Text(
+                    const SizedBox(height: 6),
+                    const Text(
                       '\$0',
                       style: TextStyle(
                         fontSize: 38,
@@ -152,13 +160,13 @@ class HomeScreen extends StatelessWidget {
                         height: 1.05,
                       ),
                     ),
-                    SizedBox(height: SavingorSpacing.sm),
+                    const SizedBox(height: SavingorSpacing.sm),
                     Text(
                       'Start adding receipts to track your savings.',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: SavingorColors.textSecondary,
+                        color: context.savingor.textSecondary,
                         height: 1.4,
                       ),
                     ),
@@ -170,6 +178,7 @@ class HomeScreen extends StatelessWidget {
                 children: <Widget>[
                   Expanded(
                     child: _metricCard(
+                      context,
                       icon: Icons.shopping_bag_outlined,
                       label: 'This month',
                       value: '\$0',
@@ -178,6 +187,7 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(width: SavingorSpacing.sm),
                   Expanded(
                     child: _metricCard(
+                      context,
                       icon: Icons.receipt_long_outlined,
                       label: 'Receipts',
                       value: '0',
@@ -186,6 +196,7 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(width: SavingorSpacing.sm),
                   Expanded(
                     child: _metricCard(
+                      context,
                       icon: Icons.checklist_rounded,
                       label: 'List items',
                       value: '0',
@@ -195,6 +206,7 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: SavingorSpacing.md),
               _cardShell(
+                context,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
@@ -207,12 +219,12 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
+                    Text(
                       'Goal: \$100',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: SavingorColors.textSecondary,
+                        color: context.savingor.textSecondary,
                       ),
                     ),
                     const SizedBox(height: SavingorSpacing.md),
@@ -221,7 +233,8 @@ class HomeScreen extends StatelessWidget {
                       child: LinearProgressIndicator(
                         value: progress,
                         minHeight: 10,
-                        backgroundColor: SavingorColors.lightGreen.withOpacity(0.4),
+                        backgroundColor:
+                            SavingorColors.lightGreen.withOpacity(0.4),
                         valueColor: const AlwaysStoppedAnimation<Color>(
                           SavingorColors.primaryStroke,
                         ),
@@ -237,12 +250,12 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
+                    Text(
                       'Add receipts to start tracking your progress.',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: SavingorColors.textSecondary,
+                        color: context.savingor.textSecondary,
                         height: 1.35,
                       ),
                     ),
@@ -251,6 +264,7 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: SavingorSpacing.md),
               _cardShell(
+                context,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
@@ -263,12 +277,12 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: SavingorSpacing.sm),
-                    const Text(
+                    Text(
                       'Add receipts and shopping lists to get personalized savings insights.',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: SavingorColors.textSecondary,
+                        color: context.savingor.textSecondary,
                         height: 1.4,
                       ),
                     ),
@@ -297,6 +311,7 @@ class HomeScreen extends StatelessWidget {
               ),
               const SizedBox(height: SavingorSpacing.md),
               _cardShell(
+                context,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
@@ -326,13 +341,13 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: SavingorSpacing.md),
-                        const Expanded(
+                        Expanded(
                           child: Text(
                             'No activity yet. Add your first receipt or shopping list item.',
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
-                              color: SavingorColors.textSecondary,
+                              color: context.savingor.textSecondary,
                               height: 1.4,
                             ),
                           ),

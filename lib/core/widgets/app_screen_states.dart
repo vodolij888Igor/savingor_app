@@ -23,10 +23,10 @@ class AppLoadingState extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary,
+                color: context.savingor.textSecondary,
               ),
             ),
           ],
@@ -65,7 +65,7 @@ class AppEmptyState extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Icon(icon, size: 56, color: SavingorColors.textSecondary),
+              Icon(icon, size: 56, color: context.savingor.textSecondary),
               const SizedBox(height: 16),
               Text(
                 title,
@@ -80,10 +80,10 @@ class AppEmptyState extends StatelessWidget {
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: SavingorColors.textSecondary,
+                  color: context.savingor.textSecondary,
                   height: 1.45,
                 ),
               ),

@@ -37,8 +37,6 @@ class DealsMapScreen extends StatefulWidget {
 }
 
 class _DealsMapScreenState extends State<DealsMapScreen> {
-  static const Color _pageWhite = SavingorColors.pageWhite;
-
   double _selectedRadiusKm = 10;
   NearbyActiveLocation? _activeLocation;
   UserLocationAccessStatus _locationStatus = UserLocationAccessStatus.idle;
@@ -208,19 +206,19 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: _pageWhite,
+      backgroundColor: context.savingor.pageBackground,
       appBar: AppBar(
         title: Text(
           l10n.nearbyStores,
-          style: SavingorAppTextStyles.screenTitle,
+          style: SavingorAppTextStyles.screenTitle(context),
         ),
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: _pageWhite,
+        backgroundColor: context.savingor.pageBackground,
         surfaceTintColor: Colors.transparent,
         leading: context.canPop()
             ? BackButton(
-                color: SavingorColors.textPrimary,
+                color: context.savingor.textPrimary,
                 onPressed: () => context.pop(),
               )
             : null,
@@ -235,7 +233,7 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary.withOpacity(0.95),
+                color: context.savingor.textSecondary.withOpacity(0.95),
                 height: 1.4,
               ),
             ),
@@ -275,7 +273,7 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
                 Expanded(
                   child: Text(
                     l10n.storesNearby,
-                    style: SavingorAppTextStyles.sectionTitle,
+                    style: SavingorAppTextStyles.sectionTitle(context),
                   ),
                 ),
                 Text(
@@ -285,7 +283,7 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: SavingorColors.textSecondary.withOpacity(0.9),
+                    color: context.savingor.textSecondary.withOpacity(0.9),
                   ),
                 ),
               ],
@@ -296,7 +294,7 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary.withOpacity(0.9),
+                color: context.savingor.textSecondary.withOpacity(0.9),
                 height: 1.35,
               ),
             ),
@@ -331,11 +329,11 @@ class _DealsMapScreenState extends State<DealsMapScreen> {
   Widget _buildEmptyRadiusState(AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: SavingorSurfaces.premiumCard(radius: 16),
+      decoration: SavingorSurfaces.premiumCard(context, radius: 16),
       child: Text(
         l10n.mapNoStoresWithinRadius(_selectedRadiusKm.round()),
         textAlign: TextAlign.center,
-        style: SavingorAppTextStyles.bodySecondary(fontSize: 13),
+        style: SavingorAppTextStyles.bodySecondary(context, fontSize: 13),
       ),
     );
   }

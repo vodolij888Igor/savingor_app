@@ -28,9 +28,8 @@ class MapDirectionsLauncher {
     NearbyStore store, {
     UserLocationCoords? origin,
   }) {
-    final String? originQuery = origin != null
-        ? '${origin.latitude},${origin.longitude}'
-        : null;
+    final String? originQuery =
+        origin != null ? '${origin.latitude},${origin.longitude}' : null;
 
     if (store.hasCoordinates) {
       final double lat = store.latitude!;
@@ -86,8 +85,7 @@ class MapDirectionsLauncher {
       ];
     }
 
-    final String destQuery =
-        Uri.encodeComponent(store.address ?? store.name);
+    final String destQuery = Uri.encodeComponent(store.address ?? store.name);
 
     if (originQuery != null) {
       if (_isIOS) {
@@ -113,13 +111,15 @@ class MapDirectionsLauncher {
     if (_isIOS) {
       return <Uri>[
         Uri.parse('https://maps.apple.com/?daddr=$destQuery'),
-        Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$destQuery'),
+        Uri.parse(
+            'https://www.google.com/maps/dir/?api=1&destination=$destQuery'),
       ];
     }
 
     return <Uri>[
       Uri.parse('geo:0,0?q=$destQuery'),
-      Uri.parse('https://www.google.com/maps/dir/?api=1&destination=$destQuery'),
+      Uri.parse(
+          'https://www.google.com/maps/dir/?api=1&destination=$destQuery'),
     ];
   }
 

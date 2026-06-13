@@ -72,7 +72,7 @@ class BottomNavShell extends StatelessWidget {
 
     return Scaffold(
       extendBody: showBottomNav,
-      backgroundColor: SavingorColors.background,
+      backgroundColor: context.savingor.pageBackground,
       body: child,
       bottomNavigationBar: showBottomNav
           ? _PremiumNavBar(
@@ -114,25 +114,20 @@ class _PremiumNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double bottomSafe = MediaQuery.paddingOf(context).bottom;
+    final SavingorThemeExtension theme = context.savingor;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(16, 0, 16, 10 + bottomSafe),
       child: Container(
         height: _barHeight,
         decoration: BoxDecoration(
-          color: const Color(0xFFFFFEFE),
+          color: theme.navBarSurface,
           borderRadius: BorderRadius.circular(_barRadius),
           border: Border.all(
-            color: const Color(0xFFEEF1EF),
+            color: theme.navBarBorder,
             width: 0.8,
           ),
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: theme.cardShadow,
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(_barRadius),
@@ -219,6 +214,7 @@ class _SideNavItem extends StatelessWidget {
       hoverScale: 1.04,
       semanticLabel: label,
       builder: (BuildContext context, SavingorInteractionState state) {
+        final SavingorThemeExtension theme = context.savingor;
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -228,27 +224,33 @@ class _SideNavItem extends StatelessWidget {
                 child: AnimatedContainer(
                   duration: SavingorInteraction.duration,
                   curve: SavingorInteraction.curve,
-                  width: selected ? 38 : state.hovered ? 36 : 34,
-                  height: selected ? 38 : state.hovered ? 36 : 34,
+                  width: selected
+                      ? 38
+                      : state.hovered
+                          ? 36
+                          : 34,
+                  height: selected
+                      ? 38
+                      : state.hovered
+                          ? 36
+                          : 34,
                   decoration: BoxDecoration(
                     color: selected
-                        ? SavingorColors.lightGreen.withOpacity(0.62)
+                        ? theme.selectedHighlight
                         : state.hovered
-                            ? SavingorColors.lightGreen.withOpacity(0.55)
+                            ? theme.hoverHighlight
                             : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                     border: state.hovered && !selected
                         ? Border.all(
-                            color: SavingorColors.primaryStroke.withOpacity(0.4),
+                            color: theme.border.withOpacity(0.8),
                           )
                         : null,
                   ),
                   child: Icon(
                     selected ? filledIcon : outlinedIcon,
                     size: selected ? _activeIconSize : _iconSize,
-                    color: selected
-                        ? SavingorColors.darkGreen
-                        : SavingorColors.textSecondary.withOpacity(0.82),
+                    color: selected ? theme.brandTitle : theme.textSecondary,
                   ),
                 ),
               ),
@@ -262,9 +264,7 @@ class _SideNavItem extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                color: selected
-                    ? SavingorColors.darkGreen
-                    : SavingorColors.textSecondary.withOpacity(0.88),
+                color: selected ? theme.brandTitle : theme.textSecondary,
                 height: 1.15,
               ),
             ),
@@ -299,6 +299,7 @@ class _ScanReceiptNavItem extends StatelessWidget {
       semanticLabel: label,
       builder: (BuildContext context, SavingorInteractionState state) {
         final bool hovered = state.hovered;
+        final SavingorThemeExtension theme = context.savingor;
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
@@ -309,23 +310,19 @@ class _ScanReceiptNavItem extends StatelessWidget {
               width: _buttonWidth,
               height: _buttonHeight,
               decoration: BoxDecoration(
-                color: selected
-                    ? SavingorColors.primaryGreen
-                    : hovered
-                        ? const Color(0xFF8DD480)
-                        : SavingorColors.primaryGreen.withOpacity(0.88),
+                color: theme.accentGreen,
                 borderRadius: BorderRadius.circular(_buttonRadius),
                 border: Border.all(
-                  color: SavingorColors.primaryStroke
-                      .withOpacity(selected ? 0.24 : hovered ? 0.22 : 0.14),
+                  color: theme.accentGreen.withOpacity(0.35),
                   width: 1.1,
                 ),
                 boxShadow: <BoxShadow>[
                   BoxShadow(
-                    color: SavingorColors.primaryStroke
-                        .withOpacity(hovered ? 0.2 : selected ? 0.18 : 0.1),
-                    blurRadius: hovered ? 12 : 10,
-                    offset: Offset(0, hovered ? 4 : 3),
+                    color: theme.accentGreen.withOpacity(
+                      theme.isDark ? 0.16 : (hovered ? 0.2 : 0.14),
+                    ),
+                    blurRadius: hovered ? 10 : 8,
+                    offset: Offset(0, hovered ? 3 : 2),
                   ),
                 ],
               ),
@@ -337,7 +334,7 @@ class _ScanReceiptNavItem extends StatelessWidget {
                         ? Icons.document_scanner_rounded
                         : Icons.document_scanner_outlined,
                     size: 24,
-                    color: SavingorColors.darkGreen,
+                    color: theme.buttonLabelOnGreen,
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -348,7 +345,7 @@ class _ScanReceiptNavItem extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 9,
                       fontWeight: selected ? FontWeight.w800 : FontWeight.w700,
-                      color: SavingorColors.darkGreen,
+                      color: theme.buttonLabelOnGreen,
                       height: 1.05,
                       letterSpacing: 0.01,
                     ),

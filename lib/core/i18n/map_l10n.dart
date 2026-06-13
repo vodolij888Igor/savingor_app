@@ -19,7 +19,8 @@ abstract final class MapL10n {
     };
   }
 
-  static String localizedStoreStatusText(BuildContext context, String statusText) {
+  static String localizedStoreStatusText(
+      BuildContext context, String statusText) {
     final AppLocalizations l10n = AppLocalizations.of(context);
     return switch (statusText) {
       'Nearby store' => l10n.mapNearbyStoreStatus,
@@ -45,8 +46,10 @@ abstract final class MapL10n {
     }
 
     return switch (status) {
-      UserLocationAccessStatus.serviceDisabled => l10n.mapLocationServicesDisabled,
-      UserLocationAccessStatus.permissionDenied => l10n.mapLocationPermissionDenied,
+      UserLocationAccessStatus.serviceDisabled =>
+        l10n.mapLocationServicesDisabled,
+      UserLocationAccessStatus.permissionDenied =>
+        l10n.mapLocationPermissionDenied,
       UserLocationAccessStatus.failed => l10n.mapCouldNotDetectLocation,
       _ => l10n.mapCouldNotAccessLocation,
     };

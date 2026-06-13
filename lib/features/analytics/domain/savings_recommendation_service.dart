@@ -50,7 +50,8 @@ abstract final class SavingsRecommendationService {
             (bestStoreProductCounts[bestStore] ?? 0) + 1;
       }
 
-      final SavingsRecommendation? storeSwitch = _buildStoreSwitchRecommendation(
+      final SavingsRecommendation? storeSwitch =
+          _buildStoreSwitchRecommendation(
         normalizedName: entry.key,
         displayName: displayName,
         latestUnit: latestUnit,
@@ -77,15 +78,15 @@ abstract final class SavingsRecommendationService {
       }
     }
 
-    for (final MapEntry<String, int> storeEntry in bestStoreProductCounts.entries) {
+    for (final MapEntry<String, int> storeEntry
+        in bestStoreProductCounts.entries) {
       if (storeEntry.value < minBestStoreProductCount) {
         continue;
       }
 
       final String storeName = storeEntry.key;
       final int productCount = storeEntry.value;
-      final String productLabel =
-          productCount == 1 ? 'product' : 'products';
+      final String productLabel = productCount == 1 ? 'product' : 'products';
 
       recommendations.add(
         SavingsRecommendation(
@@ -181,8 +182,7 @@ abstract final class SavingsRecommendationService {
     return SavingsRecommendation(
       type: SavingsRecommendationType.watchPrice,
       title: 'Watch $displayName prices closely',
-      reason:
-          'Your known prices range from ${_formatCurrency(lowestUnit)} to '
+      reason: 'Your known prices range from ${_formatCurrency(lowestUnit)} to '
           '${_formatCurrency(highestUnit)}.',
       impactText: 'Price difference: ${_formatCurrency(priceDifference)}',
       priorityScore: priceDifference,

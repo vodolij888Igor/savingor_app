@@ -43,7 +43,8 @@ class ExpenseFirestoreService {
       throw const ExpenseFirestoreException('Store name is required.');
     }
     if (totalAmount <= 0) {
-      throw const ExpenseFirestoreException('Total amount must be greater than zero.');
+      throw const ExpenseFirestoreException(
+          'Total amount must be greater than zero.');
     }
 
     final DocumentReference<Map<String, dynamic>> expenseRef =

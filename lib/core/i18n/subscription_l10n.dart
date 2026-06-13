@@ -27,7 +27,8 @@ abstract final class SubscriptionL10n {
     };
   }
 
-  static String providerLabel(BuildContext context, SubscriptionProvider provider) {
+  static String providerLabel(
+      BuildContext context, SubscriptionProvider provider) {
     final AppLocalizations l10n = AppLocalizations.of(context);
     return switch (provider) {
       SubscriptionProvider.revenuecat => l10n.revenueCatLabel,
@@ -61,7 +62,8 @@ abstract final class SubscriptionL10n {
       'Purchase cancelled.' => l10n.purchaseCancelled,
       'Network error. Check your connection and try again.' =>
         l10n.networkErrorTryAgain,
-      'Could not complete the purchase. Please try again.' => l10n.purchaseFailed,
+      'Could not complete the purchase. Please try again.' =>
+        l10n.purchaseFailed,
       'Could not restore purchases. Please try again.' =>
         l10n.couldNotRestorePurchases,
       'You need to be signed in to manage your subscription.' =>

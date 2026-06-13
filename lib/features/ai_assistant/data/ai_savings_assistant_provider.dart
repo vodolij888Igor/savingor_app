@@ -18,8 +18,8 @@ class AiSavingsAssistantProvider extends InheritedWidget {
   final AiSavingsAssistantService service;
 
   static AiSavingsAssistantService of(BuildContext context) {
-    final AiSavingsAssistantProvider? provider =
-        context.dependOnInheritedWidgetOfExactType<AiSavingsAssistantProvider>();
+    final AiSavingsAssistantProvider? provider = context
+        .dependOnInheritedWidgetOfExactType<AiSavingsAssistantProvider>();
     if (provider == null) {
       throw FlutterError('AiSavingsAssistantProvider not found');
     }

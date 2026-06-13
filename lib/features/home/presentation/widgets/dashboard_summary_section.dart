@@ -23,7 +23,7 @@ class DashboardSummarySection extends StatelessWidget {
       children: <Widget>[
         Text(
           l10n.yourSavingsSnapshot,
-          style: SavingorAppTextStyles.sectionTitleLarge,
+          style: SavingorAppTextStyles.sectionTitleLarge(context),
         ),
         const SizedBox(height: SavingorSpacing.md),
         Row(
@@ -91,7 +91,7 @@ class _SummaryMetricCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: SavingorSurfaces.premiumCard(radius: 16),
+      decoration: SavingorSurfaces.premiumCard(context, radius: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -101,10 +101,10 @@ class _SummaryMetricCard extends StatelessWidget {
             label,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: SavingorColors.textSecondary,
+              color: context.savingor.textSecondary,
               height: 1.25,
             ),
           ),
@@ -113,10 +113,10 @@ class _SummaryMetricCard extends StatelessWidget {
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w800,
-              color: SavingorColors.textPrimary,
+              color: context.savingor.textPrimary,
               height: 1.1,
             ),
           ),

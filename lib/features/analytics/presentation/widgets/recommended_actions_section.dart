@@ -41,11 +41,11 @@ class RecommendedActionsSection extends StatelessWidget {
       children: <Widget>[
         Text(
           l10n.recommendedActions,
-          style: SavingorAppTextStyles.sectionTitle,
+          style: SavingorAppTextStyles.sectionTitle(context),
         ),
         const SizedBox(height: SavingorSpacing.md),
         if (displayed.isEmpty)
-          _buildEmptyState(l10n)
+          _buildEmptyState(context, l10n)
         else
           ...displayed.map(
             (SavingsRecommendation recommendation) => Padding(
@@ -57,30 +57,26 @@ class RecommendedActionsSection extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState(AppLocalizations l10n) {
+  Widget _buildEmptyState(BuildContext context, AppLocalizations l10n) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFF3F4F3).withOpacity(0.6)),
-      ),
+      decoration: SavingorWorkflowTheme.card(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Icon(
+          Icon(
             Icons.lightbulb_outline_rounded,
-            color: SavingorColors.primaryStroke,
+            color: SavingorWorkflowTheme.accentText(context),
             size: 28,
           ),
           const SizedBox(height: 12),
           Text(
             l10n.addMoreReceiptsForSavings,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: SavingorColors.textSecondary,
+              color: context.savingor.textSecondary,
               height: 1.4,
             ),
           ),
@@ -111,14 +107,18 @@ class _RecommendationCard extends StatelessWidget {
         SavingsRecommendationL10n.impactText(context, recommendation, appState);
     final String? dataBasis =
         SavingsRecommendationL10n.dataBasisText(context, recommendation);
-    final Widget content =
-        _buildContent(showChevron: isTappable, title: title, reason: reason, impact: impact, dataBasis: dataBasis);
+    final Widget content = _buildContent(context,
+        showChevron: isTappable,
+        title: title,
+        reason: reason,
+        impact: impact,
+        dataBasis: dataBasis);
 
     if (!isTappable) {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.all(16),
-        decoration: _cardDecoration(),
+        decoration: _cardDecoration(context),
         child: content,
       );
     }
@@ -127,7 +127,9 @@ class _RecommendationCard extends StatelessWidget {
       onTap: () => _openProductDetail(context),
       borderRadius: BorderRadius.circular(18),
       accentTint: SavingorAccentColors.savings,
-      borderColor: _airyBorder.withOpacity(0.6),
+      borderColor: context.savingor.isDark
+          ? context.savingor.border
+          : _airyBorder.withOpacity(0.6),
       padding: const EdgeInsets.all(16),
       child: content,
     );
@@ -145,22 +147,11 @@ class _RecommendationCard extends StatelessWidget {
     );
   }
 
-  BoxDecoration _cardDecoration() {
-    return BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-      border: Border.all(color: _airyBorder.withOpacity(0.6)),
-      boxShadow: <BoxShadow>[
-        BoxShadow(
-          color: Colors.black.withOpacity(0.04),
-          blurRadius: 12,
-          offset: const Offset(0, 2),
-        ),
-      ],
-    );
-  }
+  BoxDecoration _cardDecoration(BuildContext context) =>
+      SavingorWorkflowTheme.card(context);
 
-  Widget _buildContent({
+  Widget _buildContent(
+    BuildContext context, {
     required bool showChevron,
     required String title,
     required String reason,
@@ -182,19 +173,19 @@ class _RecommendationCard extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
-                  color: SavingorColors.textPrimary,
+                  color: context.savingor.textPrimary,
                   height: 1.3,
                 ),
               ),
             ),
             if (showChevron) ...<Widget>[
               const SizedBox(width: 8),
-              const Icon(
+              Icon(
                 Icons.chevron_right_rounded,
-                color: SavingorColors.textSecondary,
+                color: context.savingor.textSecondary,
                 size: 22,
               ),
             ],
@@ -203,20 +194,20 @@ class _RecommendationCard extends StatelessWidget {
         const SizedBox(height: 10),
         Text(
           reason,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: SavingorColors.textSecondary,
+            color: context.savingor.textSecondary,
             height: 1.4,
           ),
         ),
         const SizedBox(height: 10),
         Text(
           impact,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w700,
-            color: SavingorAccentColors.savings,
+            color: SavingorWorkflowTheme.accentText(context),
             height: 1.3,
           ),
         ),
@@ -224,10 +215,10 @@ class _RecommendationCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             dataBasis,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: SavingorColors.textSecondary,
+              color: context.savingor.textSecondary,
             ),
           ),
         ],

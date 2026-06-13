@@ -46,10 +46,8 @@ class UserProfileService {
       return null;
     }
 
-    final DocumentSnapshot<Map<String, dynamic>> snapshot = await _firestore
-        .collection('users')
-        .doc(user.uid)
-        .get();
+    final DocumentSnapshot<Map<String, dynamic>> snapshot =
+        await _firestore.collection('users').doc(user.uid).get();
 
     if (!snapshot.exists) {
       return null;
@@ -71,15 +69,17 @@ class UserProfileService {
       return null;
     }
 
-    final DocumentSnapshot<Map<String, dynamic>> snapshot = await _firestore
-        .collection('users')
-        .doc(user.uid)
-        .get();
+    final DocumentSnapshot<Map<String, dynamic>> snapshot =
+        await _firestore.collection('users').doc(user.uid).get();
 
     if (snapshot.exists) {
       final Map<String, dynamic>? data = snapshot.data();
       if (data != null) {
-        for (final String field in <String>['fullName', 'name', 'displayName']) {
+        for (final String field in <String>[
+          'fullName',
+          'name',
+          'displayName'
+        ]) {
           final String? rawName = _nonEmptyString(data[field]);
           if (rawName != null) {
             return _firstNameFrom(rawName);
@@ -109,7 +109,8 @@ class UserProfileService {
   Future<void> updateFullName(String fullName) async {
     final User? user = _firebaseAuth.currentUser;
     if (user == null) {
-      throw const UserProfileException('You need to be signed in to edit your profile.');
+      throw const UserProfileException(
+          'You need to be signed in to edit your profile.');
     }
 
     final String trimmed = fullName.trim();
@@ -213,8 +214,11 @@ class UserProfileService {
   }
 
   static String _firstNameFrom(String value) {
-    final List<String> parts =
-        value.trim().split(RegExp(r'\s+')).where((String part) => part.isNotEmpty).toList();
+    final List<String> parts = value
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((String part) => part.isNotEmpty)
+        .toList();
     if (parts.isEmpty) {
       return value.trim();
     }

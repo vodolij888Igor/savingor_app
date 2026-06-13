@@ -22,7 +22,6 @@ class ShoppingListDetailScreen extends StatefulWidget {
 }
 
 class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
-  static const Color _pageBackground = Colors.white;
   static const int _maxQuantity = 999;
 
   ShoppingListsStore? _store;
@@ -117,7 +116,8 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
               onPressed: () => Navigator.of(dialogContext).pop(true),
               child: Text(
                 l10n.delete,
-                style: const TextStyle(color: Color(0xFFB91C1C)),
+                style:
+                    TextStyle(color: SavingorWorkflowTheme.errorText(context)),
               ),
             ),
           ],
@@ -179,24 +179,22 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
       animation: store,
       builder: (BuildContext context, Widget? child) {
         return Scaffold(
-          backgroundColor: _pageBackground,
+          backgroundColor: context.savingor.pageBackground,
           appBar: AppBar(
             title: Text(
               list?.title ?? l10n.shoppingList,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: SavingorColors.darkGreen,
+              style: SavingorAppTextStyles.screenTitle(context).copyWith(
+                color: SavingorWorkflowTheme.primaryText(context),
               ),
             ),
             elevation: 0,
             scrolledUnderElevation: 0,
-            backgroundColor: _pageBackground,
+            backgroundColor: context.savingor.pageBackground,
             surfaceTintColor: Colors.transparent,
             leading: IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.arrow_back_ios_new_rounded,
-                color: SavingorColors.darkGreen,
+                color: SavingorWorkflowTheme.appBarIcon(context),
                 size: 20,
               ),
               onPressed: () => context.pop(),
@@ -205,9 +203,10 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
               if (list != null)
                 IconButton(
                   icon: const Icon(Icons.delete_outline_rounded),
-                  color: SavingorColors.textSecondary,
+                  color: context.savingor.textSecondary,
                   tooltip: l10n.deleteList,
-                  onPressed: () => _confirmDeleteList(context, store, list, l10n),
+                  onPressed: () =>
+                      _confirmDeleteList(context, store, list, l10n),
                 ),
             ],
           ),
@@ -304,25 +303,25 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
           padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: shoppingListCardDecoration(radius: 14),
+            decoration: shoppingListCardDecoration(context, radius: 14),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(
                   '${l10n.activeCountLabel(activeItems.length)}'
                   '${completedItems.isNotEmpty ? ' · ${l10n.purchasedSummary(completedItems.length)}' : ''}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: SavingorColors.darkGreen,
+                    color: SavingorWorkflowTheme.primaryText(context),
                   ),
                 ),
                 Text(
                   l10n.estimatedShort(
                     '\$${store.activeListEstimate.toStringAsFixed(2)}',
                   ),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: SavingorColors.darkGreen,
+                    color: SavingorWorkflowTheme.primaryText(context),
                   ),
                 ),
               ],
@@ -336,10 +335,10 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
               alignment: Alignment.centerLeft,
               child: Text(
                 l10n.allItemsPurchased,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: SavingorColors.textSecondary,
+                  color: context.savingor.textSecondary,
                 ),
               ),
             ),
@@ -390,10 +389,10 @@ class _ShoppingListDetailScreenState extends State<ShoppingListDetailScreen> {
                   padding: const EdgeInsets.only(top: 8, bottom: 12),
                   child: Text(
                     l10n.purchased,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      color: SavingorColors.textSecondary,
+                      color: context.savingor.textSecondary,
                     ),
                   ),
                 ),
@@ -465,67 +464,67 @@ class _ItemTile extends StatelessWidget {
       child: Opacity(
         opacity: contentOpacity,
         child: Container(
-        decoration: shoppingListCardDecoration(radius: 16),
-        padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
-        child: Row(
-          children: <Widget>[
-            Checkbox(
-              value: item.isCompleted,
-              activeColor: SavingorColors.primaryStroke,
-              onChanged: (_) => onToggle(),
-            ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    item.name,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: SavingorColors.darkGreen,
-                      decoration: isCompletedStyle
-                          ? TextDecoration.lineThrough
-                          : null,
-                    ),
-                  ),
-                  if (item.store != null && item.store!.isNotEmpty)
+          decoration: shoppingListCardDecoration(context, radius: 16),
+          padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
+          child: Row(
+            children: <Widget>[
+              Checkbox(
+                value: item.isCompleted,
+                activeColor: SavingorColors.primaryStroke,
+                onChanged: (_) => onToggle(),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
                     Text(
-                      item.store!,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: SavingorColors.textSecondary,
+                      item.name,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: SavingorWorkflowTheme.primaryText(context),
+                        decoration: isCompletedStyle
+                            ? TextDecoration.lineThrough
+                            : null,
                       ),
                     ),
-                ],
-              ),
-            ),
-            if (item.unitPrice != null && !isCompletedStyle)
-              Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: Text(
-                  '\$${item.unitPrice!.toStringAsFixed(2)}',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                    if (item.store != null && item.store!.isNotEmpty)
+                      Text(
+                        item.store!,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: context.savingor.textSecondary,
+                        ),
+                      ),
+                  ],
                 ),
               ),
-            IconButton(
-              onPressed: item.quantity <= 1 ? null : onDecrement,
-              icon: const Icon(Icons.remove_circle_outline_rounded),
-            ),
-            Text(
-              '${item.quantity}',
-              style: const TextStyle(
-                fontWeight: FontWeight.w700,
-                color: SavingorColors.darkGreen,
+              if (item.unitPrice != null && !isCompletedStyle)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Text(
+                    '\$${item.unitPrice!.toStringAsFixed(2)}',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              IconButton(
+                onPressed: item.quantity <= 1 ? null : onDecrement,
+                icon: const Icon(Icons.remove_circle_outline_rounded),
               ),
-            ),
-            IconButton(
-              onPressed: item.quantity >= maxQuantity ? null : onIncrement,
-              icon: const Icon(Icons.add_circle_outline_rounded),
-            ),
-          ],
+              Text(
+                '${item.quantity}',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: SavingorWorkflowTheme.primaryText(context),
+                ),
+              ),
+              IconButton(
+                onPressed: item.quantity >= maxQuantity ? null : onIncrement,
+                icon: const Icon(Icons.add_circle_outline_rounded),
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

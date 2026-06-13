@@ -131,22 +131,24 @@ class _ProductBuyingAdviceCardState extends State<ProductBuyingAdviceCard> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: SavingorColors.lightGreen.withOpacity(0.35),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: SavingorColors.primaryStroke.withOpacity(0.25),
-        ),
-      ),
+      decoration: context.savingor.isDark
+          ? SavingorWorkflowTheme.highlightCard(context)
+          : BoxDecoration(
+              color: SavingorColors.lightGreen.withOpacity(0.35),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: SavingorColors.primaryStroke.withOpacity(0.25),
+              ),
+            ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
             l10n.buyingAdvice,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: SavingorColors.primaryStroke,
+              color: SavingorWorkflowTheme.accentText(context),
               letterSpacing: 0.2,
             ),
           ),
@@ -156,11 +158,14 @@ class _ProductBuyingAdviceCardState extends State<ProductBuyingAdviceCard> {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: _isAdding ? null : () => _addToShoppingList(advice, l10n),
+              onPressed:
+                  _isAdding ? null : () => _addToShoppingList(advice, l10n),
               style: OutlinedButton.styleFrom(
-                foregroundColor: SavingorColors.darkGreen,
+                foregroundColor: SavingorWorkflowTheme.primaryText(context),
                 side: BorderSide(
-                  color: SavingorColors.primaryStroke.withOpacity(0.45),
+                  color: context.savingor.isDark
+                      ? context.savingor.border.withOpacity(0.9)
+                      : SavingorColors.primaryStroke.withOpacity(0.45),
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
@@ -197,15 +202,17 @@ class _ProductBuyingAdviceCardState extends State<ProductBuyingAdviceCard> {
           Text(
             _neutralMessage(advice, l10n),
             style: TextStyle(
-              fontSize: advice.kind == ProductBuyingAdviceKind.insufficientHistory
-                  ? 14
-                  : 15,
-              fontWeight: advice.kind == ProductBuyingAdviceKind.insufficientHistory
-                  ? FontWeight.w600
-                  : FontWeight.w700,
+              fontSize:
+                  advice.kind == ProductBuyingAdviceKind.insufficientHistory
+                      ? 14
+                      : 15,
+              fontWeight:
+                  advice.kind == ProductBuyingAdviceKind.insufficientHistory
+                      ? FontWeight.w600
+                      : FontWeight.w700,
               color: advice.kind == ProductBuyingAdviceKind.insufficientHistory
-                  ? SavingorColors.textSecondary
-                  : SavingorColors.darkGreen,
+                  ? context.savingor.textSecondary
+                  : SavingorWorkflowTheme.primaryText(context),
               height: advice.kind == ProductBuyingAdviceKind.insufficientHistory
                   ? 1.4
                   : 1.35,
@@ -241,20 +248,20 @@ class _ProductBuyingAdviceCardState extends State<ProductBuyingAdviceCard> {
                 currency: advice.currency,
               ),
             ),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w800,
-              color: SavingorColors.primaryStroke,
+              color: SavingorWorkflowTheme.accentText(context),
               height: 1.3,
             ),
           ),
           const SizedBox(height: 10),
           Text(
             _recommendationText(advice, l10n),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: SavingorColors.darkGreen,
+              color: SavingorWorkflowTheme.primaryText(context),
               height: 1.4,
             ),
           ),
@@ -270,20 +277,20 @@ class _ProductBuyingAdviceCardState extends State<ProductBuyingAdviceCard> {
           width: 118,
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: SavingorColors.textSecondary,
+              color: context.savingor.textSecondary,
             ),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: SavingorColors.darkGreen,
+              color: SavingorWorkflowTheme.primaryText(context),
               height: 1.35,
             ),
           ),

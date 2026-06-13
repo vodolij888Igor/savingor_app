@@ -13,9 +13,6 @@ import 'package:savingor_app/l10n/app_localizations.dart';
 /// Picker shown from Start Saving before opening [FinalizeShoppingTripScreen].
 class SelectListToFinalizeScreen extends StatelessWidget {
   const SelectListToFinalizeScreen({super.key});
-
-  static const Color _pageBackground = Color(0xFFFFFEFE);
-
   Future<void> _openFinalizeTrip(
     BuildContext context,
     ShoppingList list,
@@ -58,7 +55,7 @@ class SelectListToFinalizeScreen extends StatelessWidget {
       builder: (BuildContext context, Widget? child) {
         if (!store.isAuthenticated) {
           return Scaffold(
-            backgroundColor: _pageBackground,
+            backgroundColor: context.savingor.pageBackground,
             appBar: _buildAppBar(context),
             body: AppSignInRequiredState(
               title: l10n.signInRequired,
@@ -70,7 +67,7 @@ class SelectListToFinalizeScreen extends StatelessWidget {
         }
 
         return Scaffold(
-          backgroundColor: _pageBackground,
+          backgroundColor: context.savingor.pageBackground,
           appBar: _buildAppBar(context),
           body: _buildBody(context, store, bottomInset, l10n),
         );
@@ -83,12 +80,12 @@ class SelectListToFinalizeScreen extends StatelessWidget {
       toolbarHeight: 48,
       elevation: 0,
       scrolledUnderElevation: 0,
-      backgroundColor: _pageBackground,
+      backgroundColor: context.savingor.pageBackground,
       surfaceTintColor: Colors.transparent,
       leading: IconButton(
-        icon: const Icon(
+        icon: Icon(
           Icons.arrow_back_ios_new_rounded,
-          color: SavingorColors.darkGreen,
+          color: SavingorWorkflowTheme.appBarIcon(context),
           size: 20,
         ),
         onPressed: () => context.pop(),
@@ -135,23 +132,14 @@ class SelectListToFinalizeScreen extends StatelessWidget {
       children: <Widget>[
         Text(
           l10n.selectListToFinalize,
-          style: const TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w800,
-            color: SavingorColors.darkGreen,
-            height: 1.1,
-            letterSpacing: -0.4,
+          style: SavingorAppTextStyles.pageTitle(context).copyWith(
+            color: SavingorWorkflowTheme.primaryText(context),
           ),
         ),
         const SizedBox(height: 8),
         Text(
           l10n.selectListToFinalizeSubtitle,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: SavingorColors.textSecondary.withOpacity(0.95),
-            height: 1.35,
-          ),
+          style: SavingorAppTextStyles.bodySecondary(context, fontSize: 16),
         ),
         const SizedBox(height: SavingorSpacing.xl),
         ...eligibleLists.map(
@@ -189,62 +177,59 @@ class _FinalizeListCard extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 16, 12, 16),
         child: Row(
           children: <Widget>[
-                Container(
-                  width: 46,
-                  height: 46,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF8B6BA8).withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: const Icon(
-                    Icons.task_alt_rounded,
-                    color: Color(0xFF8B6BA8),
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        ShoppingL10n.localizedShoppingListName(
-                          context,
-                          list.title,
-                        ),
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: SavingorColors.darkGreen,
-                          height: 1.2,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        list.itemCount > 0
-                            ? l10n.listFinalizeProgressSummary(
-                                list.completedCount,
-                                list.itemCount,
-                              )
-                            : l10n.purchasedSummary(list.completedCount),
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: SavingorColors.textSecondary.withOpacity(0.95),
-                          height: 1.35,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: SavingorColors.textSecondary.withOpacity(0.55),
-                  size: 22,
-                ),
-              ],
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: const Color(0xFF8B6BA8).withOpacity(0.12),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Icon(
+                Icons.task_alt_rounded,
+                color: Color(0xFF8B6BA8),
+                size: 24,
+              ),
             ),
-          ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    ShoppingL10n.localizedShoppingListName(
+                      context,
+                      list.title,
+                    ),
+                    style: SavingorAppTextStyles.cardTitle(context).copyWith(
+                      color: SavingorWorkflowTheme.primaryText(context),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    list.itemCount > 0
+                        ? l10n.listFinalizeProgressSummary(
+                            list.completedCount,
+                            list.itemCount,
+                          )
+                        : l10n.purchasedSummary(list.completedCount),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: context.savingor.textSecondary.withOpacity(0.95),
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: context.savingor.textSecondary.withOpacity(0.55),
+              size: 22,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

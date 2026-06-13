@@ -8,6 +8,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:savingor_app/core/i18n/map_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/features/deals/domain/models/nearby_store.dart';
+import 'package:savingor_app/features/deals/presentation/widgets/savingor_map_styles.dart';
 import 'package:savingor_app/l10n/app_localizations.dart';
 
 /// Interactive Google Map for nearby stores and the active user location.
@@ -42,8 +43,8 @@ class _NearbyStoresMapCardState extends State<NearbyStoresMapCard> {
   double? _lastCameraRadiusKm;
   String? _lastCameraStoreSignature;
 
-  static final Set<Factory<OneSequenceGestureRecognizer>> _mapGestureRecognizers =
-      <Factory<OneSequenceGestureRecognizer>>{
+  static final Set<Factory<OneSequenceGestureRecognizer>>
+      _mapGestureRecognizers = <Factory<OneSequenceGestureRecognizer>>{
     Factory<OneSequenceGestureRecognizer>(
       () => EagerGestureRecognizer(),
     ),
@@ -57,8 +58,7 @@ class _NearbyStoresMapCardState extends State<NearbyStoresMapCard> {
             oldWidget.userLongitude != widget.userLongitude;
     final bool radiusChanged = oldWidget.radiusKm != widget.radiusKm;
     final bool storesChanged =
-        _storesSignature(oldWidget.stores) !=
-            _storesSignature(widget.stores);
+        _storesSignature(oldWidget.stores) != _storesSignature(widget.stores);
 
     if (locationChanged || radiusChanged || storesChanged) {
       _updateCamera(force: true);
@@ -326,6 +326,7 @@ class _NearbyStoresMapCardState extends State<NearbyStoresMapCard> {
       child: _userPosition == null
           ? _buildLocationPrompt(context)
           : GoogleMap(
+              style: context.savingor.isDark ? SavingorMapStyles.dark : null,
               initialCameraPosition: _initialCameraPosition,
               markers: _buildMarkers(context),
               circles: _buildCircles(),
@@ -352,19 +353,32 @@ class _NearbyStoresMapCardState extends State<NearbyStoresMapCard> {
     return Stack(
       fit: StackFit.expand,
       children: <Widget>[
-        const DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: <Color>[
-                Color(0xFFECFDF5),
-                Color(0xFFD1FAE5),
-                Color(0xFFE6FFFA),
-              ],
-            ),
-          ),
-        ),
+        context.savingor.isDark
+            ? DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: <Color>[
+                      context.savingor.surfaceElevated,
+                      context.savingor.surfaceStrong,
+                    ],
+                  ),
+                ),
+              )
+            : const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: <Color>[
+                      Color(0xFFECFDF5),
+                      Color(0xFFD1FAE5),
+                      Color(0xFFE6FFFA),
+                    ],
+                  ),
+                ),
+              ),
         CustomPaint(
           painter: _MapPatternPainter(
             color: SavingorAccentColors.map.withOpacity(0.08),
@@ -392,10 +406,10 @@ class _NearbyStoresMapCardState extends State<NearbyStoresMapCard> {
                 const SizedBox(height: 12),
                 Text(
                   l10n.mapSetYourLocation,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
-                    color: SavingorColors.darkGreen,
+                    color: context.savingor.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -405,7 +419,7 @@ class _NearbyStoresMapCardState extends State<NearbyStoresMapCard> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: SavingorColors.textSecondary.withOpacity(0.95),
+                    color: context.savingor.textSecondary.withOpacity(0.95),
                     height: 1.35,
                   ),
                 ),

@@ -30,7 +30,8 @@ class SavingsOpportunity {
   final int recordCount;
   final String currency;
 
-  String get savingsMessage => 'Save up to ${_formatAmount(priceDifference)} per item';
+  String get savingsMessage =>
+      'Save up to ${_formatAmount(priceDifference)} per item';
 
   String get recommendation {
     if (latestStoreName.trim().toLowerCase() ==

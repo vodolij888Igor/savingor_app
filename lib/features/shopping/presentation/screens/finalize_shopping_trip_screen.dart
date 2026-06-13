@@ -21,15 +21,13 @@ class FinalizeShoppingTripScreen extends StatefulWidget {
   const FinalizeShoppingTripScreen({super.key, required this.listId});
 
   final String listId;
-
-  static const Color _pageBackground = Colors.white;
-
   @override
   State<FinalizeShoppingTripScreen> createState() =>
       _FinalizeShoppingTripScreenState();
 }
 
-class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen> {
+class _FinalizeShoppingTripScreenState
+    extends State<FinalizeShoppingTripScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _storeController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
@@ -45,7 +43,8 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
   bool _initScheduled = false;
   bool _dateFieldInitialized = false;
 
-  final List<PurchasedItemPriceFields> _itemFields = <PurchasedItemPriceFields>[];
+  final List<PurchasedItemPriceFields> _itemFields =
+      <PurchasedItemPriceFields>[];
 
   @override
   void initState() {
@@ -93,7 +92,8 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
       return;
     }
 
-    final ShoppingTripReceiptDraft draft = ShoppingTripReceiptBuilder.buildDraft(
+    final ShoppingTripReceiptDraft draft =
+        ShoppingTripReceiptBuilder.buildDraft(
       listItems: store.items,
     );
     if (draft.isEmpty) {
@@ -390,24 +390,22 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
         _scheduleFieldInitialization(store);
 
         return Scaffold(
-          backgroundColor: FinalizeShoppingTripScreen._pageBackground,
+          backgroundColor: context.savingor.pageBackground,
           appBar: AppBar(
             title: Text(
               l10n.finalizeShoppingTrip,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: SavingorColors.darkGreen,
+              style: SavingorAppTextStyles.screenTitle(context).copyWith(
+                color: SavingorWorkflowTheme.primaryText(context),
               ),
             ),
             elevation: 0,
             scrolledUnderElevation: 0,
-            backgroundColor: FinalizeShoppingTripScreen._pageBackground,
+            backgroundColor: context.savingor.pageBackground,
             surfaceTintColor: Colors.transparent,
             leading: IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.arrow_back_ios_new_rounded,
-                color: SavingorColors.darkGreen,
+                color: SavingorWorkflowTheme.appBarIcon(context),
                 size: 20,
               ),
               onPressed: _isSaving ? null : () => context.pop(),
@@ -435,7 +433,8 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
     AppLocalizations l10n,
   ) {
     if (store.isLoadingLists || store.isLoadingItems) {
-      return ShoppingListStatePanel.loading(message: l10n.loadingPurchasedItems);
+      return ShoppingListStatePanel.loading(
+          message: l10n.loadingPurchasedItems);
     }
 
     if (store.itemsError != null) {
@@ -456,7 +455,8 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
       );
     }
 
-    final ShoppingTripReceiptDraft draft = ShoppingTripReceiptBuilder.buildDraft(
+    final ShoppingTripReceiptDraft draft =
+        ShoppingTripReceiptBuilder.buildDraft(
       listItems: store.items,
     );
 
@@ -492,9 +492,9 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
               controller: _storeController,
               enabled: !_isSaving,
               textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                labelText: l10n.storeName,
-                border: const OutlineInputBorder(),
+              decoration: SavingorWorkflowTheme.fieldDecoration(
+                context,
+                label: l10n.storeName,
               ),
               validator: (String? value) {
                 if (value == null || value.trim().isEmpty) {
@@ -507,32 +507,28 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: SavingorColors.lightGreen.withOpacity(0.25),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: SavingorColors.primaryStroke.withOpacity(0.2),
-                ),
-              ),
+              decoration:
+                  SavingorWorkflowTheme.highlightCard(context, radius: 14),
               child: Text(
                 l10n.creatingReceiptsPerStore(draft.receiptCount),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: SavingorColors.darkGreen,
+                  color: SavingorWorkflowTheme.primaryText(context),
                   height: 1.35,
                 ),
               ),
             ),
           ],
-          if (draft.hasMultipleStores && !draft.allGroupsHaveStoreNames) ...<Widget>[
+          if (draft.hasMultipleStores &&
+              !draft.allGroupsHaveStoreNames) ...<Widget>[
             const SizedBox(height: 8),
             Text(
               l10n.missingStoreOnItems,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary,
+                color: context.savingor.textSecondary,
                 height: 1.35,
               ),
             ),
@@ -542,9 +538,9 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
             controller: _addressController,
             enabled: !_isSaving,
             textInputAction: TextInputAction.next,
-            decoration: InputDecoration(
-              labelText: l10n.storeAddressOptional,
-              border: const OutlineInputBorder(),
+            decoration: SavingorWorkflowTheme.fieldDecoration(
+              context,
+              label: l10n.storeAddressOptional,
             ),
           ),
           const SizedBox(height: 16),
@@ -552,9 +548,9 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
             controller: _dateController,
             readOnly: true,
             onTap: _isSaving ? null : _pickDate,
-            decoration: InputDecoration(
-              labelText: l10n.purchaseDate,
-              border: const OutlineInputBorder(),
+            decoration: SavingorWorkflowTheme.fieldDecoration(
+              context,
+              label: l10n.purchaseDate,
               suffixIcon: const Icon(Icons.calendar_today_outlined),
             ),
             validator: (String? value) {
@@ -570,16 +566,17 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
               (ShoppingTripStoreGroup group) => <Widget>[
                 Text(
                   group.hasStoreName ? group.storeName : l10n.missingStore,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
-                    color: SavingorColors.darkGreen,
+                    color: SavingorWorkflowTheme.primaryText(context),
                   ),
                 ),
                 const SizedBox(height: 8),
                 ...group.items.map(
                   (ShoppingListItem item) {
-                    final PurchasedItemPriceFields fields = _itemFields.firstWhere(
+                    final PurchasedItemPriceFields fields =
+                        _itemFields.firstWhere(
                       (PurchasedItemPriceFields candidate) =>
                           candidate.item.id == item.id,
                     );
@@ -595,10 +592,10 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
                   l10n.receiptSubtotalLabel(
                     '\$${_computedGroupSubtotal(group).toStringAsFixed(2)}',
                   ),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: SavingorColors.primaryStroke,
+                    color: SavingorWorkflowTheme.accentText(context),
                   ),
                 ),
                 const SizedBox(height: 18),
@@ -607,10 +604,10 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
           else ...<Widget>[
             Text(
               l10n.purchasedItems,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w800,
-                color: SavingorColors.darkGreen,
+                color: SavingorWorkflowTheme.primaryText(context),
               ),
             ),
             const SizedBox(height: 12),
@@ -627,14 +624,15 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
             TextFormField(
               controller: _totalController,
               enabled: !_isSaving,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               onChanged: (_) {
                 _totalManuallyEdited = true;
               },
-              decoration: InputDecoration(
-                labelText: l10n.receiptTotal,
+              decoration: SavingorWorkflowTheme.fieldDecoration(
+                context,
+                label: l10n.receiptTotal,
                 prefixText: '\$ ',
-                border: const OutlineInputBorder(),
               ),
               validator: (String? value) {
                 if (value == null || value.trim().isEmpty) {
@@ -652,10 +650,10 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
               l10n.subtotalFromItemPrices(
                 '\$${_computedGrandSubtotal(draft).toStringAsFixed(2)}',
               ),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: SavingorColors.textSecondary,
+                color: context.savingor.textSecondary,
               ),
             ),
           ] else ...<Widget>[
@@ -663,17 +661,17 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
               l10n.grandTotalAcrossReceipts(
                 '\$${_computedGrandSubtotal(draft).toStringAsFixed(2)}',
               ),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: SavingorColors.textSecondary,
+                color: context.savingor.textSecondary,
               ),
             ),
           ],
           const SizedBox(height: 24),
           FilledButton(
             onPressed: _isSaving ? null : () => _save(list, draft, l10n),
-            style: SavingorButtonStyles.primaryFilled(),
+            style: SavingorButtonStyles.primaryFilledFor(context),
             child: _isSaving
                 ? const SizedBox(
                     width: 22,
@@ -681,7 +679,9 @@ class _FinalizeShoppingTripScreenState extends State<FinalizeShoppingTripScreen>
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : Text(
-                    draft.hasMultipleStores ? l10n.saveReceipts : l10n.saveReceipt,
+                    draft.hasMultipleStores
+                        ? l10n.saveReceipts
+                        : l10n.saveReceipt,
                   ),
           ),
         ],

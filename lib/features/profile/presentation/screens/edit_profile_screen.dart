@@ -27,21 +27,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _isSendingReset = false;
   String? _loadErrorKey;
   String _email = '';
-
-  static const Color _pageBackground = SavingorColors.pageWhite;
   static const Color _titleCharcoal = Color(0xFF1F2937);
 
-  static const TextStyle _sectionHeadingStyle = TextStyle(
-    fontSize: 17,
-    fontWeight: FontWeight.w800,
-    color: SavingorColors.darkGreen,
-  );
+  static TextStyle _sectionHeadingStyle(BuildContext context) => TextStyle(
+        fontSize: 17,
+        fontWeight: FontWeight.w800,
+        color: context.savingor.isDark
+            ? context.savingor.textPrimary
+            : SavingorColors.darkGreen,
+      );
 
-  static const TextStyle _fieldLabelStyle = TextStyle(
-    fontSize: 12.5,
-    fontWeight: FontWeight.w600,
-    color: SavingorColors.textSecondary,
-  );
+  TextStyle _fieldLabelStyle(BuildContext context) => TextStyle(
+        fontSize: 12.5,
+        fontWeight: FontWeight.w600,
+        color: context.savingor.textSecondary,
+      );
 
   @override
   void initState() {
@@ -169,21 +169,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final double bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: _pageBackground,
+      backgroundColor: context.savingor.pageBackground,
       appBar: AppBar(
         title: Text(
           l10n.editProfile,
-          style: SavingorAppTextStyles.screenTitle,
+          style: SavingorAppTextStyles.screenTitle(context),
         ),
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: _pageBackground,
+        backgroundColor: context.savingor.pageBackground,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new_rounded,
-            color: SavingorColors.darkGreen,
+            color: SavingorWorkflowTheme.appBarIcon(context),
             size: 20,
           ),
           onPressed: _goBack,
@@ -195,9 +195,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Widget _buildBody(AppLocalizations l10n, double bottomInset) {
     if (_isLoading) {
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(
-          color: SavingorColors.primaryStroke,
+          color: context.savingor.isDark
+              ? context.savingor.accentGreen
+              : SavingorColors.primaryStroke,
         ),
       );
     }
@@ -213,17 +215,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               Text(
                 loadError,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: SavingorColors.textSecondary,
+                  color: context.savingor.textSecondary,
                   height: 1.4,
                 ),
               ),
               const SizedBox(height: 16),
               OutlinedButton(
                 onPressed: _loadProfile,
-                style: SavingorButtonStyles.secondaryOutlined(),
+                style: SavingorButtonStyles.secondaryOutlined(context),
                 child: Text(l10n.tryAgain),
               ),
             ],
@@ -244,16 +246,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(l10n.fullName, style: _fieldLabelStyle),
+                  Text(l10n.fullName, style: _fieldLabelStyle(context)),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _nameController,
                     enabled: !_isSaving,
                     textCapitalization: TextCapitalization.words,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: _titleCharcoal,
+                      color: context.savingor.isDark
+                          ? context.savingor.textPrimary
+                          : _titleCharcoal,
                     ),
                     decoration: _fieldDecoration(
                       hint: l10n.editProfileFullNameHint,
@@ -266,7 +270,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  Text(l10n.email, style: _fieldLabelStyle),
+                  Text(l10n.email, style: _fieldLabelStyle(context)),
                   const SizedBox(height: 8),
                   TextFormField(
                     initialValue: _email,
@@ -274,10 +278,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: SavingorColors.textSecondary.withOpacity(0.9),
+                      color: context.savingor.textSecondary.withOpacity(0.9),
                     ),
                     decoration: _fieldDecoration(
-                      fillColor: const Color(0xFFF6F7F6),
+                      fillColor: context.savingor.isDark
+                          ? context.savingor.inputFillDisabled
+                          : const Color(0xFFF6F7F6),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -286,7 +292,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: SavingorColors.textSecondary.withOpacity(0.85),
+                      color: context.savingor.textSecondary.withOpacity(0.85),
                       height: 1.35,
                     ),
                   ),
@@ -299,14 +305,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(l10n.password, style: _fieldLabelStyle),
+                  Text(l10n.password, style: _fieldLabelStyle(context)),
                   const SizedBox(height: 6),
-                  const Text(
+                  Text(
                     '••••••••••',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: _titleCharcoal,
+                      color: context.savingor.isDark
+                          ? context.savingor.textPrimary
+                          : _titleCharcoal,
                       letterSpacing: 2,
                       height: 1.2,
                     ),
@@ -317,7 +325,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: SavingorColors.textSecondary.withOpacity(0.85),
+                      color: context.savingor.textSecondary.withOpacity(0.85),
                       height: 1.35,
                     ),
                   ),
@@ -331,7 +339,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ),
                       );
                     },
-                    style: SavingorButtonStyles.secondaryOutlined(),
+                    style:
+                        SavingorButtonStyles.secondaryOutlined(context).merge(
+                      ButtonStyle(
+                        backgroundColor: WidgetStatePropertyAll<Color>(
+                          context.savingor.isDark
+                              ? context.savingor.surfaceElevated
+                              : context.savingor.surfacePrimary,
+                        ),
+                      ),
+                    ),
                     icon: const Icon(Icons.lock_outline_rounded, size: 19),
                     label: Text(l10n.changePassword),
                   ),
@@ -339,7 +356,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   TextButton(
                     onPressed: _isSendingReset ? null : _sendPasswordReset,
                     style: TextButton.styleFrom(
-                      foregroundColor: SavingorColors.darkGreen,
+                      foregroundColor: context.savingor.isDark
+                          ? context.savingor.brandTitle
+                          : SavingorColors.darkGreen,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8,
                         vertical: 8,
@@ -365,12 +384,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               width: double.infinity,
               borderRadius: BorderRadius.circular(18),
               child: _isSaving
-                  ? const SizedBox(
+                  ? SizedBox(
                       width: 20,
                       height: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: SavingorColors.darkGreen,
+                        color: context.savingor.isDark
+                            ? context.savingor.buttonLabelOnGreen
+                            : SavingorColors.darkGreen,
                       ),
                     )
                   : Text(l10n.saveChanges),
@@ -385,11 +406,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-      decoration: SavingorSurfaces.premiumCard(radius: 22),
+      decoration: SavingorSurfaces.premiumCard(context, radius: 22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(title, style: _sectionHeadingStyle),
+          Text(title, style: _sectionHeadingStyle(context)),
           const SizedBox(height: SavingorSpacing.lg),
           child,
         ],
@@ -398,42 +419,52 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   InputDecoration _fieldDecoration({String? hint, Color? fillColor}) {
+    final SavingorThemeExtension theme = context.savingor;
+    final Color focusColor = theme.isDark
+        ? theme.accentGreen
+        : SavingorColors.primaryStroke.withOpacity(0.55);
+
     return InputDecoration(
       hintText: hint,
       hintStyle: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: SavingorColors.textSecondary.withOpacity(0.7),
+        color: theme.textSecondary.withOpacity(0.7),
       ),
       filled: true,
-      fillColor: fillColor ?? Colors.white,
+      fillColor: fillColor ?? (theme.isDark ? theme.inputFill : Colors.white),
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: SavingorColors.border.withOpacity(0.9)),
+        borderSide: BorderSide(color: theme.border.withOpacity(0.9)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: SavingorColors.border.withOpacity(0.9)),
+        borderSide: BorderSide(color: theme.border.withOpacity(0.9)),
       ),
       disabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: SavingorColors.border.withOpacity(0.6)),
+        borderSide: BorderSide(color: theme.border.withOpacity(0.6)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide(
-          color: SavingorColors.primaryStroke.withOpacity(0.55),
+          color: focusColor,
           width: 1.25,
         ),
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Color(0xFFC45A5A)),
+        borderSide: BorderSide(
+          color: theme.isDark ? theme.error : const Color(0xFFC45A5A),
+        ),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Color(0xFFC45A5A), width: 1.25),
+        borderSide: BorderSide(
+          color: theme.isDark ? theme.error : const Color(0xFFC45A5A),
+          width: 1.25,
+        ),
       ),
     );
   }

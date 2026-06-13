@@ -13,28 +13,22 @@ class BasketSummaryCard extends StatelessWidget {
 
   final BasketOptimizationResult result;
 
-  static const Color _airyBorder = Color(0xFFF3F4F3);
-
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
 
     return Container(
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: SavingorColors.lightGreen.withOpacity(0.35),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: _airyBorder.withOpacity(0.6), width: 0.5),
-      ),
+      decoration: SavingorWorkflowTheme.highlightCard(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
             l10n.basketSummary,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
-              color: SavingorColors.textSecondary,
+              color: context.savingor.textSecondary,
             ),
           ),
           const SizedBox(height: 12),
@@ -111,10 +105,10 @@ class _Metric extends StatelessWidget {
       children: <Widget>[
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: SavingorColors.textSecondary,
+            color: context.savingor.textSecondary,
           ),
         ),
         const SizedBox(height: 4),
@@ -124,8 +118,8 @@ class _Metric extends StatelessWidget {
             fontSize: 18,
             fontWeight: FontWeight.w800,
             color: highlight
-                ? SavingorColors.primaryStroke
-                : SavingorColors.darkGreen,
+                ? SavingorWorkflowTheme.accentText(context)
+                : SavingorWorkflowTheme.primaryText(context),
           ),
         ),
       ],

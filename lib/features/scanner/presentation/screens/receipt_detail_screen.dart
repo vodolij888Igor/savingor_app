@@ -15,8 +15,6 @@ class ReceiptDetailScreen extends StatelessWidget {
   const ReceiptDetailScreen({super.key, required this.receiptId});
 
   final String receiptId;
-
-  static const Color _pageBackground = Colors.white;
   static const Color _airyBorder = Color(0xFFF3F4F3);
 
   static const TextStyle _appBarTitleStyle = TextStyle(
@@ -31,9 +29,9 @@ class ReceiptDetailScreen extends StatelessWidget {
     return '${date.year}-$month-$day';
   }
 
-  static BoxDecoration _cardDecoration() {
+  static BoxDecoration _cardDecoration(BuildContext context) {
     return BoxDecoration(
-      color: Colors.white,
+      color: context.savingor.surfacePrimary,
       borderRadius: BorderRadius.circular(18),
       border: Border.all(color: _airyBorder.withOpacity(0.6), width: 0.5),
       boxShadow: <BoxShadow>[
@@ -58,51 +56,51 @@ class ReceiptDetailScreen extends StatelessWidget {
         return AnimatedBuilder(
           animation: store,
           builder: (BuildContext context, Widget? _) {
-        final Receipt? receipt = store.receiptById(receiptId);
-        String formatMoney(double amount) => appState.formatMoney(
-              amount,
-              originalCurrency: receipt?.currency ?? 'CAD',
-            );
+            final Receipt? receipt = store.receiptById(receiptId);
+            String formatMoney(double amount) => appState.formatMoney(
+                  amount,
+                  originalCurrency: receipt?.currency ?? 'CAD',
+                );
 
-        return Scaffold(
-          backgroundColor: _pageBackground,
-          appBar: AppBar(
-            title: Text(
-              AppLocalizations.of(context).receiptDetails,
-              style: _appBarTitleStyle,
-            ),
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            backgroundColor: _pageBackground,
-            surfaceTintColor: Colors.transparent,
-            leading: IconButton(
-              icon: const Icon(
-                Icons.arrow_back_ios_new_rounded,
-                color: SavingorColors.darkGreen,
-                size: 20,
-              ),
-              onPressed: () => context.pop(),
-            ),
-          ),
-          body: receipt == null
-              ? Center(
-                  child: Text(
-                    AppLocalizations.of(context).receiptNotFound,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: SavingorColors.textSecondary,
-                    ),
-                  ),
-                )
-              : _buildContent(
-                  context,
-                  store,
-                  receipt,
-                  bottomInset,
-                  formatMoney,
+            return Scaffold(
+              backgroundColor: context.savingor.pageBackground,
+              appBar: AppBar(
+                title: Text(
+                  AppLocalizations.of(context).receiptDetails,
+                  style: _appBarTitleStyle,
                 ),
-        );
+                elevation: 0,
+                scrolledUnderElevation: 0,
+                backgroundColor: context.savingor.pageBackground,
+                surfaceTintColor: Colors.transparent,
+                leading: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: SavingorColors.darkGreen,
+                    size: 20,
+                  ),
+                  onPressed: () => context.pop(),
+                ),
+              ),
+              body: receipt == null
+                  ? Center(
+                      child: Text(
+                        AppLocalizations.of(context).receiptNotFound,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: context.savingor.textSecondary,
+                        ),
+                      ),
+                    )
+                  : _buildContent(
+                      context,
+                      store,
+                      receipt,
+                      bottomInset,
+                      formatMoney,
+                    ),
+            );
           },
         );
       },
@@ -126,7 +124,7 @@ class ReceiptDetailScreen extends StatelessWidget {
       children: <Widget>[
         Container(
           padding: const EdgeInsets.all(20),
-          decoration: _cardDecoration(),
+          decoration: _cardDecoration(context),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -174,10 +172,10 @@ class ReceiptDetailScreen extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 formattedDate,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: SavingorColors.textSecondary,
+                  color: context.savingor.textSecondary,
                 ),
               ),
               const SizedBox(height: 4),
@@ -207,7 +205,7 @@ class ReceiptDetailScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: SavingorColors.textSecondary.withOpacity(0.95),
+                      color: context.savingor.textSecondary.withOpacity(0.95),
                     ),
                   ),
                 if (receipt.tax != null)
@@ -216,7 +214,7 @@ class ReceiptDetailScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
-                      color: SavingorColors.textSecondary.withOpacity(0.95),
+                      color: context.savingor.textSecondary.withOpacity(0.95),
                     ),
                   ),
               ],
@@ -243,7 +241,7 @@ class ReceiptDetailScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: SavingorColors.textSecondary.withOpacity(0.9),
+                color: context.savingor.textSecondary.withOpacity(0.9),
               ),
             ),
           ],
@@ -251,9 +249,10 @@ class ReceiptDetailScreen extends StatelessWidget {
         const SizedBox(height: SavingorSpacing.sm),
         if (receipt.hasItems)
           Container(
-            decoration: _cardDecoration(),
+            decoration: _cardDecoration(context),
             child: Column(
-              children: List<Widget>.generate(receipt.items.length, (int index) {
+              children:
+                  List<Widget>.generate(receipt.items.length, (int index) {
                 final ReceiptItem item = receipt.items[index];
                 return Column(
                   children: <Widget>[
@@ -268,13 +267,13 @@ class ReceiptDetailScreen extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
-            decoration: _cardDecoration(),
+            decoration: _cardDecoration(context),
             child: Text(
               l10n.noLineItemsSaved,
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary.withOpacity(0.95),
+                color: context.savingor.textSecondary.withOpacity(0.95),
                 height: 1.4,
               ),
             ),
@@ -293,7 +292,7 @@ class ReceiptDetailScreen extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
-            decoration: _cardDecoration(),
+            decoration: _cardDecoration(context),
             child: Text(
               receipt.notes!,
               style: const TextStyle(
@@ -332,8 +331,7 @@ class ReceiptDetailScreen extends StatelessWidget {
         ),
         const SizedBox(height: SavingorSpacing.md),
         OutlinedButton.icon(
-          onPressed: () =>
-              _confirmDelete(context, store, receipt, formatMoney),
+          onPressed: () => _confirmDelete(context, store, receipt, formatMoney),
           style: OutlinedButton.styleFrom(
             foregroundColor: const Color(0xFFB91C1C),
             side: const BorderSide(color: Color(0xFFE5A8A8)),
@@ -383,11 +381,11 @@ class ReceiptDetailScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   '${l10n.qtyWithValue(item.displayQuantity)}'
-                      '${item.category != null ? ' · ${item.category}' : ''}',
+                  '${item.category != null ? ' · ${item.category}' : ''}',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: SavingorColors.textSecondary.withOpacity(0.95),
+                    color: context.savingor.textSecondary.withOpacity(0.95),
                   ),
                 ),
               ],

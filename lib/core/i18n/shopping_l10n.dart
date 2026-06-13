@@ -16,20 +16,16 @@ abstract final class ShoppingL10n {
       'Could not load list items. Please try again.' =>
         l10n.couldNotLoadListItems,
       'Sign in to create shopping lists.' => l10n.signInToCreateShoppingLists,
-      'Could not create the list. Please try again.' =>
-        l10n.couldNotCreateList,
-      'Could not delete the list. Please try again.' =>
-        l10n.couldNotDeleteList,
+      'Could not create the list. Please try again.' => l10n.couldNotCreateList,
+      'Could not delete the list. Please try again.' => l10n.couldNotDeleteList,
       'Could not add the item. Please try again.' => l10n.couldNotAddItem,
       'Sign in to add items to your shopping list.' =>
         l10n.signInToAddShoppingItems,
       'Item name is required.' => l10n.itemNameRequired,
-      'Could not update the item. Please try again.' =>
-        l10n.couldNotUpdateItem,
+      'Could not update the item. Please try again.' => l10n.couldNotUpdateItem,
       'Could not update quantity. Please try again.' =>
         l10n.couldNotUpdateQuantity,
-      'Could not remove the item. Please try again.' =>
-        l10n.couldNotRemoveItem,
+      'Could not remove the item. Please try again.' => l10n.couldNotRemoveItem,
       'Could not update the shopping list. Please try again.' =>
         l10n.couldNotUpdateShoppingList,
       'List title is required.' => l10n.enterListName,
@@ -44,7 +40,8 @@ abstract final class ShoppingL10n {
       localizeError(context, error);
 
   /// Display-only localization for known default list titles stored in Firestore.
-  static String localizedShoppingListName(BuildContext context, String rawName) {
+  static String localizedShoppingListName(
+      BuildContext context, String rawName) {
     if (rawName.trim().toLowerCase() == 'weekly groceries') {
       return AppLocalizations.of(context).weeklyGroceriesDefault;
     }

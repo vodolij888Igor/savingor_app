@@ -53,10 +53,10 @@ class ReceiptItemFormRow extends StatelessWidget {
               ),
               IconButton(
                 onPressed: enabled ? onRemove : null,
-                icon: const Icon(
+                icon: Icon(
                   Icons.close_rounded,
                   size: 20,
-                  color: SavingorColors.textSecondary,
+                  color: context.savingor.textSecondary,
                 ),
                 tooltip: l10n.removeItem,
               ),
@@ -186,7 +186,8 @@ class EditableReceiptItemFields {
             ? quantity.toInt().toString()
             : quantity.toString(),
       ),
-      priceController: TextEditingController(text: totalPrice.toStringAsFixed(2)),
+      priceController:
+          TextEditingController(text: totalPrice.toStringAsFixed(2)),
       categoryController: TextEditingController(text: category ?? ''),
     );
   }

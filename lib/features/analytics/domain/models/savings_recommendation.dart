@@ -35,8 +35,10 @@ class SavingsRecommendation {
   final String? dataBasisText;
   final String? normalizedProductName;
   final String? storeName;
+
   /// Localized UI: product label for [SavingsRecommendationType.storeSwitch].
   final String? productDisplayName;
+
   /// Localized UI: per-item saving amount for store-switch recommendations.
   final double? potentialSavingPerItem;
   final double? latestPaidPrice;

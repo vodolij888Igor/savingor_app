@@ -45,8 +45,10 @@ abstract final class ReceiptSourceDialog {
 
   static Widget _buildModalCard(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
+    final SavingorThemeExtension theme = context.savingor;
     final double screenWidth = MediaQuery.sizeOf(context).width;
-    final double dialogWidth = math.min(screenWidth * _widthFactor, _maxDialogWidth);
+    final double dialogWidth =
+        math.min(screenWidth * _widthFactor, _maxDialogWidth);
     final double horizontalInset = (screenWidth - dialogWidth) / 2;
 
     return SafeArea(
@@ -58,24 +60,27 @@ abstract final class ReceiptSourceDialog {
             child: Container(
               width: dialogWidth,
               decoration: BoxDecoration(
-                color: SavingorColors.pageWhite,
+                color:
+                    theme.isDark ? theme.surfaceStrong : theme.pageBackground,
                 borderRadius: BorderRadius.circular(_dialogRadius),
                 border: Border.all(
-                  color: SavingorColors.border.withOpacity(0.75),
+                  color: theme.border.withOpacity(theme.isDark ? 0.9 : 0.75),
                   width: 0.75,
                 ),
-                boxShadow: const <BoxShadow>[
-                  BoxShadow(
-                    color: Color(0x1A000000),
-                    blurRadius: 28,
-                    offset: Offset(0, 10),
-                  ),
-                  BoxShadow(
-                    color: Color(0x0F4F9D47),
-                    blurRadius: 20,
-                    offset: Offset(0, 4),
-                  ),
-                ],
+                boxShadow: theme.isDark
+                    ? theme.cardShadow
+                    : const <BoxShadow>[
+                        BoxShadow(
+                          color: Color(0x1A000000),
+                          blurRadius: 28,
+                          offset: Offset(0, 10),
+                        ),
+                        BoxShadow(
+                          color: Color(0x0F4F9D47),
+                          blurRadius: 20,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
               ),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
@@ -190,6 +195,8 @@ class _DialogHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
+    final SavingorThemeExtension theme = context.savingor;
+    final bool isDark = theme.isDark;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,16 +205,18 @@ class _DialogHeader extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: SavingorColors.lightGreen,
+            color: isDark ? theme.surfaceElevated : SavingorColors.lightGreen,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: SavingorColors.primaryStroke.withOpacity(0.18),
+              color: isDark
+                  ? theme.border.withOpacity(0.85)
+                  : SavingorColors.primaryStroke.withOpacity(0.18),
             ),
           ),
-          child: const Icon(
+          child: Icon(
             Icons.document_scanner_rounded,
             size: 20,
-            color: SavingorColors.primaryStroke,
+            color: isDark ? theme.brandHeading : SavingorColors.primaryStroke,
           ),
         ),
         const SizedBox(width: 12),
@@ -217,10 +226,10 @@ class _DialogHeader extends StatelessWidget {
             children: <Widget>[
               Text(
                 l10n.scanReceipt,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
-                  color: Color(0xFF1A2E24),
+                  color: isDark ? theme.textPrimary : const Color(0xFF1A2E24),
                   height: 1.2,
                   letterSpacing: -0.2,
                 ),
@@ -231,7 +240,7 @@ class _DialogHeader extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
-                  color: SavingorColors.textSecondary.withOpacity(0.95),
+                  color: theme.textSecondary.withOpacity(0.95),
                   height: 1.35,
                 ),
               ),
@@ -248,7 +257,9 @@ class _DialogHeader extends StatelessWidget {
               child: Icon(
                 Icons.close_rounded,
                 size: 22,
-                color: SavingorColors.textSecondary.withOpacity(0.85),
+                color: isDark
+                    ? theme.textPrimary.withOpacity(0.85)
+                    : theme.textSecondary.withOpacity(0.85),
               ),
             ),
           ),
@@ -276,61 +287,87 @@ class _SourceOptionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const Color accent = SavingorColors.primaryStroke;
+    final SavingorThemeExtension theme = context.savingor;
+    final bool isDark = theme.isDark;
 
     final BoxDecoration decoration = emphasized
-        ? BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: <Color>[
-                Color(0xFFF0FAF3),
-                Color(0xFFFAFAF5),
-              ],
-            ),
-            border: Border.all(
-              color: accent.withOpacity(0.28),
-              width: 1,
-            ),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: accent.withOpacity(0.1),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          )
+        ? (isDark
+            ? BoxDecoration(
+                color: theme.surfaceElevated,
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: theme.accentGreen.withOpacity(0.38),
+                  width: 1,
+                ),
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
+                    color: theme.accentGreen.withOpacity(0.12),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              )
+            : BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: <Color>[
+                    Color(0xFFF0FAF3),
+                    Color(0xFFFAFAF5),
+                  ],
+                ),
+                border: Border.all(
+                  color: accent.withOpacity(0.28),
+                  width: 1,
+                ),
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
+                    color: accent.withOpacity(0.1),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ))
         : BoxDecoration(
-            color: Colors.white,
+            color: isDark ? theme.surfacePrimary : theme.surfacePrimary,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: SavingorColors.border.withOpacity(0.85),
+              color: theme.border.withOpacity(isDark ? 0.9 : 0.85),
               width: 0.75,
             ),
           );
 
     final BoxDecoration iconDecoration = emphasized
-        ? BoxDecoration(
-            color: accent,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: accent.withOpacity(0.25),
-                blurRadius: 8,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          )
+        ? (isDark
+            ? BoxDecoration(
+                color: theme.accentGreen,
+                borderRadius: BorderRadius.circular(14),
+              )
+            : BoxDecoration(
+                color: accent,
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
+                    color: accent.withOpacity(0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ))
         : BoxDecoration(
-            color: SavingorColors.lightGreen,
+            color: isDark ? theme.surfaceStrong : SavingorColors.lightGreen,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: accent.withOpacity(0.2),
+              color: isDark
+                  ? theme.border.withOpacity(0.85)
+                  : accent.withOpacity(0.2),
             ),
           );
 
-    final Color iconColor =
-        emphasized ? Colors.white : SavingorColors.primaryStroke;
+    final Color iconColor = emphasized
+        ? (isDark ? theme.buttonLabelOnGreen : Colors.white)
+        : (isDark ? theme.brandHeading : SavingorColors.primaryStroke);
 
     return Material(
       color: Colors.transparent,
@@ -359,9 +396,11 @@ class _SourceOptionCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          color: emphasized
-                              ? SavingorColors.darkGreen
-                              : const Color(0xFF1F2937),
+                          color: isDark
+                              ? theme.textPrimary
+                              : emphasized
+                                  ? SavingorColors.darkGreen
+                                  : const Color(0xFF1F2937),
                           height: 1.2,
                         ),
                       ),
@@ -371,8 +410,9 @@ class _SourceOptionCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color:
-                              SavingorColors.textSecondary.withOpacity(0.95),
+                          color: theme.textSecondary.withOpacity(
+                            isDark ? 0.96 : 0.95,
+                          ),
                           height: 1.35,
                         ),
                       ),
@@ -382,8 +422,10 @@ class _SourceOptionCard extends StatelessWidget {
                 Icon(
                   Icons.chevron_right_rounded,
                   color: emphasized
-                      ? accent.withOpacity(0.75)
-                      : SavingorColors.textSecondary.withOpacity(0.55),
+                      ? (isDark
+                          ? theme.brandHeading.withOpacity(0.85)
+                          : accent.withOpacity(0.75))
+                      : theme.textSecondary.withOpacity(isDark ? 0.78 : 0.55),
                   size: 24,
                 ),
               ],

@@ -51,8 +51,9 @@ abstract final class SavingsOpportunityFinder {
       return null;
     }
 
-    final double percentageDifference =
-        insight.latestPrice == 0 ? 0 : (priceDifference / insight.latestPrice) * 100;
+    final double percentageDifference = insight.latestPrice == 0
+        ? 0
+        : (priceDifference / insight.latestPrice) * 100;
 
     return SavingsOpportunity(
       id: insight.normalizedProductName,

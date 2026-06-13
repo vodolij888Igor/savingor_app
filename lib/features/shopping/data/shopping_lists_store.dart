@@ -43,7 +43,8 @@ class ShoppingListsStore extends ChangeNotifier {
   String? _mutationError;
 
   List<ShoppingList> get lists => List<ShoppingList>.unmodifiable(_lists);
-  List<ShoppingListItem> get items => List<ShoppingListItem>.unmodifiable(_items);
+  List<ShoppingListItem> get items =>
+      List<ShoppingListItem>.unmodifiable(_items);
   String? get uid => _uid;
   String? get activeListId => _activeListId;
   bool get isAuthenticated => _uid != null;
@@ -309,8 +310,7 @@ class ShoppingListsStore extends ChangeNotifier {
       return _lists.first.id;
     }
 
-    final List<ShoppingList> fetched =
-        await _service.fetchActiveLists(_uid!);
+    final List<ShoppingList> fetched = await _service.fetchActiveLists(_uid!);
     if (fetched.isNotEmpty) {
       return fetched.first.id;
     }
@@ -404,7 +404,8 @@ class ShoppingListsStore extends ChangeNotifier {
     return true;
   }
 
-  Future<List<ShoppingListItem>> fetchUncheckedItemsForList(String listId) async {
+  Future<List<ShoppingListItem>> fetchUncheckedItemsForList(
+      String listId) async {
     if (_uid == null) return const <ShoppingListItem>[];
     return _service.fetchUncheckedItems(uid: _uid!, listId: listId);
   }

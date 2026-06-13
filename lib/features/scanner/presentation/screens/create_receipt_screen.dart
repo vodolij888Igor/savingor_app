@@ -36,9 +36,6 @@ class CreateReceiptScreen extends StatefulWidget {
   final List<String> initialItemNames;
   final ReceiptSource initialSource;
   final bool isEditing;
-
-  static const Color _pageBackground = Colors.white;
-
   @override
   State<CreateReceiptScreen> createState() => _CreateReceiptScreenState();
 }
@@ -58,7 +55,8 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
   bool _isSaving = false;
   bool _totalManuallyEdited = false;
   ReceiptSource _source = ReceiptSource.manual;
-  final List<EditableReceiptItemFields> _itemFields = <EditableReceiptItemFields>[];
+  final List<EditableReceiptItemFields> _itemFields =
+      <EditableReceiptItemFields>[];
 
   @override
   void initState() {
@@ -115,8 +113,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
       _dateController.text = _formatDate(receipt.purchaseDate);
       _categoryController.text = receipt.categorySummary ?? receipt.category;
       _amountController.text = receipt.total.toStringAsFixed(2);
-      _subtotalController.text =
-          receipt.subtotal?.toStringAsFixed(2) ?? '';
+      _subtotalController.text = receipt.subtotal?.toStringAsFixed(2) ?? '';
       _taxController.text = receipt.tax?.toStringAsFixed(2) ?? '';
       _addressController.text = receipt.displayAddress ?? '';
       _notesController.text = receipt.notes ?? '';
@@ -195,7 +192,8 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
 
   void _addItemRow() {
     setState(() {
-      final EditableReceiptItemFields fields = EditableReceiptItemFields.empty();
+      final EditableReceiptItemFields fields =
+          EditableReceiptItemFields.empty();
       fields.priceController.addListener(_syncTotalFromItems);
       _itemFields.add(fields);
       _totalManuallyEdited = false;
@@ -268,7 +266,8 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
     final double? totalAmount = double.tryParse(_amountController.text.trim());
     if (totalAmount == null || totalAmount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).enterValidTotalAmount)),
+        SnackBar(
+            content: Text(AppLocalizations.of(context).enterValidTotalAmount)),
       );
       return;
     }
@@ -367,7 +366,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
         widget.isEditing ? l10n.updateReceipt : l10n.saveReceipt;
 
     return Scaffold(
-      backgroundColor: CreateReceiptScreen._pageBackground,
+      backgroundColor: context.savingor.pageBackground,
       appBar: AppBar(
         title: Text(
           appBarTitle,
@@ -379,7 +378,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
         ),
         elevation: 0,
         scrolledUnderElevation: 0,
-        backgroundColor: CreateReceiptScreen._pageBackground,
+        backgroundColor: context.savingor.pageBackground,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
           icon: const Icon(
@@ -391,7 +390,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
         ),
       ),
       body: ColoredBox(
-        color: CreateReceiptScreen._pageBackground,
+        color: context.savingor.pageBackground,
         child: Form(
           key: _formKey,
           child: ListView(
@@ -541,7 +540,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: SavingorColors.textSecondary.withOpacity(0.95),
+                    color: context.savingor.textSecondary.withOpacity(0.95),
                     height: 1.4,
                   ),
                 )

@@ -61,8 +61,7 @@ class ProductThumbnailAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final String? assetPath =
         ProductVisualAssets.thumbnailAssetForProduct(productName);
-    final IconData fallbackIcon =
-        _ProductFallbackIcons.forProduct(productName);
+    final IconData fallbackIcon = _ProductFallbackIcons.forProduct(productName);
 
     if (assetPath != null) {
       return SizedBox(
@@ -128,7 +127,8 @@ abstract final class _ProductFallbackIcons {
         lower.contains('drink')) {
       return Icons.local_drink_rounded;
     }
-    if (ProductVisualAssets._matchesAny(lower, ProductVisualAssets._breadKeywords)) {
+    if (ProductVisualAssets._matchesAny(
+        lower, ProductVisualAssets._breadKeywords)) {
       return Icons.bakery_dining_rounded;
     }
     if (lower.contains('egg')) {

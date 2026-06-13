@@ -17,57 +17,61 @@ class SavingsOpportunitySummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: SavingorColors.lightGreen.withOpacity(0.35),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: SavingorColors.primaryStroke.withOpacity(0.35),
-        ),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: SavingorColors.primaryStroke.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
+      decoration: context.savingor.isDark
+          ? SavingorWorkflowTheme.highlightCard(context)
+          : BoxDecoration(
+              color: SavingorColors.lightGreen.withOpacity(0.35),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: SavingorColors.primaryStroke.withOpacity(0.35),
+              ),
+              boxShadow: <BoxShadow>[
+                BoxShadow(
+                  color: SavingorColors.primaryStroke.withOpacity(0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          const Text(
+          Text(
             'Savings opportunity',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: SavingorColors.primaryStroke,
+              color: SavingorWorkflowTheme.accentText(context),
               letterSpacing: 0.2,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             opportunity.displayName,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
-              color: SavingorColors.darkGreen,
+              color: SavingorWorkflowTheme.headingText(context),
             ),
           ),
           const SizedBox(height: 10),
           Text(
             opportunity.savingsMessage,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w800,
-              color: SavingorColors.primaryStroke,
+              color: SavingorWorkflowTheme.accentText(context),
             ),
           ),
           const SizedBox(height: 14),
           _detailLine(
+            context,
             'You paid',
             '${PriceMemoryFormatters.formatPrice(opportunity.latestPrice, currency: opportunity.currency)} at ${opportunity.latestStoreName}',
           ),
           const SizedBox(height: 8),
           _detailLine(
+            context,
             'Best seen',
             '${PriceMemoryFormatters.formatPrice(opportunity.lowestPrice, currency: opportunity.currency)} at ${opportunity.lowestStoreName}',
           ),
@@ -77,16 +81,17 @@ class SavingsOpportunitySummaryCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: SavingorColors.darkGreen.withOpacity(0.78),
+              color:
+                  SavingorWorkflowTheme.primaryText(context).withOpacity(0.78),
             ),
           ),
           const SizedBox(height: 4),
           Text(
             'Last bought: ${PriceMemoryFormatters.formatDate(opportunity.latestPurchaseDate)} · ${opportunity.recordCount} ${opportunity.recordCount == 1 ? 'record' : 'records'}',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: SavingorColors.textSecondary,
+              color: context.savingor.textSecondary,
             ),
           ),
         ],
@@ -94,25 +99,25 @@ class SavingsOpportunitySummaryCard extends StatelessWidget {
     );
   }
 
-  Widget _detailLine(String label, String value) {
+  Widget _detailLine(BuildContext context, String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w600,
-            color: SavingorColors.textSecondary,
+            color: context.savingor.textSecondary,
           ),
         ),
         const SizedBox(height: 2),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
-            color: SavingorColors.darkGreen,
+            color: SavingorWorkflowTheme.primaryText(context),
             height: 1.35,
           ),
         ),

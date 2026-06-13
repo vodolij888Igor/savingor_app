@@ -23,7 +23,6 @@ class DashboardProductFeatureCardsRow extends StatelessWidget {
   final int maxCards;
 
   static const Color _nearBlack = Color(0xFF111827);
-  static const Color _airyBorder = Color(0xFFF3F4F3);
   static const double _listHeight = 252;
   static const double _cardGap = 10;
 
@@ -43,7 +42,7 @@ class DashboardProductFeatureCardsRow extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-      decoration: SavingorSurfaces.premiumCard(radius: 20),
+      decoration: SavingorSurfaces.premiumCard(context, radius: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
@@ -52,14 +51,15 @@ class DashboardProductFeatureCardsRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   l10n.topSavingOpportunities,
-                  style: SavingorAppTextStyles.sectionTitleLarge,
+                  style: SavingorAppTextStyles.sectionTitleLarge(context),
                 ),
               ),
               if (hasOpportunities)
                 SavingorInteractiveTextButton(
                   onPressed: () =>
                       context.push('/analytics/savings-opportunities'),
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                   child: Text(l10n.seeAll),
                 ),
             ],
@@ -106,10 +106,10 @@ class _EmptySavingOpportunitiesCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.savingor.surfacePrimary,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: DashboardProductFeatureCardsRow._airyBorder.withOpacity(0.7),
+          color: context.savingor.border.withOpacity(0.85),
         ),
       ),
       child: Column(
@@ -132,13 +132,13 @@ class _EmptySavingOpportunitiesCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Scan receipts to discover saving opportunities.',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: SavingorColors.textPrimary,
+                    color: context.savingor.textPrimary,
                     height: 1.35,
                   ),
                 ),
@@ -148,8 +148,8 @@ class _EmptySavingOpportunitiesCard extends StatelessWidget {
           const SizedBox(height: 10),
           SavingorInteractiveOutlinedButton(
             onPressed: onAddReceipt,
-            foregroundColor: SavingorColors.textPrimary,
-            borderColor: SavingorColors.border.withOpacity(0.85),
+            foregroundColor: context.savingor.textPrimary,
+            borderColor: context.savingor.border.withOpacity(0.85),
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -182,7 +182,8 @@ class _SavingOpportunityTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
     final AppState appState = AppStateProvider.of(context);
-    final String Function(double) formatAmount = (double amount) =>
+    final SavingorThemeExtension theme = context.savingor;
+    formatAmount(double amount) =>
         appState.formatMoney(amount, originalCurrency: opportunity.currency);
 
     final String bestKnownLine = l10n.bestKnownAtStore(
@@ -250,10 +251,10 @@ class _SavingOpportunityTile extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
-                color: DashboardProductFeatureCardsRow._nearBlack,
+                color: theme.textPrimary,
                 height: 1.15,
                 letterSpacing: -0.2,
               ),
@@ -264,10 +265,10 @@ class _SavingOpportunityTile extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: SavingorColors.textSecondary,
+                color: context.savingor.textSecondary,
                 height: 1.25,
               ),
             ),
@@ -277,37 +278,42 @@ class _SavingOpportunityTile extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary,
+                color: context.savingor.textSecondary,
                 height: 1.25,
               ),
             ),
             const Spacer(),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
               decoration: BoxDecoration(
-                color: SavingorColors.primaryGreen.withOpacity(0.82),
+                color: theme.isDark
+                    ? theme.accentGreen.withOpacity(0.22)
+                    : SavingorColors.primaryGreen.withOpacity(0.82),
                 borderRadius: BorderRadius.circular(SavingorRadius.pill),
-                boxShadow: <BoxShadow>[
-                  BoxShadow(
-                    color: SavingorColors.primaryStroke.withOpacity(0.12),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                boxShadow: theme.isDark
+                    ? null
+                    : <BoxShadow>[
+                        BoxShadow(
+                          color: SavingorColors.primaryStroke.withOpacity(0.12),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
               ),
               child: Text(
                 saveBadge,
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
-                  color: DashboardProductFeatureCardsRow._nearBlack,
+                  color: theme.isDark
+                      ? theme.brandTitle
+                      : DashboardProductFeatureCardsRow._nearBlack,
                   height: 1.15,
                 ),
               ),
@@ -318,10 +324,10 @@ class _SavingOpportunityTile extends StatelessWidget {
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 9,
                 fontWeight: FontWeight.w500,
-                color: SavingorColors.textSecondary,
+                color: context.savingor.textSecondary,
                 height: 1.15,
               ),
             ),

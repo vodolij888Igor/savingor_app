@@ -74,7 +74,8 @@ abstract final class ShoppingTripReceiptBuilder {
       return const <ShoppingTripStoreGroup>[];
     }
 
-    final Map<String, _StoreGroupBucket> buckets = <String, _StoreGroupBucket>{};
+    final Map<String, _StoreGroupBucket> buckets =
+        <String, _StoreGroupBucket>{};
 
     for (final ShoppingListItem item in purchasedItems) {
       final String storeName = _displayStoreName(item.store);

@@ -138,8 +138,7 @@ class ReceiptStore extends ChangeNotifier {
         categorySummary: _trimOrNull(categorySummary) ?? 'Grocery',
         items: items,
       );
-      final String receiptId =
-          await _service.createReceipt(_uid!, receipt);
+      final String receiptId = await _service.createReceipt(_uid!, receipt);
       final Receipt savedReceipt = receipt.copyWith(id: receiptId);
       await _syncPriceMemory(savedReceipt);
       notifyListeners();
@@ -218,7 +217,8 @@ class ReceiptStore extends ChangeNotifier {
         tax: tax,
         notes: _trimOrNull(notes),
         clearNotes: _trimOrNull(notes) == null,
-        categorySummary: _trimOrNull(categorySummary) ?? existing.categorySummary,
+        categorySummary:
+            _trimOrNull(categorySummary) ?? existing.categorySummary,
         items: items,
         updatedAt: DateTime.now(),
       );

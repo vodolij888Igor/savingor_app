@@ -33,8 +33,7 @@ abstract final class SavingsIntelligenceService {
 
       for (var index = 0; index < sorted.length; index++) {
         final ProductPriceRecord current = sorted[index];
-        final List<ProductPriceRecord> priorRecords =
-            sorted.sublist(0, index);
+        final List<ProductPriceRecord> priorRecords = sorted.sublist(0, index);
 
         if (priorRecords.isEmpty) {
           continue;
@@ -113,8 +112,7 @@ abstract final class SavingsIntelligenceService {
         .toList(growable: false);
 
     const double subscriptionPrice = SavingsSummary.defaultSubscriptionPrice;
-    final double monthlyRoiAmount =
-        estimatedSavedThisMonth - subscriptionPrice;
+    final double monthlyRoiAmount = estimatedSavedThisMonth - subscriptionPrice;
     final double? monthlyRoiMultiplier = estimatedSavedThisMonth > 0
         ? estimatedSavedThisMonth / subscriptionPrice
         : null;

@@ -23,13 +23,47 @@ class ReceiptSourceBadge extends StatelessWidget {
         ? const EdgeInsets.symmetric(horizontal: 8, vertical: 4)
         : const EdgeInsets.symmetric(horizontal: 10, vertical: 5);
 
+    if (!context.savingor.isDark) {
+      return Container(
+        padding: padding,
+        decoration: BoxDecoration(
+          color: SavingorColors.lightGreen.withOpacity(0.45),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: SavingorColors.primaryStroke.withOpacity(0.25),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(
+              source.icon,
+              size: iconSize,
+              color: SavingorColors.primaryStroke,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              ReceiptL10n.sourceLabel(context, source),
+              style: TextStyle(
+                fontSize: fontSize,
+                fontWeight: FontWeight.w700,
+                color: SavingorColors.primaryStroke,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final SavingorThemeExtension theme = context.savingor;
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: SavingorColors.lightGreen.withOpacity(0.45),
+        color: theme.surfaceStrong,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: SavingorColors.primaryStroke.withOpacity(0.25),
+          color: theme.border.withOpacity(0.9),
+          width: 0.75,
         ),
       ),
       child: Row(
@@ -38,7 +72,7 @@ class ReceiptSourceBadge extends StatelessWidget {
           Icon(
             source.icon,
             size: iconSize,
-            color: SavingorColors.primaryStroke,
+            color: theme.brandHeading,
           ),
           const SizedBox(width: 4),
           Text(
@@ -46,7 +80,7 @@ class ReceiptSourceBadge extends StatelessWidget {
             style: TextStyle(
               fontSize: fontSize,
               fontWeight: FontWeight.w700,
-              color: SavingorColors.primaryStroke,
+              color: theme.brandHeading,
             ),
           ),
         ],

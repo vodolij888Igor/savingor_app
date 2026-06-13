@@ -32,7 +32,8 @@ class PriceMemoryStore extends ChangeNotifier {
   bool _isLoading = true;
   String? _loadError;
 
-  List<ProductPriceRecord> get records => List<ProductPriceRecord>.unmodifiable(_records);
+  List<ProductPriceRecord> get records =>
+      List<ProductPriceRecord>.unmodifiable(_records);
   List<ProductPriceInsight> get insights =>
       ProductPriceInsightsGrouper.group(_records);
 
@@ -73,8 +74,7 @@ class PriceMemoryStore extends ChangeNotifier {
     }
 
     _isLoading = true;
-    _recordsSubscription =
-        _service.watchPriceRecordsForUser(_uid!).listen(
+    _recordsSubscription = _service.watchPriceRecordsForUser(_uid!).listen(
       (List<ProductPriceRecord> records) {
         _records = records;
         _isLoading = false;

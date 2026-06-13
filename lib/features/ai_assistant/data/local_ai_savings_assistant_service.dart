@@ -41,8 +41,7 @@ class LocalAiSavingsAssistantService implements AiSavingsAssistantService {
         const SavingsInsight(
           id: 'get-started',
           title: 'Start tracking to save smarter',
-          message:
-              'Scan a receipt, add an expense, or create a shopping list. '
+          message: 'Scan a receipt, add an expense, or create a shopping list. '
               'Savingor will surface spending patterns and savings ideas here.',
           type: InsightType.onboarding,
           severity: InsightSeverity.info,
@@ -57,8 +56,7 @@ class LocalAiSavingsAssistantService implements AiSavingsAssistantService {
         SavingsInsight(
           id: 'spending-overview',
           title: 'Your spending snapshot',
-          message:
-              'Based on your saved receipts and expenses: '
+          message: 'Based on your saved receipts and expenses: '
               '${context.receiptCount} '
               '${context.receiptCount == 1 ? 'receipt' : 'receipts'} '
               'and ${context.manualExpenseCount} manual '
@@ -99,8 +97,7 @@ class LocalAiSavingsAssistantService implements AiSavingsAssistantService {
         SavingsInsight(
           id: 'shopping-lists',
           title: 'Shopping lists active',
-          message:
-              'Based on your current shopping lists, you have '
+          message: 'Based on your current shopping lists, you have '
               '${context.shoppingListCount} '
               '${context.shoppingListCount == 1 ? 'list' : 'lists'} '
               'to plan purchases.$estimateNote Check items before checkout.',

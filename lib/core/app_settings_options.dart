@@ -31,8 +31,7 @@ abstract final class AppSettingsOptions {
     return languageNativeNames[normalized] ?? code;
   }
 
-  static String languageDisplayName(String? code) =>
-      languageNativeName(code);
+  static String languageDisplayName(String? code) => languageNativeName(code);
 
   static String appearanceLabel(String mode) {
     return mode == 'dark' ? 'Dark' : 'Light';
