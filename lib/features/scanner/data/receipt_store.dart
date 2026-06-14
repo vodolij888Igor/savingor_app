@@ -132,6 +132,7 @@ class ReceiptStore extends ChangeNotifier {
     double? subtotal,
     double? tax,
     String? notes,
+    String? ocrRawText,
     String? categorySummary,
     List<ReceiptItem> items = const <ReceiptItem>[],
     String currency = 'CAD',
@@ -181,6 +182,7 @@ class ReceiptStore extends ChangeNotifier {
         currency: currency.toUpperCase(),
         source: source,
         notes: _trimOrNull(notes),
+        ocrRawText: _trimOrNull(ocrRawText),
         categorySummary: _trimOrNull(categorySummary) ?? 'Grocery',
         items: items,
       );

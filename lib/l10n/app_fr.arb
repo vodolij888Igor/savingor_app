@@ -174,6 +174,10 @@
   "chooseFromGallerySubtitle": "Sélectionnez une photo de reçu existante",
 
   "scanningReceipt": "Scan du reçu...",
+  "processingReceiptImage": "Traitement de l'image...",
+  "readingReceiptText": "Lecture du texte du reçu...",
+  "receiptCouldNotBeParsed": "Impossible de lire les détails clés du reçu. Vous pouvez les vérifier et les ajouter manuellement.",
+  "receiptSavedSuccessfully": "Reçu enregistré",
   "couldNotScanReceipt": "Impossible de scanner ce reçu. Essayez une autre photo.",
   "ocrResultPreview": "Aperçu du résultat OCR",
   "noTextDetected": "Aucun texte détecté. Essayez une photo de reçu plus nette.",

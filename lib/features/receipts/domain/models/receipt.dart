@@ -21,6 +21,7 @@ class Receipt {
     this.currency = 'CAD',
     this.source = ReceiptSource.manual,
     this.notes,
+    this.ocrRawText,
     this.categorySummary,
     this.items = const <ReceiptItem>[],
   });
@@ -40,6 +41,9 @@ class Receipt {
   final String currency;
   final ReceiptSource source;
   final String? notes;
+
+  /// Technical OCR output retained for audit/debug; not shown as user notes.
+  final String? ocrRawText;
   final String? categorySummary;
   final List<ReceiptItem> items;
 
@@ -121,6 +125,7 @@ class Receipt {
       currency: _nullableString(map['currency']) ?? 'CAD',
       source: _parseSource(map, legacyNotes: map['notes']),
       notes: _nullableString(map['notes']),
+      ocrRawText: _nullableString(map['ocrRawText']),
       categorySummary:
           _nullableString(map['categorySummary']) ?? legacyCategory,
       items: parsedItems,
@@ -143,6 +148,7 @@ class Receipt {
       'currency': currency,
       'source': source.value,
       if (notes != null) 'notes': notes,
+      if (ocrRawText != null) 'ocrRawText': ocrRawText,
       if (categorySummary != null) 'categorySummary': categorySummary,
       'items': items.map((ReceiptItem item) => item.toMap()).toList(),
     };
@@ -164,6 +170,7 @@ class Receipt {
     String? currency,
     ReceiptSource? source,
     String? notes,
+    String? ocrRawText,
     String? categorySummary,
     List<ReceiptItem>? items,
     bool clearStoreId = false,
@@ -172,6 +179,7 @@ class Receipt {
     bool clearSubtotal = false,
     bool clearTax = false,
     bool clearNotes = false,
+    bool clearOcrRawText = false,
     bool clearCategorySummary = false,
   }) {
     return Receipt(
@@ -191,6 +199,7 @@ class Receipt {
       currency: currency ?? this.currency,
       source: source ?? this.source,
       notes: clearNotes ? null : (notes ?? this.notes),
+      ocrRawText: clearOcrRawText ? null : (ocrRawText ?? this.ocrRawText),
       categorySummary: clearCategorySummary
           ? null
           : (categorySummary ?? this.categorySummary),
@@ -227,6 +236,10 @@ class Receipt {
     final String? explicit = _nullableString(map['source']);
     if (explicit != null) {
       return ReceiptSource.fromValue(explicit);
+    }
+
+    if (_nullableString(map['ocrRawText']) != null) {
+      return ReceiptSource.scanned;
     }
 
     final String? notes = _nullableString(legacyNotes);

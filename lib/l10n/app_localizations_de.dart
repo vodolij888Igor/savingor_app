@@ -555,7 +555,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get scanningReceipt => 'Beleg wird gescannt...';
 
   @override
+  String get processingReceiptImage => 'Bild wird verarbeitet...';
+
+  @override
+  String get readingReceiptText => 'Belegtext wird gelesen...';
+
+  @override
   String get couldNotScanReceipt => 'Dieser Beleg konnte nicht gescannt werden. Versuchen Sie ein anderes Foto.';
+
+  @override
+  String get receiptCouldNotBeParsed => 'Wichtige Belegdetails konnten nicht gelesen werden. Sie können sie prüfen und manuell hinzufügen.';
+
+  @override
+  String get receiptSavedSuccessfully => 'Beleg gespeichert';
 
   @override
   String get ocrResultPreview => 'OCR-Ergebnisvorschau';

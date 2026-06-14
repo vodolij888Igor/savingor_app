@@ -561,7 +561,19 @@ class AppLocalizationsRu extends AppLocalizations {
   String get scanningReceipt => 'Сканирование чека...';
 
   @override
+  String get processingReceiptImage => 'Обработка изображения...';
+
+  @override
+  String get readingReceiptText => 'Чтение текста чека...';
+
+  @override
   String get couldNotScanReceipt => 'Не удалось отсканировать этот чек. Попробуйте другое фото.';
+
+  @override
+  String get receiptCouldNotBeParsed => 'Не удалось распознать ключевые данные чека. Вы можете просмотреть и добавить их вручную.';
+
+  @override
+  String get receiptSavedSuccessfully => 'Чек сохранён';
 
   @override
   String get ocrResultPreview => 'Предпросмотр OCR';

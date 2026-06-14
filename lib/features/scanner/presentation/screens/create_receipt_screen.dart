@@ -21,8 +21,12 @@ class CreateReceiptScreen extends StatefulWidget {
     this.initialTotal,
     this.initialCategory,
     this.initialNotes,
+    this.initialOcrRawText,
     this.initialStoreAddress,
     this.initialItemNames = const <String>[],
+    this.initialItems = const <ReceiptItem>[],
+    this.initialSubtotal,
+    this.initialTax,
     this.initialSource = ReceiptSource.manual,
     this.isEditing = false,
   });
@@ -33,8 +37,12 @@ class CreateReceiptScreen extends StatefulWidget {
   final double? initialTotal;
   final String? initialCategory;
   final String? initialNotes;
+  final String? initialOcrRawText;
   final String? initialStoreAddress;
   final List<String> initialItemNames;
+  final List<ReceiptItem> initialItems;
+  final double? initialSubtotal;
+  final double? initialTax;
   final ReceiptSource initialSource;
   final bool isEditing;
   @override
@@ -56,6 +64,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
   bool _isSaving = false;
   bool _totalManuallyEdited = false;
   ReceiptSource _source = ReceiptSource.manual;
+  String? _ocrRawText;
   final List<EditableReceiptItemFields> _itemFields =
       <EditableReceiptItemFields>[];
 
@@ -74,10 +83,19 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
     }
     if (widget.initialTotal != null) {
       _amountController.text = widget.initialTotal!.toStringAsFixed(2);
+      _totalManuallyEdited = true;
+    }
+    if (widget.initialSubtotal != null) {
+      _subtotalController.text = widget.initialSubtotal!.toStringAsFixed(2);
+    }
+    if (widget.initialTax != null) {
+      _taxController.text = widget.initialTax!.toStringAsFixed(2);
     }
     if (widget.initialNotes != null) {
       _notesController.text = widget.initialNotes!;
     }
+    final String? rawOcr = widget.initialOcrRawText?.trim();
+    _ocrRawText = rawOcr == null || rawOcr.isEmpty ? null : rawOcr;
     if (widget.initialStoreAddress != null) {
       _addressController.text = widget.initialStoreAddress!;
     }
@@ -86,6 +104,22 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _loadExistingReceipt();
       });
+    } else if (widget.initialItems.isNotEmpty) {
+      for (final ReceiptItem item in widget.initialItems) {
+        final EditableReceiptItemFields fields =
+            EditableReceiptItemFields.fromReceiptItem(
+          id: item.id,
+          name: item.name,
+          quantity: item.quantity,
+          totalPrice: item.totalPrice,
+          category: item.category,
+        );
+        fields.priceController.addListener(_syncTotalFromItems);
+        _itemFields.add(fields);
+      }
+      if (!_totalManuallyEdited && widget.initialTotal == null) {
+        _syncTotalFromItems();
+      }
     } else if (widget.initialItemNames.isNotEmpty) {
       for (final String itemName in widget.initialItemNames) {
         final EditableReceiptItemFields fields =
@@ -118,6 +152,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
       _taxController.text = receipt.tax?.toStringAsFixed(2) ?? '';
       _addressController.text = receipt.displayAddress ?? '';
       _notesController.text = receipt.notes ?? '';
+      _ocrRawText = receipt.ocrRawText;
       _source = receipt.source;
       _totalManuallyEdited = true;
 
@@ -314,6 +349,11 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
       setState(() => _isSaving = false);
 
       if (updated) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text(AppLocalizations.of(context).receiptSavedSuccessfully)),
+        );
         context.pop();
         return;
       }
@@ -334,6 +374,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
       notes: notes,
       categorySummary: categorySummary,
       items: items,
+      ocrRawText: _ocrRawText,
       currency: appState.currency,
     );
 
@@ -341,6 +382,11 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
     setState(() => _isSaving = false);
 
     if (receiptId != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text(AppLocalizations.of(context).receiptSavedSuccessfully)),
+      );
       context.pop();
       return;
     }

@@ -17,7 +17,9 @@ import 'package:savingor_app/features/deals/presentation/screens/deal_details_sc
 import 'package:savingor_app/features/scanner/presentation/screens/receipt_scanner_screen.dart';
 import 'package:savingor_app/features/scanner/presentation/screens/create_receipt_screen.dart';
 import 'package:savingor_app/features/scanner/presentation/screens/receipt_detail_screen.dart';
+import 'package:savingor_app/features/receipts/domain/models/receipt_item.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt_source.dart';
+import 'package:savingor_app/features/scanner/domain/receipt_ocr_draft_mapper.dart';
 import 'package:savingor_app/features/shopping/presentation/screens/shopping_lists_screen.dart';
 import 'package:savingor_app/features/shopping/presentation/screens/shopping_list_detail_screen.dart';
 import 'package:savingor_app/features/shopping/presentation/screens/create_shopping_list_screen.dart';
@@ -185,6 +187,27 @@ GoRouter createAppRouter({required AppState appState}) {
                         .toList(growable: false) ??
                     const <String>[];
 
+            final List<ReceiptItem> initialItems =
+                ReceiptOcrDraftMapper.itemsFromExtra(
+              extra['initialItems'] as List<dynamic>?,
+            );
+
+            final Object? subtotalValue = extra['initialSubtotal'];
+            double? initialSubtotal;
+            if (subtotalValue is double) {
+              initialSubtotal = subtotalValue;
+            } else if (subtotalValue is num) {
+              initialSubtotal = subtotalValue.toDouble();
+            }
+
+            final Object? taxValue = extra['initialTax'];
+            double? initialTax;
+            if (taxValue is double) {
+              initialTax = taxValue;
+            } else if (taxValue is num) {
+              initialTax = taxValue.toDouble();
+            }
+
             final ReceiptSource initialSource = _parseReceiptSource(
               extra['initialSource'] as String?,
             );
@@ -196,8 +219,12 @@ GoRouter createAppRouter({required AppState appState}) {
               initialTotal: initialTotal,
               initialCategory: extra['initialCategory'] as String?,
               initialNotes: extra['initialNotes'] as String?,
+              initialOcrRawText: extra['initialOcrRawText'] as String?,
               initialStoreAddress: extra['initialStoreAddress'] as String?,
               initialItemNames: initialItemNames,
+              initialItems: initialItems,
+              initialSubtotal: initialSubtotal,
+              initialTax: initialTax,
               initialSource: initialSource,
               isEditing: extra['isEditing'] == true,
             );

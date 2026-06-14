@@ -555,7 +555,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanningReceipt => 'Scanning receipt...';
 
   @override
+  String get processingReceiptImage => 'Processing image...';
+
+  @override
+  String get readingReceiptText => 'Reading receipt text...';
+
+  @override
   String get couldNotScanReceipt => 'Could not scan this receipt. Try another photo.';
+
+  @override
+  String get receiptCouldNotBeParsed => 'We couldn\'t read key receipt details. You can review and add them manually.';
+
+  @override
+  String get receiptSavedSuccessfully => 'Receipt saved';
 
   @override
   String get ocrResultPreview => 'OCR result preview';

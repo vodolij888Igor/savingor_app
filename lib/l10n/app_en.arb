@@ -253,7 +253,11 @@
   "chooseFromGallerySubtitle": "Select an existing receipt photo.",
 
   "scanningReceipt": "Scanning receipt...",
+  "processingReceiptImage": "Processing image...",
+  "readingReceiptText": "Reading receipt text...",
   "couldNotScanReceipt": "Could not scan this receipt. Try another photo.",
+  "receiptCouldNotBeParsed": "We couldn't read key receipt details. You can review and add them manually.",
+  "receiptSavedSuccessfully": "Receipt saved",
   "ocrResultPreview": "OCR result preview",
   "noTextDetected": "No text detected. Try a clearer receipt photo.",
   "useThisReceipt": "Use this receipt",

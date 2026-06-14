@@ -1111,11 +1111,35 @@ abstract class AppLocalizations {
   /// **'Scanning receipt...'**
   String get scanningReceipt;
 
+  /// No description provided for @processingReceiptImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing image...'**
+  String get processingReceiptImage;
+
+  /// No description provided for @readingReceiptText.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading receipt text...'**
+  String get readingReceiptText;
+
   /// No description provided for @couldNotScanReceipt.
   ///
   /// In en, this message translates to:
   /// **'Could not scan this receipt. Try another photo.'**
   String get couldNotScanReceipt;
+
+  /// No description provided for @receiptCouldNotBeParsed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t read key receipt details. You can review and add them manually.'**
+  String get receiptCouldNotBeParsed;
+
+  /// No description provided for @receiptSavedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt saved'**
+  String get receiptSavedSuccessfully;
 
   /// No description provided for @ocrResultPreview.
   ///

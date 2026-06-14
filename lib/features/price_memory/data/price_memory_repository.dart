@@ -51,6 +51,7 @@ class PriceMemoryRepository {
 
     return receipt.items
         .where((ReceiptItem item) => item.name.trim().isNotEmpty)
+        .where((ReceiptItem item) => item.totalPrice > 0)
         .map((ReceiptItem item) {
       final String normalizedName =
           item.normalizedName?.trim().isNotEmpty == true

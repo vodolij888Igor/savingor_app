@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'package:savingor_app/core/app_state.dart';
 import 'package:savingor_app/core/i18n/receipt_l10n.dart';
 import 'package:savingor_app/core/theme/savingor_design_system.dart';
 import 'package:savingor_app/core/widgets/savingor_interactive.dart';
@@ -10,6 +11,8 @@ import 'package:savingor_app/features/scanner/data/receipt_ocr_parser.dart';
 import 'package:savingor_app/features/scanner/data/receipt_ocr_service.dart';
 import 'package:savingor_app/features/scanner/data/receipt_store.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt.dart';
+import 'package:savingor_app/features/scanner/domain/models/receipt_ocr_result.dart';
+import 'package:savingor_app/features/scanner/domain/receipt_ocr_draft_mapper.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt_source.dart';
 import 'package:savingor_app/features/receipts/presentation/widgets/receipt_source_badge.dart';
 import 'package:savingor_app/features/receipts/presentation/widgets/receipt_source_dialog.dart';
@@ -54,6 +57,14 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
     await _pickAndScan(source, access);
   }
 
+  ReceiptSource _inferReceiptSourceFromResult(ReceiptOcrResult result) {
+    // Source is chosen at pick time; preview uses the last picked source stored
+    // on the widget state during scan. Default to scanned when unknown.
+    return _lastReceiptSource ?? ReceiptSource.scanned;
+  }
+
+  ReceiptSource? _lastReceiptSource;
+
   Future<void> _pickAndScan(
     ImageSource source,
     ReceiptScanAccessSnapshot access,
@@ -62,6 +73,12 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
       await ReceiptScanLimitSheet.show(context);
       return;
     }
+
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final ReceiptSource receiptSource = source == ImageSource.camera
+        ? ReceiptSource.scanned
+        : ReceiptSource.gallery;
+    _lastReceiptSource = receiptSource;
 
     try {
       final XFile? image = await _imagePicker.pickImage(
@@ -73,48 +90,77 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
 
       setState(() => _isScanning = true);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).scanningReceipt)),
+        SnackBar(content: Text(l10n.processingReceiptImage)),
       );
 
-      final String text =
-          await _ocrService.extractTextFromImagePath(image.path);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.readingReceiptText)),
+      );
+
+      final ReceiptOcrResult ocrResult =
+          await _ocrService.recognizeFromImagePath(image.path);
 
       if (!mounted) return;
       setState(() => _isScanning = false);
 
-      await _showOcrPreviewDialog(
-        text,
-        source == ImageSource.camera
-            ? ReceiptSource.scanned
-            : ReceiptSource.gallery,
-      );
+      await _showOcrPreviewDialog(ocrResult);
     } catch (_) {
       if (!mounted) return;
       setState(() => _isScanning = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).couldNotScanReceipt),
-        ),
+        SnackBar(content: Text(l10n.couldNotScanReceipt)),
       );
     }
   }
 
-  Future<void> _showOcrPreviewDialog(
-    String text,
+  void _navigateToCreateFromOcr(
+    ParsedReceiptData parsed,
     ReceiptSource receiptSource,
-  ) async {
+  ) {
+    context.push(
+      '/scanner/create',
+      extra: ReceiptOcrDraftMapper.buildCreateReceiptExtra(
+        parsed: parsed,
+        receiptSource: receiptSource,
+      ),
+    );
+  }
+
+  Future<void> _showOcrPreviewDialog(ReceiptOcrResult ocrResult) async {
+    final AppLocalizations l10n = AppLocalizations.of(context);
+    final String text = ocrResult.rawText;
+    final ReceiptSource receiptSource =
+        _inferReceiptSourceFromResult(ocrResult);
+
     if (text.trim().isEmpty) {
-      final AppLocalizations l10n = AppLocalizations.of(context);
       await showDialog<void>(
         context: context,
         builder: (BuildContext dialogContext) {
           return AlertDialog(
+            backgroundColor: context.savingor.surfacePrimary,
             title: Text(l10n.ocrResultPreview),
             content: Text(l10n.noTextDetected),
             actions: <Widget>[
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(),
                 child: Text(l10n.close),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                  if (!mounted) return;
+                  context.push(
+                    '/scanner/create',
+                    extra: <String, dynamic>{
+                      'initialSource': receiptSource.value,
+                    },
+                  );
+                },
+                child: Text(
+                  l10n.addManually,
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
               ),
             ],
           );
@@ -123,13 +169,18 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
       return;
     }
 
-    final ParsedReceiptData parsed = _ocrParser.parse(text);
-    final AppLocalizations l10n = AppLocalizations.of(context);
+    final ParsedReceiptData parsed = _ocrParser.parseResult(ocrResult);
+    final AppState appState = AppStateProvider.of(context);
+    String formatAmount(double? amount) {
+      if (amount == null) return '—';
+      return appState.formatMoney(amount);
+    }
 
     await showDialog<void>(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
+          backgroundColor: context.savingor.surfacePrimary,
           title: Text(l10n.ocrResultPreview),
           content: SizedBox(
             width: double.maxFinite,
@@ -138,6 +189,19 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
+                  if (!parsed.hasRecognizedContent)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        l10n.receiptCouldNotBeParsed,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: context.savingor.textSecondary,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
                   _buildParsedField(
                     l10n.store,
                     parsed.storeName ?? '—',
@@ -148,9 +212,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
                   ),
                   _buildParsedField(
                     l10n.total,
-                    parsed.total != null
-                        ? '\$${parsed.total!.toStringAsFixed(2)}'
-                        : '—',
+                    formatAmount(parsed.total),
                   ),
                   const SizedBox(height: 12),
                   Text(
@@ -161,16 +223,24 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  if (parsed.items.isEmpty)
+                  if (parsed.lineItems.isEmpty)
                     Text(
                       l10n.noneDetected,
                       style: TextStyle(color: context.savingor.textSecondary),
                     )
                   else
-                    ...parsed.items.map(
-                      (String item) => Padding(
+                    ...parsed.lineItems.map(
+                      (ParsedReceiptLineItem item) => Padding(
                         padding: const EdgeInsets.only(bottom: 4),
-                        child: Text('• $item'),
+                        child: Text(
+                          item.hasRecognizedPrice
+                              ? '• ${item.name} — ${formatAmount(item.lineTotal)}'
+                              : '• ${item.name}',
+                          style: TextStyle(
+                            color: context.savingor.textSecondary,
+                            height: 1.3,
+                          ),
+                        ),
                       ),
                     ),
                   const SizedBox(height: 12),
@@ -212,18 +282,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
               onPressed: () {
                 Navigator.of(dialogContext).pop();
                 if (!mounted) return;
-                context.push(
-                  '/scanner/create',
-                  extra: <String, dynamic>{
-                    'initialStoreName': parsed.storeName,
-                    'initialDate': parsed.date,
-                    'initialTotal': parsed.total,
-                    'initialCategory': 'Grocery',
-                    'initialNotes': parsed.rawText,
-                    'initialItemNames': parsed.items,
-                    'initialSource': receiptSource.value,
-                  },
-                );
+                _navigateToCreateFromOcr(parsed, receiptSource);
               },
               child: Text(
                 l10n.useThisReceipt,
