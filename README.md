@@ -15,6 +15,7 @@ Grocery receipts are dense, inconsistent, and easy to lose. Savingor combines **
 - [OCR pipeline](#ocr-pipeline)
 - [Technology stack](#technology-stack)
 - [Testing and quality](#testing-and-quality)
+- [Demo](#demo)
 - [Local setup](#local-setup)
 - [Engineering capabilities demonstrated](#engineering-capabilities-demonstrated)
 - [Relevant roles](#relevant-roles)
@@ -27,11 +28,12 @@ Grocery receipts are dense, inconsistent, and easy to lose. Savingor combines **
 | Aspect | Status |
 |--------|--------|
 | Platform focus | Portfolio-ready **Android demo** (iOS project files present; primary verification on Android) |
+| Portfolio release | **[v0.9.0-portfolio](https://github.com/vodolij888Igor/savingor_app/releases/tag/v0.9.0-portfolio)** — [Android APK](https://github.com/vodolij888Igor/savingor_app/releases/download/v0.9.0-portfolio/Savingor-Portfolio-Demo-v0.9.0.apk) available for evaluation |
 | Development | **Active development** |
 | Market positioning | **Canada-first** defaults (region `ca`, currency **CAD**) |
 | Store publication | **Not published** on Google Play or the App Store |
 | Subscriptions | **RevenueCat-ready architecture**; production store billing products are **not yet configured** |
-| Release builds | Release APK builds successfully; currently signed with **demo/debug signing**, not Play Store production signing |
+| Release signing | Portfolio demo APK signed with **development/demo signing**, not Google Play production signing |
 
 ---
 
@@ -338,11 +340,22 @@ flutter test test/features/scanner/data/receipt_ocr_metro_layout_test.dart
 
 ## Demo
 
-<!-- TODO: Add a short screen-recording demo (MP4 or GIF) and link it here. -->
-<!-- TODO: Add a hosted APK or GitHub Release asset link for reviewers. -->
+Portfolio reviewers can evaluate Savingor using the [screenshots](#screenshots) in this README and the published Android portfolio release.
 
-- **Demo video:** _Coming soon_
-- **APK / demo build:** _Coming soon_ — build locally with the commands in [Local setup](#local-setup)
+| Resource | Link |
+|----------|------|
+| **Download Android APK** | [Savingor-Portfolio-Demo-v0.9.0.apk](https://github.com/vodolij888Igor/savingor_app/releases/download/v0.9.0-portfolio/Savingor-Portfolio-Demo-v0.9.0.apk) |
+| **View GitHub Release** | [v0.9.0-portfolio](https://github.com/vodolij888Igor/savingor_app/releases/tag/v0.9.0-portfolio) |
+| **View Source Repository** | [github.com/vodolij888Igor/savingor_app](https://github.com/vodolij888Igor/savingor_app) |
+
+**Release scope:**
+
+- Android portfolio demo build for technical evaluation
+- Signed with development/demo signing — not Google Play production signing
+- Not published on Google Play or the App Store
+- iOS project files are included in the repository; primary verification and this release target **Android**
+
+To build from source, see [Local setup](#local-setup).
 
 ---
 
@@ -415,7 +428,7 @@ flutter build apk --release
 
 ## Engineering capabilities demonstrated
 
-Savingor reflects hands-on software engineering across a full mobile product stack. The repository contains implemented work—not roadmap placeholders—including Flutter application architecture, Firebase Authentication and Firestore, receipt OCR with geometry-aware parsing, grocery expense and shopping workflows, price-memory logic, Free / Pro access control, maps and location services, localization, automated testing, and Android release build configuration.
+Savingor reflects hands-on software engineering across a full mobile product stack. The repository contains implemented and tested functionality, including Flutter application architecture, Firebase Authentication and Firestore, receipt OCR with geometry-aware parsing, grocery expense and shopping workflows, price-memory logic, Free / Pro access control, maps and location services, localization, automated testing, and Android release build configuration.
 
 This project demonstrates the following engineering capabilities:
 
@@ -465,7 +478,7 @@ Future work (not yet delivered):
 savingor_app/
 ├── android/                 # Android Gradle project, google-services, ProGuard
 ├── ios/                     # iOS runner (secondary target)
-├── assets/                  # Images, flags, product placeholders
+├── assets/                  # Images, flags, and product imagery
 ├── docs/                    # Product/architecture notes (see also this README)
 ├── lib/
 │   ├── app/                 # Router, shell screens
