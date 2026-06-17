@@ -69,6 +69,16 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: assets/images/savingor_launcher_icon_legacy.png
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: assets/images/savingor_launcher_icon_foreground.png
+  adaptive_icon_foreground_inset: 0
+  min_sdk_android: 21
 
 # geolocator_android 4.6+ expects the Flutter Gradle extension on library
 # modules, which breaks this project's Android plugin setup. Pin 4.5.5 (hardcoded compileSdk).
