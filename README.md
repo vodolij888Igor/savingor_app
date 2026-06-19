@@ -1,5 +1,7 @@
 # Savingor — AI-Powered Grocery Savings Platform
 
+[![Flutter CI](https://github.com/vodolij888Igor/savingor_app/actions/workflows/flutter_ci.yml/badge.svg)](https://github.com/vodolij888Igor/savingor_app/actions/workflows/flutter_ci.yml)
+
 Savingor is a Canada-first mobile application that helps households understand grocery spending, preserve receipt history, remember product prices over time, and discover practical ways to save across nearby stores.
 
 Grocery receipts are dense, inconsistent, and easy to lose. Savingor combines **on-device receipt OCR**, **expense tracking**, **price memory**, **shopping tools**, **nearby-store discovery**, and an **AI-assisted savings layer** behind a production-style Flutter architecture with Firebase backend integration.
@@ -377,9 +379,15 @@ flutter pub get
 
 ### Firebase configuration
 
-The app calls `Firebase.initializeApp()` at startup. For Android, add your own Firebase project configuration file at `android/app/google-services.json`. Firebase client configuration is project-specific; production security must rely on Firebase Authentication, correctly configured Firestore Security Rules, and appropriate API restrictions.
+The app calls `Firebase.initializeApp()` at startup.
 
-Enable Firebase Authentication (Email/Password) and configure Firestore Security Rules for your environment.
+**Android client config (local, not in Git):** Each developer must download their own `android/app/google-services.json` from the Firebase console and place it at that path. This file is intentionally excluded from Git (see `.gitignore`); do not commit it.
+
+**Firestore Security Rules (version-controlled):** Published rules live in [`firestore.rules`](firestore.rules) at the repository root. [`firebase.json`](firebase.json) points Firebase CLI deployments at that file (`firestore.rules`).
+
+Enable Firebase Authentication (Email/Password) in your Firebase project. Deploy or sync rules from `firestore.rules` for your environment. Production security must rely on Firebase Authentication, those rules, and appropriate API restrictions—not on hiding client config in the repo.
+
+**Never commit** real secrets or private server credentials (`.env` files, keystore files, `key.properties`, service-account JSON, Firebase Admin SDK keys, or private API keys). Use `--dart-define` or local env files that stay out of Git (see below).
 
 ### Optional build-time defines
 

@@ -41,3 +41,14 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Firebase / secrets (local per developer; never commit real credentials)
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+.env
+.env.*
+*.jks
+*.keystore
+key.properties
+service-account*.json
+firebase-adminsdk*.json
