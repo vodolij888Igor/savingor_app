@@ -9,6 +9,52 @@ on:
       - main
 
 jobs:
+  backend-node-22:
+    name: Backend (Node 22)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: functions
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: functions/package-lock.json
+
+      - name: Set up Java 21 for Firestore emulator
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install backend dependencies
+        run: npm ci
+
+      - name: Check backend formatting
+        run: npm run format
+
+      - name: Lint backend
+        run: npm run lint
+
+      - name: Type-check backend
+        run: npm run typecheck
+
+      - name: Test backend
+        run: npm test
+
+      - name: Test Firestore rules
+        run: npm run test:emulator
+
+      - name: Build backend
+        run: npm run build
+
   analyze-and-test:
     name: Analyze and test
     runs-on: ubuntu-latest

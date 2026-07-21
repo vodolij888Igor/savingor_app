@@ -296,12 +296,12 @@ Technologies present in this repository:
 |-------|------------|
 | Mobile framework | **Flutter / Dart** (SDK `^3.5.3`) |
 | Navigation | **go_router** |
-| Backend | **Firebase Authentication**, **Cloud Firestore** |
+| Backend | **Firebase Authentication**, **Cloud Firestore**, **Firebase Functions v2** |
 | Local persistence | **shared_preferences** |
 | OCR | **google_mlkit_text_recognition** |
 | Maps & location | **google_maps_flutter**, **geolocator**, Google Places HTTP integration |
 | Subscriptions | **purchases_flutter** (RevenueCat), demo fallback |
-| AI assistant | **http** client → OpenAI-compatible API (`--dart-define`) |
+| AI | Existing OpenAI-compatible savings assistant; server-side GPT-5.6 Sol receipt foundation |
 | Localization | Flutter **gen-l10n** with ARB files |
 | UI assets | **flutter_svg** |
 | Android build | **Gradle**, `compileSdk 35`, ProGuard rules for ML Kit release builds |
@@ -387,7 +387,7 @@ The app calls `Firebase.initializeApp()` at startup.
 
 Enable Firebase Authentication (Email/Password) in your Firebase project. Deploy or sync rules from `firestore.rules` for your environment. Production security must rely on Firebase Authentication, those rules, and appropriate API restrictions—not on hiding client config in the repo.
 
-**Never commit** real secrets or private server credentials (`.env` files, keystore files, `key.properties`, service-account JSON, Firebase Admin SDK keys, or private API keys). Use `--dart-define` or local env files that stay out of Git (see below).
+**Never commit** real secrets or private server credentials (`.env` files, keystore files, `key.properties`, service-account JSON, Firebase Admin SDK keys, or private API keys). Private server API keys must not be passed through `--dart-define`, because Flutter build-time values are recoverable from the client application.
 
 ### Optional build-time defines
 
@@ -401,12 +401,13 @@ Supply keys via `--dart-define` (never commit real values to source control):
 --dart-define=REVENUECAT_ANDROID_API_KEY=YOUR_PUBLIC_KEY
 --dart-define=REVENUECAT_IOS_API_KEY=YOUR_PUBLIC_KEY
 
-# AI Savings Assistant (Pro feature; omit for configured-but-disabled mode)
---dart-define=OPENAI_API_KEY=YOUR_KEY
---dart-define=OPENAI_MODEL=gpt-4o-mini
 ```
 
 Google Maps on Android reads `GOOGLE_PLACES_API_KEY` from Gradle `dart-defines` for manifest placeholders.
+
+The OpenAI key for Smart Receipt Firebase Functions is stored only in Google Cloud Secret Manager. See [`functions/README.md`](functions/README.md) for the backend contract and interactive secret configuration command.
+
+The pre-existing AI Savings Assistant development client remains unchanged for compatibility. It is outside the Smart Receipt security boundary and still requires a future migration to its own authenticated backend before production use. Do not reuse that legacy client-side path for Smart Receipt.
 
 ### Run, analyze, test, and build
 
@@ -445,7 +446,7 @@ This project demonstrates the following engineering capabilities:
 - **Firebase backend integration** — authentication, Firestore-backed stores, reactive UI updates
 - **OCR and document parsing** — ML Kit integration, layout heuristics, weighted-line pairing, metadata filtering
 - **Reactive data synchronization** — ChangeNotifier stores with Firestore streams and derived dashboard state
-- **AI feature integration** — structured context building, Pro-gated assistant UI, OpenAI-compatible client architecture
+- **AI feature integration** — structured context building, Pro-gated assistant UI, and a secure server-side receipt-intelligence foundation
 - **Free / Pro access-control architecture** — centralized policy, scan limits, RevenueCat-ready subscription layer
 - **Maps and location services** — Google Maps, geolocation, Places search with mock fallback
 - **Localization and theming** — six-language ARB localization, light/dark themes

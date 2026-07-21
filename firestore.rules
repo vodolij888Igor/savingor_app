@@ -29,6 +29,15 @@ service cloud.firestore {
         request.resource.data.userId == request.auth.uid;
     }
 
+    // Server-only Smart Receipt quota and project budget documents.
+    match /smartReceiptRateLimits/{documentId} {
+      allow read, write: if false;
+    }
+
+    match /smartReceiptProjectBudgets/{documentId} {
+      allow read, write: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
