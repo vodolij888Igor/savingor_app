@@ -20,6 +20,7 @@ import 'package:savingor_app/features/scanner/presentation/screens/receipt_detai
 import 'package:savingor_app/features/receipts/domain/models/receipt_item.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt_source.dart';
 import 'package:savingor_app/features/scanner/domain/receipt_ocr_draft_mapper.dart';
+import 'package:savingor_app/features/scanner/domain/models/smart_receipt.dart';
 import 'package:savingor_app/features/shopping/presentation/screens/shopping_lists_screen.dart';
 import 'package:savingor_app/features/shopping/presentation/screens/shopping_list_detail_screen.dart';
 import 'package:savingor_app/features/shopping/presentation/screens/create_shopping_list_screen.dart';
@@ -211,6 +212,19 @@ GoRouter createAppRouter({required AppState appState}) {
             final ReceiptSource initialSource = _parseReceiptSource(
               extra['initialSource'] as String?,
             );
+            final SmartReceiptProvenance? smartReceiptProvenance =
+                _parseSmartReceiptProvenance(
+              extra['smartReceiptProvenance'] as String?,
+            );
+            final SmartReceiptFailureKind? smartReceiptFallbackReason =
+                _parseSmartReceiptFailureKind(
+              extra['smartReceiptFallbackReason'] as String?,
+            );
+            final List<String> smartReceiptWarningCodes =
+                (extra['smartReceiptWarningCodes'] as List<dynamic>?)
+                        ?.whereType<String>()
+                        .toList(growable: false) ??
+                    const <String>[];
 
             return CreateReceiptScreen(
               receiptId: extra['receiptId'] as String?,
@@ -225,7 +239,11 @@ GoRouter createAppRouter({required AppState appState}) {
               initialItems: initialItems,
               initialSubtotal: initialSubtotal,
               initialTax: initialTax,
+              initialCurrency: extra['initialCurrency'] as String?,
               initialSource: initialSource,
+              smartReceiptProvenance: smartReceiptProvenance,
+              smartReceiptFallbackReason: smartReceiptFallbackReason,
+              smartReceiptWarningCodes: smartReceiptWarningCodes,
               isEditing: extra['isEditing'] == true,
             );
           }
@@ -384,4 +402,19 @@ GoRouter createAppRouter({required AppState appState}) {
 
 ReceiptSource _parseReceiptSource(String? value) {
   return ReceiptSource.fromValue(value);
+}
+
+SmartReceiptProvenance? _parseSmartReceiptProvenance(String? value) {
+  for (final SmartReceiptProvenance provenance
+      in SmartReceiptProvenance.values) {
+    if (provenance.name == value) return provenance;
+  }
+  return null;
+}
+
+SmartReceiptFailureKind? _parseSmartReceiptFailureKind(String? value) {
+  for (final SmartReceiptFailureKind kind in SmartReceiptFailureKind.values) {
+    if (kind.name == value) return kind;
+  }
+  return null;
 }

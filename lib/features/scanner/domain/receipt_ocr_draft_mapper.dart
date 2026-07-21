@@ -1,6 +1,7 @@
 import 'package:savingor_app/features/receipts/domain/models/receipt_item.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt_source.dart';
 import 'package:savingor_app/features/scanner/data/receipt_ocr_parser.dart';
+import 'package:savingor_app/features/scanner/domain/models/smart_receipt.dart';
 
 /// Converts OCR parse output into editable receipt draft values.
 abstract final class ReceiptOcrDraftMapper {
@@ -62,6 +63,52 @@ abstract final class ReceiptOcrDraftMapper {
     };
   }
 
+  /// Builds editable route values from either an AI-enhanced or local draft.
+  /// Saving remains an explicit action on the existing receipt review screen.
+  static Map<String, dynamic> buildSmartReceiptExtra(SmartReceiptDraft draft) {
+    final List<ReceiptItem> items = <ReceiptItem>[];
+    for (int index = 0; index < draft.data.items.length; index++) {
+      final SmartReceiptItemData item = draft.data.items[index];
+      final String name = item.name?.trim() ?? '';
+      if (name.isEmpty) continue;
+      final double quantity = item.quantity ?? 1;
+      final double totalPrice = item.totalPrice ?? 0;
+      items.add(
+        ReceiptItem(
+          id: 'smart_receipt_item_$index',
+          name: name,
+          quantity: quantity,
+          unit: item.unit,
+          unitPrice: item.unitPrice ??
+              (quantity > 0 && totalPrice > 0 ? totalPrice / quantity : null),
+          totalPrice: totalPrice,
+          category: item.category,
+          confidence: draft.provenance == SmartReceiptProvenance.aiEnhanced
+              ? 0.85
+              : 0.75,
+        ),
+      );
+    }
+
+    return <String, dynamic>{
+      'initialStoreName': draft.data.storeName,
+      'initialDate': draft.data.purchaseDate,
+      'initialTotal': draft.data.total,
+      'initialSubtotal': draft.data.subtotal,
+      'initialTax': draft.data.tax,
+      'initialCategory': 'Grocery',
+      'initialCurrency': draft.data.currency,
+      if (draft.rawOcrText.trim().isNotEmpty)
+        'initialOcrRawText': draft.rawOcrText,
+      'initialItems': itemsToExtra(items),
+      'initialSource': draft.source.value,
+      'smartReceiptProvenance': draft.provenance.name,
+      'smartReceiptWarningCodes': draft.data.warningCodes,
+      if (draft.fallbackReason != null)
+        'smartReceiptFallbackReason': draft.fallbackReason!.name,
+    };
+  }
+
   /// Serializes draft items for GoRouter `extra` maps.
   static List<Map<String, dynamic>> itemsToExtra(
     List<ReceiptItem> items,
@@ -73,6 +120,8 @@ abstract final class ReceiptOcrDraftMapper {
             'quantity': item.quantity,
             'totalPrice': item.totalPrice,
             if (item.unitPrice != null) 'unitPrice': item.unitPrice,
+            if (item.unit != null) 'unit': item.unit,
+            if (item.category != null) 'category': item.category,
           },
         )
         .toList(growable: false);
@@ -95,15 +144,19 @@ abstract final class ReceiptOcrDraftMapper {
       final double quantity = _parseDouble(raw['quantity'], fallback: 1);
       final double totalPrice = _parseDouble(raw['totalPrice']);
       final double? unitPrice = _nullableDouble(raw['unitPrice']);
+      final String? unit = (raw['unit'] as String?)?.trim();
+      final String? category = (raw['category'] as String?)?.trim();
 
       items.add(
         ReceiptItem(
           id: 'ocr_item_restored_$index',
           name: name,
           quantity: quantity,
+          unit: unit == null || unit.isEmpty ? null : unit,
           unitPrice: unitPrice ??
               (quantity > 0 && totalPrice > 0 ? totalPrice / quantity : null),
           totalPrice: totalPrice,
+          category: category == null || category.isEmpty ? null : category,
         ),
       );
       index++;

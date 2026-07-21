@@ -588,6 +588,60 @@ class AppLocalizationsFr extends AppLocalizations {
   String get itemsColon => 'Articles :';
 
   @override
+  String get smartReceiptImprovingTitle => 'Amélioration avec GPT-5.6...';
+
+  @override
+  String get smartReceiptImprovingSubtitle => 'Seul le texte du reçu est envoyé de façon sécurisée. L’image reste sur cet appareil.';
+
+  @override
+  String get smartReceiptAiEnhanced => 'Amélioré par l’IA';
+
+  @override
+  String get smartReceiptAiEnhancedDescription => 'GPT-5.6 a structuré les détails du reçu. Vérifiez et modifiez tout avant d’enregistrer.';
+
+  @override
+  String get smartReceiptLocalParser => 'Analyse locale';
+
+  @override
+  String get smartReceiptLocalFallbackDescription => 'L’intelligence des reçus est indisponible pour le moment. Les données locales sont prêtes à être vérifiées.';
+
+  @override
+  String get smartReceiptLocalQuotaDescription => 'La limite de démonstration Smart Receipt est atteinte. Les données locales sont prêtes à être vérifiées.';
+
+  @override
+  String get smartReceiptLocalSignInDescription => 'Connectez-vous pour utiliser l’intelligence des reçus. Les données locales sont prêtes à être vérifiées.';
+
+  @override
+  String get smartReceiptReviewTitle => 'Vérifier avant d’enregistrer';
+
+  @override
+  String get smartReceiptWarningUncertain => 'Certains détails du reçu étaient incertains. Vérifiez soigneusement ces valeurs.';
+
+  @override
+  String get smartReceiptWarningTotals => 'Les totaux du reçu peuvent être incohérents. Vérifiez le sous-total, les taxes, le total et les prix.';
+
+  @override
+  String get smartReceiptWarningInvalid => 'Certaines valeurs n’ont pas pu être validées et ont été laissées vides pour vérification.';
+
+  @override
+  String get smartReceiptWarningPrivacy => 'Les identifiants privés ont été supprimés avant le traitement du texte du reçu.';
+
+  @override
+  String get smartReceiptWarningItems => 'Le reçu contient plus d’articles que Smart Receipt ne peut en traiter. Vérifiez la liste.';
+
+  @override
+  String get currencyCodeLabel => 'Code de devise';
+
+  @override
+  String get unitOptional => 'Unité (facultatif)';
+
+  @override
+  String get unitPriceOptional => 'Prix unitaire (facultatif)';
+
+  @override
+  String get lineTotal => 'Total de la ligne';
+
+  @override
   String get addReceipt => 'Ajouter un reçu';
 
   @override

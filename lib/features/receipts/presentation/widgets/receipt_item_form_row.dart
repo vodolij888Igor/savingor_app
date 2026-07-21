@@ -9,6 +9,8 @@ class ReceiptItemFormRow extends StatelessWidget {
     super.key,
     required this.nameController,
     required this.quantityController,
+    required this.unitController,
+    required this.unitPriceController,
     required this.priceController,
     required this.categoryController,
     required this.onRemove,
@@ -17,6 +19,8 @@ class ReceiptItemFormRow extends StatelessWidget {
 
   final TextEditingController nameController;
   final TextEditingController quantityController;
+  final TextEditingController unitController;
+  final TextEditingController unitPriceController;
   final TextEditingController priceController;
   final TextEditingController categoryController;
   final VoidCallback onRemove;
@@ -107,7 +111,46 @@ class ReceiptItemFormRow extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Expanded(
-                flex: 2,
+                child: TextFormField(
+                  controller: unitController,
+                  enabled: enabled,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    labelText: l10n.unitOptional,
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: TextFormField(
+                  controller: unitPriceController,
+                  enabled: enabled,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    labelText: l10n.unitPriceOptional,
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  validator: (String? value) {
+                    if (value == null || value.trim().isEmpty) return null;
+                    final double? price = double.tryParse(value.trim());
+                    if (price == null || price < 0) {
+                      return l10n.invalidValue;
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
                 child: TextFormField(
                   controller: priceController,
                   enabled: enabled,
@@ -115,20 +158,18 @@ class ReceiptItemFormRow extends StatelessWidget {
                       const TextInputType.numberWithOptions(decimal: true),
                   textInputAction: TextInputAction.next,
                   decoration: InputDecoration(
-                    labelText: l10n.price,
-                    prefixText: '\$ ',
+                    labelText: l10n.lineTotal,
                     border: const OutlineInputBorder(),
                     isDense: true,
                   ),
                   validator: (String? value) {
                     if (value == null || value.trim().isEmpty) {
-                      return l10n.price;
+                      return l10n.lineTotal;
                     }
                     final double? price = double.tryParse(value.trim());
-                    if (price == null || price < 0) {
-                      return l10n.invalidValue;
-                    }
-                    return null;
+                    return price == null || price < 0
+                        ? l10n.invalidValue
+                        : null;
                   },
                 ),
               ),
@@ -157,6 +198,8 @@ class EditableReceiptItemFields {
     required this.id,
     required this.nameController,
     required this.quantityController,
+    required this.unitController,
+    required this.unitPriceController,
     required this.priceController,
     required this.categoryController,
   });
@@ -166,6 +209,8 @@ class EditableReceiptItemFields {
       id: 'item_${DateTime.now().microsecondsSinceEpoch}',
       nameController: TextEditingController(),
       quantityController: TextEditingController(text: '1'),
+      unitController: TextEditingController(),
+      unitPriceController: TextEditingController(),
       priceController: TextEditingController(),
       categoryController: TextEditingController(),
     );
@@ -176,6 +221,8 @@ class EditableReceiptItemFields {
     required String name,
     required double quantity,
     required double totalPrice,
+    String? unit,
+    double? unitPrice,
     String? category,
   }) {
     return EditableReceiptItemFields(
@@ -186,6 +233,10 @@ class EditableReceiptItemFields {
             ? quantity.toInt().toString()
             : quantity.toString(),
       ),
+      unitController: TextEditingController(text: unit ?? ''),
+      unitPriceController: TextEditingController(
+        text: unitPrice?.toStringAsFixed(2) ?? '',
+      ),
       priceController:
           TextEditingController(text: totalPrice.toStringAsFixed(2)),
       categoryController: TextEditingController(text: category ?? ''),
@@ -195,12 +246,16 @@ class EditableReceiptItemFields {
   final String id;
   final TextEditingController nameController;
   final TextEditingController quantityController;
+  final TextEditingController unitController;
+  final TextEditingController unitPriceController;
   final TextEditingController priceController;
   final TextEditingController categoryController;
 
   void dispose() {
     nameController.dispose();
     quantityController.dispose();
+    unitController.dispose();
+    unitPriceController.dispose();
     priceController.dispose();
     categoryController.dispose();
   }

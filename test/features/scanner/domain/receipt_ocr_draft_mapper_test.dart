@@ -4,6 +4,7 @@ import 'package:savingor_app/features/receipts/domain/models/receipt_item.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt_source.dart';
 import 'package:savingor_app/features/scanner/data/receipt_ocr_parser.dart';
 import 'package:savingor_app/features/scanner/domain/receipt_ocr_draft_mapper.dart';
+import 'package:savingor_app/features/scanner/domain/models/smart_receipt.dart';
 
 import '../data/receipt_ocr_metro_fixture.dart';
 
@@ -45,8 +46,10 @@ void main() {
           id: 'a',
           name: 'Bread',
           quantity: 2,
+          unit: 'loaf',
           unitPrice: 1.5,
           totalPrice: 3,
+          category: 'Bakery',
         ),
       ];
 
@@ -59,6 +62,9 @@ void main() {
       expect(restored.single.name, 'Bread');
       expect(restored.single.quantity, 2);
       expect(restored.single.totalPrice, 3);
+      expect(restored.single.unit, 'loaf');
+      expect(restored.single.unitPrice, 1.5);
+      expect(restored.single.category, 'Bakery');
     });
 
     test('manual corrections are preserved in built receipt items', () {
@@ -79,6 +85,55 @@ void main() {
 
       expect(corrected.name, 'Organic Milk 2L');
       expect(corrected.totalPrice, 5.49);
+    });
+
+    test('maps every Smart Receipt field into editable route state', () {
+      final Map<String, dynamic> extra =
+          ReceiptOcrDraftMapper.buildSmartReceiptExtra(
+        SmartReceiptDraft(
+          data: SmartReceiptData(
+            storeName: 'Market',
+            purchaseDate: DateTime(2026, 6, 12),
+            currency: 'CAD',
+            subtotal: 10,
+            tax: 1.30,
+            total: 11.30,
+            items: const <SmartReceiptItemData>[
+              SmartReceiptItemData(
+                name: 'Milk',
+                quantity: 2,
+                unit: 'L',
+                unitPrice: 2.25,
+                totalPrice: 4.50,
+                category: 'Dairy',
+              ),
+            ],
+            warningCodes: const <String>['UNCERTAIN_TAX'],
+          ),
+          rawOcrText: 'Market\nMilk 4.50',
+          source: ReceiptSource.gallery,
+          provenance: SmartReceiptProvenance.aiEnhanced,
+        ),
+      );
+      final List<ReceiptItem> restored = ReceiptOcrDraftMapper.itemsFromExtra(
+        extra['initialItems'] as List<dynamic>,
+      );
+
+      expect(extra['initialStoreName'], 'Market');
+      expect(extra['initialDate'], DateTime(2026, 6, 12));
+      expect(extra['initialCurrency'], 'CAD');
+      expect(extra['initialSubtotal'], 10);
+      expect(extra['initialTax'], 1.30);
+      expect(extra['initialTotal'], 11.30);
+      expect(extra['initialOcrRawText'], 'Market\nMilk 4.50');
+      expect(extra['smartReceiptProvenance'], 'aiEnhanced');
+      expect(extra['smartReceiptWarningCodes'], <String>['UNCERTAIN_TAX']);
+      expect(restored.single.name, 'Milk');
+      expect(restored.single.quantity, 2);
+      expect(restored.single.unit, 'L');
+      expect(restored.single.unitPrice, 2.25);
+      expect(restored.single.totalPrice, 4.50);
+      expect(restored.single.category, 'Dairy');
     });
     test('valid priced items are eligible for price memory', () {
       final Receipt receipt = Receipt(

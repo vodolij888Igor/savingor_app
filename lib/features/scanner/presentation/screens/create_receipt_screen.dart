@@ -9,7 +9,9 @@ import 'package:savingor_app/features/receipts/domain/models/receipt_item.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt_source.dart';
 import 'package:savingor_app/features/receipts/presentation/widgets/receipt_item_form_row.dart';
 import 'package:savingor_app/features/scanner/data/receipt_store.dart';
+import 'package:savingor_app/features/scanner/domain/models/smart_receipt.dart';
 import 'package:savingor_app/features/scanner/presentation/widgets/receipt_scan_limit_sheet.dart';
+import 'package:savingor_app/features/scanner/presentation/widgets/smart_receipt_review_banner.dart';
 import 'package:savingor_app/l10n/app_localizations.dart';
 
 class CreateReceiptScreen extends StatefulWidget {
@@ -27,7 +29,11 @@ class CreateReceiptScreen extends StatefulWidget {
     this.initialItems = const <ReceiptItem>[],
     this.initialSubtotal,
     this.initialTax,
+    this.initialCurrency,
     this.initialSource = ReceiptSource.manual,
+    this.smartReceiptProvenance,
+    this.smartReceiptFallbackReason,
+    this.smartReceiptWarningCodes = const <String>[],
     this.isEditing = false,
   });
 
@@ -43,7 +49,11 @@ class CreateReceiptScreen extends StatefulWidget {
   final List<ReceiptItem> initialItems;
   final double? initialSubtotal;
   final double? initialTax;
+  final String? initialCurrency;
   final ReceiptSource initialSource;
+  final SmartReceiptProvenance? smartReceiptProvenance;
+  final SmartReceiptFailureKind? smartReceiptFallbackReason;
+  final List<String> smartReceiptWarningCodes;
   final bool isEditing;
   @override
   State<CreateReceiptScreen> createState() => _CreateReceiptScreenState();
@@ -59,6 +69,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
   final TextEditingController _taxController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
+  final TextEditingController _currencyController = TextEditingController();
 
   DateTime _selectedDate = DateTime.now();
   bool _isSaving = false;
@@ -67,6 +78,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
   String? _ocrRawText;
   final List<EditableReceiptItemFields> _itemFields =
       <EditableReceiptItemFields>[];
+  bool _currencyInitialized = false;
 
   @override
   void initState() {
@@ -91,6 +103,9 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
     if (widget.initialTax != null) {
       _taxController.text = widget.initialTax!.toStringAsFixed(2);
     }
+    if (widget.initialCurrency != null) {
+      _currencyController.text = widget.initialCurrency!.trim().toUpperCase();
+    }
     if (widget.initialNotes != null) {
       _notesController.text = widget.initialNotes!;
     }
@@ -111,6 +126,8 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
           id: item.id,
           name: item.name,
           quantity: item.quantity,
+          unit: item.unit,
+          unitPrice: item.unitPrice,
           totalPrice: item.totalPrice,
           category: item.category,
         );
@@ -135,6 +152,17 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
     }
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_currencyInitialized) {
+      _currencyInitialized = true;
+      if (_currencyController.text.trim().isEmpty) {
+        _currencyController.text = AppStateProvider.of(context).currency;
+      }
+    }
+  }
+
   void _loadExistingReceipt() {
     final ReceiptStore store = ReceiptProvider.of(context);
     final Receipt? receipt = store.receiptById(widget.receiptId!);
@@ -152,6 +180,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
       _taxController.text = receipt.tax?.toStringAsFixed(2) ?? '';
       _addressController.text = receipt.displayAddress ?? '';
       _notesController.text = receipt.notes ?? '';
+      _currencyController.text = receipt.currency;
       _ocrRawText = receipt.ocrRawText;
       _source = receipt.source;
       _totalManuallyEdited = true;
@@ -167,6 +196,8 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
           id: item.id,
           name: item.name,
           quantity: item.quantity,
+          unit: item.unit,
+          unitPrice: item.unitPrice,
           totalPrice: item.totalPrice,
           category: item.category,
         );
@@ -186,6 +217,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
     _taxController.dispose();
     _addressController.dispose();
     _notesController.dispose();
+    _currencyController.dispose();
     for (final EditableReceiptItemFields fields in _itemFields) {
       fields.dispose();
     }
@@ -273,15 +305,22 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
       final String? category = fields.categoryController.text.trim().isEmpty
           ? null
           : fields.categoryController.text.trim();
+      final String? unit = fields.unitController.text.trim().isEmpty
+          ? null
+          : fields.unitController.text.trim();
+      final double? explicitUnitPrice =
+          double.tryParse(fields.unitPriceController.text.trim());
 
       items.add(
         ReceiptItem(
           id: fields.id,
           name: name,
           quantity: quantity,
+          unit: unit,
           totalPrice: totalPrice,
           category: category,
-          unitPrice: quantity > 0 ? totalPrice / quantity : totalPrice,
+          unitPrice: explicitUnitPrice ??
+              (quantity > 0 ? totalPrice / quantity : totalPrice),
         ),
       );
     }
@@ -343,6 +382,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
         notes: notes,
         categorySummary: categorySummary,
         items: items,
+        currency: _currencyController.text.trim().toUpperCase(),
       );
 
       if (!mounted) return;
@@ -362,7 +402,6 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
       return;
     }
 
-    final AppState appState = AppStateProvider.of(context);
     final String? receiptId = await store.createReceipt(
       storeName: _storeController.text.trim(),
       purchaseDate: _selectedDate,
@@ -375,7 +414,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
       categorySummary: categorySummary,
       items: items,
       ocrRawText: _ocrRawText,
-      currency: appState.currency,
+      currency: _currencyController.text.trim().toUpperCase(),
     );
 
     if (!mounted) return;
@@ -416,6 +455,8 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
         widget.isEditing ? l10n.editReceipt : l10n.addReceipt;
     final String saveLabel =
         widget.isEditing ? l10n.updateReceipt : l10n.saveReceipt;
+    final String currencyCode = _currencyController.text.trim().toUpperCase();
+    final String moneyPrefix = currencyCode.isEmpty ? '' : '$currencyCode ';
 
     return Scaffold(
       backgroundColor: context.savingor.pageBackground,
@@ -453,6 +494,14 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
               24 + bottomInset + keyboardInset,
             ),
             children: <Widget>[
+              if (widget.smartReceiptProvenance != null) ...<Widget>[
+                SmartReceiptReviewBanner(
+                  provenance: widget.smartReceiptProvenance!,
+                  fallbackReason: widget.smartReceiptFallbackReason,
+                  warningCodes: widget.smartReceiptWarningCodes,
+                ),
+                const SizedBox(height: 16),
+              ],
               TextFormField(
                 controller: _storeController,
                 enabled: !_isSaving,
@@ -464,6 +513,26 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
                 validator: (String? value) {
                   if (value == null || value.trim().isEmpty) {
                     return l10n.enterStoreName;
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _currencyController,
+                enabled: !_isSaving,
+                textCapitalization: TextCapitalization.characters,
+                maxLength: 3,
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  labelText: l10n.currencyCodeLabel,
+                  border: const OutlineInputBorder(),
+                  counterText: '',
+                ),
+                validator: (String? value) {
+                  final String currency = value?.trim().toUpperCase() ?? '';
+                  if (!RegExp(r'^[A-Z]{3}$').hasMatch(currency)) {
+                    return l10n.invalidValue;
                   }
                   return null;
                 },
@@ -518,7 +587,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
                       ),
                       decoration: InputDecoration(
                         labelText: l10n.subtotalOptional,
-                        prefixText: '\$ ',
+                        prefixText: moneyPrefix,
                         border: const OutlineInputBorder(),
                       ),
                     ),
@@ -533,7 +602,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
                       ),
                       decoration: InputDecoration(
                         labelText: l10n.taxOptional,
-                        prefixText: '\$ ',
+                        prefixText: moneyPrefix,
                         border: const OutlineInputBorder(),
                       ),
                     ),
@@ -549,7 +618,7 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
                 onChanged: (_) => _totalManuallyEdited = true,
                 decoration: InputDecoration(
                   labelText: l10n.receiptTotal,
-                  prefixText: '\$ ',
+                  prefixText: moneyPrefix,
                   border: const OutlineInputBorder(),
                   helperText: _itemFields.isNotEmpty
                       ? l10n.autoCalculatedFromItems
@@ -602,6 +671,8 @@ class _CreateReceiptScreenState extends State<CreateReceiptScreen> {
                   return ReceiptItemFormRow(
                     nameController: fields.nameController,
                     quantityController: fields.quantityController,
+                    unitController: fields.unitController,
+                    unitPriceController: fields.unitPriceController,
                     priceController: fields.priceController,
                     categoryController: fields.categoryController,
                     enabled: !_isSaving,

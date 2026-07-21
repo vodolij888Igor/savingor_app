@@ -237,6 +237,7 @@ class ReceiptStore extends ChangeNotifier {
     String? notes,
     String? categorySummary,
     List<ReceiptItem>? items,
+    String? currency,
   }) async {
     if (_uid == null) {
       _mutationError = 'Sign in to update receipts.';
@@ -268,6 +269,7 @@ class ReceiptStore extends ChangeNotifier {
         categorySummary:
             _trimOrNull(categorySummary) ?? existing.categorySummary,
         items: items,
+        currency: _trimOrNull(currency)?.toUpperCase(),
         updatedAt: DateTime.now(),
       );
       await _service.updateReceipt(_uid!, updated);

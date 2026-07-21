@@ -1177,6 +1177,114 @@ abstract class AppLocalizations {
   /// **'Items:'**
   String get itemsColon;
 
+  /// No description provided for @smartReceiptImprovingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Improving with GPT-5.6...'**
+  String get smartReceiptImprovingTitle;
+
+  /// No description provided for @smartReceiptImprovingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Only receipt text is sent securely. Your image stays on this device.'**
+  String get smartReceiptImprovingSubtitle;
+
+  /// No description provided for @smartReceiptAiEnhanced.
+  ///
+  /// In en, this message translates to:
+  /// **'AI enhanced'**
+  String get smartReceiptAiEnhanced;
+
+  /// No description provided for @smartReceiptAiEnhancedDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'GPT-5.6 organized the receipt details. Review and edit everything before saving.'**
+  String get smartReceiptAiEnhancedDescription;
+
+  /// No description provided for @smartReceiptLocalParser.
+  ///
+  /// In en, this message translates to:
+  /// **'Local parser'**
+  String get smartReceiptLocalParser;
+
+  /// No description provided for @smartReceiptLocalFallbackDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt intelligence is unavailable right now. Your local receipt details are ready to review.'**
+  String get smartReceiptLocalFallbackDescription;
+
+  /// No description provided for @smartReceiptLocalQuotaDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'The Smart Receipt demo limit was reached. Your local receipt details are ready to review.'**
+  String get smartReceiptLocalQuotaDescription;
+
+  /// No description provided for @smartReceiptLocalSignInDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to use Smart Receipt intelligence. Your local receipt details are ready to review.'**
+  String get smartReceiptLocalSignInDescription;
+
+  /// No description provided for @smartReceiptReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review before saving'**
+  String get smartReceiptReviewTitle;
+
+  /// No description provided for @smartReceiptWarningUncertain.
+  ///
+  /// In en, this message translates to:
+  /// **'Some receipt details were unclear. Check those values carefully.'**
+  String get smartReceiptWarningUncertain;
+
+  /// No description provided for @smartReceiptWarningTotals.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt totals may not add up. Verify subtotal, tax, total, and item prices.'**
+  String get smartReceiptWarningTotals;
+
+  /// No description provided for @smartReceiptWarningInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Some values could not be validated and were left blank for your review.'**
+  String get smartReceiptWarningInvalid;
+
+  /// No description provided for @smartReceiptWarningPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Private identifiers were removed before receipt text was processed.'**
+  String get smartReceiptWarningPrivacy;
+
+  /// No description provided for @smartReceiptWarningItems.
+  ///
+  /// In en, this message translates to:
+  /// **'The receipt had more items than Smart Receipt can process. Review the item list.'**
+  String get smartReceiptWarningItems;
+
+  /// No description provided for @currencyCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency code'**
+  String get currencyCodeLabel;
+
+  /// No description provided for @unitOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit (optional)'**
+  String get unitOptional;
+
+  /// No description provided for @unitPriceOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit price (optional)'**
+  String get unitPriceOptional;
+
+  /// No description provided for @lineTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Line total'**
+  String get lineTotal;
+
   /// No description provided for @addReceipt.
   ///
   /// In en, this message translates to:

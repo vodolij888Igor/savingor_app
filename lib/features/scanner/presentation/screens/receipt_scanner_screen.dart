@@ -13,12 +13,14 @@ import 'package:savingor_app/features/scanner/data/receipt_store.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt.dart';
 import 'package:savingor_app/features/scanner/domain/models/receipt_ocr_result.dart';
 import 'package:savingor_app/features/scanner/domain/receipt_ocr_draft_mapper.dart';
+import 'package:savingor_app/features/scanner/domain/smart_receipt_enhancer.dart';
 import 'package:savingor_app/features/receipts/domain/models/receipt_source.dart';
 import 'package:savingor_app/features/receipts/presentation/widgets/receipt_source_badge.dart';
 import 'package:savingor_app/features/receipts/presentation/widgets/receipt_source_dialog.dart';
 import 'package:savingor_app/features/scanner/presentation/widgets/receipt_scan_access_builder.dart';
 import 'package:savingor_app/features/scanner/presentation/widgets/receipt_scan_limit_sheet.dart';
 import 'package:savingor_app/features/scanner/presentation/widgets/receipt_scan_usage_indicator.dart';
+import 'package:savingor_app/features/scanner/presentation/smart_receipt_provider.dart';
 import 'package:savingor_app/l10n/app_localizations.dart';
 
 class ReceiptScannerScreen extends StatefulWidget {
@@ -34,6 +36,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
   final ReceiptOcrParser _ocrParser = ReceiptOcrParser();
 
   bool _isScanning = false;
+  bool _isEnhancing = false;
   bool _historyExpanded = false;
 
   void _openCreateReceipt() {
@@ -114,16 +117,28 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
     }
   }
 
-  void _navigateToCreateFromOcr(
+  Future<void> _enhanceAndNavigate(
     ParsedReceiptData parsed,
     ReceiptSource receiptSource,
-  ) {
+  ) async {
+    final AppState appState = AppStateProvider.of(context);
+    final ReceiptStore store = ReceiptProvider.of(context);
+    final SmartReceiptEnhancer enhancer = SmartReceiptEnhancer(
+      SmartReceiptProvider.of(context),
+    );
+    setState(() => _isEnhancing = true);
+    final draft = await enhancer.enhance(
+      parsed: parsed,
+      source: receiptSource,
+      locale: Localizations.localeOf(context).toLanguageTag(),
+      currency: appState.currency,
+      isAuthenticated: store.isAuthenticated,
+    );
+    if (!mounted) return;
+    setState(() => _isEnhancing = false);
     context.push(
       '/scanner/create',
-      extra: ReceiptOcrDraftMapper.buildCreateReceiptExtra(
-        parsed: parsed,
-        receiptSource: receiptSource,
-      ),
+      extra: ReceiptOcrDraftMapper.buildSmartReceiptExtra(draft),
     );
   }
 
@@ -279,10 +294,10 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
               child: Text(l10n.close),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(dialogContext).pop();
                 if (!mounted) return;
-                _navigateToCreateFromOcr(parsed, receiptSource);
+                await _enhanceAndNavigate(parsed, receiptSource);
               },
               child: Text(
                 l10n.useThisReceipt,
@@ -407,7 +422,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
     ReceiptScanAccessSnapshot access,
   ) {
     final SavingorThemeExtension theme = context.savingor;
-    final bool scanDisabled = _isScanning || access.isLoading;
+    final bool scanDisabled = _isScanning || _isEnhancing || access.isLoading;
 
     return Container(
       width: double.infinity,
@@ -481,32 +496,83 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
               isLoading: access.isLoading,
             ),
           const SizedBox(height: SavingorSpacing.lg),
-          SavingorInteractiveFilledButton(
-            onPressed:
-                scanDisabled ? null : () => _onScanReceiptPressed(access),
-            width: double.infinity,
-            minHeight: 54,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-            borderRadius: BorderRadius.circular(18),
-            child: _isScanning
-                ? SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: theme.buttonLabelOnGreen,
-                    ),
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      const Icon(Icons.camera_alt_outlined, size: 20),
-                      const SizedBox(width: 8),
-                      Text(l10n.scanReceipt),
-                    ],
+          if (_isEnhancing)
+            Semantics(
+              liveRegion: true,
+              label:
+                  '${l10n.smartReceiptImprovingTitle}. ${l10n.smartReceiptImprovingSubtitle}',
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: context.savingor.surfacePrimary,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: SavingorColors.primaryStroke.withOpacity(0.2),
                   ),
-          ),
+                ),
+                child: Row(
+                  children: <Widget>[
+                    const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            l10n.smartReceiptImprovingTitle,
+                            style: TextStyle(
+                              color: context.savingor.textPrimary,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            l10n.smartReceiptImprovingSubtitle,
+                            style: TextStyle(
+                              color: context.savingor.textSecondary,
+                              fontSize: 12,
+                              height: 1.35,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            SavingorInteractiveFilledButton(
+              onPressed:
+                  scanDisabled ? null : () => _onScanReceiptPressed(access),
+              width: double.infinity,
+              minHeight: 54,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              borderRadius: BorderRadius.circular(18),
+              child: _isScanning
+                  ? SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: theme.buttonLabelOnGreen,
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        const Icon(Icons.camera_alt_outlined, size: 20),
+                        const SizedBox(width: 8),
+                        Text(l10n.scanReceipt),
+                      ],
+                    ),
+            ),
         ],
       ),
     );
@@ -517,7 +583,7 @@ class _ReceiptScannerScreenState extends State<ReceiptScannerScreen> {
     final bool isDark = theme.isDark;
 
     return OutlinedButton.icon(
-      onPressed: _isScanning ? null : _openCreateReceipt,
+      onPressed: _isScanning || _isEnhancing ? null : _openCreateReceipt,
       style: OutlinedButton.styleFrom(
         foregroundColor: isDark ? theme.textPrimary : theme.brandHeading,
         backgroundColor: isDark ? theme.surfaceElevated : theme.surfacePrimary,

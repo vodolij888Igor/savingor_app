@@ -588,6 +588,60 @@ class AppLocalizationsEs extends AppLocalizations {
   String get itemsColon => 'Artículos:';
 
   @override
+  String get smartReceiptImprovingTitle => 'Mejorando con GPT-5.6...';
+
+  @override
+  String get smartReceiptImprovingSubtitle => 'Solo se envía de forma segura el texto del recibo. La imagen permanece en este dispositivo.';
+
+  @override
+  String get smartReceiptAiEnhanced => 'Mejorado con IA';
+
+  @override
+  String get smartReceiptAiEnhancedDescription => 'GPT-5.6 organizó los datos del recibo. Revisa y edita todo antes de guardar.';
+
+  @override
+  String get smartReceiptLocalParser => 'Analizador local';
+
+  @override
+  String get smartReceiptLocalFallbackDescription => 'La inteligencia de recibos no está disponible ahora. Los datos locales del recibo están listos para revisar.';
+
+  @override
+  String get smartReceiptLocalQuotaDescription => 'Se alcanzó el límite de la demostración de Smart Receipt. Los datos locales están listos para revisar.';
+
+  @override
+  String get smartReceiptLocalSignInDescription => 'Inicia sesión para usar la inteligencia de recibos. Los datos locales están listos para revisar.';
+
+  @override
+  String get smartReceiptReviewTitle => 'Revisar antes de guardar';
+
+  @override
+  String get smartReceiptWarningUncertain => 'Algunos datos del recibo no estaban claros. Revisa esos valores con cuidado.';
+
+  @override
+  String get smartReceiptWarningTotals => 'Es posible que los totales no coincidan. Verifica subtotal, impuestos, total y precios de los artículos.';
+
+  @override
+  String get smartReceiptWarningInvalid => 'Algunos valores no pudieron validarse y se dejaron en blanco para su revisión.';
+
+  @override
+  String get smartReceiptWarningPrivacy => 'Los identificadores privados se eliminaron antes de procesar el texto del recibo.';
+
+  @override
+  String get smartReceiptWarningItems => 'El recibo tenía más artículos de los que Smart Receipt puede procesar. Revisa la lista.';
+
+  @override
+  String get currencyCodeLabel => 'Código de moneda';
+
+  @override
+  String get unitOptional => 'Unidad (opcional)';
+
+  @override
+  String get unitPriceOptional => 'Precio unitario (opcional)';
+
+  @override
+  String get lineTotal => 'Total de línea';
+
+  @override
   String get addReceipt => 'Añadir recibo';
 
   @override

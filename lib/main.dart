@@ -15,6 +15,7 @@ import 'package:savingor_app/features/shopping/data/shopping_lists_store.dart';
 import 'package:savingor_app/features/expenses/data/expense_store.dart';
 import 'package:savingor_app/features/expenses/data/expenses_store.dart';
 import 'package:savingor_app/features/scanner/data/receipt_store.dart';
+import 'package:savingor_app/features/scanner/presentation/smart_receipt_provider.dart';
 import 'package:savingor_app/features/price_memory/data/price_memory_store.dart';
 import 'package:savingor_app/features/ai_assistant/data/ai_savings_assistant_provider.dart';
 import 'package:savingor_app/features/subscription/data/subscription_service.dart';
@@ -49,6 +50,7 @@ Future<void> main() async {
   final receipts = ReceiptStore();
   final priceMemory = PriceMemoryStore();
   final aiAssistantService = createDefaultAiSavingsAssistantService();
+  final smartReceiptRepository = createDefaultSmartReceiptRepository();
 
   final GoRouter router = createAppRouter(appState: appState);
 
@@ -59,21 +61,24 @@ Future<void> main() async {
         notifier: debugSubscriptionOverride,
         child: AiSavingsAssistantProvider(
           service: aiAssistantService,
-          child: ExpensesProvider(
-            notifier: firestoreExpenses,
-            child: ReceiptProvider(
-              notifier: receipts,
-              child: PriceMemoryProvider(
-                notifier: priceMemory,
-                child: ExpenseProvider(
-                  notifier: expenses,
-                  child: ShoppingListsProvider(
-                    notifier: shoppingLists,
-                    child: ShoppingListProvider(
-                      notifier: shopping,
-                      child: FavoritesProvider(
-                        notifier: favorites,
-                        child: MyApp(router: router),
+          child: SmartReceiptProvider(
+            repository: smartReceiptRepository,
+            child: ExpensesProvider(
+              notifier: firestoreExpenses,
+              child: ReceiptProvider(
+                notifier: receipts,
+                child: PriceMemoryProvider(
+                  notifier: priceMemory,
+                  child: ExpenseProvider(
+                    notifier: expenses,
+                    child: ShoppingListsProvider(
+                      notifier: shoppingLists,
+                      child: ShoppingListProvider(
+                        notifier: shopping,
+                        child: FavoritesProvider(
+                          notifier: favorites,
+                          child: MyApp(router: router),
+                        ),
                       ),
                     ),
                   ),

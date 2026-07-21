@@ -594,6 +594,60 @@ class AppLocalizationsRu extends AppLocalizations {
   String get itemsColon => 'Товары:';
 
   @override
+  String get smartReceiptImprovingTitle => 'Улучшаем с помощью GPT-5.6...';
+
+  @override
+  String get smartReceiptImprovingSubtitle => 'Безопасно отправляется только текст чека. Изображение остаётся на этом устройстве.';
+
+  @override
+  String get smartReceiptAiEnhanced => 'Улучшено ИИ';
+
+  @override
+  String get smartReceiptAiEnhancedDescription => 'GPT-5.6 упорядочил данные чека. Проверьте и отредактируйте всё перед сохранением.';
+
+  @override
+  String get smartReceiptLocalParser => 'Локальный анализ';
+
+  @override
+  String get smartReceiptLocalFallbackDescription => 'Интеллектуальная обработка чеков сейчас недоступна. Локальные данные готовы к проверке.';
+
+  @override
+  String get smartReceiptLocalQuotaDescription => 'Достигнут лимит демонстрации Smart Receipt. Локальные данные готовы к проверке.';
+
+  @override
+  String get smartReceiptLocalSignInDescription => 'Войдите, чтобы использовать интеллектуальную обработку чеков. Локальные данные готовы к проверке.';
+
+  @override
+  String get smartReceiptReviewTitle => 'Проверьте перед сохранением';
+
+  @override
+  String get smartReceiptWarningUncertain => 'Некоторые данные чека были неясны. Внимательно проверьте эти значения.';
+
+  @override
+  String get smartReceiptWarningTotals => 'Суммы в чеке могут не совпадать. Проверьте подытог, налог, итог и цены товаров.';
+
+  @override
+  String get smartReceiptWarningInvalid => 'Некоторые значения не удалось проверить, поэтому они оставлены пустыми.';
+
+  @override
+  String get smartReceiptWarningPrivacy => 'Личные идентификаторы были удалены до обработки текста чека.';
+
+  @override
+  String get smartReceiptWarningItems => 'В чеке больше товаров, чем может обработать Smart Receipt. Проверьте список товаров.';
+
+  @override
+  String get currencyCodeLabel => 'Код валюты';
+
+  @override
+  String get unitOptional => 'Единица (необязательно)';
+
+  @override
+  String get unitPriceOptional => 'Цена за единицу (необязательно)';
+
+  @override
+  String get lineTotal => 'Сумма позиции';
+
+  @override
   String get addReceipt => 'Добавить чек';
 
   @override

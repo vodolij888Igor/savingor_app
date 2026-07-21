@@ -588,6 +588,60 @@ class AppLocalizationsEn extends AppLocalizations {
   String get itemsColon => 'Items:';
 
   @override
+  String get smartReceiptImprovingTitle => 'Improving with GPT-5.6...';
+
+  @override
+  String get smartReceiptImprovingSubtitle => 'Only receipt text is sent securely. Your image stays on this device.';
+
+  @override
+  String get smartReceiptAiEnhanced => 'AI enhanced';
+
+  @override
+  String get smartReceiptAiEnhancedDescription => 'GPT-5.6 organized the receipt details. Review and edit everything before saving.';
+
+  @override
+  String get smartReceiptLocalParser => 'Local parser';
+
+  @override
+  String get smartReceiptLocalFallbackDescription => 'Receipt intelligence is unavailable right now. Your local receipt details are ready to review.';
+
+  @override
+  String get smartReceiptLocalQuotaDescription => 'The Smart Receipt demo limit was reached. Your local receipt details are ready to review.';
+
+  @override
+  String get smartReceiptLocalSignInDescription => 'Sign in to use Smart Receipt intelligence. Your local receipt details are ready to review.';
+
+  @override
+  String get smartReceiptReviewTitle => 'Review before saving';
+
+  @override
+  String get smartReceiptWarningUncertain => 'Some receipt details were unclear. Check those values carefully.';
+
+  @override
+  String get smartReceiptWarningTotals => 'The receipt totals may not add up. Verify subtotal, tax, total, and item prices.';
+
+  @override
+  String get smartReceiptWarningInvalid => 'Some values could not be validated and were left blank for your review.';
+
+  @override
+  String get smartReceiptWarningPrivacy => 'Private identifiers were removed before receipt text was processed.';
+
+  @override
+  String get smartReceiptWarningItems => 'The receipt had more items than Smart Receipt can process. Review the item list.';
+
+  @override
+  String get currencyCodeLabel => 'Currency code';
+
+  @override
+  String get unitOptional => 'Unit (optional)';
+
+  @override
+  String get unitPriceOptional => 'Unit price (optional)';
+
+  @override
+  String get lineTotal => 'Line total';
+
+  @override
   String get addReceipt => 'Add receipt';
 
   @override

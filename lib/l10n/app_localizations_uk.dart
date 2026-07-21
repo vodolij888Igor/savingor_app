@@ -594,6 +594,60 @@ class AppLocalizationsUk extends AppLocalizations {
   String get itemsColon => 'Товари:';
 
   @override
+  String get smartReceiptImprovingTitle => 'Покращуємо за допомогою GPT-5.6...';
+
+  @override
+  String get smartReceiptImprovingSubtitle => 'Безпечно надсилається лише текст чека. Зображення залишається на цьому пристрої.';
+
+  @override
+  String get smartReceiptAiEnhanced => 'Покращено ШІ';
+
+  @override
+  String get smartReceiptAiEnhancedDescription => 'GPT-5.6 упорядкував дані чека. Перевірте й відредагуйте все перед збереженням.';
+
+  @override
+  String get smartReceiptLocalParser => 'Локальний аналіз';
+
+  @override
+  String get smartReceiptLocalFallbackDescription => 'Інтелектуальна обробка чеків зараз недоступна. Локальні дані готові до перевірки.';
+
+  @override
+  String get smartReceiptLocalQuotaDescription => 'Досягнуто ліміт демонстрації Smart Receipt. Локальні дані готові до перевірки.';
+
+  @override
+  String get smartReceiptLocalSignInDescription => 'Увійдіть, щоб використовувати інтелектуальну обробку чеків. Локальні дані готові до перевірки.';
+
+  @override
+  String get smartReceiptReviewTitle => 'Перевірте перед збереженням';
+
+  @override
+  String get smartReceiptWarningUncertain => 'Деякі дані чека були нечіткими. Уважно перевірте ці значення.';
+
+  @override
+  String get smartReceiptWarningTotals => 'Суми в чеку можуть не збігатися. Перевірте підсумок, податок, загальну суму й ціни товарів.';
+
+  @override
+  String get smartReceiptWarningInvalid => 'Деякі значення не вдалося перевірити, тому їх залишено порожніми.';
+
+  @override
+  String get smartReceiptWarningPrivacy => 'Приватні ідентифікатори було видалено до обробки тексту чека.';
+
+  @override
+  String get smartReceiptWarningItems => 'У чеку більше товарів, ніж може обробити Smart Receipt. Перевірте список товарів.';
+
+  @override
+  String get currencyCodeLabel => 'Код валюти';
+
+  @override
+  String get unitOptional => 'Одиниця (необов’язково)';
+
+  @override
+  String get unitPriceOptional => 'Ціна за одиницю (необов’язково)';
+
+  @override
+  String get lineTotal => 'Сума позиції';
+
+  @override
   String get addReceipt => 'Додати чек';
 
   @override

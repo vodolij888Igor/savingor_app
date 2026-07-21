@@ -588,6 +588,60 @@ class AppLocalizationsDe extends AppLocalizations {
   String get itemsColon => 'Artikel:';
 
   @override
+  String get smartReceiptImprovingTitle => 'Verbesserung mit GPT-5.6...';
+
+  @override
+  String get smartReceiptImprovingSubtitle => 'Nur der Belegtext wird sicher gesendet. Das Bild bleibt auf diesem Gerät.';
+
+  @override
+  String get smartReceiptAiEnhanced => 'KI-verbessert';
+
+  @override
+  String get smartReceiptAiEnhancedDescription => 'GPT-5.6 hat die Belegdaten strukturiert. Prüfen und bearbeiten Sie vor dem Speichern alle Angaben.';
+
+  @override
+  String get smartReceiptLocalParser => 'Lokale Erkennung';
+
+  @override
+  String get smartReceiptLocalFallbackDescription => 'Die intelligente Belegerkennung ist derzeit nicht verfügbar. Ihre lokal erkannten Belegdaten können überprüft werden.';
+
+  @override
+  String get smartReceiptLocalQuotaDescription => 'Das Smart-Receipt-Demolimit wurde erreicht. Ihre lokal erkannten Belegdaten können überprüft werden.';
+
+  @override
+  String get smartReceiptLocalSignInDescription => 'Melden Sie sich für die intelligente Belegerkennung an. Ihre lokal erkannten Belegdaten können überprüft werden.';
+
+  @override
+  String get smartReceiptReviewTitle => 'Vor dem Speichern prüfen';
+
+  @override
+  String get smartReceiptWarningUncertain => 'Einige Belegdaten waren unklar. Prüfen Sie diese Werte sorgfältig.';
+
+  @override
+  String get smartReceiptWarningTotals => 'Die Belegsummen stimmen möglicherweise nicht überein. Prüfen Sie Zwischensumme, Steuer, Gesamtbetrag und Artikelpreise.';
+
+  @override
+  String get smartReceiptWarningInvalid => 'Einige Werte konnten nicht validiert werden und wurden zur Prüfung leer gelassen.';
+
+  @override
+  String get smartReceiptWarningPrivacy => 'Private Kennungen wurden entfernt, bevor der Belegtext verarbeitet wurde.';
+
+  @override
+  String get smartReceiptWarningItems => 'Der Beleg enthält mehr Artikel, als Smart Receipt verarbeiten kann. Prüfen Sie die Artikelliste.';
+
+  @override
+  String get currencyCodeLabel => 'Währungscode';
+
+  @override
+  String get unitOptional => 'Einheit (optional)';
+
+  @override
+  String get unitPriceOptional => 'Preis pro Einheit (optional)';
+
+  @override
+  String get lineTotal => 'Zeilensumme';
+
+  @override
   String get addReceipt => 'Beleg hinzufügen';
 
   @override
