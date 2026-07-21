@@ -24,9 +24,9 @@ class MonthlyReceiptScanUsageService {
     return (start: start, end: end);
   }
 
-  bool countsTowardMonthlyLimit(Receipt receipt) {
+  bool countsTowardMonthlyLimit(Receipt receipt, {DateTime? now}) {
     return receipt.source.isFromImageCapture &&
-        isCreatedInCurrentLocalMonth(receipt.createdAt);
+        isCreatedInCurrentLocalMonth(receipt.createdAt, now);
   }
 
   bool isCreatedInCurrentLocalMonth(DateTime createdAt, [DateTime? now]) {

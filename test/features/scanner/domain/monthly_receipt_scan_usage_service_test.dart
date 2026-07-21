@@ -126,6 +126,7 @@ void main() {
       expect(
         service.countsTowardMonthlyLimit(
           scannedReceipt(createdAt: june2026, source: ReceiptSource.scanned),
+          now: june2026,
         ),
         isTrue,
       );
