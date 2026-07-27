@@ -22,6 +22,7 @@ import 'package:savingor_app/features/subscription/data/subscription_service.dar
 import 'package:savingor_app/features/subscription/data/debug_subscription_override_store.dart';
 import 'package:savingor_app/l10n/app_localizations.dart';
 import 'package:savingor_app/savingor/bootstrap/bootstrap_provider.dart';
+import 'package:savingor_app/savingor/modules/module_loader.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -112,6 +113,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppState appState = AppStateProvider.of(context);
+    final ModuleLoader moduleLoader =
+        PlatformBootstrapProvider.of(context).moduleLoader;
+    assertRegisteredModulesReady(moduleLoader);
 
     return ListenableBuilder(
       listenable: appState,
