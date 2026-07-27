@@ -79,46 +79,90 @@ export class OpenAIReceiptModel implements ReceiptExtractionModel {
   constructor(private readonly responses: OpenAIResponsesBoundary) {}
 
   async extract(input: ModelReceiptInput): Promise<unknown> {
-    const response = await this.responses.create({
-      model: OPENAI_MODEL,
-      instructions: RECEIPT_INSTRUCTIONS,
-      input: JSON.stringify({
-        rawOcrText: input.rawOcrText,
-        locale: input.locale,
-        currency: input.currency,
-        parserCandidate: input.parserCandidate,
-      }),
-      reasoning: { effort: OPENAI_REASONING_EFFORT },
-      max_output_tokens: OPENAI_MAX_OUTPUT_TOKENS,
-      safety_identifier: input.safetyIdentifier,
-      store: false,
-      text: {
-        format: {
-          type: "json_schema",
-          name: "savingor_smart_receipt",
-          description:
-            "A receipt extraction in which missing or uncertain values are null.",
-          strict: true,
-          schema: RECEIPT_JSON_SCHEMA,
+    console.log(
+      `[Savingor AI] Calling ${OPENAI_MODEL} through the OpenAI Responses API...`,
+    );
+
+    let response: OpenAIResponseLike;
+
+    try {
+      response = await this.responses.create({
+        model: OPENAI_MODEL,
+        instructions: RECEIPT_INSTRUCTIONS,
+        input: JSON.stringify({
+          rawOcrText: input.rawOcrText,
+          locale: input.locale,
+          currency: input.currency,
+          parserCandidate: input.parserCandidate,
+        }),
+        reasoning: { effort: OPENAI_REASONING_EFFORT },
+        max_output_tokens: OPENAI_MAX_OUTPUT_TOKENS,
+        safety_identifier: input.safetyIdentifier,
+        store: false,
+        text: {
+          format: {
+            type: "json_schema",
+            name: "savingor_smart_receipt",
+            description:
+              "A receipt extraction in which missing or uncertain values are null.",
+            strict: true,
+            schema: RECEIPT_JSON_SCHEMA,
+          },
         },
-      },
-    });
+      });
+
+      console.log(
+        `[Savingor AI] ${OPENAI_MODEL} response received successfully. Status: ${
+          response.status ?? "completed"
+        }`,
+      );
+    } catch (error: unknown) {
+      console.error(
+        `[Savingor AI] ${OPENAI_MODEL} request failed:`,
+        formatErrorForLog(error),
+      );
+
+      throw error;
+    }
 
     if (containsRefusal(response)) {
+      console.error(`[Savingor AI] ${OPENAI_MODEL} refused the request.`);
       throw new ModelRefusalError();
     }
+
     if (response.status === "incomplete") {
+      console.error(
+        `[Savingor AI] ${OPENAI_MODEL} returned an incomplete response. Reason: ${
+          response.incomplete_details?.reason ?? "unknown"
+        }`,
+      );
       throw new ModelResponseError("incomplete");
     }
+
     if (response.status === "failed") {
+      console.error(`[Savingor AI] ${OPENAI_MODEL} returned failed status.`);
       throw new ModelResponseError("failed");
     }
+
     if (typeof response.output_text !== "string" || !response.output_text) {
+      console.error(
+        `[Savingor AI] ${OPENAI_MODEL} returned no structured output text.`,
+      );
       throw new ModelResponseError("missing");
     }
+
     try {
-      return JSON.parse(response.output_text) as unknown;
+      const parsed = JSON.parse(response.output_text) as unknown;
+
+      console.log(
+        `[Savingor AI] ${OPENAI_MODEL} structured receipt JSON parsed successfully.`,
+      );
+
+      return parsed;
     } catch {
+      console.error(
+        `[Savingor AI] ${OPENAI_MODEL} returned invalid structured JSON.`,
+      );
       throw new ModelResponseError("invalid-json");
     }
   }
@@ -147,6 +191,7 @@ export function createOpenAIReceiptModel(
     maxRetries: OPENAI_MAX_RETRIES,
     timeout: OPENAI_REQUEST_TIMEOUT_MS,
   });
+
   return new OpenAIReceiptModel(client.responses);
 }
 
@@ -165,9 +210,39 @@ function containsRefusal(response: OpenAIResponseLike): boolean {
 
 function createOpenAIClient(options: OpenAIClientOptions): OpenAIClientLike {
   const client = new OpenAI(options);
+
   return {
     responses: {
       create: async (request) => client.responses.create(request),
     },
+  };
+}
+
+function formatErrorForLog(error: unknown): {
+  name: string;
+  message: string;
+  status?: number;
+  code?: string;
+  type?: string;
+} {
+  if (!(error instanceof Error)) {
+    return {
+      name: "UnknownError",
+      message: String(error),
+    };
+  }
+
+  const openAIError = error as Error & {
+    status?: number;
+    code?: string;
+    type?: string;
+  };
+
+  return {
+    name: openAIError.name,
+    message: openAIError.message,
+    status: openAIError.status,
+    code: openAIError.code,
+    type: openAIError.type,
   };
 }
