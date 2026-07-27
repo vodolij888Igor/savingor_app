@@ -27,15 +27,15 @@ Grocery receipts are dense, inconsistent, and easy to lose. Savingor combines **
 
 ## Project status
 
-| Aspect | Status |
-|--------|--------|
-| Platform focus | Portfolio-ready **Android demo** (iOS project files present; primary verification on Android) |
-| Portfolio release | **[v0.9.0-portfolio](https://github.com/vodolij888Igor/savingor_app/releases/tag/v0.9.0-portfolio)** — [Android APK](https://github.com/vodolij888Igor/savingor_app/releases/download/v0.9.0-portfolio/Savingor-Portfolio-Demo-v0.9.0.apk) available for evaluation |
-| Development | **Active development** |
-| Market positioning | **Canada-first** defaults (region `ca`, currency **CAD**) |
-| Store publication | **Not published** on Google Play or the App Store |
-| Subscriptions | **RevenueCat-ready architecture**; production store billing products are **not yet configured** |
-| Release signing | Portfolio demo APK signed with **development/demo signing**, not Google Play production signing |
+| Aspect             | Status                                                                                                                                                                                                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Platform focus     | Portfolio-ready **Android demo** (iOS project files present; primary verification on Android)                                                                                                                                                                       |
+| Portfolio release  | **[v0.9.0-portfolio](https://github.com/vodolij888Igor/savingor_app/releases/tag/v0.9.0-portfolio)** — [Android APK](https://github.com/vodolij888Igor/savingor_app/releases/download/v0.9.0-portfolio/Savingor-Portfolio-Demo-v0.9.0.apk) available for evaluation |
+| Development        | **Active development**                                                                                                                                                                                                                                              |
+| Market positioning | **Canada-first** defaults (region `ca`, currency **CAD**)                                                                                                                                                                                                           |
+| Store publication  | **Not published** on Google Play or the App Store                                                                                                                                                                                                                   |
+| Subscriptions      | **RevenueCat-ready architecture**; production store billing products are **not yet configured**                                                                                                                                                                     |
+| Release signing    | Portfolio demo APK signed with **development/demo signing**, not Google Play production signing                                                                                                                                                                     |
 
 ---
 
@@ -180,10 +180,10 @@ Savingor is demonstrated below across onboarding, authentication, receipt OCR, s
 
 Access rules are centralized in `FeatureAccessPolicy` and evaluated through `FeatureAccessService`.
 
-| Tier | Capabilities |
-|------|----------------|
+| Tier     | Capabilities                                                                                                                                                                                      |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Free** | Dashboard, nearby stores, shopping lists, manual expenses, basic receipt scanning (**3 successfully saved image-based scans per calendar month**), basic price insights and savings opportunities |
-| **Pro** | Unlimited receipt scanning, **AI Savings Assistant**, **Basket Optimizer**, **Savings Analytics** |
+| **Pro**  | Unlimited receipt scanning, **AI Savings Assistant**, **Basket Optimizer**, **Savings Analytics**                                                                                                 |
 
 Additional Pro-only identifiers exist in the access policy for future capabilities (price-drop alerts, advanced reports, etc.) but are not fully productized yet.
 
@@ -292,20 +292,20 @@ Dashboard, analytics inputs, price-memory sync
 
 Technologies present in this repository:
 
-| Layer | Technology |
-|-------|------------|
-| Mobile framework | **Flutter / Dart** (SDK `^3.5.3`) |
-| Navigation | **go_router** |
-| Backend | **Firebase Authentication**, **Cloud Firestore**, **Firebase Functions v2** |
-| Local persistence | **shared_preferences** |
-| OCR | **google_mlkit_text_recognition** |
-| Maps & location | **google_maps_flutter**, **geolocator**, Google Places HTTP integration |
-| Subscriptions | **purchases_flutter** (RevenueCat), demo fallback |
-| AI | Existing OpenAI-compatible savings assistant; server-side GPT-5.6 Sol receipt foundation |
-| Localization | Flutter **gen-l10n** with ARB files |
-| UI assets | **flutter_svg** |
-| Android build | **Gradle**, `compileSdk 35`, ProGuard rules for ML Kit release builds |
-| Testing | **flutter_test**, **flutter_lints** |
+| Layer             | Technology                                                                               |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| Mobile framework  | **Flutter / Dart** (SDK `^3.5.3`)                                                        |
+| Navigation        | **go_router**                                                                            |
+| Backend           | **Firebase Authentication**, **Cloud Firestore**, **Firebase Functions v2**              |
+| Local persistence | **shared_preferences**                                                                   |
+| OCR               | **google_mlkit_text_recognition**                                                        |
+| Maps & location   | **google_maps_flutter**, **geolocator**, Google Places HTTP integration                  |
+| Subscriptions     | **purchases_flutter** (RevenueCat), demo fallback                                        |
+| AI                | Existing OpenAI-compatible savings assistant; server-side GPT-5.6 Sol receipt foundation |
+| Localization      | Flutter **gen-l10n** with ARB files                                                      |
+| UI assets         | **flutter_svg**                                                                          |
+| Android build     | **Gradle**, `compileSdk 35`, ProGuard rules for ML Kit release builds                    |
+| Testing           | **flutter_test**, **flutter_lints**                                                      |
 
 ---
 
@@ -313,12 +313,12 @@ Technologies present in this repository:
 
 Verified locally (portfolio freeze baseline):
 
-| Check | Result |
-|-------|--------|
-| `flutter analyze` | **No issues found** |
-| `flutter test` | **108 tests passed** |
-| Metro OCR regression | **14 tests passed** (`receipt_ocr_metro_layout_test.dart`) |
-| `flutter build apk --release` | **Success** |
+| Check                         | Result                                                     |
+| ----------------------------- | ---------------------------------------------------------- |
+| `flutter analyze`             | **No issues found**                                        |
+| `flutter test`                | **108 tests passed**                                       |
+| Metro OCR regression          | **14 tests passed** (`receipt_ocr_metro_layout_test.dart`) |
+| `flutter build apk --release` | **Success**                                                |
 
 Automated coverage includes:
 
@@ -344,11 +344,11 @@ flutter test test/features/scanner/data/receipt_ocr_metro_layout_test.dart
 
 Portfolio reviewers can evaluate Savingor using the [screenshots](#screenshots) in this README and the published Android portfolio release.
 
-| Resource | Link |
-|----------|------|
-| **Download Android APK** | [Savingor-Portfolio-Demo-v0.9.0.apk](https://github.com/vodolij888Igor/savingor_app/releases/download/v0.9.0-portfolio/Savingor-Portfolio-Demo-v0.9.0.apk) |
-| **View GitHub Release** | [v0.9.0-portfolio](https://github.com/vodolij888Igor/savingor_app/releases/tag/v0.9.0-portfolio) |
-| **View Source Repository** | [github.com/vodolij888Igor/savingor_app](https://github.com/vodolij888Igor/savingor_app) |
+| Resource                   | Link                                                                                                                                                       |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Download Android APK**   | [Savingor-Portfolio-Demo-v0.9.0.apk](https://github.com/vodolij888Igor/savingor_app/releases/download/v0.9.0-portfolio/Savingor-Portfolio-Demo-v0.9.0.apk) |
+| **View GitHub Release**    | [v0.9.0-portfolio](https://github.com/vodolij888Igor/savingor_app/releases/tag/v0.9.0-portfolio)                                                           |
+| **View Source Repository** | [github.com/vodolij888Igor/savingor_app](https://github.com/vodolij888Igor/savingor_app)                                                                   |
 
 **Release scope:**
 

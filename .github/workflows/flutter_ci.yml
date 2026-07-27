@@ -24,7 +24,7 @@ jobs:
       - name: Set up Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
           cache: npm
           cache-dependency-path: functions/package-lock.json
 
@@ -32,7 +32,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: "21"
 
       - name: Install backend dependencies
         run: npm ci
@@ -67,12 +67,12 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: "17"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.3'
+          flutter-version: "3.24.3"
           channel: stable
           cache: true
 
