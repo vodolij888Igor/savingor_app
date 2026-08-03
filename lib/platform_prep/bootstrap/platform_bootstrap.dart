@@ -1,5 +1,9 @@
 import 'package:savingor_app/platform_prep/feature_flags/feature_flag_service.dart';
 import 'package:savingor_app/platform_prep/feature_flags/local_feature_flag_service.dart';
+import 'package:savingor_app/platform_prep/modules/active_module_set.dart';
+import 'package:savingor_app/platform_prep/modules/module_activation_rule.dart';
+import 'package:savingor_app/platform_prep/modules/module_activation_service.dart';
+import 'package:savingor_app/platform_prep/navigation/module_id.dart';
 import 'package:savingor_app/platform_prep/navigation/module_registry.dart';
 import 'package:savingor_app/platform_prep/navigation/route_catalog.dart';
 import 'package:savingor_app/platform_prep/navigation/shell_tab_catalog.dart';
@@ -13,22 +17,30 @@ final class PlatformBootstrap {
   /// Creates a bootstrap from pre-built platform services.
   ///
   /// [routeCatalog] and [shellTabCatalog] are built once from [moduleLoader]
-  /// when omitted, keeping registry, loader, and catalogs consistent.
+  /// when omitted. [activationService] and [activeModules] are required so
+  /// activation is evaluated exactly once by the caller (typically
+  /// [PlatformBootstrap.savingor]).
   PlatformBootstrap({
     required ModuleRegistry moduleRegistry,
     required ModuleLoader moduleLoader,
     required FeatureFlagService featureFlags,
+    required ModuleActivationService activationService,
+    required ActiveModuleSet activeModules,
     RouteCatalog? routeCatalog,
     ShellTabCatalog? shellTabCatalog,
   })  : _moduleRegistry = moduleRegistry,
         _moduleLoader = moduleLoader,
         _featureFlags = featureFlags,
+        _activationService = activationService,
+        _activeModules = activeModules,
         _routeCatalog = routeCatalog ?? RouteCatalog(moduleLoader),
         _shellTabCatalog = shellTabCatalog ?? ShellTabCatalog(moduleLoader);
 
   final ModuleRegistry _moduleRegistry;
   final ModuleLoader _moduleLoader;
   final FeatureFlagService _featureFlags;
+  final ModuleActivationService _activationService;
+  final ActiveModuleSet _activeModules;
   final RouteCatalog _routeCatalog;
   final ShellTabCatalog _shellTabCatalog;
 
@@ -41,20 +53,36 @@ final class PlatformBootstrap {
   /// Feature flag evaluation service (not invoked by this bootstrap).
   FeatureFlagService get featureFlags => _featureFlags;
 
+  /// Module activation evaluator constructed once at bootstrap.
+  ModuleActivationService get activationService => _activationService;
+
+  /// Modules active after the single bootstrap-time evaluation.
+  ActiveModuleSet get activeModules => _activeModules;
+
   /// Aggregated route metadata from registered modules.
   RouteCatalog get routeCatalog => _routeCatalog;
 
   /// Aggregated shell-tab metadata from registered modules.
   ShellTabCatalog get shellTabCatalog => _shellTabCatalog;
 
-  /// Savingor product bootstrap with default registry, loader, catalogs, and
-  /// empty flags.
+  /// Savingor product bootstrap with default registry, loader, catalogs,
+  /// activation rules, and empty flags.
+  ///
+  /// Groceries is always enabled. Activation is evaluated exactly once here.
   factory PlatformBootstrap.savingor() {
     final ModuleRegistry registry = savingorModuleRegistry;
     final ModuleLoader loader = ModuleLoader(registry);
     final FeatureFlagService flags = LocalFeatureFlagService();
     final RouteCatalog routes = RouteCatalog(loader);
     final ShellTabCatalog tabs = ShellTabCatalog(loader);
+    final ModuleActivationService activation = ModuleActivationService(
+      loader: loader,
+      featureFlags: flags,
+      rules: <ModuleActivationRule>[
+        ModuleActivationRule(moduleId: ModuleId('groceries')),
+      ],
+    );
+    final ActiveModuleSet active = activation.evaluate();
 
     return PlatformBootstrap(
       moduleRegistry: registry,
@@ -62,6 +90,8 @@ final class PlatformBootstrap {
       featureFlags: flags,
       routeCatalog: routes,
       shellTabCatalog: tabs,
+      activationService: activation,
+      activeModules: active,
     );
   }
 }
