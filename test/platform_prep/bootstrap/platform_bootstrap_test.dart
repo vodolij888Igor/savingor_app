@@ -4,8 +4,11 @@ import 'package:savingor_app/platform_prep/modules/active_module_set.dart';
 import 'package:savingor_app/platform_prep/modules/module_activation_service.dart';
 import 'package:savingor_app/platform_prep/navigation/module_id.dart';
 import 'package:savingor_app/platform_prep/navigation/route_catalog.dart';
+import 'package:savingor_app/platform_prep/navigation/route_contribution.dart';
 import 'package:savingor_app/platform_prep/navigation/shell_tab_catalog.dart';
+import 'package:savingor_app/platform_prep/navigation/shell_tab_contribution.dart';
 import 'package:savingor_app/savingor/modules/groceries/groceries_module.dart';
+import 'package:savingor_app/savingor/navigation/platform_navigation_facade.dart';
 
 void main() {
   group('PlatformBootstrap.savingor', () {
@@ -126,6 +129,100 @@ void main() {
         same(groceriesModule),
       );
       expect(bootstrap.moduleLoader.contains(ModuleId('groceries')), isTrue);
+    });
+  });
+
+  group('PlatformBootstrap navigation facade', () {
+    late PlatformBootstrap bootstrap;
+
+    setUp(() {
+      bootstrap = PlatformBootstrap.savingor();
+    });
+
+    test('facade creation', () {
+      expect(bootstrap.navigation, isA<PlatformNavigationFacade>());
+      expect(bootstrap.navigation.routeCount, greaterThan(0));
+      expect(bootstrap.navigation.shellTabCount, greaterThan(0));
+      expect(bootstrap.navigation.moduleCount, equals(1));
+    });
+
+    test('bootstrap integration', () {
+      expect(
+        bootstrap.navigation.routes.map(
+          (RouteContribution r) => '${r.name}:${r.path}',
+        ),
+        equals(
+          bootstrap.activeRouteCatalog.routes.map(
+            (RouteContribution r) => '${r.name}:${r.path}',
+          ),
+        ),
+      );
+      expect(
+        bootstrap.navigation.shellTabs.map(
+          (ShellTabContribution t) => '${t.key}:${t.routePath}',
+        ),
+        equals(
+          bootstrap.activeShellTabCatalog.tabs.map(
+            (ShellTabContribution t) => '${t.key}:${t.routePath}',
+          ),
+        ),
+      );
+      expect(
+        bootstrap.navigation.module(ModuleId('groceries')),
+        same(groceriesModule),
+      );
+      expect(bootstrap.navigation.containsRoute('deals'), isTrue);
+      expect(bootstrap.navigation.routeByPath('/deals').name, equals('deals'));
+      expect(bootstrap.navigation.shellTab('home').routePath, equals('/deals'));
+    });
+
+    test('singleton behavior', () {
+      final PlatformNavigationFacade first = bootstrap.navigation;
+      final PlatformNavigationFacade second = bootstrap.navigation;
+
+      expect(identical(first, second), isTrue);
+      expect(identical(bootstrap.navigation, first), isTrue);
+    });
+
+    test('immutability', () {
+      expect(
+        () => bootstrap.navigation.routes.add(
+          RouteContribution(name: 'x', path: '/x'),
+        ),
+        throwsUnsupportedError,
+      );
+      expect(
+        () => bootstrap.navigation.shellTabs.add(
+          ShellTabContribution(key: 'x', routePath: '/x', sortOrder: 9),
+        ),
+        throwsUnsupportedError,
+      );
+      expect(
+        () => bootstrap.navigation.modules.add(groceriesModule),
+        throwsUnsupportedError,
+      );
+    });
+
+    test('backward compatibility', () {
+      // Existing bootstrap surfaces remain available alongside navigation.
+      expect(bootstrap.activeRouteCatalog, isNotNull);
+      expect(bootstrap.activeShellTabCatalog, isNotNull);
+      expect(bootstrap.queryService, isNotNull);
+      expect(bootstrap.moduleContext, isNotNull);
+      expect(bootstrap.routeCatalog, isNotNull);
+      expect(bootstrap.shellTabCatalog, isNotNull);
+      expect(
+        bootstrap.navigation.routeCount,
+        equals(bootstrap.activeRouteCatalog.routeCount),
+      );
+      expect(
+        bootstrap.navigation.shellTabCount,
+        equals(bootstrap.activeShellTabCatalog.tabCount),
+      );
+      expect(
+        bootstrap.navigation.moduleCount,
+        equals(bootstrap.activeModules.count),
+      );
     });
   });
 }

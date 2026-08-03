@@ -16,6 +16,8 @@ import 'package:savingor_app/platform_prep/navigation/shell_tab_catalog.dart';
 import 'package:savingor_app/savingor/bootstrap/route_parity_startup.dart';
 import 'package:savingor_app/savingor/modules/module_loader.dart';
 import 'package:savingor_app/savingor/modules/savingor_module_registry.dart';
+import 'package:savingor_app/savingor/navigation/platform_navigation_facade.dart';
+import 'package:savingor_app/savingor/navigation/production_navigation_composition.dart';
 
 /// Immutable composition root for platform module and feature-flag services.
 ///
@@ -24,7 +26,7 @@ final class PlatformBootstrap {
   /// Creates a bootstrap from pre-built platform services.
   ///
   /// Optional catalogs/lifecycle/discovery/query are built once when omitted.
-  /// [moduleContext] is built once in the constructor body.
+  /// [moduleContext] and [navigation] are built once in the constructor body.
   ///
   /// When [verifyProductionRouteParity] is true, Groceries route parity runs
   /// exactly once here (skipped in release builds).
@@ -83,6 +85,13 @@ final class PlatformBootstrap {
       discoveryService: _discoveryService,
       queryService: _queryService,
     );
+    _navigation = PlatformNavigationFacade.fromComposition(
+      ProductionNavigationComposition(
+        routes: _activeRouteCatalog.routes,
+        shellTabs: _activeShellTabCatalog.tabs,
+        modules: _queryService.activeModules(),
+      ),
+    );
 
     if (verifyProductionRouteParity) {
       verifySavingorProductionRouteParity(
@@ -104,6 +113,7 @@ final class PlatformBootstrap {
   late final ModuleDiscoveryService _discoveryService;
   late final ModuleQueryService _queryService;
   late final ModuleContext _moduleContext;
+  late final PlatformNavigationFacade _navigation;
 
   /// Registered modules with uniqueness validation.
   ModuleRegistry get moduleRegistry => _moduleRegistry;
@@ -143,6 +153,9 @@ final class PlatformBootstrap {
 
   /// Immutable module context built once from this bootstrap.
   ModuleContext get moduleContext => _moduleContext;
+
+  /// Single entry point for platform navigation metadata (built once).
+  PlatformNavigationFacade get navigation => _navigation;
 
   /// Savingor product bootstrap with default registry, loader, catalogs,
   /// activation rules, lifecycle, discovery, query, and empty flags.

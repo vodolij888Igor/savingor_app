@@ -4,6 +4,7 @@ import 'package:savingor_app/platform_prep/navigation/module_id.dart';
 import 'package:savingor_app/platform_prep/navigation/route_contribution.dart';
 import 'package:savingor_app/platform_prep/navigation/shell_tab_contribution.dart';
 import 'package:savingor_app/savingor/navigation/platform_navigation_service.dart';
+import 'package:savingor_app/savingor/navigation/production_navigation_composition.dart';
 import 'package:savingor_app/savingor/navigation/production_navigation_composition_service.dart';
 
 /// Single public entry point for reading platform navigation metadata.
@@ -16,9 +17,15 @@ final class PlatformNavigationFacade {
 
   /// Builds a facade from [bootstrap] navigation catalogs.
   factory PlatformNavigationFacade.fromBootstrap(PlatformBootstrap bootstrap) {
-    final composition =
-        ProductionNavigationCompositionService(bootstrap: bootstrap)
-            .composition;
+    return PlatformNavigationFacade.fromComposition(
+      ProductionNavigationCompositionService(bootstrap: bootstrap).composition,
+    );
+  }
+
+  /// Builds a facade from an existing [composition].
+  factory PlatformNavigationFacade.fromComposition(
+    ProductionNavigationComposition composition,
+  ) {
     return PlatformNavigationFacade._(
       PlatformNavigationService.fromComposition(composition),
     );
