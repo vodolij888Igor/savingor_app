@@ -4,6 +4,7 @@ import 'package:savingor_app/platform_prep/modules/active_module_set.dart';
 import 'package:savingor_app/platform_prep/modules/module_activation_service.dart';
 import 'package:savingor_app/platform_prep/modules/module_discovery_service.dart';
 import 'package:savingor_app/platform_prep/modules/module_lifecycle_service.dart';
+import 'package:savingor_app/platform_prep/modules/module_query_service.dart';
 import 'package:savingor_app/platform_prep/navigation/module_registry.dart';
 import 'package:savingor_app/platform_prep/navigation/route_catalog.dart';
 import 'package:savingor_app/platform_prep/navigation/shell_tab_catalog.dart';
@@ -26,6 +27,7 @@ final class ModuleContext {
     required this.activeModules,
     required this.lifecycleService,
     required this.discoveryService,
+    required this.queryService,
   });
 
   /// Owning bootstrap composition root.
@@ -57,4 +59,7 @@ final class ModuleContext {
 
   /// Read-only module discovery over registry and lifecycle.
   final ModuleDiscoveryService discoveryService;
+
+  /// Read-only query façade over discovery and lifecycle.
+  final ModuleQueryService queryService;
 }

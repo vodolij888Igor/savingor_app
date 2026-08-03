@@ -6,6 +6,7 @@ import 'package:savingor_app/platform_prep/modules/module_activation_service.dar
 import 'package:savingor_app/platform_prep/modules/module_context.dart';
 import 'package:savingor_app/platform_prep/modules/module_discovery_service.dart';
 import 'package:savingor_app/platform_prep/modules/module_lifecycle_service.dart';
+import 'package:savingor_app/platform_prep/modules/module_query_service.dart';
 import 'package:savingor_app/platform_prep/navigation/module_id.dart';
 import 'package:savingor_app/platform_prep/navigation/module_registry.dart';
 import 'package:savingor_app/platform_prep/navigation/route_catalog.dart';
@@ -19,7 +20,7 @@ import 'package:savingor_app/savingor/modules/savingor_module_registry.dart';
 final class PlatformBootstrap {
   /// Creates a bootstrap from pre-built platform services.
   ///
-  /// Optional catalogs/lifecycle/discovery are built once when omitted.
+  /// Optional catalogs/lifecycle/discovery/query are built once when omitted.
   /// [moduleContext] is built once in the constructor body.
   PlatformBootstrap({
     required ModuleRegistry moduleRegistry,
@@ -31,6 +32,7 @@ final class PlatformBootstrap {
     ShellTabCatalog? shellTabCatalog,
     ModuleLifecycleService? lifecycleService,
     ModuleDiscoveryService? discoveryService,
+    ModuleQueryService? queryService,
   })  : _moduleRegistry = moduleRegistry,
         _moduleLoader = moduleLoader,
         _featureFlags = featureFlags,
@@ -48,6 +50,11 @@ final class PlatformBootstrap {
           registry: _moduleRegistry,
           lifecycle: _lifecycleService,
         );
+    _queryService = queryService ??
+        ModuleQueryService(
+          discovery: _discoveryService,
+          lifecycle: _lifecycleService,
+        );
     _moduleContext = ModuleContext(
       bootstrap: this,
       moduleRegistry: _moduleRegistry,
@@ -59,6 +66,7 @@ final class PlatformBootstrap {
       activeModules: _activeModules,
       lifecycleService: _lifecycleService,
       discoveryService: _discoveryService,
+      queryService: _queryService,
     );
   }
 
@@ -71,6 +79,7 @@ final class PlatformBootstrap {
   final ShellTabCatalog _shellTabCatalog;
   final ModuleLifecycleService _lifecycleService;
   late final ModuleDiscoveryService _discoveryService;
+  late final ModuleQueryService _queryService;
   late final ModuleContext _moduleContext;
 
   /// Registered modules with uniqueness validation.
@@ -100,11 +109,14 @@ final class PlatformBootstrap {
   /// Read-only module discovery over registry and lifecycle.
   ModuleDiscoveryService get discoveryService => _discoveryService;
 
+  /// Read-only query façade over discovery and lifecycle.
+  ModuleQueryService get queryService => _queryService;
+
   /// Immutable module context built once from this bootstrap.
   ModuleContext get moduleContext => _moduleContext;
 
   /// Savingor product bootstrap with default registry, loader, catalogs,
-  /// activation rules, lifecycle, discovery, and empty flags.
+  /// activation rules, lifecycle, discovery, query, and empty flags.
   ///
   /// Groceries is always enabled. Activation is evaluated exactly once here.
   factory PlatformBootstrap.savingor() {
@@ -129,6 +141,10 @@ final class PlatformBootstrap {
       registry: registry,
       lifecycle: lifecycle,
     );
+    final ModuleQueryService query = ModuleQueryService(
+      discovery: discovery,
+      lifecycle: lifecycle,
+    );
 
     return PlatformBootstrap(
       moduleRegistry: registry,
@@ -140,6 +156,7 @@ final class PlatformBootstrap {
       activeModules: active,
       lifecycleService: lifecycle,
       discoveryService: discovery,
+      queryService: query,
     );
   }
 }
