@@ -20,6 +20,7 @@ import 'package:savingor_app/platform_prep/navigation/module_registry.dart';
 import 'package:savingor_app/platform_prep/navigation/route_catalog.dart';
 import 'package:savingor_app/platform_prep/navigation/shell_tab_catalog.dart';
 import 'package:savingor_app/platform_prep/platform/platform_facade.dart';
+import 'package:savingor_app/platform_prep/query/platform_query.dart';
 import 'package:savingor_app/platform_prep/registry/platform_registry.dart';
 import 'package:savingor_app/platform_prep/runtime/platform_runtime.dart';
 import 'package:savingor_app/savingor/bootstrap/route_parity_startup.dart';
@@ -117,6 +118,13 @@ final class PlatformBootstrap {
     _platformDiscovery = PlatformDiscovery.fromRegistry(_platformRegistry);
     _platformLifecycle = PlatformLifecycle.fromEnvironment(_environment);
     _platformActivation = PlatformActivation.fromLifecycle(_platformLifecycle);
+    _platformQuery = PlatformQuery.fromFacade(
+      _facade,
+      registry: _platformRegistry,
+      discovery: _platformDiscovery,
+      lifecycle: _platformLifecycle,
+      activation: _platformActivation,
+    );
 
     if (verifyProductionRouteParity) {
       verifySavingorProductionRouteParity(
@@ -148,6 +156,7 @@ final class PlatformBootstrap {
   late final PlatformDiscovery _platformDiscovery;
   late final PlatformLifecycle _platformLifecycle;
   late final PlatformActivation _platformActivation;
+  late final PlatformQuery _platformQuery;
 
   /// Registered modules with uniqueness validation.
   ModuleRegistry get moduleRegistry => _moduleRegistry;
@@ -218,6 +227,9 @@ final class PlatformBootstrap {
 
   /// Immutable platform activation metadata API (built once).
   PlatformActivation get platformActivation => _platformActivation;
+
+  /// Immutable read-only platform query surface (built once).
+  PlatformQuery get platformQuery => _platformQuery;
 
   /// Savingor product bootstrap with default registry, loader, catalogs,
   /// activation rules, lifecycle, discovery, query, and empty flags.
