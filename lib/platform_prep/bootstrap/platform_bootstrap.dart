@@ -13,6 +13,7 @@ import 'package:savingor_app/platform_prep/navigation/module_id.dart';
 import 'package:savingor_app/platform_prep/navigation/module_registry.dart';
 import 'package:savingor_app/platform_prep/navigation/route_catalog.dart';
 import 'package:savingor_app/platform_prep/navigation/shell_tab_catalog.dart';
+import 'package:savingor_app/savingor/bootstrap/route_parity_startup.dart';
 import 'package:savingor_app/savingor/modules/module_loader.dart';
 import 'package:savingor_app/savingor/modules/savingor_module_registry.dart';
 
@@ -24,6 +25,9 @@ final class PlatformBootstrap {
   ///
   /// Optional catalogs/lifecycle/discovery/query are built once when omitted.
   /// [moduleContext] is built once in the constructor body.
+  ///
+  /// When [verifyProductionRouteParity] is true, Groceries route parity runs
+  /// exactly once here (skipped in release builds).
   PlatformBootstrap({
     required ModuleRegistry moduleRegistry,
     required ModuleLoader moduleLoader,
@@ -37,6 +41,7 @@ final class PlatformBootstrap {
     ModuleLifecycleService? lifecycleService,
     ModuleDiscoveryService? discoveryService,
     ModuleQueryService? queryService,
+    bool verifyProductionRouteParity = false,
   })  : _moduleRegistry = moduleRegistry,
         _moduleLoader = moduleLoader,
         _featureFlags = featureFlags,
@@ -78,6 +83,12 @@ final class PlatformBootstrap {
       discoveryService: _discoveryService,
       queryService: _queryService,
     );
+
+    if (verifyProductionRouteParity) {
+      verifySavingorProductionRouteParity(
+        activeRouteCatalog: _activeRouteCatalog,
+      );
+    }
   }
 
   final ModuleRegistry _moduleRegistry;
@@ -137,6 +148,7 @@ final class PlatformBootstrap {
   /// activation rules, lifecycle, discovery, query, and empty flags.
   ///
   /// Groceries is always enabled. Activation is evaluated exactly once here.
+  /// Production route parity is verified once at construction (non-release).
   factory PlatformBootstrap.savingor() {
     final ModuleRegistry registry = savingorModuleRegistry;
     final ModuleLoader loader = ModuleLoader(registry);
@@ -179,6 +191,7 @@ final class PlatformBootstrap {
       lifecycleService: lifecycle,
       discoveryService: discovery,
       queryService: query,
+      verifyProductionRouteParity: true,
     );
   }
 }
