@@ -21,6 +21,8 @@ void main() {
       expect(context.featureFlags, isNotNull);
       expect(context.routeCatalog, isNotNull);
       expect(context.shellTabCatalog, isNotNull);
+      expect(context.activeRouteCatalog, isNotNull);
+      expect(context.activeShellTabCatalog, isNotNull);
       expect(context.activationService, isNotNull);
       expect(context.activeModules, isNotNull);
       expect(context.lifecycleService, isNotNull);
@@ -39,6 +41,17 @@ void main() {
       expect(identical(context.routeCatalog, bootstrap.routeCatalog), isTrue);
       expect(
         identical(context.shellTabCatalog, bootstrap.shellTabCatalog),
+        isTrue,
+      );
+      expect(
+        identical(context.activeRouteCatalog, bootstrap.activeRouteCatalog),
+        isTrue,
+      );
+      expect(
+        identical(
+          context.activeShellTabCatalog,
+          bootstrap.activeShellTabCatalog,
+        ),
         isTrue,
       );
       expect(

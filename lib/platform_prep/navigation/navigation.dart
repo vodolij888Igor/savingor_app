@@ -1,3 +1,5 @@
+export 'package:savingor_app/platform_prep/navigation/active_route_catalog.dart';
+export 'package:savingor_app/platform_prep/navigation/active_shell_tab_catalog.dart';
 export 'package:savingor_app/platform_prep/navigation/app_module.dart';
 export 'package:savingor_app/platform_prep/navigation/module_id.dart';
 export 'package:savingor_app/platform_prep/navigation/module_registry.dart';

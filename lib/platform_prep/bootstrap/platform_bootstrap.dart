@@ -7,6 +7,8 @@ import 'package:savingor_app/platform_prep/modules/module_context.dart';
 import 'package:savingor_app/platform_prep/modules/module_discovery_service.dart';
 import 'package:savingor_app/platform_prep/modules/module_lifecycle_service.dart';
 import 'package:savingor_app/platform_prep/modules/module_query_service.dart';
+import 'package:savingor_app/platform_prep/navigation/active_route_catalog.dart';
+import 'package:savingor_app/platform_prep/navigation/active_shell_tab_catalog.dart';
 import 'package:savingor_app/platform_prep/navigation/module_id.dart';
 import 'package:savingor_app/platform_prep/navigation/module_registry.dart';
 import 'package:savingor_app/platform_prep/navigation/route_catalog.dart';
@@ -30,6 +32,8 @@ final class PlatformBootstrap {
     required ActiveModuleSet activeModules,
     RouteCatalog? routeCatalog,
     ShellTabCatalog? shellTabCatalog,
+    ActiveRouteCatalog? activeRouteCatalog,
+    ActiveShellTabCatalog? activeShellTabCatalog,
     ModuleLifecycleService? lifecycleService,
     ModuleDiscoveryService? discoveryService,
     ModuleQueryService? queryService,
@@ -40,6 +44,10 @@ final class PlatformBootstrap {
         _activeModules = activeModules,
         _routeCatalog = routeCatalog ?? RouteCatalog(moduleLoader),
         _shellTabCatalog = shellTabCatalog ?? ShellTabCatalog(moduleLoader),
+        _activeRouteCatalog =
+            activeRouteCatalog ?? ActiveRouteCatalog(activeModules),
+        _activeShellTabCatalog =
+            activeShellTabCatalog ?? ActiveShellTabCatalog(activeModules),
         _lifecycleService = lifecycleService ??
             ModuleLifecycleService(
               loader: moduleLoader,
@@ -62,6 +70,8 @@ final class PlatformBootstrap {
       featureFlags: _featureFlags,
       routeCatalog: _routeCatalog,
       shellTabCatalog: _shellTabCatalog,
+      activeRouteCatalog: _activeRouteCatalog,
+      activeShellTabCatalog: _activeShellTabCatalog,
       activationService: _activationService,
       activeModules: _activeModules,
       lifecycleService: _lifecycleService,
@@ -77,6 +87,8 @@ final class PlatformBootstrap {
   final ActiveModuleSet _activeModules;
   final RouteCatalog _routeCatalog;
   final ShellTabCatalog _shellTabCatalog;
+  final ActiveRouteCatalog _activeRouteCatalog;
+  final ActiveShellTabCatalog _activeShellTabCatalog;
   final ModuleLifecycleService _lifecycleService;
   late final ModuleDiscoveryService _discoveryService;
   late final ModuleQueryService _queryService;
@@ -102,6 +114,12 @@ final class PlatformBootstrap {
 
   /// Aggregated shell-tab metadata from registered modules.
   ShellTabCatalog get shellTabCatalog => _shellTabCatalog;
+
+  /// Route metadata from active modules only.
+  ActiveRouteCatalog get activeRouteCatalog => _activeRouteCatalog;
+
+  /// Shell-tab metadata from active modules only.
+  ActiveShellTabCatalog get activeShellTabCatalog => _activeShellTabCatalog;
 
   /// Lifecycle snapshot derived from registration and [activeModules].
   ModuleLifecycleService get lifecycleService => _lifecycleService;
@@ -133,6 +151,8 @@ final class PlatformBootstrap {
       ],
     );
     final ActiveModuleSet active = activation.evaluate();
+    final ActiveRouteCatalog activeRoutes = ActiveRouteCatalog(active);
+    final ActiveShellTabCatalog activeTabs = ActiveShellTabCatalog(active);
     final ModuleLifecycleService lifecycle = ModuleLifecycleService(
       loader: loader,
       activeModules: active,
@@ -152,6 +172,8 @@ final class PlatformBootstrap {
       featureFlags: flags,
       routeCatalog: routes,
       shellTabCatalog: tabs,
+      activeRouteCatalog: activeRoutes,
+      activeShellTabCatalog: activeTabs,
       activationService: activation,
       activeModules: active,
       lifecycleService: lifecycle,

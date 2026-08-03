@@ -5,6 +5,8 @@ import 'package:savingor_app/platform_prep/modules/module_activation_service.dar
 import 'package:savingor_app/platform_prep/modules/module_discovery_service.dart';
 import 'package:savingor_app/platform_prep/modules/module_lifecycle_service.dart';
 import 'package:savingor_app/platform_prep/modules/module_query_service.dart';
+import 'package:savingor_app/platform_prep/navigation/active_route_catalog.dart';
+import 'package:savingor_app/platform_prep/navigation/active_shell_tab_catalog.dart';
 import 'package:savingor_app/platform_prep/navigation/module_registry.dart';
 import 'package:savingor_app/platform_prep/navigation/route_catalog.dart';
 import 'package:savingor_app/platform_prep/navigation/shell_tab_catalog.dart';
@@ -23,6 +25,8 @@ final class ModuleContext {
     required this.featureFlags,
     required this.routeCatalog,
     required this.shellTabCatalog,
+    required this.activeRouteCatalog,
+    required this.activeShellTabCatalog,
     required this.activationService,
     required this.activeModules,
     required this.lifecycleService,
@@ -47,6 +51,12 @@ final class ModuleContext {
 
   /// Aggregated shell-tab metadata from registered modules.
   final ShellTabCatalog shellTabCatalog;
+
+  /// Route metadata from active modules only.
+  final ActiveRouteCatalog activeRouteCatalog;
+
+  /// Shell-tab metadata from active modules only.
+  final ActiveShellTabCatalog activeShellTabCatalog;
 
   /// Module activation evaluator.
   final ModuleActivationService activationService;
