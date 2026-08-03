@@ -4,7 +4,9 @@ import 'package:savingor_app/platform_prep/navigation/app_module.dart';
 import 'package:savingor_app/platform_prep/navigation/module_id.dart';
 import 'package:savingor_app/platform_prep/navigation/route_contribution.dart';
 import 'package:savingor_app/platform_prep/navigation/shell_tab_contribution.dart';
-import 'package:savingor_app/savingor/navigation/navigation.dart';
+import 'package:savingor_app/savingor/navigation/navigation_resolver.dart';
+import 'package:savingor_app/savingor/navigation/platform_navigation_service.dart';
+import 'package:savingor_app/savingor/navigation/production_navigation_composition.dart';
 
 void main() {
   late RouteContribution dealsRoute;
