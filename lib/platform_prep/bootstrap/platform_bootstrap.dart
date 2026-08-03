@@ -3,6 +3,7 @@ import 'package:savingor_app/platform_prep/feature_flags/local_feature_flag_serv
 import 'package:savingor_app/platform_prep/modules/active_module_set.dart';
 import 'package:savingor_app/platform_prep/modules/module_activation_rule.dart';
 import 'package:savingor_app/platform_prep/modules/module_activation_service.dart';
+import 'package:savingor_app/platform_prep/modules/module_context.dart';
 import 'package:savingor_app/platform_prep/navigation/module_id.dart';
 import 'package:savingor_app/platform_prep/navigation/module_registry.dart';
 import 'package:savingor_app/platform_prep/navigation/route_catalog.dart';
@@ -20,6 +21,8 @@ final class PlatformBootstrap {
   /// when omitted. [activationService] and [activeModules] are required so
   /// activation is evaluated exactly once by the caller (typically
   /// [PlatformBootstrap.savingor]).
+  ///
+  /// [moduleContext] is built once in the constructor body.
   PlatformBootstrap({
     required ModuleRegistry moduleRegistry,
     required ModuleLoader moduleLoader,
@@ -34,7 +37,18 @@ final class PlatformBootstrap {
         _activationService = activationService,
         _activeModules = activeModules,
         _routeCatalog = routeCatalog ?? RouteCatalog(moduleLoader),
-        _shellTabCatalog = shellTabCatalog ?? ShellTabCatalog(moduleLoader);
+        _shellTabCatalog = shellTabCatalog ?? ShellTabCatalog(moduleLoader) {
+    _moduleContext = ModuleContext(
+      bootstrap: this,
+      moduleRegistry: _moduleRegistry,
+      moduleLoader: _moduleLoader,
+      featureFlags: _featureFlags,
+      routeCatalog: _routeCatalog,
+      shellTabCatalog: _shellTabCatalog,
+      activationService: _activationService,
+      activeModules: _activeModules,
+    );
+  }
 
   final ModuleRegistry _moduleRegistry;
   final ModuleLoader _moduleLoader;
@@ -43,6 +57,7 @@ final class PlatformBootstrap {
   final ActiveModuleSet _activeModules;
   final RouteCatalog _routeCatalog;
   final ShellTabCatalog _shellTabCatalog;
+  late final ModuleContext _moduleContext;
 
   /// Registered modules with uniqueness validation.
   ModuleRegistry get moduleRegistry => _moduleRegistry;
@@ -64,6 +79,9 @@ final class PlatformBootstrap {
 
   /// Aggregated shell-tab metadata from registered modules.
   ShellTabCatalog get shellTabCatalog => _shellTabCatalog;
+
+  /// Immutable module context built once from this bootstrap.
+  ModuleContext get moduleContext => _moduleContext;
 
   /// Savingor product bootstrap with default registry, loader, catalogs,
   /// activation rules, and empty flags.
