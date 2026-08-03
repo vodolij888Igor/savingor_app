@@ -7,33 +7,45 @@ import 'package:savingor_app/platform_prep/modules/module_lifecycle_service.dart
 import 'package:savingor_app/platform_prep/modules/module_query_service.dart';
 import 'package:savingor_app/savingor/navigation/platform_navigation_facade.dart';
 
-/// Immutable live runtime view of the Savingor application platform.
+/// Immutable live runtime view of the application platform.
 ///
-/// Future entry point for application execution. Exposes runtime metadata and
-/// public platform APIs only — no Flutter, GoRouter, UI, or feature wiring.
+/// Thin wrapper over [PlatformApplication] — leaf APIs are delegated to avoid
+/// duplicated field storage. Metadata only; no Flutter/GoRouter/UI ownership.
 final class PlatformRuntime {
-  /// Creates a runtime from already-built platform APIs.
-  const PlatformRuntime({
+  /// Creates a runtime view over [application].
+  ///
+  /// Optional named parameters are accepted for backwards compatibility; when
+  /// provided they must be identical to the corresponding [application]
+  /// surfaces.
+  PlatformRuntime({
     required this.application,
-    required this.navigation,
-    required this.moduleContext,
-    required this.query,
-    required this.discovery,
-    required this.lifecycle,
-    required this.activation,
-  });
+    PlatformNavigationFacade? navigation,
+    ModuleContext? moduleContext,
+    ModuleQueryService? query,
+    ModuleDiscoveryService? discovery,
+    ModuleLifecycleService? lifecycle,
+    ModuleActivationService? activation,
+  })  : assert(
+          navigation == null || identical(navigation, application.navigation),
+        ),
+        assert(
+          moduleContext == null ||
+              identical(moduleContext, application.moduleContext),
+        ),
+        assert(query == null || identical(query, application.query)),
+        assert(
+          discovery == null || identical(discovery, application.discovery),
+        ),
+        assert(
+          lifecycle == null || identical(lifecycle, application.lifecycle),
+        ),
+        assert(
+          activation == null || identical(activation, application.activation),
+        );
 
   /// Builds a runtime from [application] public surfaces.
   factory PlatformRuntime.fromApplication(PlatformApplication application) {
-    return PlatformRuntime(
-      application: application,
-      navigation: application.navigation,
-      moduleContext: application.moduleContext,
-      query: application.query,
-      discovery: application.discovery,
-      lifecycle: application.lifecycle,
-      activation: application.activation,
-    );
+    return PlatformRuntime(application: application);
   }
 
   /// Builds a runtime from [bootstrap] public platform surfaces.
@@ -45,20 +57,20 @@ final class PlatformRuntime {
   final PlatformApplication application;
 
   /// Navigation metadata façade.
-  final PlatformNavigationFacade navigation;
+  PlatformNavigationFacade get navigation => application.navigation;
 
   /// Immutable module platform context.
-  final ModuleContext moduleContext;
+  ModuleContext get moduleContext => application.moduleContext;
 
   /// Read-only module query API.
-  final ModuleQueryService query;
+  ModuleQueryService get query => application.query;
 
   /// Read-only module discovery API.
-  final ModuleDiscoveryService discovery;
+  ModuleDiscoveryService get discovery => application.discovery;
 
   /// Module lifecycle snapshot API.
-  final ModuleLifecycleService lifecycle;
+  ModuleLifecycleService get lifecycle => application.lifecycle;
 
   /// Module activation evaluator API.
-  final ModuleActivationService activation;
+  ModuleActivationService get activation => application.activation;
 }

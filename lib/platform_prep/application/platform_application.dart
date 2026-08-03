@@ -6,10 +6,10 @@ import 'package:savingor_app/platform_prep/modules/module_lifecycle_service.dart
 import 'package:savingor_app/platform_prep/modules/module_query_service.dart';
 import 'package:savingor_app/savingor/navigation/platform_navigation_facade.dart';
 
-/// Immutable public entry point for the Savingor application platform.
+/// Immutable leaf owner of navigation and module platform APIs.
 ///
-/// Composes navigation and module platform APIs only. Does not own routing,
-/// UI, Flutter types, or feature wiring.
+/// Outer views (runtime → facade) delegate to these surfaces. Does not own
+/// live routing, UI, Flutter types, or feature wiring.
 final class PlatformApplication {
   /// Creates an application from already-built platform APIs.
   const PlatformApplication({

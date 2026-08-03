@@ -9,37 +9,52 @@ import 'package:savingor_app/platform_prep/modules/module_query_service.dart';
 import 'package:savingor_app/platform_prep/runtime/platform_runtime.dart';
 import 'package:savingor_app/savingor/navigation/platform_navigation_facade.dart';
 
-/// Immutable root object for the complete Savingor platform core.
+/// Immutable root object for the complete application platform core.
 ///
-/// Composes environment, runtime, and application platform APIs. Metadata
-/// only — no Flutter, GoRouter, UI, routing ownership, or feature wiring.
+/// Thin wrapper over [PlatformEnvironment] — leaf APIs are delegated. Metadata
+/// only; no Flutter/GoRouter/UI ownership.
 final class PlatformKernel {
-  /// Creates a kernel from already-built platform APIs.
-  const PlatformKernel({
+  /// Creates a kernel view over [environment].
+  ///
+  /// Optional named parameters are accepted for backwards compatibility; when
+  /// provided they must be identical to the corresponding [environment]
+  /// surfaces.
+  PlatformKernel({
     required this.environment,
-    required this.runtime,
-    required this.application,
-    required this.navigation,
-    required this.moduleContext,
-    required this.query,
-    required this.discovery,
-    required this.lifecycle,
-    required this.activation,
-  });
+    PlatformRuntime? runtime,
+    PlatformApplication? application,
+    PlatformNavigationFacade? navigation,
+    ModuleContext? moduleContext,
+    ModuleQueryService? query,
+    ModuleDiscoveryService? discovery,
+    ModuleLifecycleService? lifecycle,
+    ModuleActivationService? activation,
+  })  : assert(runtime == null || identical(runtime, environment.runtime)),
+        assert(
+          application == null ||
+              identical(application, environment.application),
+        ),
+        assert(
+          navigation == null || identical(navigation, environment.navigation),
+        ),
+        assert(
+          moduleContext == null ||
+              identical(moduleContext, environment.moduleContext),
+        ),
+        assert(query == null || identical(query, environment.query)),
+        assert(
+          discovery == null || identical(discovery, environment.discovery),
+        ),
+        assert(
+          lifecycle == null || identical(lifecycle, environment.lifecycle),
+        ),
+        assert(
+          activation == null || identical(activation, environment.activation),
+        );
 
   /// Builds a kernel from [environment] public surfaces.
   factory PlatformKernel.fromEnvironment(PlatformEnvironment environment) {
-    return PlatformKernel(
-      environment: environment,
-      runtime: environment.runtime,
-      application: environment.application,
-      navigation: environment.navigation,
-      moduleContext: environment.moduleContext,
-      query: environment.query,
-      discovery: environment.discovery,
-      lifecycle: environment.lifecycle,
-      activation: environment.activation,
-    );
+    return PlatformKernel(environment: environment);
   }
 
   /// Builds a kernel from [bootstrap] public platform surfaces.
@@ -51,26 +66,26 @@ final class PlatformKernel {
   final PlatformEnvironment environment;
 
   /// Immutable live platform runtime.
-  final PlatformRuntime runtime;
+  PlatformRuntime get runtime => environment.runtime;
 
   /// Immutable platform application entry point.
-  final PlatformApplication application;
+  PlatformApplication get application => environment.application;
 
   /// Navigation metadata façade.
-  final PlatformNavigationFacade navigation;
+  PlatformNavigationFacade get navigation => environment.navigation;
 
   /// Immutable module platform context.
-  final ModuleContext moduleContext;
+  ModuleContext get moduleContext => environment.moduleContext;
 
   /// Read-only module query API.
-  final ModuleQueryService query;
+  ModuleQueryService get query => environment.query;
 
   /// Read-only module discovery API.
-  final ModuleDiscoveryService discovery;
+  ModuleDiscoveryService get discovery => environment.discovery;
 
   /// Module lifecycle snapshot API.
-  final ModuleLifecycleService lifecycle;
+  ModuleLifecycleService get lifecycle => environment.lifecycle;
 
   /// Module activation evaluator API.
-  final ModuleActivationService activation;
+  ModuleActivationService get activation => environment.activation;
 }

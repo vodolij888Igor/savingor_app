@@ -7,27 +7,31 @@ import 'package:savingor_app/platform_prep/runtime/platform_runtime.dart';
 
 /// Immutable central registry of platform metadata and public platform objects.
 ///
-/// Composes the stable top-level Application Platform surfaces. Metadata only —
-/// no Flutter, GoRouter, UI, routing ownership, or feature wiring.
+/// Thin wrapper over [PlatformFacade]. Metadata only; no Flutter/GoRouter/UI
+/// ownership.
 final class PlatformRegistry {
-  /// Creates a registry from already-built platform APIs.
-  const PlatformRegistry({
+  /// Creates a registry view over [facade].
+  ///
+  /// Optional named parameters are accepted for backwards compatibility; when
+  /// provided they must be identical to the corresponding [facade] surfaces.
+  PlatformRegistry({
     required this.facade,
-    required this.kernel,
-    required this.environment,
-    required this.runtime,
-    required this.application,
-  });
+    PlatformKernel? kernel,
+    PlatformEnvironment? environment,
+    PlatformRuntime? runtime,
+    PlatformApplication? application,
+  })  : assert(kernel == null || identical(kernel, facade.kernel)),
+        assert(
+          environment == null || identical(environment, facade.environment),
+        ),
+        assert(runtime == null || identical(runtime, facade.runtime)),
+        assert(
+          application == null || identical(application, facade.application),
+        );
 
   /// Builds a registry from [facade] public surfaces.
   factory PlatformRegistry.fromFacade(PlatformFacade facade) {
-    return PlatformRegistry(
-      facade: facade,
-      kernel: facade.kernel,
-      environment: facade.environment,
-      runtime: facade.runtime,
-      application: facade.application,
-    );
+    return PlatformRegistry(facade: facade);
   }
 
   /// Builds a registry from [bootstrap] public platform surfaces.
@@ -39,14 +43,14 @@ final class PlatformRegistry {
   final PlatformFacade facade;
 
   /// Immutable platform core root.
-  final PlatformKernel kernel;
+  PlatformKernel get kernel => facade.kernel;
 
   /// Immutable complete platform execution environment.
-  final PlatformEnvironment environment;
+  PlatformEnvironment get environment => facade.environment;
 
   /// Immutable live platform runtime.
-  final PlatformRuntime runtime;
+  PlatformRuntime get runtime => facade.runtime;
 
   /// Immutable platform application entry point.
-  final PlatformApplication application;
+  PlatformApplication get application => facade.application;
 }

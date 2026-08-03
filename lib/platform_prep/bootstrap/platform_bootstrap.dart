@@ -29,9 +29,14 @@ import 'package:savingor_app/savingor/modules/savingor_module_registry.dart';
 import 'package:savingor_app/savingor/navigation/platform_navigation_facade.dart';
 import 'package:savingor_app/savingor/navigation/production_navigation_composition.dart';
 
-/// Immutable composition root for platform module and feature-flag services.
+/// Immutable composition root for the Application Platform.
 ///
-/// Metadata and service wiring only — not connected to app runtime yet.
+/// Assembles leaf services once, then builds the coherent view chain
+/// (application → runtime → environment → kernel → facade → registry) plus
+/// discovery / lifecycle / activation / query. Prefer [facade] or
+/// [platformQuery] as the stable public entry.
+///
+/// Metadata and service wiring only — does not own live GoRouter or UI.
 final class PlatformBootstrap {
   /// Creates a bootstrap from pre-built platform services.
   ///
@@ -200,19 +205,19 @@ final class PlatformBootstrap {
   /// Single entry point for platform navigation metadata (built once).
   PlatformNavigationFacade get navigation => _navigation;
 
-  /// Immutable public platform application entry point (built once).
+  /// Leaf owner of navigation + module platform APIs (built once).
   PlatformApplication get application => _application;
 
-  /// Immutable live platform runtime entry point (built once).
+  /// Thin runtime view over [application] (built once).
   PlatformRuntime get runtime => _runtime;
 
-  /// Immutable complete platform execution environment (built once).
+  /// Thin environment view over [runtime] (built once).
   PlatformEnvironment get environment => _environment;
 
-  /// Immutable platform core root (built once).
+  /// Thin kernel view over [environment] (built once).
   PlatformKernel get kernel => _kernel;
 
-  /// Immutable single public Application Platform entry point (built once).
+  /// Stable public structural entry over [kernel] (built once).
   PlatformFacade get facade => _facade;
 
   /// Immutable central registry of platform metadata and public objects

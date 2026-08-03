@@ -4,27 +4,32 @@ import 'package:savingor_app/platform_prep/environment/platform_environment.dart
 import 'package:savingor_app/platform_prep/kernel/platform_kernel.dart';
 import 'package:savingor_app/platform_prep/runtime/platform_runtime.dart';
 
-/// Immutable single public entry point to the Application Platform.
+/// Stable public entry point to the Application Platform.
 ///
-/// Exposes stable top-level platform APIs only. Metadata only — no Flutter,
-/// GoRouter, UI, routing ownership, or feature wiring.
+/// Thin wrapper over [PlatformKernel]. Prefer this type (or
+/// [PlatformBootstrap.facade] / [PlatformBootstrap.platformQuery]) for new
+/// product code. Metadata only; no Flutter/GoRouter/UI ownership.
 final class PlatformFacade {
-  /// Creates a facade from already-built platform APIs.
-  const PlatformFacade({
+  /// Creates a facade view over [kernel].
+  ///
+  /// Optional named parameters are accepted for backwards compatibility; when
+  /// provided they must be identical to the corresponding [kernel] surfaces.
+  PlatformFacade({
     required this.kernel,
-    required this.environment,
-    required this.runtime,
-    required this.application,
-  });
+    PlatformEnvironment? environment,
+    PlatformRuntime? runtime,
+    PlatformApplication? application,
+  })  : assert(
+          environment == null || identical(environment, kernel.environment),
+        ),
+        assert(runtime == null || identical(runtime, kernel.runtime)),
+        assert(
+          application == null || identical(application, kernel.application),
+        );
 
   /// Builds a facade from [kernel] public surfaces.
   factory PlatformFacade.fromKernel(PlatformKernel kernel) {
-    return PlatformFacade(
-      kernel: kernel,
-      environment: kernel.environment,
-      runtime: kernel.runtime,
-      application: kernel.application,
-    );
+    return PlatformFacade(kernel: kernel);
   }
 
   /// Builds a facade from [bootstrap] public platform surfaces.
@@ -36,11 +41,11 @@ final class PlatformFacade {
   final PlatformKernel kernel;
 
   /// Immutable complete platform execution environment.
-  final PlatformEnvironment environment;
+  PlatformEnvironment get environment => kernel.environment;
 
   /// Immutable live platform runtime.
-  final PlatformRuntime runtime;
+  PlatformRuntime get runtime => kernel.runtime;
 
   /// Immutable platform application entry point.
-  final PlatformApplication application;
+  PlatformApplication get application => kernel.application;
 }
