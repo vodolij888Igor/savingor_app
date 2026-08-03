@@ -4,6 +4,7 @@ import 'package:savingor_app/platform_prep/modules/active_module_set.dart';
 import 'package:savingor_app/platform_prep/modules/module_activation_rule.dart';
 import 'package:savingor_app/platform_prep/modules/module_activation_service.dart';
 import 'package:savingor_app/platform_prep/modules/module_context.dart';
+import 'package:savingor_app/platform_prep/modules/module_lifecycle_service.dart';
 import 'package:savingor_app/platform_prep/navigation/module_id.dart';
 import 'package:savingor_app/platform_prep/navigation/module_registry.dart';
 import 'package:savingor_app/platform_prep/navigation/route_catalog.dart';
@@ -22,7 +23,8 @@ final class PlatformBootstrap {
   /// activation is evaluated exactly once by the caller (typically
   /// [PlatformBootstrap.savingor]).
   ///
-  /// [moduleContext] is built once in the constructor body.
+  /// [lifecycleService] is built once from [moduleLoader] and [activeModules]
+  /// when omitted. [moduleContext] is built once in the constructor body.
   PlatformBootstrap({
     required ModuleRegistry moduleRegistry,
     required ModuleLoader moduleLoader,
@@ -31,13 +33,19 @@ final class PlatformBootstrap {
     required ActiveModuleSet activeModules,
     RouteCatalog? routeCatalog,
     ShellTabCatalog? shellTabCatalog,
+    ModuleLifecycleService? lifecycleService,
   })  : _moduleRegistry = moduleRegistry,
         _moduleLoader = moduleLoader,
         _featureFlags = featureFlags,
         _activationService = activationService,
         _activeModules = activeModules,
         _routeCatalog = routeCatalog ?? RouteCatalog(moduleLoader),
-        _shellTabCatalog = shellTabCatalog ?? ShellTabCatalog(moduleLoader) {
+        _shellTabCatalog = shellTabCatalog ?? ShellTabCatalog(moduleLoader),
+        _lifecycleService = lifecycleService ??
+            ModuleLifecycleService(
+              loader: moduleLoader,
+              activeModules: activeModules,
+            ) {
     _moduleContext = ModuleContext(
       bootstrap: this,
       moduleRegistry: _moduleRegistry,
@@ -47,6 +55,7 @@ final class PlatformBootstrap {
       shellTabCatalog: _shellTabCatalog,
       activationService: _activationService,
       activeModules: _activeModules,
+      lifecycleService: _lifecycleService,
     );
   }
 
@@ -57,6 +66,7 @@ final class PlatformBootstrap {
   final ActiveModuleSet _activeModules;
   final RouteCatalog _routeCatalog;
   final ShellTabCatalog _shellTabCatalog;
+  final ModuleLifecycleService _lifecycleService;
   late final ModuleContext _moduleContext;
 
   /// Registered modules with uniqueness validation.
@@ -80,11 +90,14 @@ final class PlatformBootstrap {
   /// Aggregated shell-tab metadata from registered modules.
   ShellTabCatalog get shellTabCatalog => _shellTabCatalog;
 
+  /// Lifecycle snapshot derived from registration and [activeModules].
+  ModuleLifecycleService get lifecycleService => _lifecycleService;
+
   /// Immutable module context built once from this bootstrap.
   ModuleContext get moduleContext => _moduleContext;
 
   /// Savingor product bootstrap with default registry, loader, catalogs,
-  /// activation rules, and empty flags.
+  /// activation rules, lifecycle snapshot, and empty flags.
   ///
   /// Groceries is always enabled. Activation is evaluated exactly once here.
   factory PlatformBootstrap.savingor() {
@@ -101,6 +114,10 @@ final class PlatformBootstrap {
       ],
     );
     final ActiveModuleSet active = activation.evaluate();
+    final ModuleLifecycleService lifecycle = ModuleLifecycleService(
+      loader: loader,
+      activeModules: active,
+    );
 
     return PlatformBootstrap(
       moduleRegistry: registry,
@@ -110,6 +127,7 @@ final class PlatformBootstrap {
       shellTabCatalog: tabs,
       activationService: activation,
       activeModules: active,
+      lifecycleService: lifecycle,
     );
   }
 }

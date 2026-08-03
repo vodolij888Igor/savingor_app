@@ -23,6 +23,7 @@ void main() {
       expect(context.shellTabCatalog, isNotNull);
       expect(context.activationService, isNotNull);
       expect(context.activeModules, isNotNull);
+      expect(context.lifecycleService, isNotNull);
     });
 
     test('same singleton instances as bootstrap', () {
@@ -43,6 +44,10 @@ void main() {
         isTrue,
       );
       expect(identical(context.activeModules, bootstrap.activeModules), isTrue);
+      expect(
+        identical(context.lifecycleService, bootstrap.lifecycleService),
+        isTrue,
+      );
     });
 
     test('context is built once and immutable', () {

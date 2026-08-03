@@ -2,6 +2,7 @@ import 'package:savingor_app/platform_prep/bootstrap/platform_bootstrap.dart';
 import 'package:savingor_app/platform_prep/feature_flags/feature_flag_service.dart';
 import 'package:savingor_app/platform_prep/modules/active_module_set.dart';
 import 'package:savingor_app/platform_prep/modules/module_activation_service.dart';
+import 'package:savingor_app/platform_prep/modules/module_lifecycle_service.dart';
 import 'package:savingor_app/platform_prep/navigation/module_registry.dart';
 import 'package:savingor_app/platform_prep/navigation/route_catalog.dart';
 import 'package:savingor_app/platform_prep/navigation/shell_tab_catalog.dart';
@@ -22,6 +23,7 @@ final class ModuleContext {
     required this.shellTabCatalog,
     required this.activationService,
     required this.activeModules,
+    required this.lifecycleService,
   });
 
   /// Owning bootstrap composition root.
@@ -47,4 +49,7 @@ final class ModuleContext {
 
   /// Modules active after bootstrap-time evaluation.
   final ActiveModuleSet activeModules;
+
+  /// Lifecycle snapshot derived from registration and [activeModules].
+  final ModuleLifecycleService lifecycleService;
 }
