@@ -17,6 +17,7 @@ import 'package:savingor_app/platform_prep/navigation/module_registry.dart';
 import 'package:savingor_app/platform_prep/navigation/route_catalog.dart';
 import 'package:savingor_app/platform_prep/navigation/shell_tab_catalog.dart';
 import 'package:savingor_app/platform_prep/platform/platform_facade.dart';
+import 'package:savingor_app/platform_prep/registry/platform_registry.dart';
 import 'package:savingor_app/platform_prep/runtime/platform_runtime.dart';
 import 'package:savingor_app/savingor/bootstrap/route_parity_startup.dart';
 import 'package:savingor_app/savingor/modules/module_loader.dart';
@@ -109,6 +110,7 @@ final class PlatformBootstrap {
     _environment = PlatformEnvironment.fromRuntime(_runtime);
     _kernel = PlatformKernel.fromEnvironment(_environment);
     _facade = PlatformFacade.fromKernel(_kernel);
+    _platformRegistry = PlatformRegistry.fromFacade(_facade);
 
     if (verifyProductionRouteParity) {
       verifySavingorProductionRouteParity(
@@ -136,6 +138,7 @@ final class PlatformBootstrap {
   late final PlatformEnvironment _environment;
   late final PlatformKernel _kernel;
   late final PlatformFacade _facade;
+  late final PlatformRegistry _platformRegistry;
 
   /// Registered modules with uniqueness validation.
   ModuleRegistry get moduleRegistry => _moduleRegistry;
@@ -193,6 +196,10 @@ final class PlatformBootstrap {
 
   /// Immutable single public Application Platform entry point (built once).
   PlatformFacade get facade => _facade;
+
+  /// Immutable central registry of platform metadata and public objects
+  /// (built once).
+  PlatformRegistry get platformRegistry => _platformRegistry;
 
   /// Savingor product bootstrap with default registry, loader, catalogs,
   /// activation rules, lifecycle, discovery, query, and empty flags.
