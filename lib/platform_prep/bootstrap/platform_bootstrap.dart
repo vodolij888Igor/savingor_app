@@ -1,3 +1,4 @@
+import 'package:savingor_app/platform_prep/activation/platform_activation.dart';
 import 'package:savingor_app/platform_prep/application/platform_application.dart';
 import 'package:savingor_app/platform_prep/discovery/platform_discovery.dart';
 import 'package:savingor_app/platform_prep/environment/platform_environment.dart';
@@ -115,6 +116,7 @@ final class PlatformBootstrap {
     _platformRegistry = PlatformRegistry.fromFacade(_facade);
     _platformDiscovery = PlatformDiscovery.fromRegistry(_platformRegistry);
     _platformLifecycle = PlatformLifecycle.fromEnvironment(_environment);
+    _platformActivation = PlatformActivation.fromLifecycle(_platformLifecycle);
 
     if (verifyProductionRouteParity) {
       verifySavingorProductionRouteParity(
@@ -145,6 +147,7 @@ final class PlatformBootstrap {
   late final PlatformRegistry _platformRegistry;
   late final PlatformDiscovery _platformDiscovery;
   late final PlatformLifecycle _platformLifecycle;
+  late final PlatformActivation _platformActivation;
 
   /// Registered modules with uniqueness validation.
   ModuleRegistry get moduleRegistry => _moduleRegistry;
@@ -212,6 +215,9 @@ final class PlatformBootstrap {
 
   /// Immutable platform lifecycle metadata API (built once).
   PlatformLifecycle get platformLifecycle => _platformLifecycle;
+
+  /// Immutable platform activation metadata API (built once).
+  PlatformActivation get platformActivation => _platformActivation;
 
   /// Savingor product bootstrap with default registry, loader, catalogs,
   /// activation rules, lifecycle, discovery, query, and empty flags.
