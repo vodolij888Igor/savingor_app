@@ -24,6 +24,7 @@ void main() {
       expect(context.activationService, isNotNull);
       expect(context.activeModules, isNotNull);
       expect(context.lifecycleService, isNotNull);
+      expect(context.discoveryService, isNotNull);
     });
 
     test('same singleton instances as bootstrap', () {
@@ -46,6 +47,10 @@ void main() {
       expect(identical(context.activeModules, bootstrap.activeModules), isTrue);
       expect(
         identical(context.lifecycleService, bootstrap.lifecycleService),
+        isTrue,
+      );
+      expect(
+        identical(context.discoveryService, bootstrap.discoveryService),
         isTrue,
       );
     });
